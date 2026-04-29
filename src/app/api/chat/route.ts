@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
         ? formatLogsForPrompt(await getRecentLogs(breed, weekNumber))
         : []
 
-    const result = await queryRAG(query, breed, logStrings)
+    const result = await queryRAG(query, breed, logStrings, weekNumber ?? undefined)
     return NextResponse.json(result)
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)

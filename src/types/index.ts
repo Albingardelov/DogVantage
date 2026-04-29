@@ -1,5 +1,12 @@
 export type Breed = 'labrador' | 'italian_greyhound' | 'braque_francais'
 
+/**
+ * 'general' is used for documents that apply to all breeds
+ * (e.g. general puppy training guides, positive reinforcement methodology).
+ * Not a user-selectable breed — only used internally for RAG indexing.
+ */
+export type BreedOrGeneral = Breed | 'general'
+
 export interface DogProfile {
   name: string
   breed: Breed

@@ -20,8 +20,8 @@ export async function POST(req: NextRequest) {
     }
 
     const logStrings = formatLogsForPrompt(recentLogs)
-    const query = `Vad ska jag träna vecka ${weekNumber} med min ${breed}?`
-    const result = await queryRAG(query, breed, logStrings)
+    const query = `Min ${breed} är ${weekNumber} veckor gammal. Vad ska vi träna denna vecka? Ge ett konkret veckoschema med specifika övningar, passlängd och hur man utför dem.`
+    const result = await queryRAG(query, breed, logStrings, weekNumber)
 
     if (recentLogs.length === 0) {
       await setCachedTraining(breed, weekNumber, result).catch(() => {})
