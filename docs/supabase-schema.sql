@@ -56,6 +56,18 @@ CREATE TABLE IF NOT EXISTS takedown_requests (
   created_at timestamptz DEFAULT now()
 );
 
+-- Community submissions: user-contributed PDFs queued for admin review
+CREATE TABLE IF NOT EXISTS community_submissions (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  breed       text NOT NULL,
+  filename    text NOT NULL,
+  file_size   int  NOT NULL,
+  source_url  text NOT NULL DEFAULT '',
+  doc_version text NOT NULL DEFAULT '',
+  reviewed    boolean NOT NULL DEFAULT false,
+  created_at  timestamptz DEFAULT now()
+);
+
 -- RPC function for pgvector similarity search
 CREATE OR REPLACE FUNCTION match_breed_chunks(
   query_embedding vector(768),
