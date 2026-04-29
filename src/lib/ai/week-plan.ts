@@ -62,7 +62,7 @@ Regler:
 - Vilodagar: rest: true, utelämna exercises
 - Minst 1 och max 2 vilodagar per vecka
 - id: lowercase, inga mellanslag, inga specialtecken (t.ex. "inkallning", "apportering")
-- desc: max 8 ord på svenska
+- desc: max 12 ord på svenska — inkludera ALLTID hur länge (t.ex. "5 min per gång", "3 × 1 min", "10–15 min")
 - Anpassa övningarna till hundens vecka ${weekNumber} och rasens egenskaper`
 
   const completion = await groq.chat.completions.create({
