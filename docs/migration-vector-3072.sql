@@ -1,18 +1,12 @@
 -- Migration: update embedding dimension from 768 to 3072
 -- Google's text-embedding-004 is gone; gemini-embedding-001 returns 3072 dims
+-- No vector index needed for small datasets (sequential scan is fast enough)
 -- Run this in Supabase SQL Editor
 
--- Drop old index and column, recreate with correct dimension
 DROP INDEX IF EXISTS breed_chunks_embedding_idx;
 ALTER TABLE breed_chunks DROP COLUMN IF EXISTS embedding;
-ALTER TABLE breed_chunks ADD COLUMN embedding vector(3072) NOT NULL DEFAULT array_fill(0, ARRAY[3072])::vector(3072);
+ALTER TABLE breed_chunks ADD COLUMN embedding vector(3072);
 
--- Recreate vector index
-CREATE INDEX breed_chunks_embedding_idx
-  ON breed_chunks USING ivfflat (embedding vector_cosine_ops)
-  WITH (lists = 100);
-
--- Update RPC function signature
 CREATE OR REPLACE FUNCTION match_breed_chunks(
   query_embedding vector(3072),
   match_breed     text,

@@ -17,9 +17,8 @@ CREATE TABLE IF NOT EXISTS breed_chunks (
 );
 
 CREATE INDEX IF NOT EXISTS breed_chunks_breed_idx ON breed_chunks (breed);
-CREATE INDEX IF NOT EXISTS breed_chunks_embedding_idx
-  ON breed_chunks USING ivfflat (embedding vector_cosine_ops)
-  WITH (lists = 100);
+-- Note: no vector index needed for small datasets (sequential scan is sufficient)
+-- Add HNSW index when breed_chunks exceeds ~10k rows
 
 -- Training cache
 CREATE TABLE IF NOT EXISTS training_cache (
