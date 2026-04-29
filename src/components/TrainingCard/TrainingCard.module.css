@@ -141,3 +141,21 @@
   color: var(--color-error);
   text-align: center;
 }
+
+.logOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(28, 25, 23, 0.4);
+  display: flex;
+  align-items: flex-end;
+}
+
+.logSheet {
+  width: 100%;
+  max-height: 92dvh;
+  background: var(--color-bg);
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  overflow-y: auto;
+  padding: var(--space-5);
+}

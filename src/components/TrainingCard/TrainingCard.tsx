@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import ExerciseRow from './ExerciseRow'
 import WeekView from './WeekView'
+import SessionLogForm from '@/components/SessionLogForm'
 import styles from './TrainingCard.module.css'
 import type { Breed, WeekPlan, Exercise } from '@/types'
 
@@ -26,6 +27,7 @@ export default function TrainingCard({ weekNumber, breed, dogName }: Props) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [showWeekView, setShowWeekView] = useState(false)
+  const [showLogForm, setShowLogForm] = useState(false)
   const todayDate = todayDateString()
   const todayName = SWEDISH_DAYS[new Date().getDay()]
 
@@ -51,7 +53,13 @@ export default function TrainingCard({ weekNumber, breed, dogName }: Props) {
   function handleRepClick(exerciseId: string, currentDone: number, maxReps: number) {
     if (currentDone >= maxReps) return
     const newDone = currentDone + 1
-    setProgress((prev) => ({ ...prev, [exerciseId]: newDone }))
+    const newProgress = { ...progress, [exerciseId]: newDone }
+    setProgress(newProgress)
+
+    const allDone = todayExercises.length > 0 &&
+      todayExercises.every((e) => (newProgress[e.id] ?? 0) >= e.reps)
+    if (allDone) setShowLogForm(true)
+
     fetch('/api/training/progress', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -144,6 +152,19 @@ export default function TrainingCard({ weekNumber, breed, dogName }: Props) {
 
       {showWeekView && weekPlan && (
         <WeekView plan={weekPlan} onClose={() => setShowWeekView(false)} />
+      )}
+
+      {showLogForm && (
+        <div className={styles.logOverlay} role="dialog" aria-modal="true" aria-label="Logga träningspass">
+          <div className={styles.logSheet}>
+            <SessionLogForm
+              breed={breed}
+              weekNumber={weekNumber}
+              onSaved={() => setShowLogForm(false)}
+              onCancel={() => setShowLogForm(false)}
+            />
+          </div>
+        </div>
       )}
     </>
   )
