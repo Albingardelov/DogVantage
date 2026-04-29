@@ -36,7 +36,9 @@
 - `src/app/api/training/route.ts` — GET `/api/training?breed=&week=` (fetches recent logs, passes to RAG)
 - `src/app/api/chat/route.ts` — POST `/api/chat` `{ breed, message }`
 - `src/app/api/ingest/route.ts` — POST `/api/ingest` (multipart, admin only)
-- `src/app/api/logs/route.ts` — POST `/api/logs` `{ breed, week_number, notes }`
+- `src/app/api/logs/route.ts` — POST `/api/logs` `{ breed, week_number, ... }`
+- `src/app/api/takedown/route.ts` — DELETE `/api/takedown` (admin only, removes all chunks for a source)
+- `src/app/upload/page.tsx` — crowdsourcing: user uploads breed club PDF for their breed
 
 **Pages:**
 - `src/app/page.tsx` — landing page
@@ -372,12 +374,16 @@ export interface ChunkMatch {
   id: string
   content: string
   source: string
+  source_url: string
+  doc_version: string
+  page_ref: string
   similarity: number
 }
 
 export interface TrainingResult {
   content: string
   source: string
+  source_url: string  // empty string if unknown — used for "Läs originalet" link
 }
 
 export interface ChatMessage {
@@ -615,13 +621,15 @@ git commit -m "feat: add dog profile localStorage CRUD with tests"
 CREATE EXTENSION IF NOT EXISTS vector;
 
 -- Breed chunks: RAG source data from breed club PDFs
--- doc_version and page_ref enable traceable source citations in AI responses
+-- source_url enables "Läs originalet" links in every AI response (legal transparency)
+-- doc_version and page_ref enable traceable source citations
 CREATE TABLE IF NOT EXISTS breed_chunks (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   breed       text NOT NULL,
-  source      text NOT NULL,          -- filename, e.g. "RAS_labrador_2023.pdf"
-  doc_version text NOT NULL DEFAULT '', -- e.g. "2023-rev2"
-  page_ref    text NOT NULL DEFAULT '', -- e.g. "s. 12, Socialisering"
+  source      text NOT NULL,             -- filename, e.g. "RAS_labrador_2023.pdf"
+  source_url  text NOT NULL DEFAULT '',  -- link to original document
+  doc_version text NOT NULL DEFAULT '',  -- e.g. "2023-rev2"
+  page_ref    text NOT NULL DEFAULT '',  -- e.g. "s. 12, Socialisering"
   content     text NOT NULL,
   embedding   vector(768) NOT NULL
 );
@@ -648,7 +656,15 @@ CREATE OR REPLACE FUNCTION match_breed_chunks(
   match_breed     text,
   match_count     int DEFAULT 5
 )
-RETURNS TABLE(id uuid, content text, source text, similarity float)
+RETURNS TABLE(
+  id          uuid,
+  content     text,
+  source      text,
+  source_url  text,
+  doc_version text,
+  page_ref    text,
+  similarity  float
+)
 LANGUAGE plpgsql
 AS $$
 BEGIN
@@ -657,6 +673,9 @@ BEGIN
     bc.id,
     bc.content,
     bc.source,
+    bc.source_url,
+    bc.doc_version,
+    bc.page_ref,
     (1 - (bc.embedding <=> query_embedding))::float AS similarity
   FROM breed_chunks bc
   WHERE bc.breed = match_breed
@@ -952,6 +971,7 @@ const VET_RESPONSE: TrainingResult = {
   content:
     'Det verkar handla om ett hälsoproblem. DogVantage ger inte medicinska råd — kontakta din veterinär.',
   source: '',
+  source_url: '',
 }
 
 function isHealthQuery(query: string): boolean {
@@ -970,12 +990,17 @@ export async function queryRAG(
   const chunks = await searchBreedChunks(embedding, breed)
 
   const context = chunks
-    .map((c) => `${c.content}\n[Källa: ${c.source} ${c.doc_version}, ${c.page_ref}]`)
+    .map((c) => {
+      const ref = [c.doc_version, c.page_ref].filter(Boolean).join(', ')
+      return `${c.content}\n[Källa: ${c.source}${ref ? ` (${ref})` : ''}${c.source_url ? ` — ${c.source_url}` : ''}]`
+    })
     .join('\n\n')
+
   const primaryChunk = chunks[0]
   const primarySource = primaryChunk
-    ? `${primaryChunk.source} (${primaryChunk.doc_version}, ${primaryChunk.page_ref})`
+    ? `${primaryChunk.source}${primaryChunk.doc_version ? ` (${primaryChunk.doc_version})` : ''}`
     : 'okänd källa'
+  const primarySourceUrl = primaryChunk?.source_url ?? ''
 
   const logsSection =
     recentLogs.length > 0
@@ -996,7 +1021,7 @@ Fråga: ${query}`
   const result = await gemini.generateContent(prompt)
   const content = result.response.text()
 
-  return { content, source: primarySource }
+  return { content, source: primarySource, source_url: primarySourceUrl }
 }
 ```
 
@@ -1045,11 +1070,18 @@ function chunkText(text: string): string[] {
   return chunks.filter((c) => c.length > 50) // drop tiny trailing chunks
 }
 
+export interface IngestOptions {
+  breed: Breed
+  filename: string
+  sourceUrl?: string    // URL to original document for "Läs originalet" links
+  docVersion?: string   // e.g. "2023-rev2"
+}
+
 export async function ingestPDF(
   buffer: Buffer,
-  breed: Breed,
-  filename: string
+  options: IngestOptions
 ): Promise<{ chunksInserted: number }> {
+  const { breed, filename, sourceUrl = '', docVersion = '' } = options
   const { text } = await pdfParse(buffer)
   const chunks = chunkText(text)
 
@@ -1059,6 +1091,9 @@ export async function ingestPDF(
     const { error } = await supabaseAdmin.from('breed_chunks').insert({
       breed,
       source: filename,
+      source_url: sourceUrl,
+      doc_version: docVersion,
+      page_ref: '',   // populated manually or via future OCR feature
       content,
       embedding,
     })
@@ -1212,8 +1247,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'file and breed required' }, { status: 400 })
   }
 
+  const sourceUrl = (formData.get('source_url') as string) ?? ''
+  const docVersion = (formData.get('doc_version') as string) ?? ''
+
   const buffer = Buffer.from(await file.arrayBuffer())
-  const result = await ingestPDF(buffer, breed, file.name)
+  const result = await ingestPDF(buffer, {
+    breed,
+    filename: file.name,
+    sourceUrl,
+    docVersion,
+  })
   return NextResponse.json(result)
 }
 ```
@@ -2239,6 +2282,269 @@ export function formatLogsForPrompt(logs: SessionLog[]): string[] {
 ```bash
 git add src/lib/supabase/session-logs.ts
 git commit -m "feat: add session-logs Supabase module (save + fetch recent)"
+```
+
+---
+
+### Task 23: Takedown API-route
+
+**Files:**
+- Create: `src/app/api/takedown/route.ts`
+
+Om en rasklubb ber om att få sitt material borttaget kan admin ta bort alla chunks för ett givet `source`-filnamn med ett enda anrop. Goodwill-signal mot rasklubbar.
+
+- [ ] **Step 1: Implement**
+
+```typescript
+// src/app/api/takedown/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+import { supabaseAdmin } from '@/lib/supabase/client'
+
+export async function DELETE(req: NextRequest) {
+  const secret = req.headers.get('x-admin-secret')
+  if (secret !== process.env.ADMIN_SECRET) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { source } = (await req.json()) as { source: string }
+  if (!source) {
+    return NextResponse.json({ error: 'source required' }, { status: 400 })
+  }
+
+  const { error, count } = await supabaseAdmin
+    .from('breed_chunks')
+    .delete({ count: 'exact' })
+    .eq('source', source)
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  return NextResponse.json({ deleted: count })
+}
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add src/app/api/takedown/route.ts
+git commit -m "feat: add admin takedown route for breed_chunks by source"
+```
+
+---
+
+### Task 24: Crowdsourcing — användarstyrd uppladdning
+
+**Files:**
+- Create: `src/app/upload/page.tsx`
+- Create: `src/app/upload/upload.module.css`
+
+Återanvänder `/api/ingest`-pipelinen men med ett användarvänligt gränssnitt. Användaren bekräftar att dokumentet är offentligt tillgängligt (checkbox) innan uppladdning.
+
+- [ ] **Step 1: Implement page**
+
+```typescript
+// src/app/upload/page.tsx
+'use client'
+
+import { useState, useRef } from 'react'
+import type { Breed } from '@/types'
+import styles from './upload.module.css'
+
+const BREEDS: { value: Breed; label: string }[] = [
+  { value: 'labrador', label: 'Labrador Retriever' },
+  { value: 'italian_greyhound', label: 'Italiensk Vinthund' },
+  { value: 'braque_francais', label: 'Braque Français' },
+]
+
+export default function UploadPage() {
+  const [breed, setBreed] = useState<Breed>('labrador')
+  const [sourceUrl, setSourceUrl] = useState('')
+  const [confirmed, setConfirmed] = useState(false)
+  const [status, setStatus] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const file = fileRef.current?.files?.[0]
+    if (!file || !confirmed) return
+
+    setLoading(true)
+    setStatus(null)
+
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('breed', breed)
+    formData.append('source_url', sourceUrl)
+    formData.append('doc_version', new Date().getFullYear().toString())
+
+    try {
+      // Uses the same /api/ingest endpoint — no ADMIN_SECRET for user uploads
+      // TODO: add rate-limiting before public launch
+      const res = await fetch('/api/ingest', {
+        method: 'POST',
+        headers: { 'x-admin-secret': process.env.NEXT_PUBLIC_UPLOAD_SECRET ?? '' },
+        body: formData,
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setStatus(`Tack! ${data.chunksInserted} avsnitt indexerade. Din ras läggs till inom kort.`)
+    } catch (err) {
+      setStatus(`Något gick fel: ${(err as Error).message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <main className={styles.page}>
+      <h1 className={styles.heading}>Finns inte din ras?</h1>
+      <p className={styles.desc}>
+        Ladda upp din rasklubbs träningsguide eller RAS-dokument (PDF) så indexerar vi den åt dig.
+      </p>
+
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <select
+          value={breed}
+          onChange={(e) => setBreed(e.target.value as Breed)}
+          className={styles.select}
+        >
+          {BREEDS.map((b) => (
+            <option key={b.value} value={b.value}>{b.label}</option>
+          ))}
+        </select>
+
+        <input
+          type="url"
+          placeholder="Länk till originaldokumentet (valfritt men rekommenderat)"
+          value={sourceUrl}
+          onChange={(e) => setSourceUrl(e.target.value)}
+          className={styles.input}
+        />
+
+        <input
+          type="file"
+          accept=".pdf"
+          ref={fileRef}
+          required
+          className={styles.fileInput}
+        />
+
+        <label className={styles.confirmLabel}>
+          <input
+            type="checkbox"
+            checked={confirmed}
+            onChange={(e) => setConfirmed(e.target.checked)}
+            className={styles.checkbox}
+          />
+          Jag bekräftar att detta dokument är offentligt tillgängligt och att jag har rätt att dela det.
+        </label>
+
+        <button
+          type="submit"
+          disabled={loading || !confirmed}
+          className={styles.submitBtn}
+        >
+          {loading ? 'Laddar upp…' : 'Ladda upp dokument'}
+        </button>
+
+        {status && <p className={styles.status}>{status}</p>}
+      </form>
+    </main>
+  )
+}
+```
+
+```css
+/* src/app/upload/upload.module.css */
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-xl);
+}
+
+.heading {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+}
+
+.desc {
+  font-size: var(--font-size-base);
+  color: var(--color-muted);
+  max-width: 28rem;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  width: 100%;
+  max-width: 28rem;
+}
+
+.select,
+.input,
+.fileInput {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+.confirmLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+.checkbox {
+  margin-top: 2px;
+  accent-color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.submitBtn {
+  background: var(--color-primary);
+  color: var(--color-surface);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  transition: background 0.15s;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.submitBtn:disabled {
+  opacity: 0.4;
+}
+
+.status {
+  font-size: var(--font-size-sm);
+  color: var(--color-muted);
+  text-align: center;
+}
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add src/app/upload/
+git commit -m "feat: add crowdsourcing upload page for user-contributed breed documents"
 ```
 
 ---

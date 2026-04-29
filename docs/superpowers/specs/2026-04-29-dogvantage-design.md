@@ -92,16 +92,17 @@ interface DogProfile {
 ```
 
 ### Supabase: `breed_chunks`
-RAG-källdata från ras-PDF:er. Inkluderar dokumentversion och sidreferens för spårbar källcitation.
+RAG-källdata från ras-PDF:er. Inkluderar dokumentversion, sidreferens och ursprungs-URL för spårbar källcitation och juridisk transparens.
 ```sql
 CREATE TABLE breed_chunks (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   breed       text NOT NULL,
-  source      text NOT NULL,        -- filnamn, t.ex. "RAS_labrador_2023.pdf"
+  source      text NOT NULL,             -- filnamn, t.ex. "RAS_labrador_2023.pdf"
+  source_url  text NOT NULL DEFAULT '',  -- länk till originaldokumentet
   doc_version text NOT NULL DEFAULT '',  -- t.ex. "2023-rev2"
   page_ref    text NOT NULL DEFAULT '',  -- t.ex. "s. 12, Socialisering"
   content     text NOT NULL,
-  embedding   vector(768) NOT NULL  -- text-embedding-004
+  embedding   vector(768) NOT NULL       -- text-embedding-004
 );
 ```
 
@@ -197,11 +198,12 @@ PDF (+ metadata: doc_version, page_ref per chunk)
 Du är en expert på hundträning specialiserad på [ras].
 Basera dina svar ENBART på följande källdokument från rasklubben.
 Om svaret inte finns i källorna, säg det tydligt.
+Citera alltid källan (dokumentnamn, version, sida) och inkludera länken till originalet.
 Svara på svenska.
 
 Källdokument ([doc_version]):
-[chunk 1] (s. X)
-[chunk 2] (s. Y)
+[chunk 1] (s. X) — [source_url]
+[chunk 2] (s. Y) — [source_url]
 ...
 
 [Om session_logs finns:]
@@ -236,6 +238,27 @@ Om frågan innehåller nyckelord som: `haltar`, `kräks`, `äter inte`, `blöder
 - **AI-lagret** är isolerat i `lib/ai/` — Gemini kan bytas mot OpenAI utan att röra UI eller datamodell
 - **Affärslogik** (åldersberäkning, träningslogik) läggs i `lib/dog/` separerat från React-komponenter — förbereder för React Native-flytt
 - **Auth** läggs till genom att ersätta `localStorage`-anropen med Supabase Auth-anrop, utan att ändra resten av appen
+
+---
+
+## Datastrategi & Juridik
+
+### Fas 1 — MVP: Offentliga dokument (nu)
+RAS-dokument och jaktprovsregler är publicerade öppet av SKK och rasklubbar. De får citeras med stöd av citaträtten (Upphovsrättslagen 22 §) om källan anges och inte mer text reproduceras än vad ändamålet kräver. RAG-chunkar på ~2 000 tecken med `source_url` och `page_ref` i varje svar är juridiskt försvarbart — appen fungerar som en avancerad sökmotor, inte en piratkopiator.
+
+**Börja med Braque Français** (din egen ras) med dokument direkt från klubbens hemsida. Bygg prototypen. Visa den. Kontakta sedan klubben — ett "ja" är 100× lättare att få när de ser en fungerande app på en mobilskärm.
+
+### Fas 2 — Pilotsamarbete
+En rasklubb som godkänner samarbete skriftligt ger:
+- Rätt att använda materialet utan juridisk osäkerhet
+- Trovärdighet inför nästa klubb ("Vi samarbetar redan med Braque Français-klubben")
+- Möjlighet att få uppdateringar när RAS revideras
+
+### Fas 3 — Crowdsourcing (efter MVP)
+Användardrivna dokument-uppladdningar: "Finns inte din ras? Ladda upp din klubbs träningsguide." Återanvänder ingestion-pipelinen men med ett användarvänligt gränssnitt. Varje uppladdning kräver att användaren bekräftar att dokumentet är offentligt tillgängligt.
+
+### Takedown
+Admin kan ta bort alla chunks för ett givet `source`-filnamn via ett enkelt API-anrop om en klubb begär det. Detta är en viktig goodwill-signal mot rasklubbar.
 
 ---
 
