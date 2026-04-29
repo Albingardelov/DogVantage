@@ -103,3 +103,72 @@
   font-size: 1rem;
   font-weight: var(--font-bold);
 }
+
+.metaPanel {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.metaLabel {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-weight: var(--font-medium);
+}
+
+.select {
+  font-size: var(--text-xs);
+  padding: 6px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.pillGroup {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.pillBtn {
+  font-size: var(--text-xs);
+  padding: 6px 10px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.pillBtnSelected {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-green-50);
+}
+
+.recommendation {
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  color: var(--color-text);
+}
+
+.recommendationStrong {
+  font-weight: var(--font-semibold);
+  color: var(--color-primary);
+}
+
+.troubleshoot {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  padding-left: 16px;
+  margin: 0;
+}

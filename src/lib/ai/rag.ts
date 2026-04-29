@@ -28,7 +28,8 @@ export async function queryRAG(
   query: string,
   breed: Breed,
   recentLogs: string[] = [],
-  weekAge?: number
+  weekAge?: number,
+  todayMetrics: string[] = []
 ): Promise<TrainingResult> {
   if (isHealthQuery(query)) return VET_RESPONSE
 
@@ -64,6 +65,11 @@ export async function queryRAG(
       ? `\n=== SENASTE TRÄNINGSPASS ===\n${recentLogs.map((l) => `• ${l}`).join('\n')}\nAnpassa rekommendationerna utifrån hundens faktiska prestation ovan.\n`
       : ''
 
+  const metricsSection =
+    todayMetrics.length > 0
+      ? `\n=== DAGENS TRÄNINGSMETRIK ===\n${todayMetrics.map((m) => `• ${m}`).join('\n')}\nAnvänd metrik för att föreslå om kriteriet ska höjas/sänkas.\n`
+      : ''
+
   // 5. Compose the two-layer prompt
   //
   //    Layer A — "Verktyget" (the method): general, evidence-based training
@@ -94,7 +100,7 @@ Rasens temperament avgör HUR du applicerar metoderna — en mjuk ras kräver mj
 === RASPROFIL ===
 ${breedProfile}
 ${phaseInfo}
-${documentContext ? `\n=== KÄLLDOKUMENT (rasspecifikt material) ===\n${documentContext}\n` : ''}${logsSection}
+${documentContext ? `\n=== KÄLLDOKUMENT (rasspecifikt material) ===\n${documentContext}\n` : ''}${metricsSection}${logsSection}
 INSTRUKTIONER:
 • Svara direkt på frågan — ge inte hela veckoschemat om det inte efterfrågas
 • Kombinera metodiken (lager 1) med rasspecifika krav (lager 2)

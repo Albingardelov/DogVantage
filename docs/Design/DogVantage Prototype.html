@@ -451,9 +451,419 @@ function OnboardingScreen({ onDone }) {
   );
 }
 
+/* ── TRAINING EXERCISES ──────────────────────── */
+const FALLBACK_EXERCISES = [
+  { id: 'inkallning', label: 'Inkallning',  desc: 'Kalla på hunden med glad röst', total: 3, icon: '📣' },
+  { id: 'sitt',       label: 'Sitt',        desc: 'Kort och tydligt kommando, belöna direkt', total: 5, icon: '🐾' },
+  { id: 'ligg',       label: 'Ligg',        desc: 'Bygg upp tid i ligg gradvis', total: 3, icon: '😴' },
+  { id: 'kontakt',    label: 'Ögonkontakt', desc: 'Belöna när hunden tittar på dig spontant', total: 4, icon: '👁️' },
+  { id: 'spaning',    label: 'Markspaning', desc: 'Låt hunden utforska fritt i 5 min', total: 1, icon: '🌿' },
+];
+
+const ICON_MAP = {
+  inkallning: '📣', recall: '📣', sit: '🐾', sitt: '🐾', ligg: '😴', down: '😴',
+  ögonkontakt: '👁️', eye: '👁️', spaning: '🌿', nos: '👃', apport: '🎾',
+  socialisering: '🐕', promenad: '🚶', lek: '🎮', default: '⭐',
+};
+
+function pickIcon(label) {
+  const key = label.toLowerCase();
+  for (const [k, v] of Object.entries(ICON_MAP)) {
+    if (key.includes(k)) return v;
+  }
+  return ICON_MAP.default;
+}
+
+function ExerciseRow({ ex, done, onTap }) {
+  const complete = done >= ex.total;
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 12,
+      padding: '13px 16px',
+      background: complete ? T.green50 : T.surface,
+      borderBottom: `1px solid ${T.border}`,
+      transition: 'background 0.25s',
+    }}>
+      {/* Icon */}
+      <div style={{
+        width: 38, height: 38, borderRadius: 10, flexShrink: 0,
+        background: complete ? T.green100 : T.bgAlt,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: 18,
+        transition: 'background 0.25s',
+      }}>{ex.icon}</div>
+
+      {/* Text */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{
+          fontSize: 14, fontWeight: 600,
+          color: complete ? T.primary : T.text,
+          textDecoration: complete ? 'line-through' : 'none',
+          transition: 'color 0.2s',
+        }}>{ex.label}</div>
+        <div style={{ fontSize: 12, color: T.textMuted, marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {ex.desc}
+        </div>
+      </div>
+
+      {/* Counter / Done badge */}
+      {complete ? (
+        <div style={{
+          width: 32, height: 32, borderRadius: '50%',
+          background: T.primary, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0,
+        }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+      ) : (
+        <button onClick={onTap} style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+          background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0,
+          padding: '4px 8px',
+        }}>
+          {/* Pips */}
+          <div style={{ display: 'flex', gap: 4 }}>
+            {Array.from({ length: ex.total }).map((_, i) => (
+              <div key={i} style={{
+                width: i < done ? 10 : 10, height: i < done ? 10 : 10,
+                borderRadius: '50%',
+                background: i < done ? T.primary : T.border,
+                border: i === done ? `2px solid ${T.primary}` : 'none',
+                transition: 'background 0.2s',
+              }} />
+            ))}
+          </div>
+          <span style={{ fontSize: 10, color: done > 0 ? T.primary : T.textMuted, fontWeight: 600, fontFamily: "'DM Sans',sans-serif" }}>
+            {done}/{ex.total}
+          </span>
+        </button>
+      )}
+    </div>
+  );
+}
+
+// Shared helper: load or generate the full week plan
+async function loadWeekPlan(weekNumber, breed) {
+  const breedLabel = breed === 'braque_francais' ? 'Braque Français' : breed === 'labrador' ? 'Labrador Retriever' : 'Italiensk Vinthund';
+  const cacheKey = `week_plan_w${weekNumber}_${breed}`;
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) return JSON.parse(cached);
+
+  const text = await window.claude.complete(
+    `Du är en hundtränare. Skapa ett komplett veckoschema för vecka ${weekNumber} för en ${breedLabel}.
+
+Svara ENDAST med JSON i detta format (ingen annan text):
+{
+  "days": [
+    { "day": "Måndag", "exercises": [{ "id": "inkallning", "label": "Inkallning", "reps": 3, "desc": "Kort instruktion max 8 ord" }] },
+    { "day": "Tisdag", "exercises": [...] },
+    { "day": "Onsdag", "rest": true },
+    ...
+  ]
+}
+
+Regler:
+- Täck alla 7 dagar (Måndag–Söndag)
+- 2-3 övningar per träningsdag, sätt rest: true på vilodagar
+- id ska vara lowercase utan mellanslag
+- Skriv på svenska
+- Anpassa efter vecka ${weekNumber}`
+  );
+  const match = text.match(/\{[\s\S]*\}/);
+  const parsed = JSON.parse(match[0]);
+  localStorage.setItem(cacheKey, JSON.stringify(parsed));
+  return parsed;
+}
+
+function TrainingPlan({ weekNumber, breed, onAsk, onWeek, onAllDone }) {
+  const todayName = new Date().toLocaleDateString('sv-SE', { weekday: 'long' });
+  const todayCapitalized = todayName.charAt(0).toUpperCase() + todayName.slice(1);
+  const doneKey = `training_done_${new Date().toISOString().slice(0,10)}_${breed}`;
+
+  const [todayExercises, setTodayExercises] = useState(null);
+  const [isRest, setIsRest] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [counts, setCounts] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(doneKey) || '{}'); } catch { return {}; }
+  });
+
+  useEffect(() => {
+    async function load() {
+      setLoading(true);
+      try {
+        const plan = await loadWeekPlan(weekNumber, breed);
+        const today = plan.days?.find(d => d.day === todayCapitalized);
+        if (today?.rest) { setIsRest(true); }
+        else if (today?.exercises) {
+          setTodayExercises(today.exercises.map(e => ({ ...e, total: e.reps || 3, icon: pickIcon(e.label) })));
+        }
+      } catch {
+        setTodayExercises(FALLBACK_EXERCISES);
+      } finally { setLoading(false); }
+    }
+    load();
+  }, [weekNumber, breed]);
+
+  function tap(id, total) {
+    setCounts(prev => {
+      const next = { ...prev, [id]: Math.min((prev[id] || 0) + 1, total) };
+      localStorage.setItem(doneKey, JSON.stringify(next));
+      // Check if all done after this tap
+      const nowDone = list.filter(e => (next[e.id] || 0) >= e.total).length;
+      if (nowDone === list.length && list.length > 0) {
+        setTimeout(() => onAllDone && onAllDone(), 400);
+      }
+      return next;
+    });
+  }
+
+  const list = todayExercises || [];
+  const doneCount = list.filter(e => (counts[e.id] || 0) >= e.total).length;
+  const allDone = list.length > 0 && doneCount === list.length;
+
+  return (
+    <div style={{ background: T.surface, borderRadius: 16, boxShadow: T.shadow, overflow: 'hidden', marginBottom: 16 }}>
+      {/* Card header */}
+      <div style={{
+        background: T.green50, borderBottom: `1px solid ${T.green100}`,
+        padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      }}>
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: T.primary }}>Dagens pass</div>
+          <div style={{ fontSize: 11, color: T.textMuted, marginTop: 1 }}>Vecka {weekNumber} · tryck av varje rep</div>
+        </div>
+        <div style={{
+          fontSize: 11, fontWeight: 600,
+          color: allDone ? T.primary : T.textMuted,
+          background: allDone ? T.green100 : T.bgAlt,
+          borderRadius: 20, padding: '3px 10px',
+          transition: 'all 0.3s',
+        }}>
+          {loading ? '…' : `${doneCount}/${list.length} klara`}
+        </div>
+      </div>
+
+      {/* Progress bar */}
+      <div style={{ height: 3, background: T.border }}>
+        <div style={{
+          height: '100%', background: T.primary,
+          width: loading || !list.length ? '0%' : `${(doneCount / list.length) * 100}%`,
+          borderRadius: 2, transition: 'width 0.4s ease',
+        }} />
+      </div>
+
+      {/* Loading skeleton */}
+      {loading && (
+        <div style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {[1,2,3,4].map(i => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 38, height: 38, borderRadius: 10, background: T.bgAlt }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ height: 13, borderRadius: 6, background: T.bgAlt, width: '55%', marginBottom: 6 }} />
+                <div style={{ height: 11, borderRadius: 6, background: T.bgAlt, width: '80%' }} />
+              </div>
+            </div>
+          ))}
+          <div style={{ fontSize: 12, color: T.textMuted, textAlign: 'center', marginTop: 4 }}>
+            AI genererar träningsplan…
+          </div>
+        </div>
+      )}
+
+      {/* Auto-trigger log when all done */}
+      {!loading && allDone && !isRest && (
+        <div style={{
+          padding: '16px', textAlign: 'center',
+          borderBottom: `1px solid ${T.border}`,
+          background: T.green50,
+        }}>
+          <div style={{ fontSize: 28, marginBottom: 4 }}>🎉</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: T.primary }}>Dagens pass avklarat!</div>
+          <div style={{ fontSize: 12, color: T.textMuted, marginTop: 2 }}>Hur gick det?</div>
+        </div>
+      )}
+        <div style={{ padding: '24px 16px', textAlign: 'center' }}>
+          <div style={{ fontSize: 32, marginBottom: 8 }}>😴</div>
+          <div style={{ fontSize: 15, fontWeight: 600, color: T.text, marginBottom: 4 }}>Vilodag idag</div>
+          <div style={{ fontSize: 13, color: T.textMuted }}>Låt hunden återhämta sig. En kort promenad är okej.</div>
+        </div>
+      )}
+        <div style={{
+          padding: '16px', textAlign: 'center',
+          borderBottom: `1px solid ${T.border}`,
+          background: T.green50,
+        }}>
+          <div style={{ fontSize: 28, marginBottom: 4 }}>🎉</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: T.primary }}>Dagens träning avklarad!</div>
+          <div style={{ fontSize: 12, color: T.textMuted, marginTop: 2 }}>Fantastiskt jobbat!</div>
+        </div>
+      )}
+
+      {/* Exercises */}
+      {!loading && list.map(ex => (
+        <ExerciseRow
+          key={ex.id}
+          ex={ex}
+          done={counts[ex.id] || 0}
+          onTap={() => tap(ex.id, ex.total)}
+        />
+      ))}
+
+      {/* Ask + week link */}
+      {!loading && (
+        <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <button onClick={onAsk} style={{
+            width: '100%', padding: '11px',
+            borderRadius: 10, background: T.green50,
+            border: `1.5px solid ${T.green100}`,
+            color: T.primary, fontSize: 14, fontWeight: 600,
+            cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+          }}>
+            Fråga om dagens pass <ChevronRight size={16} color={T.primary} />
+          </button>
+          <button onClick={onWeek} style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontSize: 12, color: T.textMuted, fontFamily: "'DM Sans', sans-serif",
+            padding: '4px', textAlign: 'center',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+          }}>
+            Visa hela veckans schema <ChevronRight size={13} color={T.textMuted} />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── WEEK OVERLAY ────────────────────────────── */
+function WeekOverlay({ weekNumber, breed, breedLabel, onClose }) {
+  const [plan, setPlan] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const plan = await loadWeekPlan(weekNumber, breed);
+        setPlan(plan);
+      } catch { setPlan(null); }
+      finally { setLoading(false); }
+    }
+    load();
+  }, []);
+
+  const todayName = new Date().toLocaleDateString('sv-SE', { weekday: 'long' });
+  const todayCapitalized = todayName.charAt(0).toUpperCase() + todayName.slice(1);
+
+  return (
+    <div style={{
+      position: 'absolute', inset: 0, zIndex: 50,
+      background: T.bg, display: 'flex', flexDirection: 'column',
+    }}>
+      {/* Header */}
+      <div style={{
+        background: T.surface, borderBottom: `1px solid ${T.border}`,
+        padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 12,
+      }}>
+        <button onClick={onClose} style={{
+          width: 36, height: 36, borderRadius: 10,
+          background: T.bgAlt, border: 'none', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={T.text} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+        <div>
+          <div style={{ fontSize: 16, fontWeight: 700, color: T.text }}>Vecka {weekNumber}</div>
+          <div style={{ fontSize: 12, color: T.textMuted }}>Hela veckans schema</div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
+        {loading && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {[1,2,3,4,5].map(i => (
+              <div key={i} style={{ background: T.surface, borderRadius: 14, padding: '16px', boxShadow: T.shadow }}>
+                <div style={{ height: 14, borderRadius: 6, background: T.bgAlt, width: '30%', marginBottom: 12 }} />
+                <div style={{ height: 11, borderRadius: 6, background: T.bgAlt, width: '70%', marginBottom: 8 }} />
+                <div style={{ height: 11, borderRadius: 6, background: T.bgAlt, width: '55%' }} />
+              </div>
+            ))}
+            <div style={{ fontSize: 12, color: T.textMuted, textAlign: 'center', marginTop: 4 }}>Genererar veckoschema…</div>
+          </div>
+        )}
+
+        {!loading && plan?.days?.map((d, i) => {
+          const isToday = d.day === todayCapitalized;
+          return (
+            <div key={i} style={{
+              background: T.surface, borderRadius: 14,
+              boxShadow: T.shadow, marginBottom: 12, overflow: 'hidden',
+              border: isToday ? `2px solid ${T.primary}` : '2px solid transparent',
+            }}>
+              <div style={{
+                padding: '12px 16px',
+                background: isToday ? T.green50 : 'transparent',
+                borderBottom: `1px solid ${T.border}`,
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: isToday ? T.primary : T.text }}>
+                  {d.day}
+                  {isToday && <span style={{ fontSize: 11, fontWeight: 500, marginLeft: 8, color: T.primaryLight }}>· idag</span>}
+                </div>
+                {d.rest && <span style={{ fontSize: 11, color: T.textMuted, background: T.bgAlt, padding: '3px 8px', borderRadius: 10 }}>Vilodag</span>}
+              </div>
+
+              {d.rest ? (
+                <div style={{ padding: '14px 16px', fontSize: 13, color: T.textMuted }}>
+                  Låt hunden vila och återhämta sig. Kortare promenad är okej.
+                </div>
+              ) : (
+                <div>
+                  {(d.exercises || []).map((ex, j) => (
+                    <div key={j} style={{
+                      padding: '12px 16px',
+                      borderBottom: j < (d.exercises.length - 1) ? `1px solid ${T.border}` : 'none',
+                      display: 'flex', gap: 10,
+                    }}>
+                      <div style={{
+                        width: 28, height: 28, borderRadius: 8, flexShrink: 0,
+                        background: T.bgAlt, display: 'flex', alignItems: 'center',
+                        justifyContent: 'center', fontSize: 14,
+                      }}>{pickIcon(ex.label)}</div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>
+                          {ex.label}
+                          <span style={{ fontWeight: 400, color: T.textMuted, marginLeft: 6 }}>× {ex.reps}</span>
+                        </div>
+                        {ex.desc && <div style={{ fontSize: 12, color: T.textMuted, marginTop: 2 }}>{ex.desc}</div>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        {!loading && !plan && (
+          <div style={{ textAlign: 'center', padding: '40px 20px', color: T.textMuted, fontSize: 14 }}>
+            Kunde inte generera veckoschema. Försök igen.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ── SCREEN: DASHBOARD ───────────────────────── */
 function DashboardScreen({ profile, onNav }) {
   const [showLog, setShowLog] = useState(false);
+  const [showWeek, setShowWeek] = useState(false);
   const weekNumber = profile?.birthdate
     ? Math.max(1, Math.floor((Date.now() - new Date(profile.birthdate)) / (1000 * 60 * 60 * 24 * 7)))
     : 14;
@@ -491,39 +901,8 @@ function DashboardScreen({ profile, onNav }) {
       {/* Scrollable content */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 20px 80px' }}>
 
-        {/* Training card */}
-        <div style={{
-          background: T.surface, borderRadius: 16,
-          boxShadow: T.shadow, overflow: 'hidden', marginBottom: 16,
-        }}>
-          <div style={{
-            background: T.green50, borderBottom: `1px solid ${T.green100}`,
-            padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: T.primary }}>Veckans träning</div>
-            <div style={{ fontSize: 11, color: T.primaryLight, fontWeight: 500, background: T.green100, borderRadius: 20, padding: '3px 10px' }}>
-              RAS-baserat
-            </div>
-          </div>
-          <div style={{ padding: '16px' }}>
-            <h3 style={{ fontSize: 15, fontWeight: 700, color: T.text, marginBottom: 8 }}>
-              Vecka {weekNumber} – Grundläggande lydnad
-            </h3>
-            <p style={{ fontSize: 14, color: T.textMuted, lineHeight: 1.6 }}>
-              Fokusera på kort men konsekvent träning. Träna "sitt" och "ligg" i korta pass om 3–5 minuter. Uppmuntra naturlig markering och spårning.
-            </p>
-            <button onClick={() => onNav('chat')} style={{
-              marginTop: 14, width: '100%', padding: '11px',
-              borderRadius: 10, background: T.green50,
-              border: `1.5px solid ${T.green100}`,
-              color: T.primary, fontSize: 14, fontWeight: 600,
-              cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            }}>
-              Fråga om träningen <ChevronRight size={16} color={T.primary} />
-            </button>
-          </div>
-        </div>
+        {/* Interactive training plan */}
+        <TrainingPlan weekNumber={weekNumber} breed={profile?.breed || 'labrador'} onAsk={() => onNav('chat')} onWeek={() => setShowWeek(true)} onAllDone={() => setShowLog(true)} />
 
         {/* Quick stats */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
@@ -555,9 +934,16 @@ function DashboardScreen({ profile, onNav }) {
             ✍️ Logga träningspass
           </button>
         ) : (
-          <SessionLogCard onDone={() => setShowLog(false)} />
+          <div style={{ animation: 'slideUp 0.35s ease' }}>
+            <SessionLogCard onDone={() => setShowLog(false)} />
+          </div>
         )}
       </div>
+
+      {/* Week overview modal */}
+      {showWeek && (
+        <WeekOverlay weekNumber={weekNumber} breed={profile?.breed || 'labrador'} breedLabel={profile?.breed === 'braque_francais' ? 'Braque Français' : profile?.breed === 'labrador' ? 'Labrador Retriever' : 'Italiensk Vinthund'} onClose={() => setShowWeek(false)} />
+      )}
 
       <BottomNav screen="dashboard" onNav={onNav} />
     </div>
@@ -937,6 +1323,10 @@ function App() {
         @keyframes bounce {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-4px); }
+        }
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to   { opacity: 1; transform: translateY(0); }
         }
         ::-webkit-scrollbar { display: none; }
         * { scrollbar-width: none; }

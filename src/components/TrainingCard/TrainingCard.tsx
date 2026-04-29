@@ -6,7 +6,8 @@ import ExerciseRow from './ExerciseRow'
 import WeekView from './WeekView'
 import SessionLogForm from '@/components/SessionLogForm'
 import styles from './TrainingCard.module.css'
-import type { Breed, WeekPlan, Exercise } from '@/types'
+import type { Breed, WeekPlan, Exercise, DailyExerciseMetrics, LatencyBucket } from '@/types'
+import { getExerciseSpec } from '@/lib/training/exercise-specs'
 
 const SWEDISH_DAYS = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag']
 
@@ -15,19 +16,22 @@ function todayDateString(): string {
 }
 
 interface Props {
-  weekNumber: number
+  trainingWeek: number
+  ageWeeks: number
   breed: Breed
   dogName: string
 }
 
-export default function TrainingCard({ weekNumber, breed, dogName }: Props) {
+export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName }: Props) {
   const router = useRouter()
   const [weekPlan, setWeekPlan] = useState<WeekPlan | null>(null)
   const [progress, setProgress] = useState<Record<string, number>>({})
+  const [metrics, setMetrics] = useState<Record<string, DailyExerciseMetrics>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [showWeekView, setShowWeekView] = useState(false)
   const [showLogForm, setShowLogForm] = useState(false)
+  const [sessionGuard, setSessionGuard] = useState<Record<string, { consecutiveFails: number; consecutiveSlow: number }>>({})
   const todayDate = todayDateString()
   const todayName = SWEDISH_DAYS[new Date().getDay()]
 
@@ -35,18 +39,20 @@ export default function TrainingCard({ weekNumber, breed, dogName }: Props) {
     setLoading(true)
     setError(false)
     try {
-      const [planRes, progressRes] = await Promise.all([
-        fetch(`/api/training/week?breed=${breed}&week=${weekNumber}`),
+      const [planRes, progressRes, metricsRes] = await Promise.all([
+        fetch(`/api/training/week?breed=${breed}&week=${trainingWeek}&ageWeeks=${ageWeeks}`),
         fetch(`/api/training/progress?breed=${breed}&date=${todayDate}`),
+        fetch(`/api/training/metrics?breed=${breed}&date=${todayDate}`),
       ])
       if (planRes.ok) setWeekPlan(await planRes.json())
       if (progressRes.ok) setProgress(await progressRes.json())
+      if (metricsRes.ok) setMetrics(await metricsRes.json())
     } catch {
       setError(true)
     } finally {
       setLoading(false)
     }
-  }, [breed, weekNumber, todayDate])
+  }, [breed, trainingWeek, ageWeeks, todayDate])
 
   useEffect(() => { fetchData() }, [fetchData])
 
@@ -64,6 +70,41 @@ export default function TrainingCard({ weekNumber, breed, dogName }: Props) {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ breed, date: todayDate, exerciseId, count: newDone }),
+    }).catch(console.error)
+  }
+
+  function patchMetrics(exerciseId: string, patch: Partial<DailyExerciseMetrics>) {
+    if ('fail_count' in patch) {
+      setSessionGuard((prev) => {
+        const cur = prev[exerciseId] ?? { consecutiveFails: 0, consecutiveSlow: 0 }
+        const next = { ...cur, consecutiveFails: cur.consecutiveFails + 1 }
+        return { ...prev, [exerciseId]: next }
+      })
+    }
+    if (patch.latency_bucket === 'gt3s') {
+      setSessionGuard((prev) => {
+        const cur = prev[exerciseId] ?? { consecutiveFails: 0, consecutiveSlow: 0 }
+        const next = { ...cur, consecutiveSlow: cur.consecutiveSlow + 1 }
+        return { ...prev, [exerciseId]: next }
+      })
+    }
+    if ('success_count' in patch) {
+      setSessionGuard((prev) => {
+        const cur = prev[exerciseId] ?? { consecutiveFails: 0, consecutiveSlow: 0 }
+        const next = { ...cur, consecutiveFails: 0, consecutiveSlow: 0 }
+        return { ...prev, [exerciseId]: next }
+      })
+    }
+
+    setMetrics((prev) => ({
+      ...prev,
+      [exerciseId]: { ...(prev[exerciseId] ?? emptyMetrics()), ...patch },
+    }))
+
+    fetch('/api/training/metrics', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ breed, date: todayDate, exerciseId, patch }),
     }).catch(console.error)
   }
 
@@ -116,12 +157,33 @@ export default function TrainingCard({ weekNumber, breed, dogName }: Props) {
         {!loading && todayExercises.length > 0 && (
           <div className={styles.exercises}>
             {todayExercises.map((ex) => (
+              (() => {
+                const spec = getExerciseSpec(ex.id)
+                const m = metrics[ex.id] ?? null
+                const guard = sessionGuard[ex.id] ?? { consecutiveFails: 0, consecutiveSlow: 0 }
+                const rec = buildRecommendation(
+                  m?.success_count ?? 0,
+                  m?.fail_count ?? 0,
+                  m?.latency_bucket ?? null,
+                  ageWeeks,
+                  guard
+                )
+                const showTroubleshooting = rec?.kind === 'lower' || rec?.kind === 'stop'
+                return (
               <ExerciseRow
                 key={ex.id}
                 exercise={ex}
                 done={progress[ex.id] ?? 0}
                 onRepClick={() => handleRepClick(ex.id, progress[ex.id] ?? 0, ex.reps)}
+                spec={spec}
+                metrics={m}
+                recommendation={rec?.message ?? null}
+                showTroubleshooting={showTroubleshooting}
+                onMetricsPatch={(patch) => patchMetrics(ex.id, patch)}
+                ageWeeks={ageWeeks}
               />
+                )
+              })()
             ))}
           </div>
         )}
@@ -176,4 +238,38 @@ function ChevronRight() {
       <polyline points="9 18 15 12 9 6" />
     </svg>
   )
+}
+
+function emptyMetrics(): DailyExerciseMetrics {
+  return {
+    success_count: 0,
+    fail_count: 0,
+    latency_bucket: null,
+    criteria_level_id: null,
+  }
+}
+
+function buildRecommendation(
+  successCount: number,
+  failCount: number,
+  latencyBucket: LatencyBucket | null,
+  ageWeeks: number,
+  guard: { consecutiveFails: number; consecutiveSlow: number }
+): { kind: 'keep' | 'raise' | 'lower' | 'stop'; message: string } | null {
+  const attempts = successCount + failCount
+  const isPuppy = ageWeeks > 0 && ageWeeks < 16
+
+  if (guard.consecutiveFails >= 2 || guard.consecutiveSlow >= 2) {
+    return { kind: 'stop', message: 'Pausa och backa nivån direkt. Avsluta efter 1 lyckad rep.' }
+  }
+  if (attempts < 5) return { kind: 'keep', message: 'Kör några fler försök på samma nivå och bygg flyt.' }
+
+  const rate = attempts > 0 ? successCount / attempts : 0
+  if (rate >= 0.8 && latencyBucket !== 'gt3s' && !isPuppy) {
+    return { kind: 'raise', message: 'Höj kriteriet ett steg (lite svårare miljö/störning/avstånd).' }
+  }
+  if (rate <= 0.5 || latencyBucket === 'gt3s') {
+    return { kind: 'lower', message: 'Sänk kriteriet ett steg och höj belöningsvärdet.' }
+  }
+  return { kind: 'keep', message: 'Behåll nivån och stabilisera (sikta på ≥80% och kort latens).' }
 }

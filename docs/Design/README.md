@@ -1,60 +1,45 @@
 # Handoff: DogVantage – Full App Redesign
 
 ## Overview
-En fullständig hi-fi redesign av DogVantage PWA-appen. Designen täcker alla skärmar: Landing, Onboarding (3 steg), Dashboard, Chatt och Träningslogg. Fokus ligger på en varm, personlig känsla där hundens foto är i centrum.
+En fullständig hi-fi redesign av DogVantage PWA-appen. Designen täcker alla skärmar: Landing, Onboarding (3 steg), Dashboard, Chatt och Träningslogg. Fokus är en varm, personlig känsla där hundens foto är i centrum, med ett AI-genererat interaktivt träningssystem.
 
 ## About the Design Files
-Filerna i detta paket är **HTML-designprototyper** skapade som visuella och interaktiva referenser — inte produktionskod. Uppgiften är att **återskapa dessa designs i den befintliga Next.js-kodbasen** med dess etablerade mönster (App Router, CSS Modules, befintliga komponenter i `src/components/`). Ersätt inte befintlig logik — fokusera på att applicera den nya visuella stilen ovanpå den fungerande koden.
+Filerna i detta paket är **HTML-designprototyper** — interaktiva visuella referenser, inte produktionskod. Uppgiften är att **återskapa dessa designs i den befintliga Next.js-kodbasen** (`src/app/`, `src/components/`, `src/styles/`) med dess etablerade mönster (App Router, CSS Modules). Ersätt inte befintlig affärslogik — applicera den nya visuella stilen och de nya komponenterna ovanpå den fungerande koden.
 
 ## Fidelity
-**High-fidelity (hifi)** — Pixel-perfect mockups med slutliga färger, typografi, spacing och interaktioner. Återskapa UI:t exakt enligt prototypen med kodbas­ens befintliga bibliotek och mönster.
+**High-fidelity (hifi)** — Pixel-perfect mockups med slutliga färger, typografi, spacing och interaktioner.
 
 ---
 
 ## Design Tokens
 
-Dessa ersätter/utökar befintliga tokens i `src/styles/tokens.css`:
+Ersätt/utöka `src/styles/tokens.css`:
 
 ```css
 :root {
-  /* Backgrounds */
-  --color-bg: #faf8f4;          /* Varm krämvit (ersätter #f8f9fa) */
-  --color-bg-alt: #f2ede5;      /* Sekundär bakgrund */
+  --color-bg: #faf8f4;
+  --color-bg-alt: #f2ede5;
   --color-surface: #ffffff;
-
-  /* Brand */
-  --color-primary: #2d6a4f;     /* Oförändrad */
+  --color-primary: #2d6a4f;
   --color-primary-dark: #1b4332;
   --color-primary-light: #52b788;
-  --color-accent: #f4a261;      /* Oförändrad */
+  --color-accent: #f4a261;
   --color-accent-light: #fde8d4;
-
-  /* Text */
-  --color-text: #1c1917;        /* Varm svart (ersätter #1a1a2e) */
-  --color-text-muted: #78716c;  /* Varm grå */
-
-  /* Borders */
-  --color-border: #e7e0d8;      /* Varm border */
-
-  /* Greens (nya) */
+  --color-text: #1c1917;
+  --color-text-muted: #78716c;
+  --color-border: #e7e0d8;
   --color-green-100: #d8f0e5;
   --color-green-50: #edf8f2;
-
-  /* Shadows */
   --shadow-sm: 0 2px 12px rgba(0,0,0,0.08);
   --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
-
-  /* Radius */
   --radius-card: 16px;
   --radius-btn: 14px;
   --radius-input: 12px;
-
-  /* Font */
   --font-sans: 'DM Sans', system-ui, sans-serif;
 }
 ```
 
-Lägg till Google Font-import i `src/app/layout.tsx`:
+Lägg till i `src/app/layout.tsx` (`<head>`):
 ```html
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -63,188 +48,268 @@ Lägg till Google Font-import i `src/app/layout.tsx`:
 
 ---
 
+## Ny arkitektur: Träningssystem
+
+Detta är den viktigaste nya funktionen. Förstå detta flöde innan du implementerar:
+
+### Flöde
+1. **Ett AI-anrop** per vecka genererar hela veckoschemat (7 dagar)
+2. **Dashboard** filtrerar ut enbart **idag** ur den planen och visar som klickbara övningar
+3. **Veckovy** visar hela planen (samma cachade data, inget extra anrop)
+
+### API-endpoint: `POST /api/training/week`
+
+Skapa en ny endpoint (eller utöka `/api/training`) som returnerar:
+
+```typescript
+interface WeekPlan {
+  days: DayPlan[]
+}
+
+interface DayPlan {
+  day: string          // "Måndag" | "Tisdag" | ... | "Söndag"
+  rest?: boolean       // true = vilodag
+  exercises?: Exercise[]
+}
+
+interface Exercise {
+  id: string           // lowercase, inga mellanslag
+  label: string        // övningens namn
+  desc: string         // kort instruktion, max 8 ord
+  reps: number         // antal repetitioner (1–5)
+}
+```
+
+**Prompt till AI (använd RAG mot RAS-dokumenten):**
+```
+Skapa ett komplett veckoschema för vecka {weekNumber} för en {breedLabel}.
+Returnera JSON med 7 dagar (Måndag–Söndag).
+2–3 övningar per träningsdag, rest: true på vilodagar.
+Anpassa övningarna efter vecka {weekNumber} och rasens egenskaper.
+```
+
+### Caching
+Cachea veckoplanerna i Supabase eller `localStorage` med nyckel `week_plan_w{weekNumber}_{breed}`. Planen behöver inte regenereras förrän nästa vecka.
+
+### Daglig progress
+Spara avklarade reps per dag i Supabase (`session_logs`-tabellen eller ny `daily_progress`-tabell):
+- Nyckel: `(user_id, date, exercise_id)`
+- Värde: antal avklarade reps
+
+---
+
 ## Screens / Views
 
 ### 1. Landing Page (`src/app/page.tsx`)
 
-**Layout:** Flex column, full viewport height.
+**Hero (övre ~55% av viewport):**
+- Bakgrund: `linear-gradient(160deg, #1b4332 0%, #2d6a4f 60%, #52b788 100%)`
+- Padding: `52px 28px 40px`
+- 2 dekorativa cirklar: `position: absolute`, `rgba(255,255,255,0.06)`, 180px och 120px
+- Hundcirkel: 120×120px, `rgba(255,255,255,0.12)` bakgrund, `3px solid rgba(255,255,255,0.2)` border — visa hundfoton om profil finns
+- Titel: 32px, weight 700, vit, letter-spacing -0.5px
+- Tagline: 15px, `rgba(255,255,255,0.8)`, line-height 1.5
 
-**Hero-sektion (övre ~55%):**
-- Bakgrund: gradient `linear-gradient(160deg, #1b4332 0%, #2d6a4f 60%, #52b788 100%)`
-- Padding: 52px 28px 40px
-- Dekorativa cirklar: position absolute, `rgba(255,255,255,0.06)`, 180px och 120px diameter
-- Hundfoton: 120×120px cirkel, `rgba(255,255,255,0.12)` bakgrund, `3px solid rgba(255,255,255,0.2)` border — visa hundens foto om profil finns, annars emoji-placeholder 🐕
-- Titel "DogVantage": 32px, weight 700, vit, centrerad, letter-spacing -0.5px
-- Tagline: 15px, `rgba(255,255,255,0.8)`, centrerad, line-height 1.5
+**Features (3 rader):**
+- Icon-box: 44×44px, border-radius 12px, `--color-green-50`, emoji 20px
+- Titel: 15px weight 600; beskrivning: 13px muted; gap 20px
 
-**Feature-lista (mellerst):**
-- Padding 28px 24px
-- 3 rader med icon-box (44×44px, border-radius 12px, `--color-green-50` bakgrund, emoji 20px) + text
-- Titel: 15px weight 600, beskrivning: 13px `--color-text-muted`
-- Gap mellan rader: 20px
-
-**CTA (nedre):**
-- Padding 0 24px 40px
-- Primärknapp: full bredd, 16px padding, border-radius 14px, `--color-primary`, vit text 16px weight 600, `box-shadow: 0 4px 16px rgba(45,106,79,0.35)`
-- Sekundär ghost-knapp: "Jag har redan ett konto", `--color-text-muted`, 15px
+**CTA:**
+- Primärknapp: full bredd, padding 16px, border-radius 14px, `--color-primary`, `box-shadow: 0 4px 16px rgba(45,106,79,0.35)`
+- Ghost-knapp: "Jag har redan ett konto", muted
 
 ---
 
-### 2. Onboarding (`src/app/onboarding/page.tsx` + `src/components/DogProfileForm.tsx`)
+### 2. Onboarding – 3-stegs wizard (`src/app/onboarding/` + `src/components/DogProfileForm.tsx`)
 
-3-stegs flow med progressindikator längst upp.
-
-**Progress bar:**
-- 3 rektanglar, height 4px, border-radius 2px, gap 6px
-- Aktiva/passerade: `--color-primary`, kommande: `--color-border`
-- Steg-counter: "Steg X av 3", 12px, muted, ovanför rubrik
+**Progress bar (alltid synlig):**
+- 3 rektanglar, 4px höga, gap 6px, border-radius 2px
+- Aktiva/passerade: `--color-primary`; kommande: `--color-border`
 
 **Steg 1 – Foto:**
-- Cirkulär upload-zon: 180×180px, `border: 3px dashed`, `border-color: --color-border` (dashed när tom, `--color-primary` solid när foto valt)
-- Bakgrund: `--color-bg-alt` utan foto, transparent med foto
-- Kameraikon (SVG) + "Välj foto"-text när tom
-- `<input type="file" accept="image/*">` dold, aktiveras via onClick
-- "Hoppa över"-länk nedanför
-- Spara foto i `localStorage` som base64 (nyckel: `dogPhoto`)
+- Cirkulär upload-zon: 180×180px
+- Tom: `border: 3px dashed --color-border`, `--color-bg-alt` bakgrund, kameraikon + "Välj foto"
+- Med foto: `border: 3px solid --color-primary`, foto som `objectFit: cover`
+- `<input type="file" accept="image/*">` dold, triggas via onClick
+- Spara i `localStorage` som base64, nyckel: `dogPhoto`
+- "Hoppa över"-länk (foto är valfritt)
 
 **Steg 2 – Namn & Ras:**
-- Textinput för namn: padding 14px 16px, border-radius 12px, `1.5px solid --color-border`, focus → border `--color-primary`
-- Ras-väljare: 3 knappar (en per ras), stacked, `2px solid`, vald → `--color-green-50` bakgrund + `--color-primary` border + bockmarkering
-- Raser: Braque Français, Labrador Retriever, Italiensk Vinthund
+- Textinput: padding 14px 16px, border-radius 12px, focus-border `--color-primary`
+- Ras-knappar (3 st, stacked): `2px solid`, vald = `--color-green-50` bakgrund + `--color-primary` border + ✓
 
 **Steg 3 – Födelsedag:**
-- `<input type="date">` med samma stil som textinput
-- Preview-kort: visar beräknad vecka i realtid — `--color-green-50` bakgrund, 24px bold primärfärgad siffra
+- `<input type="date">`, samma stil
+- Preview-kort: visar beräknad vecka i realtid, `--color-green-50` bakgrund
 
-**Footer (alla steg):**
-- "Fortsätt"-knapp (disabled = grå `--color-border`, aktiv = `--color-primary`)
-- Sista steget: "Starta appen →"
+**Footer:**
+- "Fortsätt"-knapp (disabled = grå); sista steget = "Starta appen →"
 
 ---
 
 ### 3. Dashboard (`src/app/dashboard/page.tsx`)
 
 **Header (gradient):**
-- Bakgrund: `linear-gradient(160deg, #1b4332 0%, #2d6a4f 100%)`
+- `linear-gradient(160deg, #1b4332 0%, #2d6a4f 100%)`
 - Padding: 20px 24px 28px
-- Vänster: "God morgon!"-label (12px, `rgba(255,255,255,0.65)`), hundens namn (22px weight 700, vit), vecka-badge (inline-flex, `rgba(255,255,255,0.15)` bakgrund, rounded, 12px)
-- Höger: `Avatar`-komponent (se nedan), 64×64px
+- Vänster: "God morgon!" (12px, `rgba(255,255,255,0.65)`), hundens namn (22px, bold, vit), vecka-badge
+- Höger: `<Avatar>` 64px
 
-**Avatar-komponent** (ny, återanvänds på alla skärmar):
-```tsx
-// Visar hundfoton eller initialbokstav
-interface AvatarProps { photo?: string | null; name: string; size?: number }
-// Cirkel, photo = objectFit cover; annars gradient #52b788→#2d6a4f med initial-bokstav i vitt
-// Border: 3px solid white, box-shadow: --shadow-sm
-```
-
-**Träningskort:**
-- `--color-surface`, border-radius 16px, shadow
-- Header: `--color-green-50` bakgrund, border-bottom `--color-green-100`, 12px 16px padding
-  - Vänster: "Veckans träning" 13px weight 600 `--color-primary`
-  - Höger: "RAS-baserat"-badge, 11px, `--color-green-100` bakgrund, `--color-primary-light` text, rounded
-- Body: 16px padding
-  - Rubrik: 15px weight 700
-  - Brödtext: 14px `--color-text-muted` line-height 1.6
-  - "Fråga om träningen"-knapp: full bredd, `--color-green-50` bakgrund, `--color-green-100` border, `--color-primary` text, pil →
+**Träningskort – "Dagens pass":**
+Se separat sektion nedan.
 
 **Snabbstatistik (2-kolumns grid, gap 12px):**
-- 2 kort: "Pass loggade" (primary-färgad siffra) och "Snittbetyg" (accent-färgad)
-- border-radius 14px, padding 16px
+- 2 kort: `--color-surface`, border-radius 14px, padding 16px
+- "Pass loggade": stor siffra i `--color-primary`
+- "Snittbetyg": stor siffra i `--color-accent`
 
-**CTA-knapp (logga pass):**
-- Full bredd, `--color-accent` bakgrund, vit text, `box-shadow: 0 4px 16px rgba(244,162,97,0.35)`
-- Ersätts med `SessionLogForm` när klickad
+**Logga träningspass (auto-trigger):**
+- Ingen manuell logg-knapp behövs
+- När sista repen på sista övningen bockas av → `onAllDone()`-callback anropas efter 400ms delay
+- `SessionLogCard` glider upp automatiskt med `slideUp`-animation
+- Manuell "Logga träningspass"-knapp visas fortfarande som fallback om man vill logga utan att klara alla övningar
 
-**Bottom navigation** (ny komponent):
-- Position absolute bottom 0, full bredd
-- `--color-surface` bakgrund, `1px solid --color-border` top, padding-bottom 20px (safe area)
-- 3 tabs: Hem (hus-ikon), Chatt (bubbla-ikon), Logg (lista-ikon)
-- Aktiv tab: `--color-primary` färg + weight 600; inaktiv: `--color-text-muted`
-- Font-size på label: 11px
+**Bottom navigation:** se nedan
+
+---
+
+### 3a. Träningskort – Dagens pass (ny komponent: `TrainingCard.tsx`)
+
+```
+┌─────────────────────────────────┐
+│ Dagens pass          3/4 klara │  ← grön header
+├────────────────────────── ──────┤
+│ ████████░░░░░░░░░░░░░░░░░░░░░ │  ← progress bar (3px)
+├─────────────────────────────────┤
+│ 📣 Inkallning                   │
+│    Kalla på hunden med glad röst│  ● ● ○  2/3 ←klickbar
+├─────────────────────────────────┤
+│ 🐾 Sitt                    ✓   │  ← klar = grön bock
+├─────────────────────────────────┤
+│ 😴 Ligg                        │
+│    Bygg upp tid gradvis    ● ○ ○│
+├─────────────────────────────────┤
+│ [Fråga om dagens pass →]        │
+│  Visa hela veckans schema →     │
+└─────────────────────────────────┘
+```
+
+**ExerciseRow-komponenten:**
+- Flex row, padding 13px 16px, border-bottom `1px solid --color-border`
+- Ikon-box: 38×38px, border-radius 10px, `--color-bg-alt` (klar = `--color-green-100`)
+- Namn: 14px weight 600 (klar = `--color-primary` + line-through)
+- Beskrivning: 12px muted, max 8 ord
+- Prick-räknare (höger): klickbar, en prick per rep, fylld = `--color-primary`, tom = `--color-border`; nästa att fylla har `2px solid --color-primary` border
+- Klar: ersätt prickarna med grön bock-cirkel (32×32px, `--color-primary`)
+- Vilodag: stor 😴-emoji + "Vilodag idag" + förklaringstext
+
+**Veckovy (overlay/modal):**
+- Full-screen overlay ovanpå dashboarden
+- Tillbaka-pil i vänstra hörnet
+- 7 dagsort, varje dag = ett kort med övningslista
+- Vilodagar: grå badge "Vilodag"
+- Idag: `2px solid --color-primary` border + grön rubrik + "· idag"-label
 
 ---
 
 ### 4. Chatt (`src/app/chat/page.tsx` + `src/components/ChatInterface.tsx`)
 
 **Header:**
-- `--color-surface`, border-bottom
-- Avatar (36px) + "Träningsassistenten" (15px weight 700) + "● Online" (12px `--color-primary-light`)
+- `<Avatar>` (36px) + "Träningsassistenten" + "● Online" (`--color-primary-light`)
 
 **Meddelandebubbor:**
-- Användarbubbla: höger, `--color-primary` bakgrund, vit text, border-bottom-right-radius 4px
-- Modellbubbla: vänster, `--color-surface` bakgrund, `--color-text`, border-bottom-left-radius 4px
-- Padding: 12px 14px, border-radius 16px, max-width 75%
-- Modell-avatar: 28×28px cirkel med 🐾, `--color-green-50` bakgrund, `--color-green-100` border, visas till vänster om bubblan
+- Användarbubbla: höger, `--color-primary`, vit text, border-bottom-right-radius 4px
+- Modellbubbla: vänster, `--color-surface`, border-bottom-left-radius 4px
+- Padding 12px 14px, border-radius 16px, max-width 75%
+- Modell-avatar: 28×28px 🐾-cirkel, `--color-green-50`
 
 **Typing indicator:**
-- 3 punkter, 7×7px, `--color-text-muted`, bounce-animation (keyframes: translateY 0 → -4px → 0, 1.2s, stagger 0.2s per punkt)
+- 3 punkter, 7×7px, bounce-animation
+- `@keyframes bounce { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-4px) } }`
+- Stagger: 0s, 0.2s, 0.4s; duration 1.2s infinite
 
-**Snabbfrågor (visas tills 3+ meddelanden):**
-- Horisontell scroll-rad med chips
-- `--color-surface` bakgrund, `1.5px solid --color-border`, border-radius 20px, 8px 12px padding
-- Font-size 12px, whitespace nowrap
+**Snabbfrågor (föreslagna):**
+- Horisontell scroll, chips med `border: 1.5px solid --color-border`, border-radius 20px
+- Visas tills användaren skickat 3+ meddelanden
 
 **Input:**
-- Textarea (rows=1) + skicka-knapp (44×44px, `--color-primary`, border-radius 12px, pil-ikon)
+- Textarea (rows=1) + skicka-knapp (44×44px, `--color-primary`)
 - padding-bottom: 76px (för bottom nav)
 
 ---
 
-### 5. Träningslogg (`src/app/dashboard/page.tsx` – ny vy, eller ny route `/log`)
+### 5. Träningslogg
 
-**Header:**
-- `--color-surface`, border-bottom
-- Avatar (36px) + "Namn:s logg" + antal loggade pass
+**Header:** `<Avatar>` 36px + "Namn:s logg" + antal pass
 
 **Mini-stapeldiagram:**
-- 7 staplar (en per dag), flex + align-items flex-end, height 40px
-- Staplar: `--color-green-100`, senaste dag `--color-primary`
-- border-radius 4px, auto-bredd med flex: 1, gap 4px
-- "Fokus senaste 7 dagarna" label, 11px muted
+- 7 staplar, flex + align-items flex-end, height 40px
+- `--color-green-100` normalt, `--color-primary` = idag
+- border-radius 4px; gap 4px
 
 **Loggkort:**
-- `--color-surface`, border-radius 14px, shadow
-- `border-left: 4px solid` (grön=bra, orange=blandat, röd=dåligt)
-- Emoji (22px) + betyg-label + datum
-- Fokus & Lydnad: rad med 5 prickar (7×7px cirklar, fyllda/tomma)
-- Noteringar: kursiv text, 13px, separator ovan
+- `--color-surface`, border-radius 14px
+- `border-left: 4px solid` (grön/orange/röd beroende på betyg)
+- Fokus & Lydnad: 5 prickar (7×7px)
+- Noteringar: kursiv 13px muted
 
 ---
 
 ## Komponenter att skapa / uppdatera
 
-### Ny: `Avatar` (`src/components/Avatar.tsx`)
+### Ny: `src/components/Avatar.tsx`
 ```tsx
 interface AvatarProps {
-  photo?: string | null
+  photo?: string | null   // base64 eller URL
   name: string
-  size?: number
+  size?: number           // default 48
 }
+// Visar foto (objectFit cover) eller gradient-cirkel med initial-bokstav
+// Gradient: linear-gradient(135deg, #52b788, #2d6a4f)
+// Border: 3px solid white; box-shadow: --shadow-sm
+// Försök läsa från localStorage('dogPhoto') om photo-prop saknas
 ```
-Läs foto från `localStorage` med nyckel `dogPhoto` om `photo`-prop ej skickas.
 
-### Ny: `BottomNav` (`src/components/BottomNav.tsx`)
+### Ny: `src/components/BottomNav.tsx`
 ```tsx
-interface BottomNavProps {
-  active: 'dashboard' | 'chat' | 'log'
+type Tab = 'dashboard' | 'chat' | 'log'
+interface BottomNavProps { active: Tab }
+// position: fixed, bottom 0, full bredd
+// padding-bottom: env(safe-area-inset-bottom, 16px) för PWA
+// 3 tabs med SVG-ikoner (hus, pratbubbla, lista)
+// Aktiv: --color-primary + weight 600; inaktiv: --color-text-muted
+// Font-size label: 11px; gap ikon-label: 3px
+```
+
+### Ny: `src/components/TrainingCard.tsx` (ersätter befintlig)
+Se beskrivning under "Dagens pass" ovan.
+
+```tsx
+interface TrainingCardProps {
+  weekNumber: number
+  breed: Breed
+  onAskAboutTraining: () => void  // navigera till /chat
+  onShowWeek: () => void
 }
 ```
-Använd `next/link` för navigation.
 
-### Uppdatera: `DogProfileForm` (`src/components/DogProfileForm.tsx`)
-- Lägg till foto-uppladdningssteg som steg 1
-- Spara foto i `localStorage` som `dogPhoto`-nyckel (base64)
-- Gör om till 3-stegs wizard med progressindikator
+**Datahämtning:**
+- `GET /api/training/week?breed=X&week=Y` → `WeekPlan`
+- Filtrera `days` på dagens veckodag (svenska: Måndag–Söndag)
+- Cachea i SWR eller React state; invalidera vid veckoskifte
 
-### Uppdatera: `TrainingCard` (`src/components/TrainingCard.tsx`)
-- Lägg till grön header-sektion med "RAS-baserat"-badge
-- "Fråga om träningen"-knapp som navigerar till `/chat`
+**Progresslagring:**
+- `PATCH /api/training/progress` med `{ date, exerciseId, count }`
+- Läs tillbaka via `GET /api/training/progress?date=today`
 
-### Uppdatera: `SessionLogForm` (`src/components/SessionLogForm.tsx`)
-- Ersätt emoji-knappar med ny stil (se prototyp)
-- Ersätt sliders med accentColor `--color-primary`
-- Lägg till "Spara pass" + "Avbryt" side-by-side
+### Uppdatera: `src/components/DogProfileForm.tsx`
+- Gör om till 3-stegs wizard (se onboarding ovan)
+- Steg 1: foto-upload (spara i localStorage som base64, nyckel `dogPhoto`)
+
+### Uppdatera: `src/components/SessionLogForm.tsx`
+- Emoji-rating-knappar: flex row, 3 knappar, vald = `--color-green-50` bakgrund
+- Sliders: `accentColor: --color-primary`
+- "Spara" + "Avbryt" side-by-side
 
 ---
 
@@ -252,35 +317,85 @@ Använd `next/link` för navigation.
 
 | Element | Beteende |
 |---|---|
-| Onboarding steg | Fade/slide ingen animation krävs, räcker med conditional render |
-| Typing indicator | CSS `@keyframes bounce`, translateY 0→-4px, 1.2s infinite, stagger 0.2s |
-| CTA-knappar | `transition: transform 0.1s` + `active: scale(0.98)` |
-| Input focus | `border-color` transition 0.2s till `--color-primary` |
-| Logg-sparad | Success-state: ✅ + "Pass sparat!" visas 1s, sedan döljs formuläret |
+### Auto-trigger logg efter avslutat pass
+
+När användaren bockar av sista repen på sista övningen ska loggformuläret triggas automatiskt:
+
+```tsx
+// I TrainingCard-komponenten
+function tap(exerciseId: string, total: number) {
+  const next = { ...counts, [exerciseId]: Math.min((counts[exerciseId] || 0) + 1, total) }
+  saveCounts(next)
+  
+  const nowDone = exercises.filter(e => (next[e.id] || 0) >= e.total).length
+  if (nowDone === exercises.length) {
+    setTimeout(() => onAllDone(), 400) // liten delay för känsla
+  }
+}
+```
+
+I `DashboardPage`:
+```tsx
+<TrainingCard
+  ...
+  onAllDone={() => setShowLog(true)}
+/>
+
+{showLog && (
+  <div style={{ animation: 'slideUp 0.35s ease' }}>
+    <SessionLogForm ... />
+  </div>
+)}
+```
+
+CSS-animation:
+```css
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+```
+
+Flöde: bocka av alla reps → 🎉-banner i träningskortet → loggformulär glider upp → betygsätt → sparat.
+
+| Klar-animation | Prickar ersätts av grön bock; rad-bakgrund `--color-green-50` med `transition background 0.25s` |
+| Progress bar | `width` transition `0.4s ease` |
+| Typing indicator | CSS keyframes bounce, 1.2s, stagger 0.2s |
+| Veckovyer-overlay | Slide-in från botten eller fade; `position: fixed; inset: 0; z-index: 50` |
+| Alla knappar | `transition: transform 0.1s`; `active: scale(0.97)` |
+| Input focus | `border-color` transition 0.2s → `--color-primary` |
 
 ---
 
-## Assets
+## PWA-specifikt
 
-- **Hundfoton:** Lagras lokalt i `localStorage` som base64 (nyckel: `dogPhoto`). Läses upp och visas via Avatar-komponenten.
-- **Ikoner:** Ritade som inline SVG (stroke-baserade, strokeWidth 2, strokeLinecap round). Inga externa icon-bibliotek behövs.
-- **Typsnitt:** DM Sans via Google Fonts — lägg till i `layout.tsx`.
+Appen ska fungera som PWA (redan `src/app/manifest.ts`):
+
+- **Bottom nav**: använd `env(safe-area-inset-bottom)` för padding så nav inte täcks av home indicator
+- **Viewport**: `viewport-fit=cover` i manifest
+- **Offline**: träningsplanen är cachad i localStorage — appen ska visa cached data offline
+- **Scrollbars**: dölj med `scrollbar-width: none` + `::-webkit-scrollbar { display: none }`
 
 ---
 
-## Filer i detta paket
+## Implementeringsordning
+
+1. `tokens.css` + DM Sans
+2. `Avatar`-komponenten
+3. `BottomNav`-komponenten  
+4. `/api/training/week`-endpoint (AI + RAG + cache)
+5. `/api/training/progress`-endpoint (läs/skriv daglig progress)
+6. Ny `TrainingCard` med `ExerciseRow` och veckovyer-overlay
+7. Uppdatera `DogProfileForm` till 3-stegs wizard med foto
+8. Uppdatera `SessionLogForm`
+9. Landing page + Dashboard layout
+10. Chatt-skärmen
+11. Logg-skärmen
+
+---
+
+## Filer i paketet
 
 - `README.md` — denna fil
-- `DogVantage Prototype.html` — komplett interaktiv prototyp (alla skärmar)
-
----
-
-## Implementeringsordning (rekommenderad)
-
-1. Uppdatera `tokens.css` med nya designvärden + DM Sans
-2. Skapa `Avatar`-komponenten
-3. Skapa `BottomNav`-komponenten
-4. Uppdatera `DogProfileForm` med foto-steg
-5. Uppdatera `TrainingCard` och `SessionLogForm`
-6. Uppdatera `page.module.css` för Dashboard och Landing
-7. Lägg till logg-vy (ny route `/log` eller tab i Dashboard)
+- `DogVantage Prototype.html` — komplett interaktiv prototyp (alla skärmar + AI-genererade övningar)
+- `ios-frame.jsx` — iOS-ram som används i prototypen (referens, används ej i produktion)

@@ -6,10 +6,11 @@ import styles from './ChatInterface.module.css'
 
 interface Props {
   breed: Breed
-  weekNumber: number
+  ageWeeks: number
+  trainingWeek: number
 }
 
-export default function ChatInterface({ breed, weekNumber }: Props) {
+export default function ChatInterface({ breed, ageWeeks, trainingWeek }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: 'model', content: 'Hej! Jag är din träningsassistent. Vad undrar du om träningen?' },
   ])
@@ -33,7 +34,7 @@ export default function ChatInterface({ breed, weekNumber }: Props) {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, breed, weekNumber }),
+        body: JSON.stringify({ query, breed, ageWeeks, trainingWeek }),
       })
       const data: TrainingResult = await res.json()
       setMessages((prev) => [...prev, { role: 'model', content: data.content }])
@@ -50,7 +51,7 @@ export default function ChatInterface({ breed, weekNumber }: Props) {
   }
 
   const quickPrompts = [
-    `Vad ska vi träna i vecka ${weekNumber}?`,
+    `Vad ska vi träna i programvecka ${trainingWeek}?`,
     'Hur länge bör ett pass vara?',
     'Apportering — när börja?',
   ]

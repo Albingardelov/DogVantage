@@ -31,7 +31,8 @@ function Dashboard() {
   const [profile, setProfile] = useState<DogProfile | null>(null)
   const [showLogForm, setShowLogForm] = useState(false)
 
-  const weekNumber = profile ? Math.max(1, getAgeInWeeks(profile.birthdate)) : 0
+  const ageWeeks = profile ? Math.max(1, getAgeInWeeks(profile.birthdate)) : 0
+  const trainingWeek = profile?.trainingWeek ?? 1
 
   useEffect(() => {
     const p = getDogProfile()
@@ -43,6 +44,7 @@ function Dashboard() {
   }
 
   const dogName = profile?.name ?? '…'
+  const needsAssessment = Boolean(profile) && (profile?.assessment?.status ?? 'not_started') !== 'completed' && ageWeeks >= 26
 
   return (
     <main className={styles.main}>
@@ -53,7 +55,7 @@ function Dashboard() {
             <span className={styles.greeting}>{getGreeting()}</span>
             <h1 className={styles.dogName}>{dogName}</h1>
             <span className={styles.weekBadge}>
-              <span aria-hidden="true">📅</span> Vecka {weekNumber || '–'}
+              <span aria-hidden="true">🗓️</span> Programvecka {trainingWeek}
             </span>
           </div>
           <Avatar name={dogName} size={64} />
@@ -61,9 +63,20 @@ function Dashboard() {
       </header>
 
       <div className={styles.scrollArea}>
+        {needsAssessment && (
+          <button
+            className={styles.logCta}
+            onClick={() => (window.location.href = '/assessment')}
+            type="button"
+          >
+            <span aria-hidden="true">🧪</span>
+            <span>Gör snabb screening (10–12 min)</span>
+          </button>
+        )}
         {profile && (
           <TrainingCard
-            weekNumber={weekNumber}
+            trainingWeek={trainingWeek}
+            ageWeeks={ageWeeks}
             breed={profile.breed}
             dogName={dogName}
           />
@@ -87,7 +100,7 @@ function Dashboard() {
           profile && (
             <SessionLogForm
               breed={profile.breed}
-              weekNumber={weekNumber}
+              weekNumber={trainingWeek}
               onSaved={handleLogSaved}
               onCancel={() => setShowLogForm(false)}
             />

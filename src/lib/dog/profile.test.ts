@@ -6,6 +6,14 @@ const mockProfile: DogProfile = {
   name: 'Rex',
   breed: 'labrador',
   birthdate: '2024-10-15',
+  trainingWeek: 1,
+  onboarding: {
+    goal: 'everyday_obedience',
+    environment: 'suburb',
+    rewardPreference: 'mixed',
+    takesRewardsOutdoors: true,
+  },
+  assessment: { status: 'not_started' },
 }
 
 beforeEach(() => {

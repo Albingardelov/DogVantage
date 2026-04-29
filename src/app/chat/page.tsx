@@ -25,7 +25,8 @@ function Chat() {
     setProfile(getDogProfile())
   }, [])
 
-  const weekNumber = profile ? Math.max(1, getAgeInWeeks(profile.birthdate)) : 0
+  const ageWeeks = profile ? Math.max(1, getAgeInWeeks(profile.birthdate)) : 0
+  const trainingWeek = profile?.trainingWeek ?? 1
   const dogName = profile?.name ?? 'din hund'
 
   return (
@@ -39,7 +40,7 @@ function Chat() {
       </header>
 
       {profile && (
-        <ChatInterface breed={profile.breed} weekNumber={weekNumber} />
+        <ChatInterface breed={profile.breed} ageWeeks={ageWeeks} trainingWeek={trainingWeek} />
       )}
 
       <BottomNav active="chat" />

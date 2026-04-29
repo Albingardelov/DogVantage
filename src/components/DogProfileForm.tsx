@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { saveDogProfile } from '@/lib/dog/profile'
 import { saveDogPhoto } from '@/lib/dog/photo'
 import { getAgeInWeeks } from '@/lib/dog/age'
-import type { Breed, DogProfile } from '@/types'
+import type { Breed, DogProfile, OnboardingPrefs, RewardPreference, TrainingEnvironment, TrainingGoal } from '@/types'
 import styles from './DogProfileForm.module.css'
 
 const BREEDS: { value: Breed; label: string }[] = [
@@ -14,8 +14,28 @@ const BREEDS: { value: Breed; label: string }[] = [
   { value: 'italian_greyhound', label: 'Italiensk Vinthund' },
 ]
 
-const TOTAL_STEPS = 3
-const STEP_TITLES = ['Lägg till ett foto', 'Om din hund', 'När är hunden född?']
+const TOTAL_STEPS = 4
+const STEP_TITLES = ['Lägg till ett foto', 'Om din hund', 'När är hunden född?', 'Hur vill du använda appen?']
+
+const GOALS: { value: TrainingGoal; label: string }[] = [
+  { value: 'everyday_obedience', label: 'Vardagslydnad' },
+  { value: 'sport', label: 'Sport / tävling' },
+  { value: 'hunting', label: 'Jakt / bruk' },
+  { value: 'problem_solving', label: 'Lösa problem (t.ex. koppel/inkallning)' },
+]
+
+const ENVIRONMENTS: { value: TrainingEnvironment; label: string }[] = [
+  { value: 'city', label: 'Stad (mycket folk/hundar)' },
+  { value: 'suburb', label: 'Förort / blandat' },
+  { value: 'rural', label: 'Land / natur' },
+]
+
+const REWARDS: { value: RewardPreference; label: string }[] = [
+  { value: 'food', label: 'Mat' },
+  { value: 'toy', label: 'Leksak' },
+  { value: 'social', label: 'Socialt (beröm/lek)' },
+  { value: 'mixed', label: 'Blandat' },
+]
 
 export default function DogProfileForm() {
   const router = useRouter()
@@ -26,6 +46,10 @@ export default function DogProfileForm() {
   const [name, setName] = useState('')
   const [breed, setBreed] = useState<Breed | ''>('')
   const [birthdate, setBirthdate] = useState('')
+  const [goal, setGoal] = useState<TrainingGoal>('everyday_obedience')
+  const [environment, setEnvironment] = useState<TrainingEnvironment>('suburb')
+  const [rewardPreference, setRewardPreference] = useState<RewardPreference>('mixed')
+  const [takesRewardsOutdoors, setTakesRewardsOutdoors] = useState(true)
 
   function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -42,6 +66,7 @@ export default function DogProfileForm() {
     true,
     name.trim().length > 0 && breed.length > 0,
     birthdate.length > 0,
+    true,
   ]
 
   function handleNext() {
@@ -55,7 +80,20 @@ export default function DogProfileForm() {
   function finish() {
     if (!name.trim() || !breed || !birthdate) return
     if (photo) saveDogPhoto(photo)
-    const profile: DogProfile = { name: name.trim(), breed, birthdate }
+    const onboarding: OnboardingPrefs = {
+      goal,
+      environment,
+      rewardPreference,
+      takesRewardsOutdoors,
+    }
+    const profile: DogProfile = {
+      name: name.trim(),
+      breed,
+      birthdate,
+      trainingWeek: 1,
+      onboarding,
+      assessment: { status: 'not_started' },
+    }
     saveDogProfile(profile)
     router.replace('/dashboard')
   }
@@ -188,6 +226,60 @@ export default function DogProfileForm() {
             )}
           </div>
         )}
+
+        {step === 3 && (
+          <div className={styles.stepFields}>
+            <p className={styles.lead}>
+              Det här hjälper oss att prioritera rätt typ av träning för dig och din hund.
+            </p>
+
+            <ChoiceField
+              label="Primärt mål"
+              value={goal}
+              onChange={(v) => setGoal(v as TrainingGoal)}
+              options={GOALS}
+            />
+
+            <ChoiceField
+              label="Miljö där ni tränar mest"
+              value={environment}
+              onChange={(v) => setEnvironment(v as TrainingEnvironment)}
+              options={ENVIRONMENTS}
+            />
+
+            <ChoiceField
+              label="Belöning som funkar bäst"
+              value={rewardPreference}
+              onChange={(v) => setRewardPreference(v as RewardPreference)}
+              options={REWARDS}
+            />
+
+            <div className={styles.field}>
+              <span className={styles.label}>Tar hunden belöningar utomhus?</span>
+              <div className={styles.breedList} role="radiogroup" aria-label="Tar belöningar utomhus">
+                {[
+                  { value: true, label: 'Ja, oftast' },
+                  { value: false, label: 'Nej, sällan' },
+                ].map((o) => {
+                  const selected = takesRewardsOutdoors === o.value
+                  return (
+                    <button
+                      key={String(o.value)}
+                      type="button"
+                      role="radio"
+                      aria-checked={selected}
+                      onClick={() => setTakesRewardsOutdoors(o.value)}
+                      className={`${styles.breedOption} ${selected ? styles.breedOptionSelected : ''}`}
+                    >
+                      <span>{o.label}</span>
+                      {selected && <span aria-hidden="true">✓</span>}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <footer className={styles.footer}>
@@ -205,6 +297,42 @@ export default function DogProfileForm() {
           </button>
         )}
       </footer>
+    </div>
+  )
+}
+
+function ChoiceField({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  options: { value: string; label: string }[]
+}) {
+  return (
+    <div className={styles.field}>
+      <span className={styles.label}>{label}</span>
+      <div className={styles.breedList} role="radiogroup" aria-label={label}>
+        {options.map((o) => {
+          const selected = value === o.value
+          return (
+            <button
+              key={o.value}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => onChange(o.value)}
+              className={`${styles.breedOption} ${selected ? styles.breedOptionSelected : ''}`}
+            >
+              <span>{o.label}</span>
+              {selected && <span aria-hidden="true">✓</span>}
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
