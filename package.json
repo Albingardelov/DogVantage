@@ -13,6 +13,7 @@
     "@google/generative-ai": "^0.24.1",
     "@serwist/next": "^9.5.7",
     "@supabase/supabase-js": "^2.105.1",
+    "groq-sdk": "^1.1.2",
     "next": "16.2.4",
     "pdf-parse": "^2.4.5",
     "react": "19.2.4",
@@ -28,6 +29,7 @@
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.0.1",
     "@vitest/coverage-v8": "^4.1.5",
+    "dotenv": "^17.4.1",
     "jsdom": "^29.1.0",
     "typescript": "^5",
     "vitest": "^4.1.5"
