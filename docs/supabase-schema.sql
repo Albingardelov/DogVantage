@@ -46,6 +46,16 @@ CREATE TABLE IF NOT EXISTS session_logs (
 
 CREATE INDEX IF NOT EXISTS session_logs_breed_idx ON session_logs (breed, created_at DESC);
 
+-- Takedown requests: document removal requests from breed clubs
+CREATE TABLE IF NOT EXISTS takedown_requests (
+  id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  breed      text NOT NULL,
+  source     text NOT NULL,
+  reason     text NOT NULL,
+  contact    text NOT NULL DEFAULT '',
+  created_at timestamptz DEFAULT now()
+);
+
 -- RPC function for pgvector similarity search
 CREATE OR REPLACE FUNCTION match_breed_chunks(
   query_embedding vector(768),
