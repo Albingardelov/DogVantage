@@ -1,4 +1,4 @@
-import { groq, GROQ_MODEL } from './client'
+import { getGroqClient, GROQ_MODEL } from './client'
 import { embedText } from './embed'
 import { searchBreedChunks } from '@/lib/supabase/breed-chunks'
 import { formatBreedProfile, formatCurrentPhase } from './breed-profiles'
@@ -126,7 +126,7 @@ Regler:
 - desc: max 12 ord på svenska — inkludera ALLTID hur länge (t.ex. "5 min per gång", "3 × 1 min", "10–15 min")
 - Detta är programvecka ${trainingWeek}. Anpassa fokus och progression till programveckan, men låt biologisk ålder styra belastning.\n- Anpassa övningarna till rasens egenskaper${idRules ? `\n${idRules}\n` : ''}`
 
-  const completion = await groq.chat.completions.create({
+  const completion = await getGroqClient().chat.completions.create({
     model: GROQ_MODEL,
     messages: [
       { role: 'system', content: systemPrompt },

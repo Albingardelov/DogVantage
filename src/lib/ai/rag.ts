@@ -1,5 +1,5 @@
 import { embedText } from './embed'
-import { groq, GROQ_MODEL } from './client'
+import { getGroqClient, GROQ_MODEL } from './client'
 import { searchBreedChunks } from '@/lib/supabase/breed-chunks'
 import { formatBreedProfile, formatCurrentPhase } from './breed-profiles'
 import type { Breed, TrainingResult } from '@/types'
@@ -109,7 +109,7 @@ INSTRUKTIONER:
 • Svara alltid på svenska, kortfattat och konkret
 • Max 150 ord om inte frågan kräver längre svar`
 
-  const completion = await groq.chat.completions.create({
+  const completion = await getGroqClient().chat.completions.create({
     model: GROQ_MODEL,
     messages: [
       { role: 'system', content: systemPrompt },

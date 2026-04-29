@@ -1,4 +1,4 @@
-import { supabaseAdmin } from './client'
+import { getSupabaseAdmin } from './client'
 import type { Breed } from '@/types'
 import type { DailyExerciseMetrics, LatencyBucket } from '@/types'
 
@@ -16,7 +16,7 @@ export async function getMetrics(
   date: string,
   dogKey: string
 ): Promise<Record<string, DailyExerciseMetrics>> {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await getSupabaseAdmin()
     .from('daily_exercise_metrics')
     .select('exercise_id, success_count, fail_count, latency_bucket, criteria_level_id, notes')
     .eq('dog_key', dogKey)
@@ -42,7 +42,7 @@ export async function upsertMetrics(
   exerciseId: string,
   patch: Partial<DailyExerciseMetrics>
 ): Promise<void> {
-  const { error } = await supabaseAdmin
+  const { error } = await getSupabaseAdmin()
     .from('daily_exercise_metrics')
     .upsert(
       {

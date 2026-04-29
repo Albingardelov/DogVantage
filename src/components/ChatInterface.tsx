@@ -9,9 +9,10 @@ interface Props {
   ageWeeks: number
   trainingWeek: number
   initialQuestion?: string
+  dogKey?: string
 }
 
-export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQuestion }: Props) {
+export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQuestion, dogKey }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: 'model', content: 'Hej! Jag är din träningsassistent. Vad undrar du om träningen?' },
   ])
@@ -36,7 +37,7 @@ export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQu
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, breed, ageWeeks, trainingWeek }),
+        body: JSON.stringify({ query, breed, ageWeeks, trainingWeek, dogKey }),
       })
       const data: TrainingResult = await res.json()
       setMessages((prev) => [...prev, { role: 'model', content: data.content }])

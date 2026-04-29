@@ -19,24 +19,30 @@ vi.mock('@/lib/supabase/breed-chunks', () => ({
   ] satisfies ChunkMatch[]),
 }))
 
-vi.mock('@/lib/ai/client', () => ({
-  groq: {
+vi.mock('@/lib/ai/client', () => {
+  const create = vi.fn().mockResolvedValue({
+    choices: [
+      {
+        message: {
+          content: 'Vecka 8: Träna grundläggande lydnad i lugn miljö 10 min/dag.',
+        },
+      },
+    ],
+  })
+
+  const groq = {
     chat: {
       completions: {
-        create: vi.fn().mockResolvedValue({
-          choices: [
-            {
-              message: {
-                content: 'Vecka 8: Träna grundläggande lydnad i lugn miljö 10 min/dag.',
-              },
-            },
-          ],
-        }),
+        create,
       },
     },
-  },
-  GROQ_MODEL: 'llama-3.3-70b-versatile',
-}))
+  }
+
+  return {
+    getGroqClient: () => groq,
+    GROQ_MODEL: 'llama-3.3-70b-versatile',
+  }
+})
 
 describe('queryRAG', () => {
   beforeEach(() => vi.clearAllMocks())
@@ -60,7 +66,8 @@ describe('queryRAG', () => {
   })
 
   it('includes breed in system prompt', async () => {
-    const { groq } = await import('@/lib/ai/client')
+    const { getGroqClient } = await import('@/lib/ai/client')
+    const groq = getGroqClient()
     const { queryRAG } = await import('./rag')
     await queryRAG('Vad ska jag träna?', 'labrador')
     const call = vi.mocked(groq.chat.completions.create).mock.calls[0][0]
@@ -69,7 +76,8 @@ describe('queryRAG', () => {
   })
 
   it('includes session logs in prompt when provided', async () => {
-    const { groq } = await import('@/lib/ai/client')
+    const { getGroqClient } = await import('@/lib/ai/client')
+    const groq = getGroqClient()
     const { queryRAG } = await import('./rag')
     await queryRAG('Vad ska jag träna?', 'labrador', [
       'Vecka 7: tappade fokus efter 15 min',
@@ -80,7 +88,8 @@ describe('queryRAG', () => {
   })
 
   it('returns vet guardrail message for health keywords without calling Groq', async () => {
-    const { groq } = await import('@/lib/ai/client')
+    const { getGroqClient } = await import('@/lib/ai/client')
+    const groq = getGroqClient()
     const { queryRAG } = await import('./rag')
     const result = await queryRAG('hunden haltar efter träning', 'labrador')
     expect(result.content).toContain('veterinär')

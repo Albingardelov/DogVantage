@@ -1,13 +1,13 @@
 import { describe, it, expect, vi } from 'vitest'
 
 vi.mock('./client', () => ({
-  groq: {
+  getGroqClient: () => ({
     chat: {
       completions: {
         create: vi.fn(),
       },
     },
-  },
+  }),
   GROQ_MODEL: 'llama-3.3-70b-versatile',
 }))
 

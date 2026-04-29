@@ -1,11 +1,11 @@
-import { supabaseAdmin } from './client'
+import { getSupabaseAdmin } from './client'
 import type { TrainingResult, Breed, WeekPlan } from '@/types'
 
 export async function getCachedTraining(
   breed: Breed,
   weekNumber: number
 ): Promise<TrainingResult | null> {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await getSupabaseAdmin()
     .from('training_cache')
     .select('content, source')
     .eq('breed', breed)
@@ -21,7 +21,7 @@ export async function setCachedTraining(
   weekNumber: number,
   result: TrainingResult
 ): Promise<void> {
-  const { error } = await supabaseAdmin
+  const { error } = await getSupabaseAdmin()
     .from('training_cache')
     .upsert({
       breed,
@@ -39,7 +39,7 @@ export async function getCachedWeekPlan(
   breed: Breed,
   weekNumber: number
 ): Promise<WeekPlan | null> {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await getSupabaseAdmin()
     .from('training_cache')
     .select('content')
     .eq('breed', `weekplan_${breed}`)
@@ -59,7 +59,7 @@ export async function setCachedWeekPlan(
   weekNumber: number,
   plan: WeekPlan
 ): Promise<void> {
-  const { error } = await supabaseAdmin
+  const { error } = await getSupabaseAdmin()
     .from('training_cache')
     .upsert({
       breed: `weekplan_${breed}`,

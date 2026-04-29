@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase/client'
+import { getSupabaseAdmin } from '@/lib/supabase/client'
 import type { Breed } from '@/types'
 
 // Community submission endpoint — stores file metadata for admin review.
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'File too large (max 20 MB)' }, { status: 400 })
   }
 
-  const { error } = await supabaseAdmin.from('community_submissions').insert({
+  const { error } = await getSupabaseAdmin().from('community_submissions').insert({
     breed,
     filename: file.name,
     file_size: file.size,

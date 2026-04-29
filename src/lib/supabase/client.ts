@@ -1,12 +1,27 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+// We don't ship a generated Supabase Database type yet; use `any` to avoid `never` tables.
+let _supabase: SupabaseClient<any> | null = null
+let _supabaseAdmin: SupabaseClient<any> | null = null
 
-export const supabase = createClient(url, anonKey)
+function requireEnv(name: string, value: string | undefined): string {
+  if (value && value.length > 0) return value
+  throw new Error(`${name} is required.`)
+}
 
-// Server-side only — never expose to client
-export const supabaseAdmin = serviceKey
-  ? createClient(url, serviceKey)
-  : supabase
+export function getSupabase() {
+  if (_supabase) return _supabase
+  const url = requireEnv('supabaseUrl', process.env.NEXT_PUBLIC_SUPABASE_URL)
+  const anonKey = requireEnv('supabaseAnonKey', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+  _supabase = createClient<any>(url, anonKey)
+  return _supabase
+}
+
+// Server-side only — never expose service key to client
+export function getSupabaseAdmin() {
+  if (_supabaseAdmin) return _supabaseAdmin
+  const url = requireEnv('supabaseUrl', process.env.NEXT_PUBLIC_SUPABASE_URL)
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  _supabaseAdmin = serviceKey ? createClient<any>(url, serviceKey) : getSupabase()
+  return _supabaseAdmin
+}

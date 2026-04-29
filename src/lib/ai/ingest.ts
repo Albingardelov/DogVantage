@@ -1,6 +1,6 @@
 import { PDFParse } from 'pdf-parse'
 import { embedText } from './embed'
-import { supabaseAdmin } from '@/lib/supabase/client'
+import { getSupabaseAdmin } from '@/lib/supabase/client'
 import type { Breed } from '@/types'
 
 const CHUNK_SIZE = 2000    // chars ≈ 500 tokens
@@ -36,7 +36,7 @@ export async function ingestPDF(
   let inserted = 0
   for (const content of chunks) {
     const embedding = await embedText(content)
-    const { error } = await supabaseAdmin.from('breed_chunks').insert({
+    const { error } = await getSupabaseAdmin().from('breed_chunks').insert({
       breed,
       source: filename,
       source_url: sourceUrl,

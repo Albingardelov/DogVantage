@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase/client'
+import { getSupabaseAdmin } from '@/lib/supabase/client'
 import type { Breed } from '@/types'
 
 export async function POST(req: NextRequest) {
@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Log the request for admin review
-  const { error } = await supabaseAdmin.from('takedown_requests').insert({
+  const { error } = await getSupabaseAdmin().from('takedown_requests').insert({
     breed,
     source,
     reason,

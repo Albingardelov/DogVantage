@@ -1,4 +1,4 @@
-import { supabaseAdmin } from './client'
+import { getSupabaseAdmin } from './client'
 import type { Breed, SessionLog, QuickRating } from '@/types'
 
 export async function saveSessionLog(log: {
@@ -9,7 +9,7 @@ export async function saveSessionLog(log: {
   obedience: number
   notes?: string
 }): Promise<SessionLog> {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await getSupabaseAdmin()
     .from('session_logs')
     .insert(log)
     .select()
@@ -24,7 +24,7 @@ export async function getRecentLogs(
   weekNumber: number,
   limit = 5
 ): Promise<SessionLog[]> {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await getSupabaseAdmin()
     .from('session_logs')
     .select('*')
     .eq('breed', breed)
@@ -37,7 +37,7 @@ export async function getRecentLogs(
 }
 
 export async function getAllLogs(breed: Breed, limit = 30): Promise<SessionLog[]> {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await getSupabaseAdmin()
     .from('session_logs')
     .select('*')
     .eq('breed', breed)

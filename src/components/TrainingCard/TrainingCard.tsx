@@ -225,7 +225,7 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
           <div className={styles.logSheet}>
             <SessionLogForm
               breed={breed}
-              weekNumber={weekNumber}
+              weekNumber={trainingWeek}
               onSaved={() => setShowLogForm(false)}
               onCancel={() => setShowLogForm(false)}
             />
