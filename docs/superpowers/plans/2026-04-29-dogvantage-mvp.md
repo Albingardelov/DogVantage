@@ -4,9 +4,16 @@
 
 **Goal:** Build a PWA for breed-specific dog training with AI-driven weekly tasks and free chat, grounded in breed club PDF documents via RAG with Google Gemini 2.0 Flash.
 
-**Architecture:** Next.js 15 App Router, Tailwind CSS. Pure business logic in `src/lib/` (dog profile, age, AI/RAG) is fully decoupled from UI. Supabase stores pgvector embeddings and caches AI responses per breed/week. No auth in MVP — dog profile persists in localStorage. AI layer is isolated behind a thin interface so providers can be swapped later.
+**Architecture:** Next.js 15 App Router, CSS Modules. Pure business logic in `src/lib/` (dog profile, age, AI/RAG) is fully decoupled from UI. Supabase stores pgvector embeddings and caches AI responses per breed/week. No auth in MVP — dog profile persists in localStorage. AI layer is isolated behind a thin interface so providers can be swapped later.
 
-**Tech Stack:** Next.js 15, TypeScript 5, Tailwind CSS, @serwist/next 9, supabase-js 2, @google/generative-ai, pdf-parse, Vitest 2
+**Tech Stack:** Next.js 15, TypeScript 5, CSS Modules, @serwist/next 9, supabase-js 2, @google/generative-ai, pdf-parse, Vitest 2
+
+**CSS-regler (bryts ej):**
+- En `.module.css` per komponent, i samma mapp som `.tsx`
+- Ingen `style={{}}` inline (undantag: CSS custom property-värden)
+- Inga utility-klasser i JSX
+- Design tokens i `src/styles/tokens.css` som CSS custom properties
+- Komponenter i egna mappar: `src/components/ComponentName/ComponentName.tsx`
 
 ---
 
@@ -40,11 +47,16 @@
 - `src/app/manifest.ts` — PWA manifest (Next.js format)
 - `src/app/sw.ts` — service worker entry (serwist)
 
-**Components:**
-- `src/components/ProfileGuard.tsx` — client component: checks localStorage, redirects to /onboarding if missing
-- `src/components/DogProfileForm.tsx` — registration form (client component)
-- `src/components/TrainingCard.tsx` — weekly task + source citation
-- `src/components/ChatInterface.tsx` — chat UI with message history
+**Components (varje komponent är en egen mapp med .tsx + .module.css):**
+- `src/components/ProfileGuard/ProfileGuard.tsx`
+- `src/components/DogProfileForm/DogProfileForm.tsx` + `.module.css`
+- `src/components/TrainingCard/TrainingCard.tsx` + `.module.css`
+- `src/components/SessionLogForm/SessionLogForm.tsx` + `.module.css` — hybrid-loggformulär (snabbknappar + skalor + fritext)
+- `src/components/ChatInterface/ChatInterface.tsx` + `.module.css`
+
+**Styles:**
+- `src/styles/tokens.css` — CSS custom properties (färger, spacing, radier, shadow)
+- `src/styles/globals.css` — importerar tokens + CSS reset, ingenting mer
 
 **Config:**
 - `vitest.config.ts`
@@ -192,6 +204,152 @@ git commit -m "chore: configure Vitest with jsdom and localStorage mock"
 
 ---
 
+### Task 2b: CSS-arkitektur setup
+
+**Files:**
+- Create: `src/styles/tokens.css`
+- Create: `src/styles/globals.css` (ersätter Next.js default)
+- Modify: `src/app/layout.tsx` (importera globals.css)
+
+- [ ] **Step 1: Ta bort Tailwind från projektet**
+
+```bash
+npm uninstall tailwindcss @tailwindcss/postcss postcss
+```
+
+Ta bort `postcss.config.mjs` och `tailwind.config.ts` om de finns:
+
+```bash
+rm -f postcss.config.mjs tailwind.config.ts tailwind.config.js
+```
+
+- [ ] **Step 2: Skapa `src/styles/tokens.css`**
+
+```css
+/* src/styles/tokens.css */
+:root {
+  --color-primary: #000000;
+  --color-primary-hover: #1a1a1a;
+  --color-text: #111111;
+  --color-muted: #6b7280;
+  --color-border: #e5e7eb;
+  --color-surface: #ffffff;
+  --color-surface-raised: #f9fafb;
+  --color-success: #16a34a;
+  --color-error: #dc2626;
+  --color-warning: #d97706;
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+}
+```
+
+- [ ] **Step 3: Skapa `src/styles/globals.css`**
+
+```css
+/* src/styles/globals.css */
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  color: var(--color-text);
+  background: var(--color-surface);
+  min-height: 100dvh;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font: inherit;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+}
+```
+
+- [ ] **Step 4: Uppdatera `src/app/layout.tsx`**
+
+Ersätt importen av Tailwind (`globals.css` från Next.js) med den nya filen:
+
+```typescript
+// src/app/layout.tsx
+import '@/styles/globals.css'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'DogVantage',
+  description: 'Rasspecifik hundträning anpassad till din hunds ålder',
+}
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="sv">
+      <body>{children}</body>
+    </html>
+  )
+}
+```
+
+- [ ] **Step 5: Verifiera att `npm run build` fungerar**
+
+```bash
+npm run build
+```
+
+Expected: inga fel relaterade till Tailwind eller CSS.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add src/styles/ src/app/layout.tsx
+git rm -f postcss.config.mjs tailwind.config.ts 2>/dev/null || true
+git commit -m "chore: replace Tailwind with CSS Modules and design tokens"
+```
+
+---
+
 ### Task 3: Shared types
 
 **Files:**
@@ -227,12 +385,23 @@ export interface ChatMessage {
   content: string
 }
 
+export type QuickRating = 'good' | 'mixed' | 'bad'
+
 export interface SessionLog {
   id: string
   breed: Breed
   week_number: number
-  notes: string
+  quick_rating: QuickRating
+  focus: number       // 1–5
+  obedience: number   // 1–5
+  notes?: string      // valfri fritext
   created_at: string
+}
+
+export interface ChunkSource {
+  source: string
+  doc_version: string
+  page_ref: string
 }
 ```
 
@@ -446,12 +615,15 @@ git commit -m "feat: add dog profile localStorage CRUD with tests"
 CREATE EXTENSION IF NOT EXISTS vector;
 
 -- Breed chunks: RAG source data from breed club PDFs
+-- doc_version and page_ref enable traceable source citations in AI responses
 CREATE TABLE IF NOT EXISTS breed_chunks (
-  id        uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  breed     text NOT NULL,
-  source    text NOT NULL,
-  content   text NOT NULL,
-  embedding vector(768) NOT NULL
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  breed       text NOT NULL,
+  source      text NOT NULL,          -- filename, e.g. "RAS_labrador_2023.pdf"
+  doc_version text NOT NULL DEFAULT '', -- e.g. "2023-rev2"
+  page_ref    text NOT NULL DEFAULT '', -- e.g. "s. 12, Socialisering"
+  content     text NOT NULL,
+  embedding   vector(768) NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS breed_chunks_breed_idx ON breed_chunks (breed);
@@ -743,6 +915,14 @@ describe('queryRAG', () => {
     const call = vi.mocked(gemini.generateContent).mock.calls[0][0] as string
     expect(call).toContain('tappade fokus efter 15 min')
   })
+
+  it('returns vet guardrail message for health keywords without calling Gemini', async () => {
+    const { gemini } = await import('@/lib/ai/client')
+    const { queryRAG } = await import('./rag')
+    const result = await queryRAG('hunden haltar efter träning', 'labrador')
+    expect(result.content).toContain('veterinär')
+    expect(vi.mocked(gemini.generateContent)).not.toHaveBeenCalled()
+  })
 })
 ```
 
@@ -763,25 +943,49 @@ import { gemini } from './client'
 import { searchBreedChunks } from '@/lib/supabase/breed-chunks'
 import type { Breed, TrainingResult } from '@/types'
 
+const VET_KEYWORDS = [
+  'haltar', 'kräks', 'äter inte', 'blöder', 'veterinär',
+  'sjuk', 'ont', 'skada', 'hälta', 'kräkningar', 'diarré',
+]
+
+const VET_RESPONSE: TrainingResult = {
+  content:
+    'Det verkar handla om ett hälsoproblem. DogVantage ger inte medicinska råd — kontakta din veterinär.',
+  source: '',
+}
+
+function isHealthQuery(query: string): boolean {
+  const lower = query.toLowerCase()
+  return VET_KEYWORDS.some((kw) => lower.includes(kw))
+}
+
 export async function queryRAG(
   query: string,
   breed: Breed,
   recentLogs: string[] = []
 ): Promise<TrainingResult> {
+  if (isHealthQuery(query)) return VET_RESPONSE
+
   const embedding = await embedText(query)
   const chunks = await searchBreedChunks(embedding, breed)
 
-  const context = chunks.map((c) => c.content).join('\n\n')
-  const primarySource = chunks[0]?.source ?? 'okänd källa'
+  const context = chunks
+    .map((c) => `${c.content}\n[Källa: ${c.source} ${c.doc_version}, ${c.page_ref}]`)
+    .join('\n\n')
+  const primaryChunk = chunks[0]
+  const primarySource = primaryChunk
+    ? `${primaryChunk.source} (${primaryChunk.doc_version}, ${primaryChunk.page_ref})`
+    : 'okänd källa'
 
   const logsSection =
     recentLogs.length > 0
-      ? `\nTidigare träningspass för denna hund:\n${recentLogs.map((l) => `- ${l}`).join('\n')}\n\nAnpassa rekommendationen utifrån hundens faktiska prestation ovan.`
+      ? `\nSenaste träningspass:\n${recentLogs.map((l) => `- ${l}`).join('\n')}\n\nAnpassa rekommendationen utifrån hundens faktiska prestation ovan.`
       : ''
 
   const prompt = `Du är en expert på hundträning specialiserad på ${breed}.
 Basera ditt svar ENBART på följande källdokument från rasklubben.
 Om svaret inte finns i källorna, säg det tydligt.
+Citera källan (dokumentnamn, version, sida) i ditt svar.
 Svara på svenska.
 
 Källdokument:
@@ -892,7 +1096,7 @@ Hämtar de senaste loggarna och skickar dem med till RAG om de finns.
 import { NextRequest, NextResponse } from 'next/server'
 import { queryRAG } from '@/lib/ai/rag'
 import { getCachedTraining, setCachedTraining } from '@/lib/supabase/training-cache'
-import { getRecentLogs } from '@/lib/supabase/session-logs'
+import { getRecentLogs, formatLogsForPrompt } from '@/lib/supabase/session-logs'
 import type { Breed } from '@/types'
 
 export async function GET(req: NextRequest) {
@@ -905,13 +1109,13 @@ export async function GET(req: NextRequest) {
 
   const recentLogs = await getRecentLogs(breed)
 
-  // Only use cache if there are no recent logs (logs make each response adaptive)
+  // Use cache only when no personal logs exist (generic baseline per breed+week)
   if (recentLogs.length === 0) {
     const cached = await getCachedTraining(breed, week)
     if (cached) return NextResponse.json(cached)
   }
 
-  const logStrings = recentLogs.map((l) => `Vecka ${l.week_number}: ${l.notes}`)
+  const logStrings = formatLogsForPrompt(recentLogs)
 
   const result = await queryRAG(
     `Vad är lämplig träning för en ${breed} i vecka ${week} av sin uppväxt?`,
@@ -919,7 +1123,6 @@ export async function GET(req: NextRequest) {
     logStrings
   )
 
-  // Cache only when no personal logs exist (generic baseline)
   if (recentLogs.length === 0) {
     await setCachedTraining(breed, week, result)
   }
@@ -963,20 +1166,25 @@ import { saveSessionLog } from '@/lib/supabase/session-logs'
 import type { Breed } from '@/types'
 
 export async function POST(req: NextRequest) {
-  const { breed, week_number, notes } = (await req.json()) as {
+  const body = (await req.json()) as {
     breed: Breed
     week_number: number
-    notes: string
+    quick_rating: 'good' | 'mixed' | 'bad'
+    focus: number
+    obedience: number
+    notes?: string
   }
 
-  if (!breed || !notes || week_number === undefined) {
+  const { breed, week_number, quick_rating, focus, obedience } = body
+
+  if (!breed || week_number === undefined || !quick_rating || !focus || !obedience) {
     return NextResponse.json(
-      { error: 'breed, week_number and notes required' },
+      { error: 'breed, week_number, quick_rating, focus and obedience required' },
       { status: 400 }
     )
   }
 
-  await saveSessionLog(breed, week_number, notes)
+  await saveSessionLog(body)
   return NextResponse.json({ ok: true })
 }
 ```
@@ -1217,82 +1425,297 @@ git commit -m "feat: add onboarding page and dog profile form"
 
 ---
 
-### Task 16: TrainingCard component + Dashboard page
+### Task 16: TrainingCard + SessionLogForm + Dashboard
 
 **Files:**
-- Create: `src/components/TrainingCard.tsx`
+- Create: `src/components/TrainingCard/TrainingCard.tsx`
+- Create: `src/components/TrainingCard/TrainingCard.module.css`
+- Create: `src/components/SessionLogForm/SessionLogForm.tsx`
+- Create: `src/components/SessionLogForm/SessionLogForm.module.css`
 - Create: `src/app/dashboard/page.tsx`
+- Create: `src/app/dashboard/dashboard.module.css`
+
+TrainingCard visar träningsuppgift + källcitation. SessionLogForm är ett separat komponent med snabbknappar (bra/blandat/dåligt), fokus-skala (1–5), lydnad-skala (1–5) och valfri fritext. Logg-formuläret ska kunna fyllas i på max 20 sekunder.
 
 - [ ] **Step 1: Create TrainingCard**
 
-TrainingCard innehåller ett fritext-fält för att logga hur träningen gick. När användaren sparar skickas anteckningen till `/api/logs`.
-
 ```typescript
-// src/components/TrainingCard.tsx
-'use client'
-
-import { useState } from 'react'
-import type { Breed } from '@/types'
+// src/components/TrainingCard/TrainingCard.tsx
+import styles from './TrainingCard.module.css'
 
 interface Props {
   content: string
   source: string
   weekNumber: number
-  breed: Breed
 }
 
-export function TrainingCard({ content, source, weekNumber, breed }: Props) {
+export function TrainingCard({ content, source, weekNumber }: Props) {
+  return (
+    <article className={styles.card}>
+      <p className={styles.week}>Vecka {weekNumber}</p>
+      <p className={styles.content}>{content}</p>
+      <p className={styles.source}>Källa: {source}</p>
+    </article>
+  )
+}
+```
+
+```css
+/* src/components/TrainingCard/TrainingCard.module.css */
+.card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
+  max-width: 32rem;
+  width: 100%;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.week {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-muted);
+}
+
+.content {
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  color: var(--color-text);
+}
+
+.source {
+  font-size: var(--font-size-xs);
+  color: var(--color-muted);
+  margin-top: var(--spacing-xs);
+}
+```
+
+- [ ] **Step 2: Create SessionLogForm**
+
+```typescript
+// src/components/SessionLogForm/SessionLogForm.tsx
+'use client'
+
+import { useState } from 'react'
+import type { Breed, QuickRating } from '@/types'
+import styles from './SessionLogForm.module.css'
+
+interface Props {
+  breed: Breed
+  weekNumber: number
+  onSaved?: () => void
+}
+
+const QUICK_OPTIONS: { value: QuickRating; label: string; emoji: string }[] = [
+  { value: 'good', label: 'Bra', emoji: '✅' },
+  { value: 'mixed', label: 'Blandat', emoji: '🔶' },
+  { value: 'bad', label: 'Dåligt', emoji: '❌' },
+]
+
+export function SessionLogForm({ breed, weekNumber, onSaved }: Props) {
+  const [quickRating, setQuickRating] = useState<QuickRating | null>(null)
+  const [focus, setFocus] = useState(3)
+  const [obedience, setObedience] = useState(3)
   const [notes, setNotes] = useState('')
-  const [saved, setSaved] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
 
   async function handleSave() {
-    if (!notes.trim()) return
+    if (!quickRating) return
     setSaving(true)
     try {
       await fetch('/api/logs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ breed, week_number: weekNumber, notes }),
+        body: JSON.stringify({
+          breed,
+          week_number: weekNumber,
+          quick_rating: quickRating,
+          focus,
+          obedience,
+          notes: notes.trim() || undefined,
+        }),
       })
       setSaved(true)
+      onSaved?.()
     } finally {
       setSaving(false)
     }
   }
 
+  if (saved) {
+    return <p className={styles.savedMessage}>Träningspass loggat!</p>
+  }
+
   return (
-    <div className="rounded-2xl border p-6 max-w-lg w-full shadow-sm flex flex-col gap-4">
-      <div>
-        <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">
-          Vecka {weekNumber}
-        </p>
-        <p className="text-base leading-relaxed whitespace-pre-wrap">{content}</p>
-        <p className="mt-3 text-xs text-gray-400">Källa: {source}</p>
+    <section className={styles.form}>
+      <h3 className={styles.heading}>Hur gick träningen?</h3>
+
+      <div className={styles.quickButtons}>
+        {QUICK_OPTIONS.map((opt) => (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => setQuickRating(opt.value)}
+            className={`${styles.quickBtn} ${quickRating === opt.value ? styles.quickBtnActive : ''}`}
+          >
+            <span>{opt.emoji}</span>
+            <span>{opt.label}</span>
+          </button>
+        ))}
       </div>
 
-      <div className="border-t pt-4 flex flex-col gap-2">
-        <label className="text-xs font-medium text-gray-500">
-          Hur gick träningen?
+      <div className={styles.scales}>
+        <label className={styles.scaleLabel}>
+          Fokus: {focus}/5
+          <input
+            type="range"
+            min={1}
+            max={5}
+            value={focus}
+            onChange={(e) => setFocus(Number(e.target.value))}
+            className={styles.range}
+          />
         </label>
-        <textarea
-          value={notes}
-          onChange={(e) => { setNotes(e.target.value); setSaved(false) }}
-          placeholder="T.ex. tappade fokus efter 15 min, ville leka istället…"
-          rows={3}
-          className="border rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-black"
-        />
-        <button
-          onClick={handleSave}
-          disabled={saving || saved || !notes.trim()}
-          className="self-end text-sm bg-black text-white rounded-xl px-4 py-2 disabled:opacity-40"
-        >
-          {saved ? 'Sparat!' : saving ? 'Sparar…' : 'Spara notering'}
-        </button>
+        <label className={styles.scaleLabel}>
+          Lydnad: {obedience}/5
+          <input
+            type="range"
+            min={1}
+            max={5}
+            value={obedience}
+            onChange={(e) => setObedience(Number(e.target.value))}
+            className={styles.range}
+          />
+        </label>
       </div>
-    </div>
+
+      <textarea
+        value={notes}
+        onChange={(e) => setNotes(e.target.value)}
+        placeholder="Valfritt: beskriv kort hur det gick…"
+        rows={2}
+        className={styles.textarea}
+      />
+
+      <button
+        type="button"
+        onClick={handleSave}
+        disabled={!quickRating || saving}
+        className={styles.saveBtn}
+      >
+        {saving ? 'Sparar…' : 'Spara pass'}
+      </button>
+    </section>
   )
 }
+```
+
+```css
+/* src/components/SessionLogForm/SessionLogForm.module.css */
+.form {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  max-width: 32rem;
+  width: 100%;
+}
+
+.heading {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.quickButtons {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.quickBtn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  background: var(--color-surface);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.quickBtnActive {
+  border-color: var(--color-primary);
+  background: var(--color-surface-raised);
+}
+
+.scales {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.scaleLabel {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.range {
+  width: 100%;
+  accent-color: var(--color-primary);
+}
+
+.textarea {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-sm);
+  resize: none;
+  color: var(--color-text);
+}
+
+.textarea:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.saveBtn {
+  align-self: flex-end;
+  background: var(--color-primary);
+  color: var(--color-surface);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  transition: background 0.15s;
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.saveBtn:disabled {
+  opacity: 0.4;
+}
+
+.savedMessage {
+  font-size: var(--font-size-sm);
+  color: var(--color-success);
+  font-weight: 500;
+}
+```
 ```
 
 - [ ] **Step 2: Create dashboard page**
@@ -1727,13 +2150,16 @@ git commit -m "feat: configure PWA with serwist manifest and service worker"
 Lägg till i `docs/supabase-schema.sql`:
 
 ```sql
--- Session logs: fritext-noteringar per träningspass
+-- Session logs: hybrid-loggning (snabbbetyg + skalor + valfri fritext)
 CREATE TABLE IF NOT EXISTS session_logs (
-  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  breed       text NOT NULL,
-  week_number int  NOT NULL,
-  notes       text NOT NULL,
-  created_at  timestamptz DEFAULT now()
+  id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  breed        text NOT NULL,
+  week_number  int  NOT NULL,
+  quick_rating text NOT NULL CHECK (quick_rating IN ('good', 'mixed', 'bad')),
+  focus        int  NOT NULL CHECK (focus BETWEEN 1 AND 5),
+  obedience    int  NOT NULL CHECK (obedience BETWEEN 1 AND 5),
+  notes        text,               -- valfri fritext
+  created_at   timestamptz DEFAULT now()
 );
 
 CREATE INDEX IF NOT EXISTS session_logs_breed_idx ON session_logs (breed, created_at DESC);
@@ -1765,15 +2191,17 @@ git commit -m "feat: add session_logs table to Supabase schema"
 import { supabaseAdmin } from './client'
 import type { Breed, SessionLog } from '@/types'
 
-export async function saveSessionLog(
-  breed: Breed,
-  weekNumber: number,
-  notes: string
-): Promise<void> {
-  const { error } = await supabaseAdmin
-    .from('session_logs')
-    .insert({ breed, week_number: weekNumber, notes })
+export interface NewSessionLog {
+  breed: Breed
+  week_number: number
+  quick_rating: 'good' | 'mixed' | 'bad'
+  focus: number
+  obedience: number
+  notes?: string
+}
 
+export async function saveSessionLog(log: NewSessionLog): Promise<void> {
+  const { error } = await supabaseAdmin.from('session_logs').insert(log)
   if (error) throw new Error(`Log save failed: ${error.message}`)
 }
 
@@ -1783,13 +2211,26 @@ export async function getRecentLogs(
 ): Promise<SessionLog[]> {
   const { data, error } = await supabaseAdmin
     .from('session_logs')
-    .select('id, breed, week_number, notes, created_at')
+    .select('id, breed, week_number, quick_rating, focus, obedience, notes, created_at')
     .eq('breed', breed)
     .order('created_at', { ascending: false })
     .limit(limit)
 
   if (error) throw new Error(`Log fetch failed: ${error.message}`)
   return (data as SessionLog[]) ?? []
+}
+
+// Formats logs as human-readable strings for RAG prompt context
+export function formatLogsForPrompt(logs: SessionLog[]): string[] {
+  const ratingLabel: Record<string, string> = {
+    good: 'Bra',
+    mixed: 'Blandat',
+    bad: 'Dåligt',
+  }
+  return logs.map((l) => {
+    const base = `Vecka ${l.week_number}: Betyg: ${ratingLabel[l.quick_rating]}, Fokus: ${l.focus}/5, Lydnad: ${l.obedience}/5`
+    return l.notes ? `${base}. "${l.notes}"` : base
+  })
 }
 ```
 
