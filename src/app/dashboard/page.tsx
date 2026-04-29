@@ -22,12 +22,14 @@ function Dashboard() {
   const [profile, setProfile] = useState<DogProfile | null>(null)
   const [training, setTraining] = useState<TrainingResult | null>(null)
   const [loading, setLoading] = useState(true)
+  const [apiError, setApiError] = useState('')
   const [showLogForm, setShowLogForm] = useState(false)
 
   const weekNumber = profile ? getAgeInWeeks(profile.birthdate) : 0
 
   const fetchTraining = useCallback(async (p: DogProfile, week: number) => {
     setLoading(true)
+    setApiError('')
     try {
       const res = await fetch('/api/training', {
         method: 'POST',
@@ -35,7 +37,13 @@ function Dashboard() {
         body: JSON.stringify({ breed: p.breed, weekNumber: week }),
       })
       const data = await res.json()
-      setTraining(data)
+      if (!res.ok) {
+        setApiError(data.error ?? `Fel ${res.status}`)
+      } else {
+        setTraining(data)
+      }
+    } catch (err) {
+      setApiError(err instanceof Error ? err.message : 'Nätverksfel')
     } finally {
       setLoading(false)
     }
@@ -66,6 +74,11 @@ function Dashboard() {
       </header>
 
       <div className={styles.content}>
+        {apiError && (
+          <p style={{ color: 'var(--color-error)', fontSize: 'var(--text-sm)', padding: 'var(--space-4)' }}>
+            Fel: {apiError}
+          </p>
+        )}
         <TrainingCard
           weekNumber={weekNumber}
           dogName={profile?.name ?? '…'}
