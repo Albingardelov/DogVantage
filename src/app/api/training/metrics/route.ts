@@ -29,6 +29,7 @@ function parseLatencyBucket(v: unknown): LatencyBucket | null {
 function parsePatch(body: unknown): {
   breed: Breed
   date: string
+  dogKey: string
   exerciseId: string
   patch: Partial<DailyExerciseMetrics>
 } | { error: string; status: number } {
@@ -37,6 +38,7 @@ function parsePatch(body: unknown): {
 
   const breed = b.breed
   const date = b.date
+  const dogKey = typeof b.dogKey === 'string' && b.dogKey ? b.dogKey : 'default'
   const exerciseId = b.exerciseId
   const patchRaw = b.patch
 
@@ -84,17 +86,18 @@ function parsePatch(body: unknown): {
 
   if (Object.keys(patch).length === 0) return { error: 'patch must include at least one field', status: 400 }
 
-  return { breed, date, exerciseId, patch }
+  return { breed, date, dogKey, exerciseId, patch }
 }
 
 export async function GET(req: NextRequest) {
   const breed = req.nextUrl.searchParams.get('breed')
   const date = req.nextUrl.searchParams.get('date')
+  const dogKey = req.nextUrl.searchParams.get('dogKey') ?? 'default'
   if (!isValidBreed(breed) || !isValidDateString(date)) {
     return NextResponse.json({ error: 'breed and date required' }, { status: 400 })
   }
 
-  const metrics = await getMetrics(breed, date)
+  const metrics = await getMetrics(breed, date, dogKey)
   return NextResponse.json(metrics)
 }
 
@@ -102,7 +105,7 @@ export async function PATCH(req: NextRequest) {
   const parsed = parsePatch(await req.json())
   if ('error' in parsed) return NextResponse.json({ error: parsed.error }, { status: parsed.status })
 
-  await upsertMetrics(parsed.breed, parsed.date, parsed.exerciseId, parsed.patch)
+  await upsertMetrics(parsed.breed, parsed.date, parsed.dogKey, parsed.exerciseId, parsed.patch)
   return NextResponse.json({ ok: true })
 }
 

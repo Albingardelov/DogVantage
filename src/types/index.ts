@@ -12,6 +12,11 @@ export interface DogProfile {
   breed: Breed
   birthdate: string // ISO 8601, e.g. "2024-10-15"
   /**
+   * Stable identifier for this dog's data in storage/DB.
+   * Needed to separate training progress between dogs of the same breed.
+   */
+  dogKey?: string
+  /**
    * "Programvecka" – weeks since starting in the app / baseline assessment.
    * Separate from biological age (derived from birthdate).
    */

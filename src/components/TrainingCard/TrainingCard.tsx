@@ -21,9 +21,10 @@ interface Props {
   ageWeeks: number
   breed: Breed
   dogName: string
+  dogKey: string
 }
 
-export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName }: Props) {
+export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, dogKey }: Props) {
   const router = useRouter()
   const [weekPlan, setWeekPlan] = useState<WeekPlan | null>(null)
   const [progress, setProgress] = useState<Record<string, number>>({})
@@ -43,8 +44,8 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName }:
     try {
       const [planRes, progressRes, metricsRes] = await Promise.all([
         fetch(`/api/training/week?breed=${breed}&week=${trainingWeek}&ageWeeks=${ageWeeks}`),
-        fetch(`/api/training/progress?breed=${breed}&date=${todayDate}`),
-        fetch(`/api/training/metrics?breed=${breed}&date=${todayDate}`),
+        fetch(`/api/training/progress?breed=${breed}&date=${todayDate}&dogKey=${encodeURIComponent(dogKey)}`),
+        fetch(`/api/training/metrics?breed=${breed}&date=${todayDate}&dogKey=${encodeURIComponent(dogKey)}`),
       ])
       if (planRes.ok) setWeekPlan(await planRes.json())
       if (progressRes.ok) setProgress(await progressRes.json())
@@ -71,7 +72,7 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName }:
     fetch('/api/training/progress', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ breed, date: todayDate, exerciseId, count: newDone }),
+      body: JSON.stringify({ breed, date: todayDate, dogKey, exerciseId, count: newDone }),
     }).catch(console.error)
   }
 
@@ -106,7 +107,7 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName }:
     fetch('/api/training/metrics', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ breed, date: todayDate, exerciseId, patch }),
+      body: JSON.stringify({ breed, date: todayDate, dogKey, exerciseId, patch }),
     }).catch(console.error)
   }
 

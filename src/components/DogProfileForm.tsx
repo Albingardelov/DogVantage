@@ -90,6 +90,7 @@ export default function DogProfileForm() {
       name: name.trim(),
       breed,
       birthdate,
+      dogKey: undefined, // generated in saveDogProfile
       trainingWeek: 1,
       onboarding,
       assessment: { status: 'not_started' },

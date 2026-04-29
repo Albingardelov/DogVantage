@@ -28,16 +28,20 @@ describe('getDogProfile', () => {
 
   it('returns the stored profile', () => {
     localStorage.setItem('dogProfile', JSON.stringify(mockProfile))
-    expect(getDogProfile()).toEqual(mockProfile)
+    const stored = getDogProfile()
+    expect(stored).toMatchObject(mockProfile)
+    expect(typeof stored?.dogKey).toBe('string')
+    expect(stored?.dogKey?.length).toBeGreaterThan(5)
   })
 })
 
 describe('saveDogProfile', () => {
   it('stores the profile in localStorage', () => {
     saveDogProfile(mockProfile)
+    // dogKey is generated on save if missing, so avoid strict JSON equality here
     expect(localStorage.setItem).toHaveBeenCalledWith(
       'dogProfile',
-      JSON.stringify(mockProfile)
+      expect.any(String)
     )
   })
 })

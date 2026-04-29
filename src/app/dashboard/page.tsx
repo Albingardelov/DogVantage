@@ -79,6 +79,7 @@ function Dashboard() {
             ageWeeks={ageWeeks}
             breed={profile.breed}
             dogName={dogName}
+            dogKey={profile.dogKey ?? 'default'}
           />
         )}
 
