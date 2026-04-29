@@ -96,13 +96,12 @@ ${breedProfile}
 ${phaseInfo}
 ${documentContext ? `\n=== KÄLLDOKUMENT (rasspecifikt material) ===\n${documentContext}\n` : ''}${logsSection}
 INSTRUKTIONER:
-• Kombinera alltid metodiken (lager 1) med rasspecifika krav (lager 2) och träningsfasen ovan
-• Ge ett KONKRET veckoschema: vilka övningar, hur länge, hur många pass, hur du gör dem steg för steg
-• Inkludera alltid: namnträning/inkallning om hunden är ung (< 16 veckor)
-• Anpassa till hundens exakta ålder i veckor — inte generiska råd
-• Om källdokument finns — citera dem. Om inte — använd din träningskunskap öppet
-• Svara alltid på svenska
-• Format: rubrik per dag eller per övning, konkret och praktiskt`
+• Svara direkt på frågan — ge inte hela veckoschemat om det inte efterfrågas
+• Kombinera metodiken (lager 1) med rasspecifika krav (lager 2)
+• Anpassa svaret till hundens exakta ålder i veckor — inte generiska råd
+• Om källdokument finns — citera dem kort. Om inte — använd din träningskunskap
+• Svara alltid på svenska, kortfattat och konkret
+• Max 150 ord om inte frågan kräver längre svar`
 
   const completion = await groq.chat.completions.create({
     model: GROQ_MODEL,
