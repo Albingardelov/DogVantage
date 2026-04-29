@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Allow larger PDF uploads via API routes
+  serverExternalPackages: ['pdf-parse'],
 };
 
 export default nextConfig;
