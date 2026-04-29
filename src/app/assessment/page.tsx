@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import ProfileGuard from '@/components/ProfileGuard'
 import BottomNav from '@/components/BottomNav'
+import ExerciseGuideSheet from '@/components/ExerciseGuideSheet'
 import { getDogProfile, saveDogProfile } from '@/lib/dog/profile'
 import { getAgeInWeeks } from '@/lib/dog/age'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
@@ -31,6 +32,7 @@ function Assessment() {
   const [profile, setProfile] = useState<DogProfile | null>(null)
   const [metrics, setMetrics] = useState<Record<ExerciseId, DailyExerciseMetrics>>({})
   const [saving, setSaving] = useState(false)
+  const [guideExerciseId, setGuideExerciseId] = useState<string | null>(null)
 
   useEffect(() => {
     const p = getDogProfile()
@@ -107,6 +109,7 @@ function Assessment() {
             exerciseId={id}
             metrics={metrics[id] ?? null}
             onPatch={(patch) => patchMetrics(id, patch)}
+            onOpenGuide={() => setGuideExerciseId(id)}
           />
         ))}
       </div>
@@ -131,6 +134,14 @@ function Assessment() {
       </div>
 
       <BottomNav active="dashboard" />
+
+      {guideExerciseId && (
+        <ExerciseGuideSheet
+          exerciseId={guideExerciseId}
+          metrics={metrics[guideExerciseId] ?? null}
+          onClose={() => setGuideExerciseId(null)}
+        />
+      )}
     </main>
   )
 }
@@ -139,10 +150,12 @@ function AssessmentExercise({
   exerciseId,
   metrics,
   onPatch,
+  onOpenGuide,
 }: {
   exerciseId: string
   metrics: DailyExerciseMetrics | null
   onPatch: (patch: Partial<DailyExerciseMetrics>) => void
+  onOpenGuide: () => void
 }) {
   const spec = getExerciseSpec(exerciseId)
   if (!spec) return null
@@ -158,7 +171,15 @@ function AssessmentExercise({
   return (
     <section className={styles.card}>
       <div className={styles.cardHeader}>
-        <div className={styles.cardTitle}>{prettyLabel(exerciseId)}</div>
+        <button
+          type="button"
+          className={styles.cardTitle}
+          onClick={onOpenGuide}
+          style={{ background: 'transparent', border: 'none', padding: 0, textAlign: 'left', cursor: 'pointer' }}
+          aria-label={`Öppna guide: ${prettyLabel(exerciseId)}`}
+        >
+          {prettyLabel(exerciseId)}
+        </button>
         <div className={styles.cardMeta}>{attempts}/5 · {rate != null ? `${rate}%` : '—'}</div>
       </div>
 

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import ExerciseRow from './ExerciseRow'
 import WeekView from './WeekView'
 import SessionLogForm from '@/components/SessionLogForm'
+import ExerciseGuideSheet from '@/components/ExerciseGuideSheet'
 import styles from './TrainingCard.module.css'
 import type { Breed, WeekPlan, Exercise, DailyExerciseMetrics, LatencyBucket } from '@/types'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
@@ -31,6 +32,7 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName }:
   const [error, setError] = useState(false)
   const [showWeekView, setShowWeekView] = useState(false)
   const [showLogForm, setShowLogForm] = useState(false)
+  const [guideExerciseId, setGuideExerciseId] = useState<string | null>(null)
   const [sessionGuard, setSessionGuard] = useState<Record<string, { consecutiveFails: number; consecutiveSlow: number }>>({})
   const todayDate = todayDateString()
   const todayName = SWEDISH_DAYS[new Date().getDay()]
@@ -175,6 +177,7 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName }:
                 exercise={ex}
                 done={progress[ex.id] ?? 0}
                 onRepClick={() => handleRepClick(ex.id, progress[ex.id] ?? 0, ex.reps)}
+                onOpenGuide={() => setGuideExerciseId(ex.id)}
                 spec={spec}
                 metrics={m}
                 recommendation={rec?.message ?? null}
@@ -227,6 +230,14 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName }:
             />
           </div>
         </div>
+      )}
+
+      {guideExerciseId && (
+        <ExerciseGuideSheet
+          exerciseId={guideExerciseId}
+          metrics={metrics[guideExerciseId] ?? null}
+          onClose={() => setGuideExerciseId(null)}
+        />
       )}
     </>
   )

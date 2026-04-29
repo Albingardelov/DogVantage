@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import ProfileGuard from '@/components/ProfileGuard'
 import ChatInterface from '@/components/ChatInterface'
 import Avatar from '@/components/Avatar'
@@ -20,6 +21,8 @@ export default function ChatPage() {
 
 function Chat() {
   const [profile, setProfile] = useState<DogProfile | null>(null)
+  const searchParams = useSearchParams()
+  const initialQuestion = searchParams.get('question') ?? undefined
 
   useEffect(() => {
     setProfile(getDogProfile())
@@ -40,7 +43,12 @@ function Chat() {
       </header>
 
       {profile && (
-        <ChatInterface breed={profile.breed} ageWeeks={ageWeeks} trainingWeek={trainingWeek} />
+        <ChatInterface
+          breed={profile.breed}
+          ageWeeks={ageWeeks}
+          trainingWeek={trainingWeek}
+          initialQuestion={initialQuestion}
+        />
       )}
 
       <BottomNav active="chat" />

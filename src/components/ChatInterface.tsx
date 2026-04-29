@@ -8,15 +8,17 @@ interface Props {
   breed: Breed
   ageWeeks: number
   trainingWeek: number
+  initialQuestion?: string
 }
 
-export default function ChatInterface({ breed, ageWeeks, trainingWeek }: Props) {
+export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQuestion }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: 'model', content: 'Hej! Jag är din träningsassistent. Vad undrar du om träningen?' },
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const didAutoSendRef = useRef(false)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -42,6 +44,16 @@ export default function ChatInterface({ breed, ageWeeks, trainingWeek }: Props) 
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (!initialQuestion || didAutoSendRef.current) return
+    if (loading) return
+    // Only auto-send when the chat is still fresh (1 greeting message)
+    if (messages.length !== 1) return
+    didAutoSendRef.current = true
+    send(initialQuestion)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialQuestion, messages.length, loading])
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {

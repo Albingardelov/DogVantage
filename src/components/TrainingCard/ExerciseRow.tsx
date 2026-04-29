@@ -32,6 +32,7 @@ interface Props {
   exercise: Exercise
   done: number        // reps completed so far
   onRepClick: () => void
+  onOpenGuide?: () => void
   spec: ExerciseSpec | null
   metrics: DailyExerciseMetrics | null
   recommendation: string | null
@@ -50,6 +51,7 @@ export default function ExerciseRow({
   exercise,
   done,
   onRepClick,
+  onOpenGuide,
   spec,
   metrics,
   recommendation,
@@ -76,9 +78,15 @@ export default function ExerciseRow({
       </div>
 
       <div className={styles.info}>
-        <span className={`${styles.label} ${isComplete ? styles.labelDone : ''}`}>
+        <button
+          type="button"
+          className={`${styles.label} ${isComplete ? styles.labelDone : ''}`}
+          onClick={onOpenGuide}
+          style={{ background: 'transparent', border: 'none', padding: 0, textAlign: 'left', cursor: onOpenGuide ? 'pointer' : 'default' }}
+          aria-label={`Öppna guide: ${exercise.label}`}
+        >
           {exercise.label}
-        </span>
+        </button>
         {exercise.desc && (
           <span className={styles.desc}>{exercise.desc}</span>
         )}
