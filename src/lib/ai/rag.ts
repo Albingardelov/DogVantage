@@ -1,5 +1,5 @@
 import { embedText } from './embed'
-import { gemini } from './client'
+import { groq, GROQ_MODEL } from './client'
 import { searchBreedChunks } from '@/lib/supabase/breed-chunks'
 import type { Breed, TrainingResult } from '@/types'
 
@@ -59,8 +59,11 @@ ${context}
 ${logsSection}
 Fråga: ${query}`
 
-  const result = await gemini.generateContent(prompt)
-  const content = result.response.text()
+  const completion = await groq.chat.completions.create({
+    model: GROQ_MODEL,
+    messages: [{ role: 'user', content: prompt }],
+  })
+  const content = completion.choices[0].message.content ?? ''
 
   return { content, source: primarySource, source_url: primarySourceUrl }
 }

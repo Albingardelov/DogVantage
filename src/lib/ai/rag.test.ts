@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type { ChunkMatch, TrainingResult } from '@/types'
 
 vi.mock('@/lib/ai/embed', () => ({
-  embedText: vi.fn().mockResolvedValue(new Array(768).fill(0.1)),
+  embedText: vi.fn().mockResolvedValue(new Array(3072).fill(0.1)),
 }))
 
 vi.mock('@/lib/supabase/breed-chunks', () => ({
@@ -20,14 +20,22 @@ vi.mock('@/lib/supabase/breed-chunks', () => ({
 }))
 
 vi.mock('@/lib/ai/client', () => ({
-  gemini: {
-    generateContent: vi.fn().mockResolvedValue({
-      response: {
-        text: () =>
-          'Vecka 8: Träna grundläggande lydnad i lugn miljö 10 min/dag.',
+  groq: {
+    chat: {
+      completions: {
+        create: vi.fn().mockResolvedValue({
+          choices: [
+            {
+              message: {
+                content: 'Vecka 8: Träna grundläggande lydnad i lugn miljö 10 min/dag.',
+              },
+            },
+          ],
+        }),
       },
-    }),
+    },
   },
+  GROQ_MODEL: 'llama-3.3-70b-versatile',
 }))
 
 describe('queryRAG', () => {
@@ -52,28 +60,30 @@ describe('queryRAG', () => {
   })
 
   it('includes breed in system prompt', async () => {
-    const { gemini } = await import('@/lib/ai/client')
+    const { groq } = await import('@/lib/ai/client')
     const { queryRAG } = await import('./rag')
     await queryRAG('Vad ska jag träna?', 'labrador')
-    const call = vi.mocked(gemini.generateContent).mock.calls[0][0] as string
-    expect(call).toContain('labrador')
+    const call = vi.mocked(groq.chat.completions.create).mock.calls[0][0]
+    const prompt = (call.messages[0] as { content: string }).content
+    expect(prompt).toContain('labrador')
   })
 
   it('includes session logs in prompt when provided', async () => {
-    const { gemini } = await import('@/lib/ai/client')
+    const { groq } = await import('@/lib/ai/client')
     const { queryRAG } = await import('./rag')
     await queryRAG('Vad ska jag träna?', 'labrador', [
       'Vecka 7: tappade fokus efter 15 min',
     ])
-    const call = vi.mocked(gemini.generateContent).mock.calls[0][0] as string
-    expect(call).toContain('tappade fokus efter 15 min')
+    const call = vi.mocked(groq.chat.completions.create).mock.calls[0][0]
+    const prompt = (call.messages[0] as { content: string }).content
+    expect(prompt).toContain('tappade fokus efter 15 min')
   })
 
-  it('returns vet guardrail message for health keywords without calling Gemini', async () => {
-    const { gemini } = await import('@/lib/ai/client')
+  it('returns vet guardrail message for health keywords without calling Groq', async () => {
+    const { groq } = await import('@/lib/ai/client')
     const { queryRAG } = await import('./rag')
     const result = await queryRAG('hunden haltar efter träning', 'labrador')
     expect(result.content).toContain('veterinär')
-    expect(vi.mocked(gemini.generateContent)).not.toHaveBeenCalled()
+    expect(vi.mocked(groq.chat.completions.create)).not.toHaveBeenCalled()
   })
 })
