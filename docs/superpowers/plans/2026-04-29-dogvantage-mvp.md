@@ -13,21 +13,23 @@
 ## File Map
 
 **Types & Lib:**
-- `src/types/index.ts` — shared types (DogProfile, Breed, ChunkMatch, TrainingResult)
+- `src/types/index.ts` — shared types (DogProfile, Breed, ChunkMatch, TrainingResult, SessionLog)
 - `src/lib/dog/age.ts` — age-in-weeks calculation (pure function)
 - `src/lib/dog/profile.ts` — localStorage CRUD for DogProfile
 - `src/lib/supabase/client.ts` — Supabase singleton
 - `src/lib/supabase/breed-chunks.ts` — pgvector similarity search via RPC
 - `src/lib/supabase/training-cache.ts` — read/write training_cache
+- `src/lib/supabase/session-logs.ts` — save + fetch recent session logs
 - `src/lib/ai/client.ts` — Gemini 2.0 Flash singleton
 - `src/lib/ai/embed.ts` — text-embedding-004 wrapper (returns number[])
-- `src/lib/ai/rag.ts` — RAG query: embed → search → generate
+- `src/lib/ai/rag.ts` — RAG query: embed → search → generate (accepts optional session logs)
 - `src/lib/ai/ingest.ts` — PDF → chunks → embeddings → Supabase insert
 
 **API Routes:**
-- `src/app/api/training/route.ts` — GET `/api/training?breed=&week=`
-- `src/app/api/chat/route.ts` — POST `/api/chat` `{ breed, message, history }`
+- `src/app/api/training/route.ts` — GET `/api/training?breed=&week=` (fetches recent logs, passes to RAG)
+- `src/app/api/chat/route.ts` — POST `/api/chat` `{ breed, message }`
 - `src/app/api/ingest/route.ts` — POST `/api/ingest` (multipart, admin only)
+- `src/app/api/logs/route.ts` — POST `/api/logs` `{ breed, week_number, notes }`
 
 **Pages:**
 - `src/app/page.tsx` — landing page
@@ -223,6 +225,14 @@ export interface TrainingResult {
 export interface ChatMessage {
   role: 'user' | 'model'
   content: string
+}
+
+export interface SessionLog {
+  id: string
+  breed: Breed
+  week_number: number
+  notes: string
+  created_at: string
 }
 ```
 
@@ -723,6 +733,16 @@ describe('queryRAG', () => {
     const call = vi.mocked(gemini.generateContent).mock.calls[0][0] as string
     expect(call).toContain('labrador')
   })
+
+  it('includes session logs in prompt when provided', async () => {
+    const { gemini } = await import('@/lib/ai/client')
+    const { queryRAG } = await import('./rag')
+    await queryRAG('Vad ska jag träna?', 'labrador', [
+      'Vecka 7: tappade fokus efter 15 min',
+    ])
+    const call = vi.mocked(gemini.generateContent).mock.calls[0][0] as string
+    expect(call).toContain('tappade fokus efter 15 min')
+  })
 })
 ```
 
@@ -745,13 +765,19 @@ import type { Breed, TrainingResult } from '@/types'
 
 export async function queryRAG(
   query: string,
-  breed: Breed
+  breed: Breed,
+  recentLogs: string[] = []
 ): Promise<TrainingResult> {
   const embedding = await embedText(query)
   const chunks = await searchBreedChunks(embedding, breed)
 
   const context = chunks.map((c) => c.content).join('\n\n')
   const primarySource = chunks[0]?.source ?? 'okänd källa'
+
+  const logsSection =
+    recentLogs.length > 0
+      ? `\nTidigare träningspass för denna hund:\n${recentLogs.map((l) => `- ${l}`).join('\n')}\n\nAnpassa rekommendationen utifrån hundens faktiska prestation ovan.`
+      : ''
 
   const prompt = `Du är en expert på hundträning specialiserad på ${breed}.
 Basera ditt svar ENBART på följande källdokument från rasklubben.
@@ -760,7 +786,7 @@ Svara på svenska.
 
 Källdokument:
 ${context}
-
+${logsSection}
 Fråga: ${query}`
 
   const result = await gemini.generateContent(prompt)
@@ -855,14 +881,18 @@ git commit -m "feat: add PDF ingestion pipeline (chunk + embed + insert)"
 - Create: `src/app/api/training/route.ts`
 - Create: `src/app/api/chat/route.ts`
 - Create: `src/app/api/ingest/route.ts`
+- Create: `src/app/api/logs/route.ts`
 
 - [ ] **Step 1: Create training route**
+
+Hämtar de senaste loggarna och skickar dem med till RAG om de finns.
 
 ```typescript
 // src/app/api/training/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { queryRAG } from '@/lib/ai/rag'
 import { getCachedTraining, setCachedTraining } from '@/lib/supabase/training-cache'
+import { getRecentLogs } from '@/lib/supabase/session-logs'
 import type { Breed } from '@/types'
 
 export async function GET(req: NextRequest) {
@@ -873,15 +903,27 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'breed and week required' }, { status: 400 })
   }
 
-  const cached = await getCachedTraining(breed, week)
-  if (cached) return NextResponse.json(cached)
+  const recentLogs = await getRecentLogs(breed)
+
+  // Only use cache if there are no recent logs (logs make each response adaptive)
+  if (recentLogs.length === 0) {
+    const cached = await getCachedTraining(breed, week)
+    if (cached) return NextResponse.json(cached)
+  }
+
+  const logStrings = recentLogs.map((l) => `Vecka ${l.week_number}: ${l.notes}`)
 
   const result = await queryRAG(
     `Vad är lämplig träning för en ${breed} i vecka ${week} av sin uppväxt?`,
-    breed
+    breed,
+    logStrings
   )
 
-  await setCachedTraining(breed, week, result)
+  // Cache only when no personal logs exist (generic baseline)
+  if (recentLogs.length === 0) {
+    await setCachedTraining(breed, week, result)
+  }
+
   return NextResponse.json(result)
 }
 ```
@@ -910,6 +952,34 @@ export async function POST(req: NextRequest) {
   const result = await queryRAG(message, breed)
   return NextResponse.json(result)
 }
+```
+
+- [ ] **Step 3: Create logs route**
+
+```typescript
+// src/app/api/logs/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+import { saveSessionLog } from '@/lib/supabase/session-logs'
+import type { Breed } from '@/types'
+
+export async function POST(req: NextRequest) {
+  const { breed, week_number, notes } = (await req.json()) as {
+    breed: Breed
+    week_number: number
+    notes: string
+  }
+
+  if (!breed || !notes || week_number === undefined) {
+    return NextResponse.json(
+      { error: 'breed, week_number and notes required' },
+      { status: 400 }
+    )
+  }
+
+  await saveSessionLog(breed, week_number, notes)
+  return NextResponse.json({ ok: true })
+}
+```
 ```
 
 - [ ] **Step 3: Create ingest route**
@@ -1155,22 +1225,71 @@ git commit -m "feat: add onboarding page and dog profile form"
 
 - [ ] **Step 1: Create TrainingCard**
 
+TrainingCard innehåller ett fritext-fält för att logga hur träningen gick. När användaren sparar skickas anteckningen till `/api/logs`.
+
 ```typescript
 // src/components/TrainingCard.tsx
+'use client'
+
+import { useState } from 'react'
+import type { Breed } from '@/types'
+
 interface Props {
   content: string
   source: string
   weekNumber: number
+  breed: Breed
 }
 
-export function TrainingCard({ content, source, weekNumber }: Props) {
+export function TrainingCard({ content, source, weekNumber, breed }: Props) {
+  const [notes, setNotes] = useState('')
+  const [saved, setSaved] = useState(false)
+  const [saving, setSaving] = useState(false)
+
+  async function handleSave() {
+    if (!notes.trim()) return
+    setSaving(true)
+    try {
+      await fetch('/api/logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ breed, week_number: weekNumber, notes }),
+      })
+      setSaved(true)
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
-    <div className="rounded-2xl border p-6 max-w-lg w-full shadow-sm">
-      <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">
-        Vecka {weekNumber}
-      </p>
-      <p className="text-base leading-relaxed whitespace-pre-wrap">{content}</p>
-      <p className="mt-4 text-xs text-gray-400">Källa: {source}</p>
+    <div className="rounded-2xl border p-6 max-w-lg w-full shadow-sm flex flex-col gap-4">
+      <div>
+        <p className="text-xs uppercase tracking-widest text-gray-400 mb-1">
+          Vecka {weekNumber}
+        </p>
+        <p className="text-base leading-relaxed whitespace-pre-wrap">{content}</p>
+        <p className="mt-3 text-xs text-gray-400">Källa: {source}</p>
+      </div>
+
+      <div className="border-t pt-4 flex flex-col gap-2">
+        <label className="text-xs font-medium text-gray-500">
+          Hur gick träningen?
+        </label>
+        <textarea
+          value={notes}
+          onChange={(e) => { setNotes(e.target.value); setSaved(false) }}
+          placeholder="T.ex. tappade fokus efter 15 min, ville leka istället…"
+          rows={3}
+          className="border rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-black"
+        />
+        <button
+          onClick={handleSave}
+          disabled={saving || saved || !notes.trim()}
+          className="self-end text-sm bg-black text-white rounded-xl px-4 py-2 disabled:opacity-40"
+        >
+          {saved ? 'Sparat!' : saving ? 'Sparar…' : 'Spara notering'}
+        </button>
+      </div>
     </div>
   )
 }
@@ -1187,7 +1306,7 @@ import Link from 'next/link'
 import { ProfileGuard } from '@/components/ProfileGuard'
 import { TrainingCard } from '@/components/TrainingCard'
 import { getAgeInWeeks } from '@/lib/dog/age'
-import type { TrainingResult } from '@/types'
+import type { TrainingResult, Breed } from '@/types'
 
 export default function DashboardPage() {
   return (
@@ -1225,6 +1344,7 @@ function Dashboard({ profile }: { profile: { name: string; breed: string; birthd
           content={task.content}
           source={task.source}
           weekNumber={weekNumber}
+          breed={profile.breed as Breed}
         />
       )}
 
@@ -1593,6 +1713,91 @@ Any placeholder image works for POC. Tools like [RealFaviconGenerator](https://r
 ```bash
 git add src/app/manifest.ts src/app/sw.ts next.config.ts public/
 git commit -m "feat: configure PWA with serwist manifest and service worker"
+```
+
+---
+
+### Task 21: Supabase session_logs schema
+
+**Files:**
+- Modify: `docs/supabase-schema.sql`
+
+- [ ] **Step 1: Add table to schema file**
+
+Lägg till i `docs/supabase-schema.sql`:
+
+```sql
+-- Session logs: fritext-noteringar per träningspass
+CREATE TABLE IF NOT EXISTS session_logs (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  breed       text NOT NULL,
+  week_number int  NOT NULL,
+  notes       text NOT NULL,
+  created_at  timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS session_logs_breed_idx ON session_logs (breed, created_at DESC);
+```
+
+- [ ] **Step 2: Kör i Supabase SQL Editor**
+
+Öppna Supabase → SQL Editor, klistra in ovanstående och kör.
+Verifiera att `session_logs` visas i Table Editor.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add docs/supabase-schema.sql
+git commit -m "feat: add session_logs table to Supabase schema"
+```
+
+---
+
+### Task 22: Session-logs Supabase-modul
+
+**Files:**
+- Create: `src/lib/supabase/session-logs.ts`
+
+- [ ] **Step 1: Implement**
+
+```typescript
+// src/lib/supabase/session-logs.ts
+import { supabaseAdmin } from './client'
+import type { Breed, SessionLog } from '@/types'
+
+export async function saveSessionLog(
+  breed: Breed,
+  weekNumber: number,
+  notes: string
+): Promise<void> {
+  const { error } = await supabaseAdmin
+    .from('session_logs')
+    .insert({ breed, week_number: weekNumber, notes })
+
+  if (error) throw new Error(`Log save failed: ${error.message}`)
+}
+
+export async function getRecentLogs(
+  breed: Breed,
+  limit = 5
+): Promise<SessionLog[]> {
+  const { data, error } = await supabaseAdmin
+    .from('session_logs')
+    .select('id, breed, week_number, notes, created_at')
+    .eq('breed', breed)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (error) throw new Error(`Log fetch failed: ${error.message}`)
+  return (data as SessionLog[]) ?? []
+}
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add src/lib/supabase/session-logs.ts
+git commit -m "feat: add session-logs Supabase module (save + fetch recent)"
 ```
 
 ---

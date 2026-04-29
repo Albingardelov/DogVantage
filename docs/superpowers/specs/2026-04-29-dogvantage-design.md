@@ -60,12 +60,26 @@ CREATE TABLE training_cache (
   breed       text NOT NULL,
   week_number int  NOT NULL,
   content     text NOT NULL,
+  source      text NOT NULL DEFAULT '',
   created_at  timestamptz DEFAULT now(),
   UNIQUE(breed, week_number)
 );
 -- Cachen är permanent i MVP. Ras + vecka är deterministisk data som inte förändras.
 -- Invalidering läggs till om/när ras-dokumenten uppdateras.
 ```
+
+### Supabase: `session_logs`
+Användaren skriver fritt hur ett träningspass gick direkt på träningskortet. Loggarna skickas med i nästa RAG-anrop för att ge AI:n kontext om hundens faktiska prestation.
+```sql
+CREATE TABLE session_logs (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  breed       text NOT NULL,
+  week_number int  NOT NULL,
+  notes       text NOT NULL,  -- fritext, t.ex. "tappade fokus efter 15 min"
+  created_at  timestamptz DEFAULT now()
+);
+```
+**Ingen koppling till användare i MVP** — för POC med ett fåtal testare hämtas de 5 senaste loggarna per ras och används som kontext.
 
 ---
 
@@ -88,10 +102,13 @@ CREATE TABLE training_cache (
 ## Träningsuppgift — Logik
 
 1. Beräkna hundens ålder i veckor: `Math.floor(daysSinceBirth / 7)`
-2. Kolla `training_cache` för `(breed, week_number)`
-3. **Cache hit:** returnera cachat svar direkt
-4. **Cache miss:** kör RAG-pipeline → spara i cache → returnera svar
-5. Visa uppgift + källreferens (vilket PDF-dokument svaret härstammar från)
+2. Hämta de 5 senaste `session_logs` för rasen
+3. Kolla `training_cache` för `(breed, week_number)` **— men bara om inga nya loggar finns sedan cachen skapades**
+4. **Cache hit (utan nya loggar):** returnera cachat svar direkt
+5. **Cache miss eller nya loggar:** kör adaptiv RAG-pipeline → spara i cache → returnera svar
+6. Visa uppgift + källreferens
+
+**Adaptiv logik:** Om det finns session_logs skickas de med i prompten så AI:n kan justera svårighetsgrad, duration eller fokusområde baserat på hundens verkliga prestation.
 
 ---
 
@@ -126,6 +143,13 @@ Källdokument:
 [chunk 1]
 [chunk 2]
 ...
+
+[Om session_logs finns:]
+Tidigare träningspasset för denna hund:
+- Vecka X: "[fritext från användaren]"
+- Vecka Y: "[fritext från användaren]"
+
+Anpassa rekommendationen utifrån hundens faktiska prestation ovan.
 ```
 
 ---
