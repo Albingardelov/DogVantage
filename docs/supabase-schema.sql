@@ -67,6 +67,20 @@ CREATE TABLE IF NOT EXISTS community_submissions (
   created_at  timestamptz DEFAULT now()
 );
 
+-- Daily exercise progress: persists rep counts per exercise per day
+CREATE TABLE IF NOT EXISTS daily_progress (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  breed       text NOT NULL,
+  date        date NOT NULL,
+  exercise_id text NOT NULL,
+  reps_done   int  NOT NULL DEFAULT 0,
+  created_at  timestamptz DEFAULT now(),
+  UNIQUE(breed, date, exercise_id)
+);
+
+CREATE INDEX IF NOT EXISTS daily_progress_lookup_idx
+  ON daily_progress (breed, date);
+
 -- RPC function for pgvector similarity search
 CREATE OR REPLACE FUNCTION match_breed_chunks(
   query_embedding vector(3072),
