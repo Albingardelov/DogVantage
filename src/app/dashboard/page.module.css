@@ -2,66 +2,148 @@
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
-  background: var(--color-bg);
-}
-
-.topBar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-4) var(--space-6);
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.appName {
-  font-size: var(--text-lg);
-  font-weight: var(--font-bold);
-  color: var(--color-primary-dark);
-}
-
-.nav {
-  display: flex;
-  gap: var(--space-4);
-}
-
-.navLink {
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-  font-weight: var(--font-medium);
-  transition: color var(--transition-fast);
-}
-
-.navLink:hover {
-  color: var(--color-primary);
-}
-
-.content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  padding: var(--space-6);
   max-width: var(--max-width);
   margin: 0 auto;
   width: 100%;
+  background: var(--color-bg);
+  padding-bottom: var(--bottom-nav-height);
 }
 
-.logBtn {
-  padding: var(--space-4) var(--space-6);
-  border: 2px dashed var(--color-border);
-  border-radius: var(--radius-lg);
-  background: transparent;
-  color: var(--color-text-muted);
-  font-size: var(--text-base);
+.header {
+  position: relative;
+  overflow: hidden;
+  padding: var(--space-5) var(--space-6) 1.75rem;
+  background: linear-gradient(160deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
+  color: #fff;
+}
+
+.decorCircle {
+  position: absolute;
+  top: -1.875rem;
+  right: -1.875rem;
+  width: 8.75rem;
+  height: 8.75rem;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.05);
+  pointer-events: none;
+}
+
+.headerContent {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.greeting {
+  font-size: var(--text-xs);
   font-weight: var(--font-medium);
-  transition: border-color var(--transition-fast), color var(--transition-fast);
-  width: 100%;
+  color: rgb(255 255 255 / 0.65);
 }
 
-.logBtn:hover {
-  border-color: var(--color-primary);
+.dogName {
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  letter-spacing: -0.3px;
+  color: #fff;
+}
+
+.weekBadge {
+  margin-top: var(--space-1);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: rgb(255 255 255 / 0.15);
+  border-radius: var(--radius-full);
+  padding: 0.25rem 0.75rem;
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  color: rgb(255 255 255 / 0.9);
+  align-self: flex-start;
+}
+
+.scrollArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.errorMsg {
+  color: var(--color-error);
+  font-size: var(--text-sm);
+  padding: var(--space-3);
+  background: rgb(214 40 40 / 0.08);
+  border-radius: var(--radius-input);
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.statCard {
+  background: var(--color-surface);
+  border-radius: 0.875rem;
+  padding: var(--space-4);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.statValue {
+  font-size: 1.625rem;
+  font-weight: var(--font-bold);
   color: var(--color-primary);
+  line-height: 1.1;
+}
+
+.statValueAccent {
+  color: var(--color-accent);
+}
+
+.statLabel {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-text);
+}
+
+.statSub {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.logCta {
+  padding: var(--space-4);
+  border-radius: var(--radius-btn);
+  background: var(--color-accent);
+  color: #fff;
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  box-shadow: var(--shadow-accent);
+  transition: filter var(--transition-fast), transform 0.1s;
+}
+
+.logCta:hover {
+  filter: brightness(0.96);
+}
+
+.logCta:active {
+  transform: scale(0.98);
 }

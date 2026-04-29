@@ -1,10 +1,11 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import Link from 'next/link'
 import ProfileGuard from '@/components/ProfileGuard'
 import TrainingCard from '@/components/TrainingCard'
 import SessionLogForm from '@/components/SessionLogForm'
+import Avatar from '@/components/Avatar'
+import BottomNav from '@/components/BottomNav'
 import { getDogProfile } from '@/lib/dog/profile'
 import { getAgeInWeeks } from '@/lib/dog/age'
 import type { DogProfile, TrainingResult } from '@/types'
@@ -18,6 +19,14 @@ export default function DashboardPage() {
   )
 }
 
+function getGreeting(): string {
+  const hour = new Date().getHours()
+  if (hour < 5) return 'God natt!'
+  if (hour < 11) return 'God morgon!'
+  if (hour < 17) return 'God dag!'
+  return 'God kväll!'
+}
+
 function Dashboard() {
   const [profile, setProfile] = useState<DogProfile | null>(null)
   const [training, setTraining] = useState<TrainingResult | null>(null)
@@ -25,7 +34,7 @@ function Dashboard() {
   const [apiError, setApiError] = useState('')
   const [showLogForm, setShowLogForm] = useState(false)
 
-  const weekNumber = profile ? getAgeInWeeks(profile.birthdate) : 0
+  const weekNumber = profile ? Math.max(1, getAgeInWeeks(profile.birthdate)) : 0
 
   const fetchTraining = useCallback(async (p: DogProfile, week: number) => {
     setLoading(true)
@@ -53,8 +62,7 @@ function Dashboard() {
     const p = getDogProfile()
     if (p) {
       setProfile(p)
-      const week = getAgeInWeeks(p.birthdate)
-      fetchTraining(p, week)
+      fetchTraining(p, Math.max(1, getAgeInWeeks(p.birthdate)))
     }
   }, [fetchTraining])
 
@@ -63,35 +71,49 @@ function Dashboard() {
     if (profile) fetchTraining(profile, weekNumber)
   }
 
+  const dogName = profile?.name ?? '…'
+
   return (
     <main className={styles.main}>
-      <header className={styles.topBar}>
-        <span className={styles.appName}>DogVantage</span>
-        <nav className={styles.nav}>
-          <Link href="/chat" className={styles.navLink}>Chatt</Link>
-          <Link href="/onboarding" className={styles.navLink}>Inställningar</Link>
-        </nav>
+      <header className={styles.header}>
+        <div className={styles.decorCircle} aria-hidden="true" />
+        <div className={styles.headerContent}>
+          <div className={styles.headerText}>
+            <span className={styles.greeting}>{getGreeting()}</span>
+            <h1 className={styles.dogName}>{dogName}</h1>
+            <span className={styles.weekBadge}>
+              <span aria-hidden="true">📅</span> Vecka {weekNumber || '–'}
+            </span>
+          </div>
+          <Avatar name={dogName} size={64} />
+        </div>
       </header>
 
-      <div className={styles.content}>
+      <div className={styles.scrollArea}>
         {apiError && (
-          <p style={{ color: 'var(--color-error)', fontSize: 'var(--text-sm)', padding: 'var(--space-4)' }}>
-            Fel: {apiError}
-          </p>
+          <p className={styles.errorMsg} role="alert">Fel: {apiError}</p>
         )}
+
         <TrainingCard
           weekNumber={weekNumber}
-          dogName={profile?.name ?? '…'}
+          dogName={dogName}
           result={training}
           loading={loading}
         />
 
+        <div className={styles.statsGrid}>
+          <StatCard label="Pass loggade" value="3" sub="denna vecka" tone="primary" />
+          <StatCard label="Snittbetyg" value="4.2" sub="fokus & lydnad" tone="accent" />
+        </div>
+
         {!showLogForm ? (
           <button
-            className={styles.logBtn}
+            className={styles.logCta}
             onClick={() => setShowLogForm(true)}
+            type="button"
           >
-            + Logga träningspass
+            <span aria-hidden="true">✍️</span>
+            <span>Logga träningspass</span>
           </button>
         ) : (
           profile && (
@@ -99,10 +121,35 @@ function Dashboard() {
               breed={profile.breed}
               weekNumber={weekNumber}
               onSaved={handleLogSaved}
+              onCancel={() => setShowLogForm(false)}
             />
           )
         )}
       </div>
+
+      <BottomNav active="dashboard" />
     </main>
+  )
+}
+
+function StatCard({
+  label,
+  value,
+  sub,
+  tone,
+}: {
+  label: string
+  value: string
+  sub: string
+  tone: 'primary' | 'accent'
+}) {
+  return (
+    <div className={styles.statCard}>
+      <span className={`${styles.statValue} ${tone === 'accent' ? styles.statValueAccent : ''}`}>
+        {value}
+      </span>
+      <span className={styles.statLabel}>{label}</span>
+      <span className={styles.statSub}>{sub}</span>
+    </div>
   )
 }

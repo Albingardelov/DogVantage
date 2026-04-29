@@ -36,6 +36,18 @@ export async function getRecentLogs(
   return (data ?? []) as SessionLog[]
 }
 
+export async function getAllLogs(breed: Breed, limit = 30): Promise<SessionLog[]> {
+  const { data, error } = await supabaseAdmin
+    .from('session_logs')
+    .select('*')
+    .eq('breed', breed)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (error) throw new Error(`Failed to fetch session logs: ${error.message}`)
+  return (data ?? []) as SessionLog[]
+}
+
 export function formatLogsForPrompt(logs: SessionLog[]): string[] {
   return logs.map((log) => {
     const ratingMap: Record<QuickRating, string> = {

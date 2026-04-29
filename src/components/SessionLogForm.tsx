@@ -8,20 +8,22 @@ interface Props {
   breed: Breed
   weekNumber: number
   onSaved: () => void
+  onCancel?: () => void
 }
 
 const RATINGS: { value: QuickRating; label: string; emoji: string }[] = [
   { value: 'good', label: 'Bra', emoji: '😄' },
   { value: 'mixed', label: 'Blandat', emoji: '😐' },
-  { value: 'bad', label: 'Dåligt', emoji: '😞' },
+  { value: 'bad', label: 'Svårt', emoji: '😞' },
 ]
 
-export default function SessionLogForm({ breed, weekNumber, onSaved }: Props) {
+export default function SessionLogForm({ breed, weekNumber, onSaved, onCancel }: Props) {
   const [rating, setRating] = useState<QuickRating | null>(null)
   const [focus, setFocus] = useState(3)
   const [obedience, setObedience] = useState(3)
   const [notes, setNotes] = useState('')
   const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -31,37 +33,59 @@ export default function SessionLogForm({ breed, weekNumber, onSaved }: Props) {
       await fetch('/api/logs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ breed, week_number: weekNumber, quick_rating: rating, focus, obedience, notes: notes.trim() || undefined }),
+        body: JSON.stringify({
+          breed,
+          week_number: weekNumber,
+          quick_rating: rating,
+          focus,
+          obedience,
+          notes: notes.trim() || undefined,
+        }),
       })
-      onSaved()
+      setSaved(true)
+      setTimeout(() => onSaved(), 1000)
     } finally {
       setSaving(false)
     }
   }
 
+  if (saved) {
+    return (
+      <div className={styles.savedCard} role="status">
+        <div className={styles.savedEmoji} aria-hidden="true">✅</div>
+        <p className={styles.savedText}>Pass sparat!</p>
+      </div>
+    )
+  }
+
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
-      <h3 className={styles.heading}>Logga träningspasset</h3>
+      <h3 className={styles.heading}>Logga träningspass</h3>
 
-      <div className={styles.ratingRow}>
-        {RATINGS.map((r) => (
-          <button
-            key={r.value}
-            type="button"
-            className={`${styles.ratingBtn} ${rating === r.value ? styles.selected : ''}`}
-            onClick={() => setRating(r.value)}
-            aria-pressed={rating === r.value}
-          >
-            <span className={styles.emoji}>{r.emoji}</span>
-            <span>{r.label}</span>
-          </button>
-        ))}
+      <div className={styles.section}>
+        <span className={styles.sectionLabel}>Hur gick det?</span>
+        <div className={styles.ratingRow} role="radiogroup" aria-label="Hur gick passet?">
+          {RATINGS.map((r) => {
+            const selected = rating === r.value
+            return (
+              <button
+                key={r.value}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                className={`${styles.ratingBtn} ${selected ? styles.ratingBtnSelected : ''}`}
+                onClick={() => setRating(r.value)}
+              >
+                <span className={styles.emoji} aria-hidden="true">{r.emoji}</span>
+                <span className={styles.ratingLabel}>{r.label}</span>
+              </button>
+            )
+          })}
+        </div>
       </div>
 
-      <div className={styles.sliders}>
-        <SliderField label="Fokus" value={focus} onChange={setFocus} />
-        <SliderField label="Lydnad" value={obedience} onChange={setObedience} />
-      </div>
+      <SliderField label="Fokus" value={focus} onChange={setFocus} />
+      <SliderField label="Lydnad" value={obedience} onChange={setObedience} />
 
       <textarea
         className={styles.notes}
@@ -71,13 +95,25 @@ export default function SessionLogForm({ breed, weekNumber, onSaved }: Props) {
         rows={2}
       />
 
-      <button
-        type="submit"
-        className={styles.submit}
-        disabled={!rating || saving}
-      >
-        {saving ? 'Sparar…' : 'Spara pass'}
-      </button>
+      <div className={styles.actions}>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className={styles.cancelBtn}
+            disabled={saving}
+          >
+            Avbryt
+          </button>
+        )}
+        <button
+          type="submit"
+          className={styles.submitBtn}
+          disabled={!rating || saving}
+        >
+          {saving ? 'Sparar…' : 'Spara pass'}
+        </button>
+      </div>
     </form>
   )
 }
@@ -93,9 +129,10 @@ function SliderField({
 }) {
   return (
     <div className={styles.sliderField}>
-      <label className={styles.sliderLabel}>
-        {label} <span className={styles.sliderValue}>{value}/5</span>
-      </label>
+      <div className={styles.sliderHeader}>
+        <span className={styles.sliderLabel}>{label}</span>
+        <span className={styles.sliderValue}>{value}/5</span>
+      </div>
       <input
         type="range"
         min={1}
@@ -103,6 +140,7 @@ function SliderField({
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
         className={styles.slider}
+        aria-label={label}
       />
     </div>
   )

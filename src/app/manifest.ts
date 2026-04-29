@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'Personlig hundträning baserad på din ras och ålder',
     start_url: '/dashboard',
     display: 'standalone',
-    background_color: '#f8f9fa',
+    background_color: '#faf8f4',
     theme_color: '#2d6a4f',
     orientation: 'portrait',
     icons: [

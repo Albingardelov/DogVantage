@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
 import ProfileGuard from '@/components/ProfileGuard'
 import ChatInterface from '@/components/ChatInterface'
+import Avatar from '@/components/Avatar'
+import BottomNav from '@/components/BottomNav'
 import { getDogProfile } from '@/lib/dog/profile'
 import { getAgeInWeeks } from '@/lib/dog/age'
 import type { DogProfile } from '@/types'
@@ -24,20 +25,24 @@ function Chat() {
     setProfile(getDogProfile())
   }, [])
 
-  const weekNumber = profile ? getAgeInWeeks(profile.birthdate) : 0
+  const weekNumber = profile ? Math.max(1, getAgeInWeeks(profile.birthdate)) : 0
+  const dogName = profile?.name ?? 'din hund'
 
   return (
     <main className={styles.main}>
-      <header className={styles.topBar}>
-        <Link href="/dashboard" className={styles.back}>← Tillbaka</Link>
-        <span className={styles.title}>
-          {profile ? `${profile.name} · vecka ${weekNumber}` : 'Chatt'}
-        </span>
+      <header className={styles.header}>
+        <Avatar name={dogName} size={36} bordered={false} />
+        <div className={styles.headerText}>
+          <span className={styles.title}>Träningsassistenten</span>
+          <span className={styles.status}>● Online</span>
+        </div>
       </header>
 
       {profile && (
         <ChatInterface breed={profile.breed} weekNumber={weekNumber} />
       )}
+
+      <BottomNav active="chat" />
     </main>
   )
 }

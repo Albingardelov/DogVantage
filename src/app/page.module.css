@@ -1,101 +1,162 @@
 .main {
   display: flex;
-  flex: 1;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-8);
-  padding: var(--space-12) var(--space-6);
+  flex: 1;
+  min-height: 100dvh;
   max-width: var(--max-width);
   margin: 0 auto;
   width: 100%;
-  min-height: 100dvh;
+  background: var(--color-bg);
 }
 
 .hero {
+  position: relative;
+  overflow: hidden;
+  padding: 3.25rem 1.75rem 2.5rem;
+  background: linear-gradient(160deg, var(--color-primary-dark) 0%, var(--color-primary) 60%, var(--color-primary-light) 100%);
+  color: #fff;
   text-align: center;
+}
+
+.decorCircleLg,
+.decorCircleSm {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.decorCircleLg {
+  top: -2.5rem;
+  right: -2.5rem;
+  width: 11.25rem;
+  height: 11.25rem;
+  background: rgb(255 255 255 / 0.06);
+}
+
+.decorCircleSm {
+  bottom: -1.25rem;
+  left: -1.25rem;
+  width: 7.5rem;
+  height: 7.5rem;
+  background: rgb(255 255 255 / 0.04);
+}
+
+.heroPhoto {
+  width: 7.5rem;
+  height: 7.5rem;
+  margin: 0 auto var(--space-5);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.12);
+  border: 3px solid rgb(255 255 255 / 0.2);
   display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  position: relative;
+  z-index: 1;
 }
 
 .title {
   font-size: var(--text-3xl);
   font-weight: var(--font-bold);
-  color: var(--color-primary-dark);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.5px;
+  position: relative;
+  z-index: 1;
 }
 
 .tagline {
-  font-size: var(--text-lg);
-  color: var(--color-text-muted);
-  line-height: 1.6;
+  margin-top: var(--space-2);
+  font-size: var(--text-base);
+  color: rgb(255 255 255 / 0.8);
+  line-height: 1.5;
   text-wrap: balance;
+  position: relative;
+  z-index: 1;
 }
 
 .features {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  width: 100%;
+  gap: var(--space-5);
+  padding: 1.75rem 1.5rem;
+  flex: 1;
 }
 
-.features li {
+.featureRow {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+
+.featureIcon {
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  border-radius: var(--radius-input);
+  background: var(--color-green-50);
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.featureText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.featureTitle {
   font-size: var(--text-base);
+  font-weight: var(--font-semibold);
   color: var(--color-text);
 }
 
-.features li::before {
-  content: '✓';
-  color: var(--color-primary);
-  font-weight: var(--font-bold);
-  flex-shrink: 0;
+.featureDesc {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: 1.4;
 }
 
 .actions {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  width: 100%;
+  gap: var(--space-2);
+  padding: 0 1.5rem 2.5rem;
 }
 
 .btnPrimary {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-4) var(--space-6);
+  padding: var(--space-4);
+  border-radius: var(--radius-btn);
   background: var(--color-primary);
   color: #fff;
-  border-radius: var(--radius-md);
-  font-size: var(--text-base);
+  font-size: var(--text-md);
   font-weight: var(--font-semibold);
-  transition: background var(--transition-fast);
   text-align: center;
+  box-shadow: var(--shadow-primary);
+  transition: background var(--transition-fast), transform 0.1s;
 }
 
 .btnPrimary:hover {
   background: var(--color-primary-dark);
 }
 
-.btnSecondary {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-4) var(--space-6);
-  background: var(--color-surface);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-size: var(--text-base);
-  font-weight: var(--font-medium);
-  transition: background var(--transition-fast);
-  text-align: center;
+.btnPrimary:active {
+  transform: scale(0.98);
 }
 
-.btnSecondary:hover {
-  background: var(--color-bg);
+.btnGhost {
+  padding: 0.875rem;
+  border-radius: var(--radius-btn);
+  background: none;
+  color: var(--color-text-muted);
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  text-align: center;
+  transition: color var(--transition-fast);
+}
+
+.btnGhost:hover {
+  color: var(--color-text);
 }

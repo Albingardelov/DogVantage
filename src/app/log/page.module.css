@@ -1,0 +1,183 @@
+.main {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  width: 100%;
+  background: var(--color-bg);
+  padding-bottom: var(--bottom-nav-height);
+}
+
+.header {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.headerTop {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--color-text);
+}
+
+.subtitle {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.chart {
+  display: flex;
+  gap: 0.25rem;
+  height: 2.5rem;
+  align-items: flex-end;
+}
+
+.bar {
+  flex: 1;
+  border-radius: 0.25rem;
+  background: var(--color-green-100);
+  transition: height var(--transition-base);
+  min-height: 0.25rem;
+}
+
+.barLast {
+  background: var(--color-primary);
+}
+
+.chartLabel {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.error {
+  color: var(--color-error);
+  font-size: var(--text-sm);
+  padding: var(--space-3);
+  background: rgb(214 40 40 / 0.08);
+  border-radius: var(--radius-input);
+}
+
+.empty {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  text-align: center;
+  padding: var(--space-8) var(--space-4);
+}
+
+.card {
+  background: var(--color-surface);
+  border-radius: 0.875rem;
+  padding: var(--space-4);
+  box-shadow: var(--shadow-sm);
+  border-left: 4px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.card_good { border-left-color: var(--color-primary); }
+.card_mixed { border-left-color: var(--color-accent); }
+.card_bad { border-left-color: var(--color-error); }
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.cardEmoji {
+  font-size: 1.375rem;
+  line-height: 1;
+}
+
+.cardLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.0625rem;
+  flex: 1;
+}
+
+.ratingLabel {
+  font-size: 0.875rem;
+  font-weight: var(--font-bold);
+  color: var(--color-text);
+}
+
+.dateLabel {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.weekLabel {
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: var(--color-primary);
+  background: var(--color-green-50);
+  border-radius: var(--radius-full);
+  padding: 0.25rem 0.625rem;
+}
+
+.dotsRow {
+  display: flex;
+  gap: var(--space-5);
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.metricLabel {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.dots {
+  display: flex;
+  gap: 0.1875rem;
+}
+
+.dot {
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: 50%;
+  background: var(--color-border);
+}
+
+.dotFilled {
+  background: var(--color-primary);
+}
+
+.notes {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-3);
+  line-height: 1.5;
+}

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { saveSessionLog, getRecentLogs } from '@/lib/supabase/session-logs'
+import { saveSessionLog, getRecentLogs, getAllLogs } from '@/lib/supabase/session-logs'
 import type { Breed, QuickRating } from '@/types'
 
 export async function POST(req: NextRequest) {
@@ -26,12 +26,21 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const breed = searchParams.get('breed') as Breed | null
-  const weekNumber = searchParams.get('week') ? Number(searchParams.get('week')) : undefined
+  const weekParam = searchParams.get('week')
 
-  if (!breed || typeof weekNumber !== 'number') {
-    return NextResponse.json({ error: 'breed and week required' }, { status: 400 })
+  if (!breed) {
+    return NextResponse.json({ error: 'breed required' }, { status: 400 })
   }
 
-  const logs = await getRecentLogs(breed, weekNumber)
+  if (weekParam !== null) {
+    const weekNumber = Number(weekParam)
+    if (!Number.isFinite(weekNumber)) {
+      return NextResponse.json({ error: 'invalid week' }, { status: 400 })
+    }
+    const logs = await getRecentLogs(breed, weekNumber)
+    return NextResponse.json(logs)
+  }
+
+  const logs = await getAllLogs(breed)
   return NextResponse.json(logs)
 }
