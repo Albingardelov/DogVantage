@@ -53,3 +53,20 @@ export interface ChunkSource {
   page_ref: string
   source_url: string
 }
+
+export interface Exercise {
+  id: string      // slug, e.g. "inkallning"
+  label: string   // display name, e.g. "Inkallning"
+  desc: string    // short instruction, max 8 words
+  reps: number    // 1–5
+}
+
+export interface DayPlan {
+  day: string          // "Måndag" | "Tisdag" | "Onsdag" | "Torsdag" | "Fredag" | "Lördag" | "Söndag"
+  rest?: boolean
+  exercises?: Exercise[]
+}
+
+export interface WeekPlan {
+  days: DayPlan[]      // always exactly 7 items
+}
