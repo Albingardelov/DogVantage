@@ -1,0 +1,54 @@
+import { supabaseAdmin } from './client'
+import type { Breed, SessionLog, QuickRating } from '@/types'
+
+export async function saveSessionLog(log: {
+  breed: Breed
+  week_number: number
+  quick_rating: QuickRating
+  focus: number
+  obedience: number
+  notes?: string
+}): Promise<SessionLog> {
+  const { data, error } = await supabaseAdmin
+    .from('session_logs')
+    .insert(log)
+    .select()
+    .single()
+
+  if (error) throw new Error(`Failed to save session log: ${error.message}`)
+  return data as SessionLog
+}
+
+export async function getRecentLogs(
+  breed: Breed,
+  weekNumber: number,
+  limit = 5
+): Promise<SessionLog[]> {
+  const { data, error } = await supabaseAdmin
+    .from('session_logs')
+    .select('*')
+    .eq('breed', breed)
+    .eq('week_number', weekNumber)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (error) throw new Error(`Failed to fetch session logs: ${error.message}`)
+  return (data ?? []) as SessionLog[]
+}
+
+export function formatLogsForPrompt(logs: SessionLog[]): string[] {
+  return logs.map((log) => {
+    const ratingMap: Record<QuickRating, string> = {
+      good: 'Bra',
+      mixed: 'Blandat',
+      bad: 'Dåligt',
+    }
+    const parts = [
+      `Vecka ${log.week_number}: ${ratingMap[log.quick_rating]}`,
+      `fokus ${log.focus}/5`,
+      `lydnad ${log.obedience}/5`,
+    ]
+    if (log.notes) parts.push(`"${log.notes}"`)
+    return parts.join(', ')
+  })
+}
