@@ -134,3 +134,10 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+.errorMsg {
+  padding: var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--color-error);
+  text-align: center;
+}

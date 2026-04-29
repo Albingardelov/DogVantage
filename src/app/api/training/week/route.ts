@@ -8,7 +8,8 @@ export async function GET(req: NextRequest) {
   const weekStr = req.nextUrl.searchParams.get('week')
   const weekNumber = weekStr ? Number(weekStr) : NaN
 
-  if (!breed || isNaN(weekNumber)) {
+  const VALID_BREEDS = ['labrador', 'italian_greyhound', 'braque_francais']
+  if (!breed || isNaN(weekNumber) || !VALID_BREEDS.includes(breed)) {
     return NextResponse.json({ error: 'breed and week required' }, { status: 400 })
   }
 

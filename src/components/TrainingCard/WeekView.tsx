@@ -1,3 +1,5 @@
+'use client'
+
 import styles from './WeekView.module.css'
 import type { WeekPlan } from '@/types'
 

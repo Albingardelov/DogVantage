@@ -7,7 +7,8 @@ export async function GET(req: NextRequest) {
   const breed = req.nextUrl.searchParams.get('breed') as Breed | null
   const date = req.nextUrl.searchParams.get('date')
 
-  if (!breed || !date) {
+  const VALID_BREEDS = ['labrador', 'italian_greyhound', 'braque_francais']
+  if (!breed || !date || !VALID_BREEDS.includes(breed)) {
     return NextResponse.json({ error: 'breed and date required' }, { status: 400 })
   }
 
@@ -23,7 +24,8 @@ export async function PATCH(req: NextRequest) {
     count: number
   }
 
-  if (!breed || !date || !exerciseId || count === undefined) {
+  const VALID_BREEDS = ['labrador', 'italian_greyhound', 'braque_francais']
+  if (!breed || !date || !exerciseId || count === undefined || !VALID_BREEDS.includes(breed)) {
     return NextResponse.json({ error: 'breed, date, exerciseId, count required' }, { status: 400 })
   }
 

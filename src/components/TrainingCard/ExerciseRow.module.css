@@ -8,7 +8,7 @@
 }
 
 .rowDone {
-  background: var(--color-green-50);
+  background: var(--color-green-100);
 }
 
 .iconBox {
@@ -97,7 +97,7 @@
   height: 32px;
   border-radius: var(--radius-full);
   background: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-surface);
   display: flex;
   align-items: center;
   justify-content: center;

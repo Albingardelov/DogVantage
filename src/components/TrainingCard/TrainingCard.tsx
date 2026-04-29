@@ -24,12 +24,14 @@ export default function TrainingCard({ weekNumber, breed, dogName }: Props) {
   const [weekPlan, setWeekPlan] = useState<WeekPlan | null>(null)
   const [progress, setProgress] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
   const [showWeekView, setShowWeekView] = useState(false)
   const todayDate = todayDateString()
   const todayName = SWEDISH_DAYS[new Date().getDay()]
 
   const fetchData = useCallback(async () => {
     setLoading(true)
+    setError(false)
     try {
       const [planRes, progressRes] = await Promise.all([
         fetch(`/api/training/week?breed=${breed}&week=${weekNumber}`),
@@ -37,6 +39,8 @@ export default function TrainingCard({ weekNumber, breed, dogName }: Props) {
       ])
       if (planRes.ok) setWeekPlan(await planRes.json())
       if (progressRes.ok) setProgress(await progressRes.json())
+    } catch {
+      setError(true)
     } finally {
       setLoading(false)
     }
@@ -87,6 +91,10 @@ export default function TrainingCard({ weekNumber, breed, dogName }: Props) {
             <span className={styles.spinner} />
             <span>Hämtar träningsplan…</span>
           </div>
+        )}
+
+        {!loading && error && (
+          <p className={styles.errorMsg}>Kunde inte hämta träningsplan. Försök igen.</p>
         )}
 
         {!loading && todayPlan?.rest && (
