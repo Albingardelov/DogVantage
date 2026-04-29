@@ -1,14 +1,14 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import ProfileGuard from '@/components/ProfileGuard'
-import TrainingCard from '@/components/TrainingCard'
+import TrainingCard from '@/components/TrainingCard/TrainingCard'
 import SessionLogForm from '@/components/SessionLogForm'
 import Avatar from '@/components/Avatar'
 import BottomNav from '@/components/BottomNav'
 import { getDogProfile } from '@/lib/dog/profile'
 import { getAgeInWeeks } from '@/lib/dog/age'
-import type { DogProfile, TrainingResult } from '@/types'
+import type { DogProfile } from '@/types'
 import styles from './page.module.css'
 
 export default function DashboardPage() {
@@ -29,46 +29,17 @@ function getGreeting(): string {
 
 function Dashboard() {
   const [profile, setProfile] = useState<DogProfile | null>(null)
-  const [training, setTraining] = useState<TrainingResult | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [apiError, setApiError] = useState('')
   const [showLogForm, setShowLogForm] = useState(false)
 
   const weekNumber = profile ? Math.max(1, getAgeInWeeks(profile.birthdate)) : 0
 
-  const fetchTraining = useCallback(async (p: DogProfile, week: number) => {
-    setLoading(true)
-    setApiError('')
-    try {
-      const res = await fetch('/api/training', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ breed: p.breed, weekNumber: week }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setApiError(data.error ?? `Fel ${res.status}`)
-      } else {
-        setTraining(data)
-      }
-    } catch (err) {
-      setApiError(err instanceof Error ? err.message : 'Nätverksfel')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
   useEffect(() => {
     const p = getDogProfile()
-    if (p) {
-      setProfile(p)
-      fetchTraining(p, Math.max(1, getAgeInWeeks(p.birthdate)))
-    }
-  }, [fetchTraining])
+    if (p) setProfile(p)
+  }, [])
 
   function handleLogSaved() {
     setShowLogForm(false)
-    if (profile) fetchTraining(profile, weekNumber)
   }
 
   const dogName = profile?.name ?? '…'
@@ -90,16 +61,13 @@ function Dashboard() {
       </header>
 
       <div className={styles.scrollArea}>
-        {apiError && (
-          <p className={styles.errorMsg} role="alert">Fel: {apiError}</p>
+        {profile && (
+          <TrainingCard
+            weekNumber={weekNumber}
+            breed={profile.breed}
+            dogName={dogName}
+          />
         )}
-
-        <TrainingCard
-          weekNumber={weekNumber}
-          dogName={dogName}
-          result={training}
-          loading={loading}
-        />
 
         <div className={styles.statsGrid}>
           <StatCard label="Pass loggade" value="3" sub="denna vecka" tone="primary" />
