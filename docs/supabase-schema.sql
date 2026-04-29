@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS breed_chunks (
   doc_version text NOT NULL DEFAULT '',
   page_ref    text NOT NULL DEFAULT '',
   content     text NOT NULL,
-  embedding   vector(768) NOT NULL
+  embedding   vector(3072) NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS breed_chunks_breed_idx ON breed_chunks (breed);
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS community_submissions (
 
 -- RPC function for pgvector similarity search
 CREATE OR REPLACE FUNCTION match_breed_chunks(
-  query_embedding vector(768),
+  query_embedding vector(3072),
   match_breed     text,
   match_count     int DEFAULT 5
 )
