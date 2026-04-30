@@ -117,14 +117,16 @@ export default function ExerciseRow({
                 <button
                   type="button"
                   className={styles.pillBtn}
-                  onClick={() => onMetricsPatch({ success_count: successCount + 1 })}
+                  disabled={isComplete}
+                  onClick={() => { onMetricsPatch({ success_count: successCount + 1 }); onRepClick() }}
                 >
                   Lyckad
                 </button>
                 <button
                   type="button"
                   className={styles.pillBtn}
-                  onClick={() => onMetricsPatch({ fail_count: failCount + 1 })}
+                  disabled={isComplete}
+                  onClick={() => { onMetricsPatch({ fail_count: failCount + 1 }); onRepClick() }}
                 >
                   Miss
                 </button>

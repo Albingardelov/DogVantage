@@ -15,11 +15,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'breed and week required' }, { status: 400 })
   }
 
-  const cached = await getCachedWeekPlan(breed, trainingWeek)
+  const cached = await getCachedWeekPlan(breed, trainingWeek, ageWeeks)
   if (cached) return NextResponse.json(cached)
 
   const plan = await generateWeekPlan(breed, trainingWeek, ageWeeks)
-  await setCachedWeekPlan(breed, trainingWeek, plan).catch(() => {})
+  await setCachedWeekPlan(breed, trainingWeek, plan, ageWeeks).catch(() => {})
 
   return NextResponse.json(plan)
 }

@@ -33,16 +33,25 @@ export async function setCachedTraining(
   if (error) throw new Error(`Cache write failed: ${error.message}`)
 }
 
+function ageBucket(ageWeeks?: number): string {
+  if (!ageWeeks || ageWeeks < 16) return 'puppy'
+  if (ageWeeks < 52) return 'junior'
+  return 'adult'
+}
+
 // Week plan cache uses breed key prefixed with "weekplan_" to avoid
 // collisions with the existing text-based training cache entries.
+// The age bucket (puppy/junior/adult) is included so age-appropriate
+// plans are never served to dogs in the wrong life stage.
 export async function getCachedWeekPlan(
   breed: Breed,
-  weekNumber: number
+  weekNumber: number,
+  ageWeeks?: number
 ): Promise<WeekPlan | null> {
   const { data, error } = await getSupabaseAdmin()
     .from('training_cache')
     .select('content')
-    .eq('breed', `weekplan_${breed}`)
+    .eq('breed', `weekplan_${breed}_${ageBucket(ageWeeks)}`)
     .eq('week_number', weekNumber)
     .single()
 
@@ -57,12 +66,13 @@ export async function getCachedWeekPlan(
 export async function setCachedWeekPlan(
   breed: Breed,
   weekNumber: number,
-  plan: WeekPlan
+  plan: WeekPlan,
+  ageWeeks?: number
 ): Promise<void> {
   const { error } = await getSupabaseAdmin()
     .from('training_cache')
     .upsert({
-      breed: `weekplan_${breed}`,
+      breed: `weekplan_${breed}_${ageBucket(ageWeeks)}`,
       week_number: weekNumber,
       content: JSON.stringify(plan),
       source: 'week_plan',

@@ -8,6 +8,7 @@ import ExerciseGuideSheet from '@/components/ExerciseGuideSheet'
 import { getDogProfile, saveDogProfile } from '@/lib/dog/profile'
 import { getAgeInWeeks } from '@/lib/dog/age'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
+import { computeStartingWeek } from '@/lib/training/assessment-week'
 import type { DailyExerciseMetrics, DogProfile, LatencyBucket } from '@/types'
 import styles from './page.module.css'
 
@@ -76,9 +77,10 @@ function Assessment() {
     if (!profile || !complete) return
     setSaving(true)
     try {
+      const startingWeek = computeStartingWeek(ageWeeks, metrics)
       const updated: DogProfile = {
         ...profile,
-        trainingWeek: Math.max(1, trainingWeek),
+        trainingWeek: startingWeek,
         assessment: { status: 'completed', completed_at: new Date().toISOString() },
       }
       saveDogProfile(updated)
