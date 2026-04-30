@@ -29,12 +29,17 @@ function buildOnboardingContext(params: URLSearchParams): string | undefined {
   const environment = params.get('environment') as TrainingEnvironment | null
   const rewardPreference = params.get('rewardPreference') as RewardPreference | null
   const takesRewardsOutdoors = params.get('takesRewardsOutdoors')
+  const behaviorContext = params.get('behaviorContext')
 
   const lines: string[] = []
   if (environment && ENV_LABELS[environment]) lines.push(`Miljö: ${ENV_LABELS[environment]}`)
   if (rewardPreference && REWARD_LABELS[rewardPreference]) lines.push(`Belöning som funkar bäst: ${REWARD_LABELS[rewardPreference]}`)
   if (takesRewardsOutdoors != null) {
     lines.push(`Tar belöning utomhus: ${takesRewardsOutdoors === 'true' ? 'Ja' : 'Nej — träna inne eller med extra hög-värde belöning ute'}`)
+  }
+  if (behaviorContext) {
+    lines.push('')
+    lines.push(behaviorContext)
   }
   return lines.length > 0 ? lines.join('\n') : undefined
 }

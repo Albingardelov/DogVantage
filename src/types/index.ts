@@ -55,9 +55,58 @@ export interface OnboardingPrefs {
   takesRewardsOutdoors: boolean
 }
 
+// ─── Behavior profile (collected in assessment step 1) ───────────────────────
+
+export type TriggerType =
+  | 'cars'
+  | 'cyclists'
+  | 'runners'
+  | 'children'
+  | 'skateboards'
+  | 'other_dogs'
+  | 'animals'
+  | 'loud_sounds'
+  | 'strangers'
+
+/** How the dog behaves on leash in general */
+export type LeashBehavior =
+  | 'calm'                  // Slakt koppel, lugnt
+  | 'pulls_some'            // Drar lite, men hanterbart
+  | 'pulls_hard_reactive'   // Drar konstant eller reaktiv/skäller
+
+/** How the dog reacts to new environments and people */
+export type NewEnvironmentReaction =
+  | 'curious'   // Nyfiken och trygg
+  | 'cautious'  // Lite försiktig, men lugnar ner sig
+  | 'avoidant'  // Undviker eller verkar rädd
+
+/** Handler's experience level */
+export type TrainingBackground =
+  | 'beginner'        // Nybörjare — aldrig tränat strukturerat
+  | 'some_training'   // Lite tränad / gått valp- eller lydnadskurs
+  | 'experienced'     // Erfaren — tävlat eller tränat länge
+
+/** Other animals living in the same household */
+export type HouseholdPet =
+  | 'cats_indoor'   // Innekatter (kontrollerad miljö)
+  | 'cats_outdoor'  // Katter som är ute / kan smita ut
+  | 'dogs'          // Andra hundar
+  | 'small_animals' // Kanin, fågel, gnagare m.m.
+  | 'livestock'     // Gårdsdjur: häst, får, höns etc.
+
+export interface BehaviorProfile {
+  triggers: TriggerType[]
+  leashBehavior: LeashBehavior
+  newEnvironmentReaction: NewEnvironmentReaction
+  trainingBackground: TrainingBackground
+  householdPets: HouseholdPet[]
+  problemNotes?: string
+}
+
 export interface AssessmentState {
   status: 'not_started' | 'completed'
   completed_at?: string // ISO timestamp
+  behaviorProfile?: BehaviorProfile
 }
 
 export interface ChunkMatch {

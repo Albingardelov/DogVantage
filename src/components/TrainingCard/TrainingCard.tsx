@@ -26,9 +26,10 @@ interface Props {
   environment?: TrainingEnvironment
   rewardPreference?: RewardPreference
   takesRewardsOutdoors?: boolean
+  behaviorContext?: string
 }
 
-export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, dogKey, goals, environment, rewardPreference, takesRewardsOutdoors }: Props) {
+export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, dogKey, goals, environment, rewardPreference, takesRewardsOutdoors, behaviorContext }: Props) {
   const router = useRouter()
   const [weekPlan, setWeekPlan] = useState<WeekPlan | null>(null)
   const [progress, setProgress] = useState<Record<string, number>>({})
@@ -47,7 +48,7 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
     setError(false)
     try {
       const [planRes, progressRes, metricsRes] = await Promise.all([
-        fetch(`/api/training/week?breed=${breed}&week=${trainingWeek}&ageWeeks=${ageWeeks}${goals && goals.length > 0 ? `&goals=${goals.join(',')}` : ''}${dogKey ? `&dogKey=${dogKey}` : ''}${environment ? `&environment=${environment}` : ''}${rewardPreference ? `&rewardPreference=${rewardPreference}` : ''}${takesRewardsOutdoors != null ? `&takesRewardsOutdoors=${takesRewardsOutdoors}` : ''}`),
+        fetch(`/api/training/week?breed=${breed}&week=${trainingWeek}&ageWeeks=${ageWeeks}${goals && goals.length > 0 ? `&goals=${goals.join(',')}` : ''}${dogKey ? `&dogKey=${dogKey}` : ''}${environment ? `&environment=${environment}` : ''}${rewardPreference ? `&rewardPreference=${rewardPreference}` : ''}${takesRewardsOutdoors != null ? `&takesRewardsOutdoors=${takesRewardsOutdoors}` : ''}${behaviorContext ? `&behaviorContext=${encodeURIComponent(behaviorContext)}` : ''}`),
         fetch(`/api/training/progress?breed=${breed}&date=${todayDate}&dogKey=${encodeURIComponent(dogKey)}`),
         fetch(`/api/training/metrics?breed=${breed}&date=${todayDate}&dogKey=${encodeURIComponent(dogKey)}`),
       ])
@@ -59,7 +60,7 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
     } finally {
       setLoading(false)
     }
-  }, [breed, trainingWeek, ageWeeks, todayDate, goals])
+  }, [breed, trainingWeek, ageWeeks, todayDate, goals, environment, rewardPreference, takesRewardsOutdoors, behaviorContext])
 
   useEffect(() => { fetchData() }, [fetchData])
 

@@ -9,6 +9,7 @@ import Avatar from '@/components/Avatar'
 import BottomNav from '@/components/BottomNav'
 import { getDogProfile } from '@/lib/dog/profile'
 import { getAgeInWeeks } from '@/lib/dog/age'
+import { formatBehaviorProfile } from '@/lib/dog/behavior'
 import type { DogProfile } from '@/types'
 import styles from './page.module.css'
 
@@ -93,6 +94,9 @@ function Dashboard() {
             environment={profile.onboarding?.environment}
             rewardPreference={profile.onboarding?.rewardPreference}
             takesRewardsOutdoors={profile.onboarding?.takesRewardsOutdoors}
+            behaviorContext={profile.assessment?.behaviorProfile
+              ? formatBehaviorProfile(profile.assessment.behaviorProfile)
+              : undefined}
           />
         )}
 

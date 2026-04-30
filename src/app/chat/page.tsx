@@ -8,6 +8,7 @@ import Avatar from '@/components/Avatar'
 import BottomNav from '@/components/BottomNav'
 import { getDogProfile } from '@/lib/dog/profile'
 import { getAgeInWeeks } from '@/lib/dog/age'
+import { formatBehaviorProfile } from '@/lib/dog/behavior'
 import type { DogProfile, TrainingEnvironment, RewardPreference } from '@/types'
 
 const ENV_LABELS: Record<TrainingEnvironment, string> = {
@@ -25,12 +26,16 @@ const REWARD_LABELS: Record<RewardPreference, string> = {
 
 function buildOnboardingContext(profile: DogProfile): string | undefined {
   const prefs = profile.onboarding
-  if (!prefs) return undefined
   const lines: string[] = []
-  if (prefs.environment) lines.push(`Miljö: ${ENV_LABELS[prefs.environment] ?? prefs.environment}`)
-  if (prefs.rewardPreference) lines.push(`Belöning som funkar bäst: ${REWARD_LABELS[prefs.rewardPreference] ?? prefs.rewardPreference}`)
-  if (prefs.takesRewardsOutdoors != null) {
+  if (prefs?.environment) lines.push(`Miljö: ${ENV_LABELS[prefs.environment] ?? prefs.environment}`)
+  if (prefs?.rewardPreference) lines.push(`Belöning som funkar bäst: ${REWARD_LABELS[prefs.rewardPreference] ?? prefs.rewardPreference}`)
+  if (prefs?.takesRewardsOutdoors != null) {
     lines.push(`Tar belöning utomhus: ${prefs.takesRewardsOutdoors ? 'Ja' : 'Nej — prioritera inne-träning eller extra hög-värde belöning ute'}`)
+  }
+  const behaviorProfile = profile.assessment?.behaviorProfile
+  if (behaviorProfile) {
+    lines.push('')
+    lines.push(formatBehaviorProfile(behaviorProfile))
   }
   return lines.length > 0 ? lines.join('\n') : undefined
 }
