@@ -82,6 +82,15 @@ export interface ChatMessage {
 
 export type QuickRating = 'good' | 'mixed' | 'bad'
 
+export interface ExerciseSummary {
+  id: string
+  label: string
+  success_count: number
+  fail_count: number
+  latency_bucket: LatencyBucket | null
+  criteria_level_id: string | null
+}
+
 export interface SessionLog {
   id: string
   breed: Breed
@@ -90,6 +99,7 @@ export interface SessionLog {
   focus: number      // 1–5
   obedience: number  // 1–5
   notes?: string     // valfri fritext
+  exercises?: ExerciseSummary[]
   created_at: string
 }
 

@@ -1,12 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import type { Breed, QuickRating } from '@/types'
+import type { Breed, QuickRating, ExerciseSummary } from '@/types'
 import styles from './SessionLogForm.module.css'
 
 interface Props {
   breed: Breed
   weekNumber: number
+  exercises?: ExerciseSummary[]
   onSaved: () => void
   onCancel?: () => void
 }
@@ -17,7 +18,7 @@ const RATINGS: { value: QuickRating; label: string; emoji: string }[] = [
   { value: 'bad', label: 'Svårt', emoji: '😞' },
 ]
 
-export default function SessionLogForm({ breed, weekNumber, onSaved, onCancel }: Props) {
+export default function SessionLogForm({ breed, weekNumber, exercises, onSaved, onCancel }: Props) {
   const [rating, setRating] = useState<QuickRating | null>(null)
   const [focus, setFocus] = useState(3)
   const [obedience, setObedience] = useState(3)
@@ -40,6 +41,7 @@ export default function SessionLogForm({ breed, weekNumber, onSaved, onCancel }:
           focus,
           obedience,
           notes: notes.trim() || undefined,
+          exercises: exercises && exercises.length > 0 ? exercises : undefined,
         }),
       })
       setSaved(true)
@@ -61,6 +63,28 @@ export default function SessionLogForm({ breed, weekNumber, onSaved, onCancel }:
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
       <h3 className={styles.heading}>Logga träningspass</h3>
+
+      {exercises && exercises.length > 0 && (
+        <div className={styles.section}>
+          <span className={styles.sectionLabel}>Tränade övningar</span>
+          <ul className={styles.exerciseList}>
+            {exercises.map((ex) => {
+              const attempts = ex.success_count + ex.fail_count
+              const rate = attempts > 0 ? Math.round((ex.success_count / attempts) * 100) : null
+              return (
+                <li key={ex.id} className={styles.exerciseItem}>
+                  <span className={styles.exerciseName}>{ex.label}</span>
+                  {attempts > 0 && (
+                    <span className={styles.exerciseStats}>
+                      {ex.success_count}/{attempts} lyckade{rate !== null ? ` (${rate}%)` : ''}
+                    </span>
+                  )}
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+      )}
 
       <div className={styles.section}>
         <span className={styles.sectionLabel}>Hur gick det?</span>

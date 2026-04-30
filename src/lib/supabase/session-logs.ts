@@ -1,5 +1,5 @@
 import { getSupabaseAdmin } from './client'
-import type { Breed, SessionLog, QuickRating } from '@/types'
+import type { Breed, SessionLog, QuickRating, ExerciseSummary } from '@/types'
 
 export async function saveSessionLog(log: {
   breed: Breed
@@ -8,6 +8,7 @@ export async function saveSessionLog(log: {
   focus: number
   obedience: number
   notes?: string
+  exercises?: ExerciseSummary[]
 }): Promise<SessionLog> {
   const { data, error } = await getSupabaseAdmin()
     .from('session_logs')
@@ -60,6 +61,14 @@ export function formatLogsForPrompt(logs: SessionLog[]): string[] {
       `fokus ${log.focus}/5`,
       `lydnad ${log.obedience}/5`,
     ]
+    if (log.exercises && log.exercises.length > 0) {
+      const exerciseParts = log.exercises.map((ex) => {
+        const attempts = ex.success_count + ex.fail_count
+        const rate = attempts > 0 ? Math.round((ex.success_count / attempts) * 100) : null
+        return rate !== null ? `${ex.label} ${rate}%` : ex.label
+      })
+      parts.push(`övningar: ${exerciseParts.join(', ')}`)
+    }
     if (log.notes) parts.push(`"${log.notes}"`)
     return parts.join(', ')
   })

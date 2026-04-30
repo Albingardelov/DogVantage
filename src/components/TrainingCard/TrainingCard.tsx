@@ -7,7 +7,7 @@ import WeekView from './WeekView'
 import SessionLogForm from '@/components/SessionLogForm'
 import ExerciseGuideSheet from '@/components/ExerciseGuideSheet'
 import styles from './TrainingCard.module.css'
-import type { Breed, WeekPlan, Exercise, DailyExerciseMetrics, LatencyBucket } from '@/types'
+import type { Breed, WeekPlan, Exercise, DailyExerciseMetrics, LatencyBucket, ExerciseSummary } from '@/types'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
 
 const SWEDISH_DAYS = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag']
@@ -226,6 +226,7 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
             <SessionLogForm
               breed={breed}
               weekNumber={trainingWeek}
+              exercises={buildExerciseSummaries(todayExercises, metrics)}
               onSaved={() => setShowLogForm(false)}
               onCancel={() => setShowLogForm(false)}
             />
@@ -250,6 +251,23 @@ function ChevronRight() {
       <polyline points="9 18 15 12 9 6" />
     </svg>
   )
+}
+
+function buildExerciseSummaries(
+  exercises: Exercise[],
+  metrics: Record<string, DailyExerciseMetrics>
+): ExerciseSummary[] {
+  return exercises.map((ex) => {
+    const m = metrics[ex.id]
+    return {
+      id: ex.id,
+      label: ex.label,
+      success_count: m?.success_count ?? 0,
+      fail_count: m?.fail_count ?? 0,
+      latency_bucket: m?.latency_bucket ?? null,
+      criteria_level_id: m?.criteria_level_id ?? null,
+    }
+  })
 }
 
 function emptyMetrics(): DailyExerciseMetrics {

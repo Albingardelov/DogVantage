@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { saveSessionLog, getRecentLogs, getAllLogs } from '@/lib/supabase/session-logs'
-import type { Breed, QuickRating } from '@/types'
+import type { Breed, QuickRating, ExerciseSummary } from '@/types'
 
 export async function POST(req: NextRequest) {
   const body = await req.json() as {
@@ -10,16 +10,17 @@ export async function POST(req: NextRequest) {
     focus: number
     obedience: number
     notes?: string
+    exercises?: ExerciseSummary[]
   }
 
-  const { breed, week_number, quick_rating, focus, obedience, notes } = body
+  const { breed, week_number, quick_rating, focus, obedience, notes, exercises } = body
 
   if (!breed || typeof week_number !== 'number' || !quick_rating ||
       typeof focus !== 'number' || typeof obedience !== 'number') {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
-  const log = await saveSessionLog({ breed, week_number, quick_rating, focus, obedience, notes })
+  const log = await saveSessionLog({ breed, week_number, quick_rating, focus, obedience, notes, exercises })
   return NextResponse.json(log, { status: 201 })
 }
 
