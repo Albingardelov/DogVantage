@@ -44,11 +44,15 @@ function Assessment() {
   const trainingWeek = profile?.trainingWeek ?? 1
 
   const exerciseIds = useMemo(() => {
-    const primaryGoal = profile?.onboarding?.goals?.[0] ?? 'everyday_obedience'
-    if (primaryGoal === 'hunting') return ['inkallning', 'stoppsignal', 'stadga', 'orientering', 'kontrollerat_sok']
-    if (primaryGoal === 'sport') return ['namn', 'stanna', 'sitt', 'ligg', 'inkallning']
-    if (primaryGoal === 'problem_solving') return ['koppel', 'inkallning', 'stadga', 'impulskontroll', 'orientering']
-    return ['namn', 'inkallning', 'koppel', 'stanna', 'hantering']
+    const goalExercises: Record<string, string[]> = {
+      everyday_obedience: ['namn', 'inkallning', 'koppel', 'stanna', 'hantering'],
+      sport: ['namn', 'stanna', 'sitt', 'ligg', 'inkallning'],
+      hunting: ['inkallning', 'stoppsignal', 'stadga', 'orientering', 'kontrollerat_sok'],
+      problem_solving: ['koppel', 'inkallning', 'stadga', 'impulskontroll', 'orientering'],
+    }
+    const goals = profile?.onboarding?.goals ?? ['everyday_obedience']
+    const merged = [...new Set(goals.flatMap((g) => goalExercises[g] ?? goalExercises.everyday_obedience))]
+    return merged.slice(0, 7) // max 7 övningar i assessment
   }, [profile?.onboarding?.goals])
 
   const ready = profile != null

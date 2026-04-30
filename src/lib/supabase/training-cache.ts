@@ -39,19 +39,25 @@ function ageBucket(ageWeeks?: number): string {
   return 'adult'
 }
 
-// Week plan cache uses breed key prefixed with "weekplan_" to avoid
-// collisions with the existing text-based training cache entries.
-// The age bucket (puppy/junior/adult) is included so age-appropriate
-// plans are never served to dogs in the wrong life stage.
+function goalsBucket(goals?: string[]): string {
+  if (!goals || goals.length === 0) return 'default'
+  return [...goals].sort().join('+')
+}
+
+function weekPlanCacheKey(breed: Breed, ageWeeks?: number, goals?: string[]): string {
+  return `weekplan_${breed}_${ageBucket(ageWeeks)}_${goalsBucket(goals)}`
+}
+
 export async function getCachedWeekPlan(
   breed: Breed,
   weekNumber: number,
-  ageWeeks?: number
+  ageWeeks?: number,
+  goals?: string[]
 ): Promise<WeekPlan | null> {
   const { data, error } = await getSupabaseAdmin()
     .from('training_cache')
     .select('content')
-    .eq('breed', `weekplan_${breed}_${ageBucket(ageWeeks)}`)
+    .eq('breed', weekPlanCacheKey(breed, ageWeeks, goals))
     .eq('week_number', weekNumber)
     .single()
 
@@ -67,12 +73,13 @@ export async function setCachedWeekPlan(
   breed: Breed,
   weekNumber: number,
   plan: WeekPlan,
-  ageWeeks?: number
+  ageWeeks?: number,
+  goals?: string[]
 ): Promise<void> {
   const { error } = await getSupabaseAdmin()
     .from('training_cache')
     .upsert({
-      breed: `weekplan_${breed}_${ageBucket(ageWeeks)}`,
+      breed: weekPlanCacheKey(breed, ageWeeks, goals),
       week_number: weekNumber,
       content: JSON.stringify(plan),
       source: 'week_plan',

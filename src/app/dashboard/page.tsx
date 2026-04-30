@@ -89,6 +89,7 @@ function Dashboard() {
             breed={profile.breed}
             dogName={dogName}
             dogKey={profile.dogKey ?? 'default'}
+            goals={profile.onboarding?.goals}
           />
         )}
 

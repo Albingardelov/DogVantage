@@ -2,7 +2,28 @@ import { getGroqClient, GROQ_MODEL } from './client'
 import { embedText } from './embed'
 import { searchBreedChunks } from '@/lib/supabase/breed-chunks'
 import { formatBreedProfile, formatCurrentPhase } from './breed-profiles'
-import type { Breed, WeekPlan } from '@/types'
+import type { Breed, TrainingGoal, WeekPlan } from '@/types'
+
+const GOAL_EXERCISE_IDS: Record<TrainingGoal, string[]> = {
+  everyday_obedience: ['namn', 'inkallning', 'koppel', 'stanna', 'hantering', 'socialisering'],
+  sport: ['namn', 'stanna', 'sitt', 'ligg', 'inkallning', 'fokus', 'apportering'],
+  hunting: ['inkallning', 'stoppsignal', 'stadga', 'orientering', 'kontrollerat_sok', 'apportering', 'vatten'],
+  problem_solving: ['koppel', 'inkallning', 'stadga', 'impulskontroll', 'orientering', 'fokus'],
+}
+
+const GOAL_LABELS: Record<TrainingGoal, string> = {
+  everyday_obedience: 'Vardagslydnad',
+  sport: 'Sport / tävling',
+  hunting: 'Jakt / bruk',
+  problem_solving: 'Lösa problem (koppel/inkallning)',
+}
+
+const GOAL_RULES: Record<TrainingGoal, string> = {
+  everyday_obedience: 'Inkludera vardagsrelevanta övningar som koppel, inkallning, hantering.',
+  sport: 'Prioritera precision och snabbhet: sitt, ligg, fokus, inkallning med hög kriterienivå.',
+  hunting: 'Inkludera minst en av: stadga, orientering, kontrollerat_sok, stoppsignal per träningsdag.',
+  problem_solving: 'Fokusera på impulskontroll, koppelgång och inkallning i utmanande miljöer.',
+}
 
 function allowedExerciseIdsForBreed(breed: Breed, ageWeeks?: number): string[] {
   if (breed === 'braque_francais') {
@@ -82,7 +103,8 @@ export function buildFallbackPlan(): WeekPlan {
 export async function generateWeekPlan(
   breed: Breed,
   trainingWeek: number,
-  ageWeeks?: number
+  ageWeeks?: number,
+  goals?: TrainingGoal[]
 ): Promise<WeekPlan> {
   let chunks: import('@/types').ChunkMatch[] = []
   try {
@@ -96,8 +118,22 @@ export async function generateWeekPlan(
     ? chunks.map((c) => `${c.content}\n[Källa: ${c.source}]`).join('\n\n')
     : ''
 
-  const allowedIds = allowedExerciseIdsForBreed(breed, ageWeeks)
+  const breedIds = allowedExerciseIdsForBreed(breed, ageWeeks)
+  const goalIds = goals && goals.length > 0
+    ? goals.flatMap((g) => GOAL_EXERCISE_IDS[g] ?? [])
+    : []
+  const allowedIds = [...new Set([...breedIds, ...goalIds])]
+
   const isPuppy = typeof ageWeeks === 'number' && ageWeeks > 0 && ageWeeks < 16
+
+  const goalContext = goals && goals.length > 0
+    ? `\nÄgarens mål: ${goals.map((g) => GOAL_LABELS[g]).join(', ')}. Anpassa övningsvalet efter dessa mål.\n`
+    : ''
+
+  const goalRules = goals && goals.length > 0
+    ? goals.map((g) => `Målregel (${GOAL_LABELS[g]}): ${GOAL_RULES[g]}`).join('\n')
+    : ''
+
   const idRules = [
     breed === 'braque_francais'
       ? 'Rasregel (stående fågelhund): inkludera minst 1 av: stadga, orientering, kontrollerat_sok, impulskontroll under veckan.'
@@ -105,6 +141,7 @@ export async function generateWeekPlan(
     isPuppy
       ? 'Valpregel: inkludera hantering och socialisering flera dagar. Inga “tunga” distans/störnings-ökningar.'
       : null,
+    goalRules || null,
   ].filter(Boolean).join('\n')
 
   const ageInfo = typeof ageWeeks === 'number' && Number.isFinite(ageWeeks)
@@ -114,7 +151,7 @@ export async function generateWeekPlan(
   const systemPrompt = `Du är DogVantage träningsassistent för rasen ${breed}. Returnera ett veckoschema som giltig JSON.
 
 ${formatBreedProfile(breed)}
-${ageInfo}${typeof ageWeeks === 'number' && Number.isFinite(ageWeeks) ? formatCurrentPhase(ageWeeks) : ''}
+${ageInfo}${typeof ageWeeks === 'number' && Number.isFinite(ageWeeks) ? formatCurrentPhase(ageWeeks) : ''}${goalContext}
 ${documentContext ? `\n=== KÄLLDOKUMENT ===\n${documentContext}\n` : ''}
 Returnera ENBART detta JSON-schema (inga förklaringar, inga kommentarer):
 {
