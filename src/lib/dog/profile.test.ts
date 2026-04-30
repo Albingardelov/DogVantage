@@ -8,7 +8,7 @@ const mockProfile: DogProfile = {
   birthdate: '2024-10-15',
   trainingWeek: 1,
   onboarding: {
-    goal: 'everyday_obedience',
+    goals: ['everyday_obedience'],
     environment: 'suburb',
     rewardPreference: 'mixed',
     takesRewardsOutdoors: true,

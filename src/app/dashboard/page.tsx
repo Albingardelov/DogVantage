@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import ProfileGuard from '@/components/ProfileGuard'
 import TrainingCard from '@/components/TrainingCard/TrainingCard'
 import SessionLogForm from '@/components/SessionLogForm'
@@ -28,6 +29,7 @@ function getGreeting(): string {
 }
 
 function Dashboard() {
+  const router = useRouter()
   const [profile, setProfile] = useState<DogProfile | null>(null)
   const [showLogForm, setShowLogForm] = useState(false)
 
@@ -58,7 +60,14 @@ function Dashboard() {
               <span aria-hidden="true">🗓️</span> Programvecka {trainingWeek}
             </span>
           </div>
-          <Avatar name={dogName} size={64} />
+          <button
+            type="button"
+            onClick={() => router.push('/profile')}
+            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', borderRadius: '50%' }}
+            aria-label="Öppna profil"
+          >
+            <Avatar name={dogName} size={64} />
+          </button>
         </div>
       </header>
 

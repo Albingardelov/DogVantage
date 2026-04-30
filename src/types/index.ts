@@ -43,7 +43,7 @@ export type RewardPreference =
   | 'mixed'
 
 export interface OnboardingPrefs {
-  goal: TrainingGoal
+  goals: TrainingGoal[]
   environment: TrainingEnvironment
   rewardPreference: RewardPreference
   /**

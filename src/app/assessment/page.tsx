@@ -44,12 +44,12 @@ function Assessment() {
   const trainingWeek = profile?.trainingWeek ?? 1
 
   const exerciseIds = useMemo(() => {
-    const goal = profile?.onboarding?.goal ?? 'everyday_obedience'
-    if (goal === 'hunting') return ['inkallning', 'stoppsignal', 'stadga', 'orientering', 'kontrollerat_sok']
-    if (goal === 'sport') return ['namn', 'stanna', 'sitt', 'ligg', 'inkallning']
-    if (goal === 'problem_solving') return ['koppel', 'inkallning', 'stadga', 'impulskontroll', 'orientering']
+    const primaryGoal = profile?.onboarding?.goals?.[0] ?? 'everyday_obedience'
+    if (primaryGoal === 'hunting') return ['inkallning', 'stoppsignal', 'stadga', 'orientering', 'kontrollerat_sok']
+    if (primaryGoal === 'sport') return ['namn', 'stanna', 'sitt', 'ligg', 'inkallning']
+    if (primaryGoal === 'problem_solving') return ['koppel', 'inkallning', 'stadga', 'impulskontroll', 'orientering']
     return ['namn', 'inkallning', 'koppel', 'stanna', 'hantering']
-  }, [profile?.onboarding?.goal])
+  }, [profile?.onboarding?.goals])
 
   const ready = profile != null
   const complete = exerciseIds.every((id) => {

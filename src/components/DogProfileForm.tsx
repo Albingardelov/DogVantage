@@ -17,20 +17,20 @@ const BREEDS: { value: Breed; label: string }[] = [
 const TOTAL_STEPS = 4
 const STEP_TITLES = ['Lägg till ett foto', 'Om din hund', 'När är hunden född?', 'Hur vill du använda appen?']
 
-const GOALS: { value: TrainingGoal; label: string }[] = [
+export const GOALS: { value: TrainingGoal; label: string }[] = [
   { value: 'everyday_obedience', label: 'Vardagslydnad' },
   { value: 'sport', label: 'Sport / tävling' },
   { value: 'hunting', label: 'Jakt / bruk' },
   { value: 'problem_solving', label: 'Lösa problem (t.ex. koppel/inkallning)' },
 ]
 
-const ENVIRONMENTS: { value: TrainingEnvironment; label: string }[] = [
+export const ENVIRONMENTS: { value: TrainingEnvironment; label: string }[] = [
   { value: 'city', label: 'Stad (mycket folk/hundar)' },
   { value: 'suburb', label: 'Förort / blandat' },
   { value: 'rural', label: 'Land / natur' },
 ]
 
-const REWARDS: { value: RewardPreference; label: string }[] = [
+export const REWARDS: { value: RewardPreference; label: string }[] = [
   { value: 'food', label: 'Mat' },
   { value: 'toy', label: 'Leksak' },
   { value: 'social', label: 'Socialt (beröm/lek)' },
@@ -46,7 +46,7 @@ export default function DogProfileForm() {
   const [name, setName] = useState('')
   const [breed, setBreed] = useState<Breed | ''>('')
   const [birthdate, setBirthdate] = useState('')
-  const [goal, setGoal] = useState<TrainingGoal>('everyday_obedience')
+  const [goals, setGoals] = useState<TrainingGoal[]>(['everyday_obedience'])
   const [environment, setEnvironment] = useState<TrainingEnvironment>('suburb')
   const [rewardPreference, setRewardPreference] = useState<RewardPreference>('mixed')
   const [takesRewardsOutdoors, setTakesRewardsOutdoors] = useState(true)
@@ -81,7 +81,7 @@ export default function DogProfileForm() {
     if (!name.trim() || !breed || !birthdate) return
     if (photo) saveDogPhoto(photo)
     const onboarding: OnboardingPrefs = {
-      goal,
+      goals,
       environment,
       rewardPreference,
       takesRewardsOutdoors,
@@ -234,10 +234,10 @@ export default function DogProfileForm() {
               Det här hjälper oss att prioritera rätt typ av träning för dig och din hund.
             </p>
 
-            <ChoiceField
-              label="Primärt mål"
-              value={goal}
-              onChange={(v) => setGoal(v as TrainingGoal)}
+            <MultiChoiceField
+              label="Mål (välj ett eller flera)"
+              values={goals}
+              onChange={(v) => setGoals(v as TrainingGoal[])}
               options={GOALS}
             />
 
@@ -326,6 +326,51 @@ function ChoiceField({
               role="radio"
               aria-checked={selected}
               onClick={() => onChange(o.value)}
+              className={`${styles.breedOption} ${selected ? styles.breedOptionSelected : ''}`}
+            >
+              <span>{o.label}</span>
+              {selected && <span aria-hidden="true">✓</span>}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+export function MultiChoiceField({
+  label,
+  values,
+  onChange,
+  options,
+}: {
+  label: string
+  values: string[]
+  onChange: (v: string[]) => void
+  options: { value: string; label: string }[]
+}) {
+  function toggle(v: string) {
+    if (values.includes(v)) {
+      if (values.length === 1) return // minst ett val
+      onChange(values.filter((x) => x !== v))
+    } else {
+      onChange([...values, v])
+    }
+  }
+
+  return (
+    <div className={styles.field}>
+      <span className={styles.label}>{label}</span>
+      <div className={styles.breedList} role="group" aria-label={label}>
+        {options.map((o) => {
+          const selected = values.includes(o.value)
+          return (
+            <button
+              key={o.value}
+              type="button"
+              role="checkbox"
+              aria-checked={selected}
+              onClick={() => toggle(o.value)}
               className={`${styles.breedOption} ${selected ? styles.breedOptionSelected : ''}`}
             >
               <span>{o.label}</span>

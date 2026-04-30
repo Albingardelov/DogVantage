@@ -20,13 +20,18 @@ export function getDogProfile(): DogProfile | null {
   const raw = localStorage.getItem(KEY)
   if (!raw) return null
   try {
-    const p = JSON.parse(raw) as DogProfile
+    const p = JSON.parse(raw) as DogProfile & { onboarding?: { goal?: string; goals?: string[] } }
     // Backfill dogKey for older stored profiles
     if (!p.dogKey) {
       p.dogKey = generateDogKey()
       saveDogProfile(p)
     }
-    return p
+    // Migrate legacy single-value goal → goals array
+    if (p.onboarding && !p.onboarding.goals && p.onboarding.goal) {
+      p.onboarding.goals = [p.onboarding.goal as import('@/types').TrainingGoal]
+      saveDogProfile(p)
+    }
+    return p as DogProfile
   } catch {
     return null
   }
