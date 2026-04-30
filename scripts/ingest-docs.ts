@@ -110,6 +110,34 @@ const DOCS: DocSpec[] = [
     sourceUrl: 'https://www.navhda.org',
     docVersion: '2022',
   },
+  // Miniature American Shepherd — AKC official breed standard
+  {
+    file: 'docs/mas-akc-breed-standard.pdf',
+    breed: 'miniature_american_shepherd',
+    sourceUrl: 'https://images.akc.org/pdf/breeds/standards/MiniatureAmericanShepherd.pdf',
+    docVersion: 'AKC 2015',
+  },
+  // Miniature American Shepherd — FCI standard nr 367 (English)
+  {
+    file: 'docs/mas-fci-367-en.pdf',
+    breed: 'miniature_american_shepherd',
+    sourceUrl: 'https://www.fci.be/Nomenclature/Standards/367g01-en.pdf',
+    docVersion: 'FCI-367 2023',
+  },
+  // Miniature American Shepherd — UKC breed standard
+  {
+    file: 'docs/mas-ukc-breed-standard.pdf',
+    breed: 'miniature_american_shepherd',
+    sourceUrl: 'https://www.ukcdogs.com/docs/breeds/miniature-american-shepherd.pdf',
+    docVersion: 'UKC 2024',
+  },
+  // Miniature American Shepherd — MASCUSA breed standard seminar (rasstandard med bildmaterial)
+  {
+    file: 'docs/mas-mascusa-breed-standard-seminar.pdf',
+    breed: 'miniature_american_shepherd',
+    sourceUrl: 'https://mascusa.org/wp-content/uploads/docs/bsee/breed-standard-seminar.pdf',
+    docVersion: 'MASCUSA 2026',
+  },
 ]
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

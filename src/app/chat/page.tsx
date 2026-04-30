@@ -8,7 +8,32 @@ import Avatar from '@/components/Avatar'
 import BottomNav from '@/components/BottomNav'
 import { getDogProfile } from '@/lib/dog/profile'
 import { getAgeInWeeks } from '@/lib/dog/age'
-import type { DogProfile } from '@/types'
+import type { DogProfile, TrainingEnvironment, RewardPreference } from '@/types'
+
+const ENV_LABELS: Record<TrainingEnvironment, string> = {
+  city:   'Stad (mycket folk och hundar)',
+  suburb: 'Förort / blandat',
+  rural:  'Land / natur',
+}
+
+const REWARD_LABELS: Record<RewardPreference, string> = {
+  food:   'Mat',
+  toy:    'Leksak',
+  social: 'Socialt (beröm/lek)',
+  mixed:  'Blandat',
+}
+
+function buildOnboardingContext(profile: DogProfile): string | undefined {
+  const prefs = profile.onboarding
+  if (!prefs) return undefined
+  const lines: string[] = []
+  if (prefs.environment) lines.push(`Miljö: ${ENV_LABELS[prefs.environment] ?? prefs.environment}`)
+  if (prefs.rewardPreference) lines.push(`Belöning som funkar bäst: ${REWARD_LABELS[prefs.rewardPreference] ?? prefs.rewardPreference}`)
+  if (prefs.takesRewardsOutdoors != null) {
+    lines.push(`Tar belöning utomhus: ${prefs.takesRewardsOutdoors ? 'Ja' : 'Nej — prioritera inne-träning eller extra hög-värde belöning ute'}`)
+  }
+  return lines.length > 0 ? lines.join('\n') : undefined
+}
 import styles from './page.module.css'
 
 export default function ChatPage() {
@@ -49,6 +74,7 @@ function Chat() {
           trainingWeek={trainingWeek}
           initialQuestion={initialQuestion}
           dogKey={profile.dogKey}
+          onboardingContext={buildOnboardingContext(profile)}
         />
       )}
 

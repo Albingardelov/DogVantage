@@ -9,6 +9,7 @@ import { getDogProfile, saveDogProfile } from '@/lib/dog/profile'
 import { getAgeInWeeks } from '@/lib/dog/age'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
 import { computeStartingWeek } from '@/lib/training/assessment-week'
+import { GOAL_EXERCISE_IDS } from '@/lib/training/goal-exercises'
 import type { DailyExerciseMetrics, DogProfile, LatencyBucket } from '@/types'
 import styles from './page.module.css'
 
@@ -44,14 +45,8 @@ function Assessment() {
   const trainingWeek = profile?.trainingWeek ?? 1
 
   const exerciseIds = useMemo(() => {
-    const goalExercises: Record<string, string[]> = {
-      everyday_obedience: ['namn', 'inkallning', 'koppel', 'stanna', 'hantering'],
-      sport: ['namn', 'stanna', 'sitt', 'ligg', 'inkallning'],
-      hunting: ['inkallning', 'stoppsignal', 'stadga', 'orientering', 'kontrollerat_sok'],
-      problem_solving: ['koppel', 'inkallning', 'stadga', 'impulskontroll', 'orientering'],
-    }
     const goals = profile?.onboarding?.goals ?? ['everyday_obedience']
-    const merged = [...new Set(goals.flatMap((g) => goalExercises[g] ?? goalExercises.everyday_obedience))]
+    const merged = [...new Set(goals.flatMap((g) => GOAL_EXERCISE_IDS[g] ?? GOAL_EXERCISE_IDS.everyday_obedience))]
     return merged.slice(0, 7) // max 7 övningar i assessment
   }, [profile?.onboarding?.goals])
 

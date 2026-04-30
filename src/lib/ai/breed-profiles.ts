@@ -11,7 +11,7 @@
  * to produce breed-appropriate, week-specific recommendations.
  */
 
-import type { Breed } from '@/types'
+import type { Breed, TrainingGoal } from '@/types'
 
 export interface BreedProfile {
   /** Swedish display name */
@@ -39,6 +39,14 @@ export interface BreedProfile {
    * to do according to its breed standard and working tradition.
    */
   breedSkills: BreedSkill[]
+  /**
+   * Goals that make sense for this breed and should be pre-selected in onboarding.
+   */
+  suggestedGoals: TrainingGoal[]
+  /**
+   * Goals that are irrelevant or misleading for this breed — hidden in onboarding.
+   */
+  hiddenGoals: TrainingGoal[]
   /**
    * Common training pitfalls or things to actively avoid with this breed.
    */
@@ -78,6 +86,8 @@ const braqueFrancais: BreedProfile = {
     'Social mot människor och andra hundar',
   ],
   sensitivity: 'soft',
+  suggestedGoals: ['hunting', 'everyday_obedience'],
+  hiddenGoals: ['herding', 'impulse_control'],
   breedSkills: [
     {
       name: 'Sökets vidd (Quête)',
@@ -149,6 +159,8 @@ const labrador: BreedProfile = {
     'Generellt sett tålig — hanterar mer direkt feedback än mjukare raser',
   ],
   sensitivity: 'medium',
+  suggestedGoals: ['hunting', 'everyday_obedience'],
+  hiddenGoals: ['herding', 'impulse_control'],
   breedSkills: [
     {
       name: 'Apportering (Retrieve)',
@@ -213,6 +225,8 @@ const italianGreyhound: BreedProfile = {
     'Leker gärna men på sina egna villkor',
   ],
   sensitivity: 'soft',
+  suggestedGoals: ['everyday_obedience', 'sport'],
+  hiddenGoals: ['hunting', 'herding', 'impulse_control'],
   breedSkills: [
     {
       name: 'Koppelanpassning',
@@ -257,12 +271,88 @@ const italianGreyhound: BreedProfile = {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// MINIATURE AMERICAN SHEPHERD
+// Source: AKC breed standard (2015), MASCUSA breed guide, SKK rasstandard
+// ─────────────────────────────────────────────────────────────────────────────
+const miniatureAmericanShepherd: BreedProfile = {
+  name: 'Miniature American Shepherd',
+  purpose:
+    'Vallhund för lättare boskap (får, getter). Utvecklad på 1960-talet ur små Australiska Vallhundar av Doris Cordova. Erkänd av AKC 2015. Jobbar nära människan, tänker självständigt men är mycket kontaktssökande.',
+  temperament: [
+    'Intelligent och snabblärd — tar till sig kommandon snabbt, behöver mentala utmaningar',
+    'Energisk och arbetsvillig — trivs bäst när den har ett uppdrag',
+    'Lojal och nära sin familj — stark anknytning, kan bli överdrivet vaktande',
+    'Reserverad mot okända — inte skygg, men iakttagande och försiktig initialt',
+    'Stark vallandeininstinkt — kan försöka valla barn, cyklister, katter om instinkten inte kanaliseras',
+    'Tar träning på allvar — tål direkt feedback men mår bäst med positiv förstärkning',
+  ],
+  sensitivity: 'medium',
+  suggestedGoals: ['impulse_control', 'sport', 'herding'],
+  hiddenGoals: ['hunting'],
+  breedSkills: [
+    {
+      name: 'Vallning (Herding)',
+      description:
+        'Rasens kärna. Hunden har naturligt "eye" (fasthållande blick), crouch (sänkt postur) och flank-rörelse för att styra boskap. Kanaliseras tidigt med grundlydnad och impulskontroll — utan detta kan instinkten bli problematisk mot allt som rör sig.',
+      startPhase: 'adolescent',
+    },
+    {
+      name: 'Agility & rörlighet',
+      description:
+        'Naturligt atletisk och koordinerad. Fantastisk för agility-träning: tunnlar, slalom, hopp, kontakthinder. Rasen är en av de mest framgångsrika i agility på sin storlek.',
+      startPhase: 'junior',
+    },
+    {
+      name: 'Tävlingslydnad (Obedience)',
+      description:
+        'Extremt träningsbar för formell lydnad: heel, front, apportering, distansarbete. Lär sig snabbt precis beteende och trivs med utmaningar som kräver tänkande.',
+      startPhase: 'junior',
+    },
+    {
+      name: 'Nosework / doftspår',
+      description:
+        'MAS är en naturlig sökare med bra nos. Nosework ger enormt mentalt utlopp. Introduceras med enkla doftboxar och bygger upp gradvis.',
+      startPhase: 'puppy',
+    },
+    {
+      name: 'Frisbee / disc dog',
+      description:
+        'Hög lekdrift kombinerat med atletisk förmåga gör MAS utmärkt för disc dog. Börja med rullande skiva på marken, bygg upp till luftfångst.',
+      startPhase: 'junior',
+    },
+    {
+      name: 'Trickträning',
+      description:
+        'Rasen älskar att lära sig trick — snurra, bow, paw, cover, skateboard. Utmärkt vardagsträning för mentalt utlopp och relationsbygge.',
+      startPhase: 'puppy',
+    },
+  ],
+  trainingCautions: [
+    'Understimulerad MAS hittar egna projekt — grävning, skällande, destruktion',
+    'Vallinstinkten kan bli problematisk mot barn, cyklister eller katter om den inte kanaliseras tidigt',
+    'Kan bli överdrivet vaktande/barklystet om socialiseringen är otillräcklig',
+    'Repetitiv träning utan variation trökar ut hunden — variera övningarna',
+    'Stark lekdrift kan skapa fixering på boll/skiva — hantera drivnivån aktivt',
+    'Undvik för tidigt agility-hopp — leder är känsliga under 12–15 månader',
+  ],
+  activityGuidelines: {
+    puppy:
+      '5 min träning per session, 3–4 ggr/dag. Fokus: namn, inkallning, impulskontroll, socialisering mot ALLT (folk, hundar, cyklar, barn). Nosework-intro med enkla doftboxar.',
+    junior:
+      '15–25 min. Introducera agility-grunder (tunnlar, plank, kontakt utan hopp), formell lydnad, trickträning. Kanalisera lekdrift.',
+    adolescent:
+      '25–45 min. Agility med full utrustning (inga höga hopp förrän 15 mån), tävlingslydnad, vallnings-intro om intresse finns. Sport 3–4 ggr/vecka.',
+  },
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // EXPORTED MAP
 // ─────────────────────────────────────────────────────────────────────────────
 export const BREED_PROFILES: Record<Breed, BreedProfile> = {
   braque_francais: braqueFrancais,
   labrador: labrador,
   italian_greyhound: italianGreyhound,
+  miniature_american_shepherd: miniatureAmericanShepherd,
 }
 
 export function getBreedProfile(breed: Breed): BreedProfile {

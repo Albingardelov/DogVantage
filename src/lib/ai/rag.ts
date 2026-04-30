@@ -29,7 +29,8 @@ export async function queryRAG(
   breed: Breed,
   recentLogs: string[] = [],
   weekAge?: number,
-  todayMetrics: string[] = []
+  todayMetrics: string[] = [],
+  onboardingContext?: string
 ): Promise<TrainingResult> {
   if (isHealthQuery(query)) return VET_RESPONSE
 
@@ -81,6 +82,10 @@ export async function queryRAG(
   //    Layer B — "Ritningen" (the blueprint): breed-specific expectations from
   //              standards and tradition. This comes from our curated profile and
   //              from any retrieved document chunks.
+  const onboardingSection = onboardingContext
+    ? `\n=== TRÄNARKONTEXT ===\n${onboardingContext}\nAnpassa råden (träningsmetod, belöningsval, miljö) utifrån ovanstående.\n`
+    : ''
+
   const systemPrompt = `Du är DogVantage träningsassistent — en kunnig hundtränare specialiserad på rasen ${breed}.
 
 Du arbetar med ett tydligt tvålagerssystem:
@@ -100,7 +105,7 @@ Rasens temperament avgör HUR du applicerar metoderna — en mjuk ras kräver mj
 === RASPROFIL ===
 ${breedProfile}
 ${phaseInfo}
-${documentContext ? `\n=== KÄLLDOKUMENT (rasspecifikt material) ===\n${documentContext}\n` : ''}${metricsSection}${logsSection}
+${documentContext ? `\n=== KÄLLDOKUMENT (rasspecifikt material) ===\n${documentContext}\n` : ''}${onboardingSection}${metricsSection}${logsSection}
 INSTRUKTIONER:
 • Svara direkt på frågan — ge inte hela veckoschemat om det inte efterfrågas
 • Kombinera metodiken (lager 1) med rasspecifika krav (lager 2)

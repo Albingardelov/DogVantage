@@ -8,6 +8,7 @@ const BREEDS: { value: Breed; label: string }[] = [
   { value: 'labrador', label: 'Labrador retriever' },
   { value: 'italian_greyhound', label: 'Italiensk vinthund' },
   { value: 'braque_francais', label: 'Braque français' },
+  { value: 'miniature_american_shepherd', label: 'Miniature American Shepherd' },
 ]
 
 export default function AdminIngestPage() {

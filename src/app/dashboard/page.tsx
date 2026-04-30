@@ -90,6 +90,9 @@ function Dashboard() {
             dogName={dogName}
             dogKey={profile.dogKey ?? 'default'}
             goals={profile.onboarding?.goals}
+            environment={profile.onboarding?.environment}
+            rewardPreference={profile.onboarding?.rewardPreference}
+            takesRewardsOutdoors={profile.onboarding?.takesRewardsOutdoors}
           />
         )}
 

@@ -2,66 +2,54 @@ import { getGroqClient, GROQ_MODEL } from './client'
 import { embedText } from './embed'
 import { searchBreedChunks } from '@/lib/supabase/breed-chunks'
 import { formatBreedProfile, formatCurrentPhase } from './breed-profiles'
+import { GOAL_EXERCISE_IDS, GOAL_LABELS, GOAL_RULES } from '@/lib/training/goal-exercises'
 import type { Breed, TrainingGoal, WeekPlan } from '@/types'
 
-const GOAL_EXERCISE_IDS: Record<TrainingGoal, string[]> = {
-  everyday_obedience: ['namn', 'inkallning', 'koppel', 'stanna', 'hantering', 'socialisering'],
-  sport: ['namn', 'stanna', 'sitt', 'ligg', 'inkallning', 'fokus', 'apportering'],
-  hunting: ['inkallning', 'stoppsignal', 'stadga', 'orientering', 'kontrollerat_sok', 'apportering', 'vatten'],
-  problem_solving: ['koppel', 'inkallning', 'stadga', 'impulskontroll', 'orientering', 'fokus'],
-}
-
-const GOAL_LABELS: Record<TrainingGoal, string> = {
-  everyday_obedience: 'Vardagslydnad',
-  sport: 'Sport / tävling',
-  hunting: 'Jakt / bruk',
-  problem_solving: 'Lösa problem (koppel/inkallning)',
-}
-
-const GOAL_RULES: Record<TrainingGoal, string> = {
-  everyday_obedience: 'Inkludera vardagsrelevanta övningar som koppel, inkallning, hantering.',
-  sport: 'Prioritera precision och snabbhet: sitt, ligg, fokus, inkallning med hög kriterienivå.',
-  hunting: 'Inkludera minst en av: stadga, orientering, kontrollerat_sok, stoppsignal per träningsdag.',
-  problem_solving: 'Fokusera på impulskontroll, koppelgång och inkallning i utmanande miljöer.',
-}
-
 function allowedExerciseIdsForBreed(breed: Breed, ageWeeks?: number): string[] {
+  const isPuppy = typeof ageWeeks === 'number' && ageWeeks > 0 && ageWeeks < 16
+
   if (breed === 'braque_francais') {
-    const isPuppy = typeof ageWeeks === 'number' && ageWeeks > 0 && ageWeeks < 16
     return [
-      // foundation
-      'namn',
-      'inkallning',
-      'stoppsignal',
-      'stanna',
-      'hantering',
-      'socialisering',
-      // gundog/pointing-specific blocks (curated)
-      'stadga',
-      'orientering',
-      'kontrollerat_sok',
-      'impulskontroll',
-      // misc/common
-      'koppel',
-      'ligg',
-      'sitt',
+      'namn', 'inkallning', 'stoppsignal', 'stanna', 'hantering', 'socialisering',
+      'stadga', 'orientering', 'kontrollerat_sok', 'impulskontroll',
+      'koppel', 'ligg', 'sitt',
       ...(isPuppy ? [] : ['apportering', 'vatten']),
     ]
   }
 
+  if (breed === 'labrador') {
+    return [
+      'namn', 'inkallning', 'stoppsignal', 'stanna', 'sitt', 'ligg',
+      'koppel', 'hantering', 'socialisering', 'fokus',
+      'apportering', // central rasinstinkt — tillgänglig från start
+      ...(isPuppy ? [] : ['vatten']),
+    ]
+  }
+
+  if (breed === 'italian_greyhound') {
+    return [
+      'namn', 'inkallning', 'stanna', 'sitt', 'ligg',
+      'koppel', 'hantering', 'socialisering',
+      'fokus', 'impulskontroll',
+      // Ingen hunting/pointing/herding — rasen är sällskap/lure coursing
+    ]
+  }
+
+  if (breed === 'miniature_american_shepherd') {
+    return [
+      'namn', 'inkallning', 'stoppsignal', 'stanna', 'sitt', 'ligg',
+      'koppel', 'hantering', 'socialisering',
+      'fokus', 'impulskontroll', 'stadga', 'orientering',
+      'nosework',
+      // Ingen hunting/apportering/vatten som standard för MAS
+    ]
+  }
+
+  // Fallback för okända raser
   return [
-    'namn',
-    'inkallning',
-    'sitt',
-    'ligg',
-    'stanna',
-    'koppel',
-    'hantering',
-    'socialisering',
-    'stoppsignal',
-    'fokus',
-    'apportering',
-    'vatten',
+    'namn', 'inkallning', 'sitt', 'ligg', 'stanna',
+    'koppel', 'hantering', 'socialisering', 'stoppsignal',
+    'fokus', 'apportering', 'vatten',
   ]
 }
 
@@ -104,7 +92,9 @@ export async function generateWeekPlan(
   breed: Breed,
   trainingWeek: number,
   ageWeeks?: number,
-  goals?: TrainingGoal[]
+  goals?: TrainingGoal[],
+  onboardingContext?: string,
+  performanceSummary?: string
 ): Promise<WeekPlan> {
   let chunks: import('@/types').ChunkMatch[] = []
   try {
@@ -131,15 +121,19 @@ export async function generateWeekPlan(
     : ''
 
   const goalRules = goals && goals.length > 0
-    ? goals.map((g) => `Målregel (${GOAL_LABELS[g]}): ${GOAL_RULES[g]}`).join('\n')
+    ? goals.map((g) => GOAL_RULES[g] ? `Målregel (${GOAL_LABELS[g]}): ${GOAL_RULES[g]}` : null).filter(Boolean).join('\n')
     : ''
 
+  const breedSpecificRule = breed === 'braque_francais'
+    ? 'Rasregel (stående fågelhund): inkludera minst 1 av: stadga, orientering, kontrollerat_sok, impulskontroll under veckan.'
+    : breed === 'miniature_american_shepherd'
+    ? 'Rasregel (vallhund): inkludera impulskontroll och/eller stoppsignal minst 2 dagar. Varva rörelse med lugn-övningar.'
+    : null
+
   const idRules = [
-    breed === 'braque_francais'
-      ? 'Rasregel (stående fågelhund): inkludera minst 1 av: stadga, orientering, kontrollerat_sok, impulskontroll under veckan.'
-      : null,
+    breedSpecificRule,
     isPuppy
-      ? 'Valpregel: inkludera hantering och socialisering flera dagar. Inga “tunga” distans/störnings-ökningar.'
+      ? 'Valpregel: inkludera hantering och socialisering flera dagar. Inga "tunga" distans/störnings-ökningar.'
       : null,
     goalRules || null,
   ].filter(Boolean).join('\n')
@@ -148,10 +142,18 @@ export async function generateWeekPlan(
     ? `\nBiologisk ålder: ${ageWeeks} veckor. Anpassa belastning, passlängd och förväntningar efter detta.\n`
     : ''
 
+  const onboardingSection = onboardingContext
+    ? `\n=== TRÄNARKONTEXT ===\n${onboardingContext}\n`
+    : ''
+
+  const performanceSection = performanceSummary
+    ? `\n=== SENASTE PRESTATION (anpassa nästkommande vecka efter detta) ===\n${performanceSummary}\nJustera svårighetsgrad och val av övningar baserat på ovanstående.\n`
+    : ''
+
   const systemPrompt = `Du är DogVantage träningsassistent för rasen ${breed}. Returnera ett veckoschema som giltig JSON.
 
 ${formatBreedProfile(breed)}
-${ageInfo}${typeof ageWeeks === 'number' && Number.isFinite(ageWeeks) ? formatCurrentPhase(ageWeeks) : ''}${goalContext}
+${ageInfo}${typeof ageWeeks === 'number' && Number.isFinite(ageWeeks) ? formatCurrentPhase(ageWeeks) : ''}${goalContext}${onboardingSection}${performanceSection}
 ${documentContext ? `\n=== KÄLLDOKUMENT ===\n${documentContext}\n` : ''}
 Returnera ENBART detta JSON-schema (inga förklaringar, inga kommentarer):
 {

@@ -7,7 +7,7 @@ import WeekView from './WeekView'
 import SessionLogForm from '@/components/SessionLogForm'
 import ExerciseGuideSheet from '@/components/ExerciseGuideSheet'
 import styles from './TrainingCard.module.css'
-import type { Breed, TrainingGoal, WeekPlan, Exercise, DailyExerciseMetrics, LatencyBucket, ExerciseSummary } from '@/types'
+import type { Breed, TrainingGoal, TrainingEnvironment, RewardPreference, WeekPlan, Exercise, DailyExerciseMetrics, LatencyBucket, ExerciseSummary } from '@/types'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
 
 const SWEDISH_DAYS = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag']
@@ -23,9 +23,12 @@ interface Props {
   dogName: string
   dogKey: string
   goals?: TrainingGoal[]
+  environment?: TrainingEnvironment
+  rewardPreference?: RewardPreference
+  takesRewardsOutdoors?: boolean
 }
 
-export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, dogKey, goals }: Props) {
+export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, dogKey, goals, environment, rewardPreference, takesRewardsOutdoors }: Props) {
   const router = useRouter()
   const [weekPlan, setWeekPlan] = useState<WeekPlan | null>(null)
   const [progress, setProgress] = useState<Record<string, number>>({})
@@ -44,7 +47,7 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
     setError(false)
     try {
       const [planRes, progressRes, metricsRes] = await Promise.all([
-        fetch(`/api/training/week?breed=${breed}&week=${trainingWeek}&ageWeeks=${ageWeeks}${goals && goals.length > 0 ? `&goals=${goals.join(',')}` : ''}`),
+        fetch(`/api/training/week?breed=${breed}&week=${trainingWeek}&ageWeeks=${ageWeeks}${goals && goals.length > 0 ? `&goals=${goals.join(',')}` : ''}${dogKey ? `&dogKey=${dogKey}` : ''}${environment ? `&environment=${environment}` : ''}${rewardPreference ? `&rewardPreference=${rewardPreference}` : ''}${takesRewardsOutdoors != null ? `&takesRewardsOutdoors=${takesRewardsOutdoors}` : ''}`),
         fetch(`/api/training/progress?breed=${breed}&date=${todayDate}&dogKey=${encodeURIComponent(dogKey)}`),
         fetch(`/api/training/metrics?breed=${breed}&date=${todayDate}&dogKey=${encodeURIComponent(dogKey)}`),
       ])

@@ -26,13 +26,14 @@ function formatMetricsForPrompt(metrics: Record<string, import('@/types').DailyE
 
 export async function POST(req: NextRequest) {
   try {
-    const { query, breed, weekNumber, ageWeeks, trainingWeek, dogKey } = await req.json() as {
+    const { query, breed, weekNumber, ageWeeks, trainingWeek, dogKey, onboardingContext } = await req.json() as {
       query: string
       breed: Breed
       weekNumber?: number
       ageWeeks?: number
       trainingWeek?: number
       dogKey?: string
+      onboardingContext?: string
     }
 
     if (!query || !breed) {
@@ -57,7 +58,7 @@ export async function POST(req: NextRequest) {
     }
 
     const phaseAgeWeeks = typeof ageWeeks === 'number' ? ageWeeks : (typeof weekNumber === 'number' ? weekNumber : undefined)
-    const result = await queryRAG(query, breed, logStrings, phaseAgeWeeks, metricsStrings)
+    const result = await queryRAG(query, breed, logStrings, phaseAgeWeeks, metricsStrings, onboardingContext)
     return NextResponse.json(result)
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)

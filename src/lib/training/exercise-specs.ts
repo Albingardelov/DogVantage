@@ -562,6 +562,220 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       ],
     },
   }),
+  socialisering: spec({
+    exerciseId: 'socialisering',
+    definition: 'Lyckad rep när hunden exponeras för ett nytt stimuli (ljud, yta, människa, djur) och förblir lugn och nyfiken utan stress.',
+    ladder: [
+      { id: 'home_objects', label: 'Inne · föremål', criteria: 'Låt hunden utforska nytt föremål i lugn takt. Belöna nyfikenhet.' },
+      { id: 'outdoor_low', label: 'Ute · låg störning', criteria: 'Ny miljö med lite folk. Observera, belöna lugn.' },
+      { id: 'outdoor_people', label: 'Ute · människor', criteria: 'Passerar förbi folk på lagom avstånd. Belöna avslappnad kroppspostur.' },
+      { id: 'outdoor_busy', label: 'Ute · hög stimulans', criteria: 'Trafik, barn, andra hundar på avstånd. Fokus på lugn och orientering mot ägaren.' },
+    ],
+    troubleshooting: [
+      'Öka avstånd till triggern och belöna för varje liten lugn stund.',
+      'Gå till enklare miljö och bygg upp positivt igen.',
+      'Tvinga aldrig — låt hunden välja avstånd.',
+    ],
+    guide: {
+      setup: [
+        'Välj ett nytt stimuli per session.',
+        'Ha hög-värde belöning redo.',
+        'Mål: hunden väljer att utforska, inte att fly eller frys.',
+      ],
+      steps: [
+        'Placera dig och hunden på tryggt avstånd från stimulit.',
+        'Belöna varje blick mot stimulit som är lugn och nyfiken.',
+        'Minska avstånd BARA om hunden är avslappnad och väljer att gå närmre.',
+        'Avsluta efter 2–5 lyckade interaktioner.',
+      ],
+      logging: [
+        'Lyckad = hunden närmade sig/passerade/tittade på stimulit utan stress.',
+        'Miss = hunden frös, flydde, skällde eller visade tydlig stress.',
+        'Latens = hur snabbt hunden "återhämtar sig" och blir nyfiken igen.',
+      ],
+      commonMistakes: [
+        'Tvinga hunden för nära för fort.',
+        'Belöna när hunden är stressad (förstärker stresstillståndet).',
+        'För många nya stimuli per session — välj ett åt gången.',
+      ],
+      stopRules: [
+        'Tydliga stresssignaler (gäsp, slicka sig, undvikande) → öka avstånd och avsluta.',
+        'Om hunden vägrar ta belöning → för svårt, gå till enklare miljö.',
+      ],
+    },
+  }),
+
+  fokus: spec({
+    exerciseId: 'fokus',
+    definition: 'Lyckad rep när hunden håller ögonkontakt med föraren i minst 2 sekunder trots distraktion.',
+    ladder: [
+      { id: 'home_no_distraction', label: 'Inne · ingen störning', criteria: 'Be om ögonkontakt 2 sek. Belöna direkt.' },
+      { id: 'home_mild', label: 'Inne · mild störning', criteria: '2–3 sek kontakt med någon rörelse i bakgrunden.' },
+      { id: 'outdoor_low', label: 'Ute · låg störning', criteria: 'Kort kontakt i lugn utemiljö. Belöna tätt.' },
+      { id: 'outdoor_medium', label: 'Ute · medel störning', criteria: '3–5 sek kontakt med folk/hundar på avstånd.' },
+    ],
+    troubleshooting: [
+      'Belöna kortare ögonkontakt (0,5 sek) och bygg upp gradvis.',
+      'Minska störning och öka belöningsvärde.',
+      'Träna "fokus" vid lugnare tillfällen och bygg upp association.',
+    ],
+    guide: {
+      setup: [
+        'Stå still. Ha belöning gömd i handen bakom ryggen.',
+        'Vänta på spontan ögonkontakt — belöna.',
+      ],
+      steps: [
+        'Stå still i lugn miljö. Vänta 1–5 sek på att hunden tittar upp på dig.',
+        'Märk exakt när ögonkontakt sker → belöna direkt.',
+        'Bygg upp duration: belöna efter 1s, 2s, 3s.',
+        'Lägg gradvis in distraktion i bakgrunden.',
+      ],
+      logging: [
+        'Lyckad = ögonkontakt i minst 2 sek i aktuell miljö.',
+        'Miss = hunden tittar bort/iväg innan 2 sek.',
+        'Latens = hur lång tid det tar tills hunden tittar upp.',
+      ],
+      commonMistakes: [
+        'Säger hundens namn upprepade gånger för att "tvinga" kontakt.',
+        'Ökar distraktion och duration samtidigt.',
+        'Belönar för sent (ögonkontakten har redan brutits).',
+      ],
+      stopRules: [
+        'Tre missar i rad → gå till ingen-störning-version och avsluta efter 1 lyckad.',
+      ],
+    },
+  }),
+
+  apportering: spec({
+    exerciseId: 'apportering',
+    definition: 'Lyckad rep när hunden hämtar objektet, bär det tillbaka mjukt och lämnar det i handen.',
+    ladder: [
+      { id: 'home_take', label: 'Inne · ta', criteria: 'Hunden tar objektet i munnen frivilligt. Belöna direkt.' },
+      { id: 'home_carry', label: 'Inne · bär', criteria: 'Bär objektet 2–3 steg tillbaka till dig. Belöna generöst.' },
+      { id: 'home_deliver', label: 'Inne · lämna', criteria: 'Hunden håller kvar tills du öppnar handen/säger "lämna". Byt mot godis.' },
+      { id: 'outdoor_short', label: 'Ute · kort kast', criteria: 'Kast 3–5 meter. Hämtar och återvänder. Belöna vid leverans.' },
+      { id: 'outdoor_distraction', label: 'Ute · störning', criteria: 'Apportering med mild distraktion i närheten.' },
+    ],
+    troubleshooting: [
+      'Om hunden inte tar objektet: lägg det på marken och belöna varje beröring.',
+      'Om hunden springer iväg med det: bli intressant (backa, squeak) — aldrig jaga.',
+      'Om hunden tappar det tidigt: belöna för kortare bärning och bygg upp.',
+    ],
+    guide: {
+      setup: [
+        'Välj ett objekt hunden gillar (mjukt dummy, leksak).',
+        'Träna inne i kort korridor eller liten yta.',
+        'Ha belöning redo för utbyte.',
+      ],
+      steps: [
+        'Visa objektet, kasta 0,5–1 meter.',
+        'Uppmuntra med glad röst när hunden tar det.',
+        'Backa 1–2 steg → hunden kommer naturligt mot dig.',
+        'Byt objektet mot belöning ("lämna").',
+      ],
+      logging: [
+        'Lyckad = komplett kedja: hämtar → bär → lämnar i handen.',
+        'Miss = hunden hämtar inte, springer iväg, eller vägrar lämna.',
+        'Latens = hur snabbt hunden sätter sig i rörelse mot kastet.',
+      ],
+      commonMistakes: [
+        'Kastar för långt för tidigt.',
+        'Springer efter hunden som flyr med objektet.',
+        'Tar objektet för snabbt utan "lämna"-signal — hunden lär sig att hålla fast.',
+      ],
+      stopRules: [
+        'Tre missar i rad → minska kastet till 0,5 m och avsluta efter 1 lyckad.',
+        'Om hunden tröttnar → gör 1 kort kast och avsluta.',
+      ],
+    },
+  }),
+
+  vatten: spec({
+    exerciseId: 'vatten',
+    definition: 'Lyckad rep när hunden frivilligt kliver/simmar in i vatten på uppmuntran.',
+    ladder: [
+      { id: 'puddle', label: 'Pöl / grunt', criteria: 'Kliver i pöl eller vid vattenkanten. Belöna varje steg in.' },
+      { id: 'knee_deep', label: 'Knädjupt', criteria: 'Vadare. Frivilligt. Inga tvång.' },
+      { id: 'swim_short', label: 'Simning · kort', criteria: 'Simmar 1–2 meter och återvänder. Belöna generöst vid retur.' },
+      { id: 'retrieve_water', label: 'Apportering i vatten', criteria: 'Hämtar dummy i grunt vatten och levererar.' },
+    ],
+    troubleshooting: [
+      'Tvinga aldrig in hunden — det skapar negativ association som är svår att reparera.',
+      'Börja med stillastående grunt vatten och lek nära kanten.',
+      'Om hunden är rädd: gå tillbaka till pöl/kanten och belöna närvaro.',
+    ],
+    guide: {
+      setup: [
+        'Välj stillastående, grunt vatten (strand/bäck) i lugn miljö.',
+        'Ha hög-värde belöning och leksak redo.',
+        'Kliv gärna i vattnet själv — hunden följer ofta.',
+      ],
+      steps: [
+        'Låt hunden sniffa och utforska kanten. Belöna nyfikenhet.',
+        'Kasta belöning/leksak nära kanten i vattnet.',
+        'Öka gradvis djupet och kastet när hunden är trygg.',
+        'Avsluta alltid innan hunden är trött/kall.',
+      ],
+      logging: [
+        'Lyckad = hunden gick/simmade in frivilligt på given signal/uppmuntran.',
+        'Miss = hunden vägrar, drar sig tillbaka, eller visar stress.',
+        'Latens = hur snabbt hunden agerar efter uppmuntran.',
+      ],
+      commonMistakes: [
+        'Bära/tvinga in hunden i vatten — skapar rädsla.',
+        'Kalla på hunden in mot djupare vatten för fort.',
+        'Träna när hunden är kall, trött eller ledsen.',
+      ],
+      stopRules: [
+        'Tydliga rädslosignaler → avsluta sessionen och bygg upp nästa gång från grunt.',
+        'Om hunden skakar/är kall → avsluta.',
+      ],
+    },
+  }),
+
+  nosework: spec({
+    exerciseId: 'nosework',
+    definition: 'Lyckad rep när hunden hittar gömd doft/belöning och indikerar platsen tydligt (sitter/pöser/pekar).',
+    ladder: [
+      { id: 'box_1', label: 'Boxsök · 1 box', criteria: 'En box med belöning, 2–3 tomma. Hunden hittar och indikerar.' },
+      { id: 'box_multi', label: 'Boxsök · flera boxar', criteria: '5–8 boxar. Söker systematiskt och stannar vid rätt.' },
+      { id: 'room_search', label: 'Rumssök', criteria: 'Doften gömd i rummet (ej i box). Systematiskt sök.' },
+      { id: 'outdoor_search', label: 'Utomhussök', criteria: 'Söker i avgränsat utomhusområde. Hittar och indikerar.' },
+    ],
+    troubleshooting: [
+      'Om hunden tappar intresset: gör boxen med belöningen uppenbar och belöna snabbt.',
+      'Om hunden gissar slumpmässigt: öka värdet på belöningen vid rätt box.',
+      'Korta pass (3–5 sök) och avsluta med en lätt vinst.',
+    ],
+    guide: {
+      setup: [
+        'Börja med mat-doft (godis i box) — inte nödvändigt med specifik doft.',
+        'Starta med 1 box utan lock, bygg upp till stängda boxar.',
+        'Sätt upp en tydlig "sök"-signal.',
+      ],
+      steps: [
+        'Placera belöning i en av 3 boxar. Låt hunden se dig (intro-fas).',
+        'Säg "sök" och låt hunden hitta. Belöna generöst direkt.',
+        'Öka antal boxar och döm belöningen bättre.',
+        'Byt till doftpinne (t.ex. birch) när hunden förstår spelet.',
+      ],
+      logging: [
+        'Lyckad = hunden indikerar korrekt box/plats utan att "gissa runt".',
+        'Miss = hunden ger upp, indikerar fel, eller söker för ytligt.',
+        'Latens = tid från "sök" till korrekt indikering.',
+      ],
+      commonMistakes: [
+        'För svårt för tidigt (för många boxar, för dold doft).',
+        'Belönar "nästan rätt" — hunden lär sig att ge svaga indikeringar.',
+        'Tränar för länge — nosework är mentalt utmattande.',
+      ],
+      stopRules: [
+        'Tre missar i rad → gör ett lätt fynd och avsluta.',
+        'Om hunden verkar mentalt trött (ointresserad, söker ytligt) → avsluta.',
+      ],
+    },
+  }),
+
 } as const
 
 export function getExerciseSpec(exerciseId: string): ExerciseSpec | null {

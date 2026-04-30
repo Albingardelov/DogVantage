@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { saveDogProfile } from '@/lib/dog/profile'
 import { saveDogPhoto } from '@/lib/dog/photo'
 import { getAgeInWeeks } from '@/lib/dog/age'
+import { BREED_PROFILES } from '@/lib/ai/breed-profiles'
 import type { Breed, DogProfile, OnboardingPrefs, RewardPreference, TrainingEnvironment, TrainingGoal } from '@/types'
 import styles from './DogProfileForm.module.css'
 
@@ -12,6 +13,7 @@ const BREEDS: { value: Breed; label: string }[] = [
   { value: 'braque_francais', label: 'Braque Français' },
   { value: 'labrador', label: 'Labrador Retriever' },
   { value: 'italian_greyhound', label: 'Italiensk Vinthund' },
+  { value: 'miniature_american_shepherd', label: 'Miniature American Shepherd' },
 ]
 
 const TOTAL_STEPS = 4
@@ -21,8 +23,22 @@ export const GOALS: { value: TrainingGoal; label: string }[] = [
   { value: 'everyday_obedience', label: 'Vardagslydnad' },
   { value: 'sport', label: 'Sport / tävling' },
   { value: 'hunting', label: 'Jakt / bruk' },
+  { value: 'herding', label: 'Vallning' },
+  { value: 'impulse_control', label: 'Impulskontroll & lugn' },
+  { value: 'nosework', label: 'Nosework / doftsök' },
   { value: 'problem_solving', label: 'Lösa problem (t.ex. koppel/inkallning)' },
 ]
+
+function getGoalsForBreed(breed: Breed | ''): { value: TrainingGoal; label: string }[] {
+  if (!breed) return GOALS
+  const profile = BREED_PROFILES[breed]
+  return GOALS.filter((g) => !profile.hiddenGoals.includes(g.value))
+}
+
+function getDefaultGoalsForBreed(breed: Breed | ''): TrainingGoal[] {
+  if (!breed) return ['everyday_obedience']
+  return BREED_PROFILES[breed].suggestedGoals
+}
 
 export const ENVIRONMENTS: { value: TrainingEnvironment; label: string }[] = [
   { value: 'city', label: 'Stad (mycket folk/hundar)' },
@@ -47,6 +63,11 @@ export default function DogProfileForm() {
   const [breed, setBreed] = useState<Breed | ''>('')
   const [birthdate, setBirthdate] = useState('')
   const [goals, setGoals] = useState<TrainingGoal[]>(['everyday_obedience'])
+
+  function handleBreedChange(value: Breed) {
+    setBreed(value)
+    setGoals(getDefaultGoalsForBreed(value))
+  }
   const [environment, setEnvironment] = useState<TrainingEnvironment>('suburb')
   const [rewardPreference, setRewardPreference] = useState<RewardPreference>('mixed')
   const [takesRewardsOutdoors, setTakesRewardsOutdoors] = useState(true)
@@ -186,7 +207,7 @@ export default function DogProfileForm() {
                       type="button"
                       role="radio"
                       aria-checked={selected}
-                      onClick={() => setBreed(b.value)}
+                      onClick={() => handleBreedChange(b.value)}
                       className={`${styles.breedOption} ${selected ? styles.breedOptionSelected : ''}`}
                     >
                       <span>{b.label}</span>
@@ -238,7 +259,7 @@ export default function DogProfileForm() {
               label="Mål (välj ett eller flera)"
               values={goals}
               onChange={(v) => setGoals(v as TrainingGoal[])}
-              options={GOALS}
+              options={getGoalsForBreed(breed)}
             />
 
             <ChoiceField

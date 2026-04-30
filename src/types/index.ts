@@ -1,4 +1,4 @@
-export type Breed = 'labrador' | 'italian_greyhound' | 'braque_francais'
+export type Breed = 'labrador' | 'italian_greyhound' | 'braque_francais' | 'miniature_american_shepherd'
 
 /**
  * 'general' is used for documents that apply to all breeds
@@ -29,6 +29,9 @@ export type TrainingGoal =
   | 'everyday_obedience'
   | 'sport'
   | 'hunting'
+  | 'herding'
+  | 'impulse_control'
+  | 'nosework'
   | 'problem_solving'
 
 export type TrainingEnvironment =
