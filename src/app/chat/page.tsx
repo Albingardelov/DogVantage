@@ -8,7 +8,7 @@ import Avatar from '@/components/Avatar'
 import BottomNav from '@/components/BottomNav'
 import { getDogProfile } from '@/lib/dog/profile'
 import { getAgeInWeeks } from '@/lib/dog/age'
-import { formatBehaviorProfile } from '@/lib/dog/behavior'
+import { buildBehaviorContext } from '@/lib/dog/behavior'
 import type { DogProfile, TrainingEnvironment, RewardPreference } from '@/types'
 
 const ENV_LABELS: Record<TrainingEnvironment, string> = {
@@ -32,10 +32,10 @@ function buildOnboardingContext(profile: DogProfile): string | undefined {
   if (prefs?.takesRewardsOutdoors != null) {
     lines.push(`Tar belöning utomhus: ${prefs.takesRewardsOutdoors ? 'Ja' : 'Nej — prioritera inne-träning eller extra hög-värde belöning ute'}`)
   }
-  const behaviorProfile = profile.assessment?.behaviorProfile
-  if (behaviorProfile) {
+  const behaviorContext = buildBehaviorContext(profile)
+  if (behaviorContext) {
     lines.push('')
-    lines.push(formatBehaviorProfile(behaviorProfile))
+    lines.push(behaviorContext)
   }
   return lines.length > 0 ? lines.join('\n') : undefined
 }

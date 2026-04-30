@@ -49,7 +49,7 @@ export const HOUSEHOLD_PET_LABELS: Record<HouseholdPet, string> = {
  * Returns extra training notes for risky pet combinations (e.g. hunting breed + outdoor cats).
  * These are appended to the AI prompt to ensure the right precautions are flagged.
  */
-function householdPetNotes(pets: HouseholdPet[]): string[] {
+export function householdPetNotes(pets: HouseholdPet[]): string[] {
   const notes: string[] = []
   if (pets.includes('cats_outdoor')) {
     notes.push(
@@ -105,5 +105,25 @@ export function formatBehaviorProfile(bp: BehaviorProfile): string {
   }
 
   lines.push('Anpassa träningsinnehåll, progression och rådgivning utifrån beteendeprofilen ovan.')
+  return lines.join('\n')
+}
+
+/**
+ * Builds a behavior context string from whichever source is available:
+ * - Full BehaviorProfile from assessment (preferred)
+ * - Partial context from onboarding householdPets only (fallback for new dogs)
+ */
+export function buildBehaviorContext(profile: {
+  assessment?: { behaviorProfile?: BehaviorProfile }
+  onboarding?: { householdPets?: HouseholdPet[] }
+}): string | undefined {
+  if (profile.assessment?.behaviorProfile) {
+    return formatBehaviorProfile(profile.assessment.behaviorProfile)
+  }
+  const pets = profile.onboarding?.householdPets ?? []
+  if (pets.length === 0) return undefined
+  const lines = ['=== HUSDJUR I HEMMET ===']
+  lines.push(`Husdjur: ${pets.map((p) => HOUSEHOLD_PET_LABELS[p]).join(', ')}`)
+  for (const note of householdPetNotes(pets)) lines.push(note)
   return lines.join('\n')
 }

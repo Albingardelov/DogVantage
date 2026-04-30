@@ -53,6 +53,8 @@ export interface OnboardingPrefs {
    * If true, user reports the dog reliably takes rewards outdoors.
    */
   takesRewardsOutdoors: boolean
+  /** Other animals living in the same household — captured at onboarding */
+  householdPets?: HouseholdPet[]
 }
 
 // ─── Behavior profile (collected in assessment step 1) ───────────────────────

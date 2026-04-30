@@ -6,7 +6,8 @@ import { saveDogProfile } from '@/lib/dog/profile'
 import { saveDogPhoto } from '@/lib/dog/photo'
 import { getAgeInWeeks } from '@/lib/dog/age'
 import { BREED_PROFILES } from '@/lib/ai/breed-profiles'
-import type { Breed, DogProfile, OnboardingPrefs, RewardPreference, TrainingEnvironment, TrainingGoal } from '@/types'
+import { HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'
+import type { Breed, DogProfile, HouseholdPet, OnboardingPrefs, RewardPreference, TrainingEnvironment, TrainingGoal } from '@/types'
 import styles from './DogProfileForm.module.css'
 
 const BREEDS: { value: Breed; label: string }[] = [
@@ -18,6 +19,7 @@ const BREEDS: { value: Breed; label: string }[] = [
 
 const TOTAL_STEPS = 4
 const STEP_TITLES = ['Lägg till ett foto', 'Om din hund', 'När är hunden född?', 'Hur vill du använda appen?']
+const ALL_HOUSEHOLD_PETS = Object.keys(HOUSEHOLD_PET_LABELS) as HouseholdPet[]
 
 export const GOALS: { value: TrainingGoal; label: string }[] = [
   { value: 'everyday_obedience', label: 'Vardagslydnad' },
@@ -71,6 +73,13 @@ export default function DogProfileForm() {
   const [environment, setEnvironment] = useState<TrainingEnvironment>('suburb')
   const [rewardPreference, setRewardPreference] = useState<RewardPreference>('mixed')
   const [takesRewardsOutdoors, setTakesRewardsOutdoors] = useState(true)
+  const [householdPets, setHouseholdPets] = useState<HouseholdPet[]>([])
+
+  function togglePet(p: HouseholdPet) {
+    setHouseholdPets((prev) =>
+      prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]
+    )
+  }
 
   function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -106,6 +115,7 @@ export default function DogProfileForm() {
       environment,
       rewardPreference,
       takesRewardsOutdoors,
+      householdPets: householdPets.length > 0 ? householdPets : undefined,
     }
     const profile: DogProfile = {
       name: name.trim(),
@@ -294,6 +304,28 @@ export default function DogProfileForm() {
                       className={`${styles.breedOption} ${selected ? styles.breedOptionSelected : ''}`}
                     >
                       <span>{o.label}</span>
+                      {selected && <span aria-hidden="true">✓</span>}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className={styles.field}>
+              <span className={styles.label}>Finns det andra husdjur hemma? <span style={{ fontWeight: 400, color: 'var(--color-text-muted)', fontSize: 'var(--text-xs)' }}>(valfritt)</span></span>
+              <div className={styles.breedList} role="group" aria-label="Husdjur hemma">
+                {ALL_HOUSEHOLD_PETS.map((p) => {
+                  const selected = householdPets.includes(p)
+                  return (
+                    <button
+                      key={p}
+                      type="button"
+                      role="checkbox"
+                      aria-checked={selected}
+                      onClick={() => togglePet(p)}
+                      className={`${styles.breedOption} ${selected ? styles.breedOptionSelected : ''}`}
+                    >
+                      <span>{HOUSEHOLD_PET_LABELS[p]}</span>
                       {selected && <span aria-hidden="true">✓</span>}
                     </button>
                   )
