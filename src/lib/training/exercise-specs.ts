@@ -733,6 +733,50 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
     },
   }),
 
+  vallning: spec({
+    exerciseId: 'vallning',
+    definition: 'Lyckad rep när hunden visar kontrollerat vallningsbeteende (eye, crouch, flank) och kan avbryta/komma in på signal.',
+    ladder: [
+      { id: 'follow_handler', label: 'Följ hanteraren', criteria: 'Hunden rör sig med hanteraren runt en trigger (boll/cone). Belöna nära kontakt.' },
+      { id: 'eye_cone', label: 'Eye mot kon', criteria: 'Hunden "låser" blicken (eye) mot ett objekt på kommando. Belöna stillhet + fokus.' },
+      { id: 'flank_short', label: 'Kort flank', criteria: 'Hunden rör sig ett halvt varv runt objektet på signal ("fot" / "bort"). Belöna smidig rörelse.' },
+      { id: 'stop_on_signal', label: 'Stopp i rörelse', criteria: 'Hunden stannar mitt i flanken på stoppsignal. Kombinerar vallning + impulskontroll.' },
+      { id: 'livestock_intro', label: 'Boskap intro', criteria: 'Hunden introduceras för boskap på lina med lugnt kroppsspråk. Belöna avspänning.' },
+    ],
+    troubleshooting: [
+      'Om hunden går upp i varv/kastar sig: öka avstånd till "bytet" och belöna stillhet.',
+      'Blanda alltid in stoppsignal/impulskontroll — vallning utan stopp är okontrollerad instinkt.',
+      'Korta pass (3–5 min) — vallning är mentalt och fysiskt intensivt.',
+    ],
+    guide: {
+      setup: [
+        'Börja utan boskap — använd en boll, kon eller skateboard som "byte".',
+        'Ha stoppsignal säkert inlärd INNAN du introducerar rörliga triggers.',
+        'Lina vid all kontakt med boskap tills hunden är pålitlig på stopp.',
+      ],
+      steps: [
+        'Rör dig runt objektet och belöna hunden för att följa i kontrollerat tempo.',
+        'Introducera "eye": peka mot objektet → belöna när hunden låser blicken.',
+        'Lägg till en kort flanksida (halv cirkel) på signal.',
+        'Avbryt med stoppsignal eller "här" och belöna lydig avslutning.',
+      ],
+      logging: [
+        'Lyckad = hunden visade kontrollerat vallningsbeteende och stannade på signal.',
+        'Miss = hunden tappade kontrollen, ignorerade stopp eller gick upp i stress.',
+        'Latens = hur snabbt hunden svarar på stoppkommando mitt i vallningsrörelsen.',
+      ],
+      commonMistakes: [
+        'Träna vallning utan inlärd stoppsignal — instinkten tar över.',
+        'För tidigt kontakt med boskap utan tillräcklig impulskontroll.',
+        'Passen blir för långa — hunden hetsar upp sig.',
+      ],
+      stopRules: [
+        'Hunden ignorerar stoppsignal → avsluta sessionen och träna impulskontroll separat.',
+        'Tydlig stress/jakt-beteende → öka avstånd och avsluta.',
+      ],
+    },
+  }),
+
   nosework: spec({
     exerciseId: 'nosework',
     definition: 'Lyckad rep när hunden hittar gömd doft/belöning och indikerar platsen tydligt (sitter/pöser/pekar).',

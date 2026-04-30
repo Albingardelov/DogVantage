@@ -10,7 +10,7 @@ export const GOAL_EXERCISE_IDS: Record<TrainingGoal, string[]> = {
   everyday_obedience: ['namn', 'inkallning', 'koppel', 'stanna', 'hantering', 'socialisering'],
   sport:              ['namn', 'stanna', 'sitt', 'ligg', 'inkallning', 'fokus'],
   hunting:            ['inkallning', 'stoppsignal', 'stadga', 'orientering', 'kontrollerat_sok', 'apportering', 'vatten'],
-  herding:            ['inkallning', 'stoppsignal', 'impulskontroll', 'stadga', 'orientering', 'fokus'],
+  herding:            ['vallning', 'inkallning', 'stoppsignal', 'impulskontroll', 'stadga', 'orientering', 'fokus'],
   impulse_control:    ['impulskontroll', 'stanna', 'stadga', 'namn', 'hantering'],
   nosework:           ['nosework', 'inkallning', 'stanna'],
   problem_solving:    ['koppel', 'inkallning', 'stadga', 'impulskontroll', 'orientering', 'fokus'],

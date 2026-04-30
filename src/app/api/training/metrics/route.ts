@@ -3,7 +3,7 @@ import { getMetrics, upsertMetrics } from '@/lib/supabase/daily-exercise-metrics
 import { getExerciseSpec, isValidCriteriaLevel } from '@/lib/training/exercise-specs'
 import type { Breed, DailyExerciseMetrics, LatencyBucket } from '@/types'
 
-const VALID_BREEDS = ['labrador', 'italian_greyhound', 'braque_francais'] as const
+const VALID_BREEDS = ['labrador', 'italian_greyhound', 'braque_francais', 'miniature_american_shepherd'] as const
 const VALID_LATENCY: LatencyBucket[] = ['lt1s', '1to3s', 'gt3s']
 
 function isValidBreed(breed: unknown): breed is Breed {

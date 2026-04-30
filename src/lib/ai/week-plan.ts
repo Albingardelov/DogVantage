@@ -41,7 +41,7 @@ function allowedExerciseIdsForBreed(breed: Breed, ageWeeks?: number): string[] {
       'koppel', 'hantering', 'socialisering',
       'fokus', 'impulskontroll', 'stadga', 'orientering',
       'nosework',
-      // Ingen hunting/apportering/vatten som standard för MAS
+      ...(isPuppy ? [] : ['vallning']), // introduseras från ungdomsfas och framåt
     ]
   }
 
@@ -124,10 +124,14 @@ export async function generateWeekPlan(
     ? goals.map((g) => GOAL_RULES[g] ? `Målregel (${GOAL_LABELS[g]}): ${GOAL_RULES[g]}` : null).filter(Boolean).join('\n')
     : ''
 
+  const isMasAdult = breed === 'miniature_american_shepherd' && !(typeof ageWeeks === 'number' && ageWeeks < 26)
+
   const breedSpecificRule = breed === 'braque_francais'
     ? 'Rasregel (stående fågelhund): inkludera minst 1 av: stadga, orientering, kontrollerat_sok, impulskontroll under veckan.'
+    : isMasAdult
+    ? 'Rasregel (vallhund, ungdom/vuxen): inkludera vallning minst 1 dag per vecka. Inkludera impulskontroll och/eller stoppsignal minst 2 dagar. Varva rörelse med lugn-övningar.'
     : breed === 'miniature_american_shepherd'
-    ? 'Rasregel (vallhund): inkludera impulskontroll och/eller stoppsignal minst 2 dagar. Varva rörelse med lugn-övningar.'
+    ? 'Rasregel (vallhund, valp): inkludera impulskontroll och hantering varje vecka. Inga direkta vallningsövningar ännu — bygg grunden.'
     : null
 
   const idRules = [
