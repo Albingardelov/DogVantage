@@ -76,6 +76,11 @@ function Log() {
             <span className={styles.subtitle}>
               {loading ? 'Laddar…' : `${logs.length} pass loggade`}
             </span>
+            {!loading && logs.length > 0 && (
+              <span className={styles.listHint}>
+                Tryck på ett pass för att visa övningar och mer information.
+              </span>
+            )}
           </div>
         </div>
 
@@ -109,6 +114,7 @@ function Log() {
           const date = DATE_FMT.format(new Date(log.created_at))
           const isExpanded = expandedId === log.id
           const hasExercises = log.exercises && log.exercises.length > 0
+          const detailLabel = `${meta.label} ${date}, programvecka ${log.week_number}`
           return (
             <article
               key={log.id}
@@ -117,6 +123,11 @@ function Log() {
               role="button"
               tabIndex={0}
               aria-expanded={isExpanded}
+              aria-label={
+                isExpanded
+                  ? `Dölj detaljer för pass: ${detailLabel}`
+                  : `Visa detaljer för pass: ${detailLabel}`
+              }
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault()
@@ -131,7 +142,12 @@ function Log() {
                   <span className={styles.dateLabel}>{date}</span>
                 </div>
                 <span className={styles.weekLabel}>v.{log.week_number}</span>
-                <span className={`${styles.chevron} ${isExpanded ? styles.chevronOpen : ''}`} aria-hidden="true">›</span>
+                <div className={styles.cardAction}>
+                  <span className={styles.expandHint}>{isExpanded ? 'Dölj' : 'Visa mer'}</span>
+                  <span className={`${styles.chevron} ${isExpanded ? styles.chevronOpen : ''}`} aria-hidden="true">
+                    ›
+                  </span>
+                </div>
               </div>
 
               <div className={styles.dotsRow}>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import ProfileGuard from '@/components/ProfileGuard'
@@ -12,7 +12,7 @@ import { getDogProfile } from '@/lib/dog/profile'
 import { getAgeInWeeks } from '@/lib/dog/age'
 import { buildBehaviorContext } from '@/lib/dog/behavior'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
-import type { DogProfile, BehaviorProfile } from '@/types'
+import type { DogProfile, BehaviorProfile, SessionLog } from '@/types'
 import styles from './page.module.css'
 
 export default function DashboardPage() {
@@ -99,6 +99,19 @@ function getContextualTips(profile: DogProfile, ageWeeks: number): ContextualTip
   return tips
 }
 
+/** Innevarande kalendervecka: måndag 00:00 – söndag 23:59 (lokal tid). */
+function getWeekRangeMs(now = new Date()): { start: number; end: number } {
+  const d = new Date(now)
+  const dow = d.getDay()
+  const offsetToMonday = dow === 0 ? -6 : 1 - dow
+  const start = new Date(d)
+  start.setDate(d.getDate() + offsetToMonday)
+  start.setHours(0, 0, 0, 0)
+  const end = new Date(start)
+  end.setDate(start.getDate() + 7)
+  return { start: start.getTime(), end: end.getTime() }
+}
+
 function getAgeAlert(ageWeeks: number): AgeAlert | null {
   if (ageWeeks >= 14 && ageWeeks <= 20) {
     return {
@@ -126,6 +139,7 @@ function Dashboard() {
       return JSON.parse(localStorage.getItem('dismissedTips') ?? '[]')
     } catch { return [] }
   })
+  const [weekStats, setWeekStats] = useState<{ count: number; avg: number | null } | null>(null)
 
   const ageWeeks = profile ? Math.max(1, getAgeInWeeks(profile.birthdate)) : 0
   const trainingWeek = profile?.trainingWeek ?? 1
@@ -139,8 +153,47 @@ function Dashboard() {
     return () => { alive = false }
   }, [])
 
+  const refreshWeekStats = useCallback(async () => {
+    if (!profile?.breed) return
+    try {
+      const { start, end } = getWeekRangeMs()
+      const params = new URLSearchParams({
+        breed: profile.breed,
+        from: new Date(start).toISOString(),
+        to: new Date(end).toISOString(),
+      })
+      const res = await fetch(`/api/logs?${params}`)
+      const data = await res.json()
+      if (!res.ok) {
+        setWeekStats({ count: 0, avg: null })
+        return
+      }
+      const weekLogs = data as SessionLog[]
+      const count = weekLogs.length
+      if (count === 0) {
+        setWeekStats({ count: 0, avg: null })
+        return
+      }
+      const sumScore = weekLogs.reduce((acc, l) => acc + (l.focus + l.obedience) / 2, 0)
+      setWeekStats({ count, avg: sumScore / count })
+    } catch (e) {
+      console.error('[dashboard week stats]', e)
+      setWeekStats({ count: 0, avg: null })
+    }
+  }, [profile?.breed])
+
+  useEffect(() => {
+    if (!profile?.breed) {
+      setWeekStats(null)
+      return
+    }
+    setWeekStats(null)
+    refreshWeekStats()
+  }, [profile?.breed, refreshWeekStats])
+
   function handleLogSaved() {
     setShowLogForm(false)
+    refreshWeekStats()
   }
 
   function dismissTip(id: string) {
@@ -260,10 +313,28 @@ function Dashboard() {
           />
         )}
 
-        <div className={styles.statsGrid}>
-          <StatCard label="Pass loggade" value="3" sub="denna vecka" tone="primary" />
-          <StatCard label="Snittbetyg" value="4.2" sub="fokus & lydnad" tone="accent" />
-        </div>
+        {profile && (
+          <div className={styles.statsGrid}>
+            <StatCard
+              label="Pass loggade"
+              value={weekStats === null ? '…' : String(weekStats.count)}
+              sub="denna vecka"
+              tone="primary"
+            />
+            <StatCard
+              label="Snittbetyg"
+              value={
+                weekStats === null
+                  ? '…'
+                  : weekStats.avg === null
+                    ? '—'
+                    : weekStats.avg.toFixed(1)
+              }
+              sub="fokus & lydnad"
+              tone="accent"
+            />
+          </div>
+        )}
 
         {!showLogForm ? (
           <button

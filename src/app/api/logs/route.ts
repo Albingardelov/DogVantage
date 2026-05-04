@@ -80,13 +80,29 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(data ?? [])
   }
 
-  const { data, error } = await supabase
+  const from = searchParams.get('from')
+  const to = searchParams.get('to')
+  const hasRange = Boolean(from && to)
+
+  let q = supabase
     .from('session_logs')
     .select('*')
     .eq('user_id', user.id)
     .eq('breed', breed)
-    .order('created_at', { ascending: false })
-    .limit(30)
+
+  if (from) q = q.gte('created_at', from)
+  if (to) q = q.lt('created_at', to)
+
+  q = q.order('created_at', { ascending: false })
+
+  const defaultLimit = hasRange ? 500 : 30
+  const limitParam = searchParams.get('limit')
+  const parsedLimit = limitParam != null ? Number(limitParam) : defaultLimit
+  const limit = Number.isFinite(parsedLimit)
+    ? Math.min(500, Math.max(1, parsedLimit))
+    : defaultLimit
+
+  const { data, error } = await q.limit(limit)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data ?? [])
