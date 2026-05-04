@@ -6,7 +6,7 @@ import ProfileGuard from '@/components/ProfileGuard'
 import BottomNav from '@/components/BottomNav'
 import { getDogProfile } from '@/lib/dog/profile'
 import { getAgeInWeeks } from '@/lib/dog/age'
-import type { DogProfile, SessionLog, WeekPlan } from '@/types'
+import type { DogProfile, QuickRating, SessionLog, WeekPlan } from '@/types'
 import styles from './page.module.css'
 
 export default function CalendarPage() {
@@ -149,7 +149,7 @@ function CalendarGrid({
   )
 }
 
-const RATING_CONFIG: Record<string, { label: string; cls: string }> = {
+const RATING_CONFIG: Record<QuickRating, { label: string; cls: string }> = {
   good:  { label: 'Bra',     cls: styles.ratingGood },
   mixed: { label: 'Blandat', cls: styles.ratingMixed },
   bad:   { label: 'Svårt',   cls: styles.ratingBad },
