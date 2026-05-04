@@ -29,11 +29,57 @@ const DAY_NAMES_LC  = ['söndag', 'måndag', 'tisdag', 'onsdag', 'torsdag', 'fre
 function CalendarView() {
   const router = useRouter()
   const [profile, setProfile] = useState<DogProfile | null>(null)
+  const [logs, setLogs] = useState<Record<string, SessionLog>>({})
+  const [trainingWeekdays, setTrainingWeekdays] = useState<Set<string>>(new Set())
+  const [loading, setLoading] = useState(true)
+
+  const today = new Date()
+  const todayStr = today.toISOString().split('T')[0]
+  const [viewYear, setViewYear]     = useState(today.getFullYear())
+  const [viewMonth, setViewMonth]   = useState(today.getMonth()) // 0-based
+  const [selectedDate, setSelectedDate] = useState<string>(todayStr)
 
   useEffect(() => {
     const p = getDogProfile()
     if (p) setProfile(p)
   }, [])
+
+  const fetchData = useCallback(async () => {
+    if (!profile) return
+    setLoading(true)
+    try {
+      const ageWeeks = Math.max(1, getAgeInWeeks(profile.birthdate))
+      const trainingWeek = profile.trainingWeek ?? 1
+      const goals = profile.onboarding?.goals
+      const goalsParam = goals && goals.length > 0 ? `&goals=${goals.join(',')}` : ''
+
+      const [logsRes, planRes] = await Promise.all([
+        fetch(`/api/logs?breed=${profile.breed}`),
+        fetch(`/api/training/week?breed=${profile.breed}&week=${trainingWeek}&ageWeeks=${ageWeeks}${goalsParam}`),
+      ])
+
+      if (logsRes.ok) {
+        const allLogs: SessionLog[] = await logsRes.json()
+        const byDate: Record<string, SessionLog> = {}
+        for (const log of allLogs) {
+          const date = log.created_at.slice(0, 10)
+          if (!byDate[date]) byDate[date] = log // keep first (most recent) per day
+        }
+        setLogs(byDate)
+      }
+
+      if (planRes.ok) {
+        const plan: WeekPlan = await planRes.json()
+        setTrainingWeekdays(
+          new Set(plan.days.filter((d) => !d.rest).map((d) => d.day))
+        )
+      }
+    } finally {
+      setLoading(false)
+    }
+  }, [profile])
+
+  useEffect(() => { fetchData() }, [fetchData])
 
   if (!profile) return null
 
@@ -49,7 +95,10 @@ function CalendarView() {
         </div>
       </header>
       <div className={styles.scrollArea}>
-        <p className={styles.noData}>Laddar…</p>
+        {loading
+          ? <p className={styles.noData}>Laddar…</p>
+          : <p className={styles.noData}>Data laddad: {Object.keys(logs).length} loggade pass</p>
+        }
       </div>
       <BottomNav active="dashboard" />
     </main>
