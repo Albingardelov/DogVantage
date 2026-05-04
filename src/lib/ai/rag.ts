@@ -2,7 +2,7 @@ import { embedText } from './embed'
 import { getGroqClient, GROQ_MODEL } from './client'
 import { searchBreedChunks } from '@/lib/supabase/breed-chunks'
 import { formatBreedProfile, formatCurrentPhase } from './breed-profiles'
-import type { Breed, TrainingResult } from '@/types'
+import type { Breed, ChunkMatch, TrainingResult, TrainingSourceRef } from '@/types'
 
 // ─── Vet-guard ────────────────────────────────────────────────────────────────
 const VET_KEYWORDS = [
@@ -16,6 +16,27 @@ const VET_RESPONSE: TrainingResult = {
     'Det verkar handla om ett hälsoproblem. DogVantage ger inte medicinska råd — kontakta din veterinär.',
   source: '',
   source_url: '',
+  attributionNote: 'Fast svar vid hälsoindikation — inte från dina dokument.',
+}
+
+function chunksToSourceRefs(chunks: ChunkMatch[]): TrainingSourceRef[] {
+  const seen = new Set<string>()
+  const out: TrainingSourceRef[] = []
+  for (const c of chunks) {
+    const key =
+      c.source_url && c.source_url.length > 0
+        ? c.source_url
+        : `${c.source}|${c.doc_version}|${c.page_ref}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push({
+      source: c.source,
+      source_url: c.source_url ?? '',
+      doc_version: c.doc_version,
+      page_ref: c.page_ref,
+    })
+  }
+  return out
 }
 
 function isHealthQuery(query: string): boolean {
@@ -37,7 +58,7 @@ export async function queryRAG(
   // 1. Embed the query and retrieve breed-specific document chunks (best-effort)
   // If the embedding API is unavailable (rate limit, quota), we fall back
   // gracefully to breed-profile-only answers — which are already very good.
-  let chunks: import('@/types').ChunkMatch[] = []
+  let chunks: ChunkMatch[] = []
   try {
     const embedding = await embedText(query)
     chunks = await searchBreedChunks(embedding, breed)
@@ -110,7 +131,8 @@ INSTRUKTIONER:
 • Svara direkt på frågan — ge inte hela veckoschemat om det inte efterfrågas
 • Kombinera metodiken (lager 1) med rasspecifika krav (lager 2)
 • Anpassa svaret till hundens exakta ålder i veckor — inte generiska råd
-• Om källdokument finns — citera dem kort. Om inte — använd din träningskunskap
+• Om källdokument finns i prompten — du kan nämna källans namn kort om det stärker svaret
+• Om avsnittet KÄLLDOKUMENT saknas eller är tomt: påstå INTE att du citerar ett specifikt uppladdat dokument — utgå då från metod (lager 1) och rasprofilen (lager 2)
 • Svara alltid på svenska, kortfattat och konkret
 • Max 150 ord om inte frågan kräver längre svar`
 
@@ -127,11 +149,23 @@ INSTRUKTIONER:
   const content = raw ||
     'Jag kunde inte generera ett svar på den frågan. Prova att ställa en mer specifik träningsfråga, till exempel: "Hur tränar jag inkallning?" eller "Hur länge bör ett pass vara?"'
 
+  const sourceRefs = chunksToSourceRefs(chunks)
   const primaryChunk = chunks[0]
   const primarySource = primaryChunk
     ? `${primaryChunk.source}${primaryChunk.doc_version ? ` (${primaryChunk.doc_version})` : ''}`
     : ''
   const primarySourceUrl = primaryChunk?.source_url ?? ''
 
-  return { content, source: primarySource, source_url: primarySourceUrl }
+  const attributionNote =
+    chunks.length === 0
+      ? 'Inget material från uppladdade dokument användes för den här frågan (ingen nära träff i kunskapsbasen). Svaret bygger på allmän träningsmetodik och DogVantages rasprofil.'
+      : undefined
+
+  return {
+    content,
+    source: primarySource,
+    source_url: primarySourceUrl,
+    sources: sourceRefs.length > 0 ? sourceRefs : undefined,
+    attributionNote,
+  }
 }

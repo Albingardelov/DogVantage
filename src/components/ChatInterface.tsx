@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import type { Breed, ChatMessage, TrainingResult } from '@/types'
+import type { Breed, ChatMessage, TrainingResult, TrainingSourceRef } from '@/types'
 import styles from './ChatInterface.module.css'
 
 interface Props {
@@ -46,7 +46,15 @@ export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQu
         setMessages((prev) => [...prev, { role: 'model', content: `Något gick fel: ${msg}` }])
         return
       }
-      setMessages((prev) => [...prev, { role: 'model', content: data.content }])
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'model',
+          content: data.content,
+          sources: data.sources,
+          attributionNote: data.attributionNote,
+        },
+      ])
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Nätverksfel'
       setMessages((prev) => [...prev, { role: 'model', content: `Kunde inte nå assistenten: ${msg}` }])
@@ -89,11 +97,33 @@ export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQu
             {m.role === 'model' && (
               <div className={styles.modelAvatar} aria-hidden="true">🐾</div>
             )}
-            <div
-              className={`${styles.bubble} ${m.role === 'user' ? styles.bubbleUser : styles.bubbleModel}`}
-            >
-              {m.content}
-            </div>
+            {m.role === 'user' ? (
+              <div className={`${styles.bubble} ${styles.bubbleUser}`}>{m.content}</div>
+            ) : (
+              <div className={styles.modelColumn}>
+                <div className={`${styles.bubble} ${styles.bubbleModel}`}>{m.content}</div>
+                {(m.sources && m.sources.length > 0) || m.attributionNote ? (
+                  <aside className={styles.citationBlock} aria-label="Källor och förklaring">
+                    {m.sources && m.sources.length > 0 && (
+                      <>
+                        <span className={styles.citationTitle}>Källor</span>
+                        <ul className={styles.sourceList}>
+                          {m.sources.map((s, j) => (
+                            <SourceRow key={`${s.source}-${j}`} s={s} />
+                          ))}
+                        </ul>
+                        <p className={styles.methodHint}>
+                          Svaret kombinerar dessutom allmän metod (t.ex. belöning, timing) med material och rasprofil.
+                        </p>
+                      </>
+                    )}
+                    {m.attributionNote && (
+                      <p className={styles.attributionNote}>{m.attributionNote}</p>
+                    )}
+                  </aside>
+                ) : null}
+              </div>
+            )}
           </div>
         ))}
 
@@ -146,6 +176,27 @@ export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQu
         </button>
       </div>
     </div>
+  )
+}
+
+function SourceRow({ s }: { s: TrainingSourceRef }) {
+  const meta = [s.doc_version, s.page_ref].filter(Boolean).join(' · ')
+  return (
+    <li className={styles.sourceItem}>
+      {s.source_url ? (
+        <a
+          href={s.source_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.sourceLink}
+        >
+          {s.source || 'Dokument'}
+        </a>
+      ) : (
+        <span className={styles.sourceName}>{s.source || 'Dokument'}</span>
+      )}
+      {meta && <span className={styles.sourceMeta}>{meta}</span>}
+    </li>
   )
 }
 

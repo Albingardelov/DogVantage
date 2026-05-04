@@ -65,6 +65,15 @@ describe('queryRAG', () => {
     expect(result.source_url).toBe('https://lab-klubb.se/ras.pdf')
   })
 
+  it('returns sources array for chat UI and omits attribution when documents match', async () => {
+    const { queryRAG } = await import('./rag')
+    const result = await queryRAG('Vad ska jag träna?', 'labrador')
+    expect(result.sources).toBeDefined()
+    expect(result.sources).toHaveLength(1)
+    expect(result.sources![0].source).toContain('RAS_labrador')
+    expect(result.attributionNote).toBeUndefined()
+  })
+
   it('includes breed in system prompt', async () => {
     const { getGroqClient } = await import('@/lib/ai/client')
     const groq = getGroqClient()

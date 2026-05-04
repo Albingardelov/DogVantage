@@ -121,10 +121,24 @@ export interface ChunkMatch {
   similarity: number
 }
 
+/** Utvalt dokument för bakåtkompatibilitet + UI (primär källa). */
+export interface TrainingSourceRef {
+  source: string
+  source_url: string
+  doc_version: string
+  page_ref: string
+}
+
 export interface TrainingResult {
   content: string
   source: string
-  source_url: string // empty string if unknown — used for "Läs originalet" link
+  source_url: string // empty string if unknown — primär källa / "Läs originalet"
+  /** Alla unika RAG-träffar denna förfrågan (för källista i chatten). */
+  sources?: TrainingSourceRef[]
+  /**
+   * Kort förklaring när inga dokument chunks använts, så användaren inte tror att svaret citerar PDF:er.
+   */
+  attributionNote?: string
 }
 
 export type LatencyBucket = 'lt1s' | '1to3s' | 'gt3s'
@@ -132,6 +146,8 @@ export type LatencyBucket = 'lt1s' | '1to3s' | 'gt3s'
 export interface ChatMessage {
   role: 'user' | 'model'
   content: string
+  sources?: TrainingSourceRef[]
+  attributionNote?: string
 }
 
 export type QuickRating = 'good' | 'mixed' | 'bad'

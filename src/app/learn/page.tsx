@@ -166,6 +166,43 @@ const ARTICLES: Article[] = [
       },
     ],
   },
+  {
+    id: 'training-aids',
+    title: 'Visselpipa och andra redskap — så använder du dem',
+    summary:
+      'Visselpipa, långlina, sele och markör: vad de är till för, och hur du bygger tydliga signaler utan att stressa hunden.',
+    readTime: '6 min',
+    sections: [
+      {
+        heading: 'Visselpipa: börja med betydelse, inte avstånd',
+        body: 'En visselpipa är värdelös som "magisk knapp" tills hunden lärt sig vad ljudet betyder. Första veckorna: blås **en kort sekvens** (t.ex. tre snabba pip) **bara** i lugna lägen — direkt följt av högklassig belöning (godis, lek). Upprepa många gånger inne och i trädgård. Målet är att pipan = "något bra händer nu". Först därefter kan du använda samma signal på avstånd, t.ex. som extra tydlig inkallning när rösten inte räcker.',
+      },
+      {
+        heading: 'En signal = en sak',
+        body: 'Bestäm vad **just din** pipsekvens betyder — ofta "kom hit" eller "kolla in mig". Använd **samma** ton och längd varje gång. Blås inte olika "pip för arg" och "pip för glad": hunden hör bara olika ljud, inte din frustration. Om du behöver flera meddelanden (t.ex. inkallning vs. stanna), använd **olika** signaler (kort vs. lång ton, eller pip + handtecken) och konditionera varje för sig.',
+      },
+      {
+        heading: 'När du INTE ska använda pipan',
+        body: 'Inte som straff eller för att "skärpa" när hunden inte lyssnar — då lär sig hunden att pipan är obehaglig eller meningslös. Inte när hunden är over threshold (skäller, fixerad, vägrar godis): avstånd först, pip senare. Undvik att blåsa upprepade gånger i rad utan belöning — då urvattnas signalen.',
+      },
+      {
+        heading: 'Frekvens, volym och miljö',
+        body: 'Olika pipor har olika frekvenser; vissa hundar är känsligare för höga toner. Testa på låg volym först. Utomhus med vind och avstånd kan du behöva en tydligare sekvens — men öka svårighet **efter** att inkallningen funkar nära. Kom ihåg: grannar, vilda djur och hästar — använd sunt förnuft var du blåser.',
+      },
+      {
+        heading: 'Långlina',
+        body: 'En långlina är för **träning på avstånd**, inte för att straffa drag. Håll den säkrad (ingen löst släng runt ben på människor). Låt aldrig linan "smälla" till när hunden stannar — du vill inte skapa obehag kopplat till stopp. Kombinera med belöning när hunden vänder mot dig.',
+      },
+      {
+        heading: 'Sele, halsband och koppel',
+        body: 'En väl passande **Y-sele** eller bröstsele fördelar tryck om hunden drar ibland. Platta halsband är ofta okej till promenad; undvik att rycka hårt i halsband — det kan ge hals- och ögonskador. Koppel är hantering och säkerhet; lydnad bygger du med **belöning och tydliga signaler**, inte genom att rycka i kopplet.',
+      },
+      {
+        heading: 'Klicker och muntlig markör',
+        body: 'Klicker eller ett kort "ja!" markerar **exakt** rätt ögonblick innan belöning kommer — perfekt när du ska fånga små beteenden. Läs mer under guiden **Timing**. Pipan ersätter inte markören; de har olika roller (lång räckvidd vs. precision i tid).',
+      },
+    ],
+  },
 ]
 
 function Learn() {
