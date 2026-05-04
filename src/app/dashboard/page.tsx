@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import ProfileGuard from '@/components/ProfileGuard'
 import TrainingCard from '@/components/TrainingCard/TrainingCard'
 import SessionLogForm from '@/components/SessionLogForm'
@@ -57,9 +58,9 @@ function Dashboard() {
           <div className={styles.headerText}>
             <span className={styles.greeting}>{getGreeting()}</span>
             <h1 className={styles.dogName}>{dogName}</h1>
-            <span className={styles.weekBadge}>
+            <Link href="/calendar" className={styles.weekBadge}>
               <span aria-hidden="true">🗓️</span> Programvecka {trainingWeek}
-            </span>
+            </Link>
           </div>
           <button
             type="button"
