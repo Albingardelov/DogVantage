@@ -55,7 +55,12 @@ function Chat() {
   const initialQuestion = searchParams.get('question') ?? undefined
 
   useEffect(() => {
-    setProfile(getDogProfile())
+    let alive = true
+    ;(async () => {
+      const p = await getDogProfile()
+      if (alive) setProfile(p)
+    })().catch((e) => console.error('[chat getDogProfile]', e))
+    return () => { alive = false }
   }, [])
 
   const ageWeeks = profile ? Math.max(1, getAgeInWeeks(profile.birthdate)) : 0

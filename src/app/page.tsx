@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { createSupabaseServer } from '@/lib/supabase/server'
 import styles from './page.module.css'
 
 const FEATURES: { icon: string; title: string; desc: string }[] = [
@@ -19,7 +21,11 @@ const FEATURES: { icon: string; title: string; desc: string }[] = [
   },
 ]
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const supabase = await createSupabaseServer()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) redirect('/dashboard')
+
   return (
     <main className={styles.main}>
       <section className={styles.hero}>
@@ -50,8 +56,8 @@ export default function LandingPage() {
         <Link href="/onboarding" className={styles.btnPrimary}>
           Kom igång
         </Link>
-        <Link href="/dashboard" className={styles.btnGhost}>
-          Jag har redan ett konto
+        <Link href="/login" className={styles.btnGhost}>
+          Logga in
         </Link>
       </div>
     </main>

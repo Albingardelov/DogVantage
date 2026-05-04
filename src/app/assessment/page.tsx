@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import ProfileGuard from '@/components/ProfileGuard'
 import BottomNav from '@/components/BottomNav'
 import ExerciseGuideSheet from '@/components/ExerciseGuideSheet'
-import { getDogProfile, saveDogProfile } from '@/lib/dog/profile'
+import { getDogProfile, updateDogProfile } from '@/lib/dog/profile'
 import { getAgeInWeeks } from '@/lib/dog/age'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
 import { computeStartingWeek } from '@/lib/training/assessment-week'
@@ -68,8 +68,12 @@ function Assessment() {
   const [guideExerciseId, setGuideExerciseId] = useState<string | null>(null)
 
   useEffect(() => {
-    const p = getDogProfile()
-    if (p) setProfile(p)
+    let alive = true
+    ;(async () => {
+      const p = await getDogProfile()
+      if (alive && p) setProfile(p)
+    })().catch((e) => console.error('[assessment getDogProfile]', e))
+    return () => { alive = false }
   }, [])
 
   const ageWeeks = profile ? Math.max(1, getAgeInWeeks(profile.birthdate)) : 0
@@ -124,16 +128,14 @@ function Assessment() {
         problemNotes: problemNotes.trim() || undefined,
       }
       const startingWeek = computeStartingWeek(ageWeeks, metrics)
-      const updated: DogProfile = {
-        ...profile,
+      await updateDogProfile({
         trainingWeek: startingWeek,
         assessment: {
           status: 'completed',
           completed_at: new Date().toISOString(),
           behaviorProfile,
         },
-      }
-      saveDogProfile(updated)
+      })
       router.replace('/dashboard')
     } finally {
       setSaving(false)

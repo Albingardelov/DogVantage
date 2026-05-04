@@ -146,8 +146,12 @@ function CalendarView() {
   const todayStr = new Date().toISOString().slice(0, 10)
 
   useEffect(() => {
-    const p = getDogProfile()
-    if (p) setProfile(p)
+    let alive = true
+    ;(async () => {
+      const p = await getDogProfile()
+      if (alive && p) setProfile(p)
+    })().catch((e) => console.error('[calendar getDogProfile]', e))
+    return () => { alive = false }
   }, [])
 
   const fetchData = useCallback(async () => {
@@ -160,7 +164,7 @@ function CalendarView() {
       const goalsParam = goals && goals.length > 0 ? `&goals=${goals.join(',')}` : ''
 
       const [logsRes, planRes] = await Promise.all([
-        fetch(`/api/logs?breed=${profile.breed}${profile.dogKey ? `&dogKey=${encodeURIComponent(profile.dogKey)}` : ''}`),
+        fetch(`/api/logs?breed=${profile.breed}`),
         fetch(`/api/training/week?breed=${profile.breed}&week=${trainingWeek}&ageWeeks=${ageWeeks}${goalsParam}`),
       ])
 

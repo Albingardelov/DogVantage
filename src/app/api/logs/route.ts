@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { saveSessionLog, getRecentLogs, getAllLogs } from '@/lib/supabase/session-logs'
+import { createSupabaseServer } from '@/lib/supabase/server'
 import type { Breed, QuickRating, ExerciseSummary } from '@/types'
 
 export async function POST(req: NextRequest) {
+  const supabase = await createSupabaseServer()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+
   const body = await req.json() as {
     breed: Breed
-    dog_key?: string
     week_number: number
     quick_rating: QuickRating
     focus: number
@@ -17,7 +20,7 @@ export async function POST(req: NextRequest) {
     exercises?: ExerciseSummary[]
   }
 
-  const { breed, dog_key, week_number, quick_rating, focus, obedience,
+  const { breed, week_number, quick_rating, focus, obedience,
           handler_timing, handler_consistency, handler_reading, notes, exercises } = body
 
   if (!breed || typeof week_number !== 'number' || !quick_rating ||
@@ -25,18 +28,36 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
-  const log = await saveSessionLog({
-    breed, dog_key, week_number, quick_rating, focus, obedience,
-    handler_timing, handler_consistency, handler_reading, notes, exercises,
-  })
-  return NextResponse.json(log, { status: 201 })
+  const { data, error } = await supabase
+    .from('session_logs')
+    .insert({
+      user_id: user.id,
+      breed,
+      week_number,
+      quick_rating,
+      focus,
+      obedience,
+      handler_timing,
+      handler_consistency,
+      handler_reading,
+      notes,
+      exercises,
+    })
+    .select()
+    .single()
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json(data, { status: 201 })
 }
 
 export async function GET(req: NextRequest) {
+  const supabase = await createSupabaseServer()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+
   const { searchParams } = new URL(req.url)
   const breed = searchParams.get('breed') as Breed | null
   const weekParam = searchParams.get('week')
-  const dogKey = searchParams.get('dogKey') ?? undefined
 
   if (!breed) {
     return NextResponse.json({ error: 'breed required' }, { status: 400 })
@@ -47,10 +68,26 @@ export async function GET(req: NextRequest) {
     if (!Number.isFinite(weekNumber)) {
       return NextResponse.json({ error: 'invalid week' }, { status: 400 })
     }
-    const logs = await getRecentLogs(breed, weekNumber, undefined, dogKey)
-    return NextResponse.json(logs)
+    const { data, error } = await supabase
+      .from('session_logs')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('breed', breed)
+      .eq('week_number', weekNumber)
+      .order('created_at', { ascending: false })
+      .limit(5)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(data ?? [])
   }
 
-  const logs = await getAllLogs(breed, undefined, dogKey)
-  return NextResponse.json(logs)
+  const { data, error } = await supabase
+    .from('session_logs')
+    .select('*')
+    .eq('user_id', user.id)
+    .eq('breed', breed)
+    .order('created_at', { ascending: false })
+    .limit(30)
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json(data ?? [])
 }

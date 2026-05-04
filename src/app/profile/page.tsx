@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import ProfileGuard from '@/components/ProfileGuard'
 import Avatar from '@/components/Avatar'
 import BottomNav from '@/components/BottomNav'
-import { getDogProfile, saveDogProfile } from '@/lib/dog/profile'
+import { getDogProfile, updateDogProfile } from '@/lib/dog/profile'
 import { getAgeInWeeks } from '@/lib/dog/age'
 import { GOALS, ENVIRONMENTS, REWARDS } from '@/components/DogProfileForm'
 import type { DogProfile, TrainingGoal, TrainingEnvironment, RewardPreference } from '@/types'
@@ -29,13 +29,17 @@ function ProfileView() {
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
-    const p = getDogProfile()
-    if (!p) return
-    setProfile(p)
-    setGoals(p.onboarding?.goals ?? ['everyday_obedience'])
-    setEnvironment(p.onboarding?.environment ?? 'suburb')
-    setRewardPreference(p.onboarding?.rewardPreference ?? 'mixed')
-    setTakesRewardsOutdoors(p.onboarding?.takesRewardsOutdoors ?? true)
+    let alive = true
+    ;(async () => {
+      const p = await getDogProfile()
+      if (!alive || !p) return
+      setProfile(p)
+      setGoals(p.onboarding?.goals ?? ['everyday_obedience'])
+      setEnvironment(p.onboarding?.environment ?? 'suburb')
+      setRewardPreference(p.onboarding?.rewardPreference ?? 'mixed')
+      setTakesRewardsOutdoors(p.onboarding?.takesRewardsOutdoors ?? true)
+    })().catch((e) => console.error('[profile getDogProfile]', e))
+    return () => { alive = false }
   }, [])
 
   function toggleGoal(goal: TrainingGoal) {
@@ -49,7 +53,7 @@ function ProfileView() {
     setSaved(false)
   }
 
-  function handleSave() {
+  async function handleSave() {
     if (!profile) return
     const updated: DogProfile = {
       ...profile,
@@ -61,10 +65,14 @@ function ProfileView() {
         takesRewardsOutdoors,
       },
     }
-    saveDogProfile(updated)
-    setProfile(updated)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
+    try {
+      await updateDogProfile({ onboarding: updated.onboarding })
+      setProfile(updated)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+    } catch (e) {
+      console.error('[profile save]', e)
+    }
   }
 
   if (!profile) return null

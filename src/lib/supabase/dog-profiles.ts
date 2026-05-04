@@ -1,4 +1,4 @@
-import { supabaseBrowser } from './browser'
+import { getSupabaseBrowser } from './browser'
 import type { DogProfile } from '@/types'
 
 interface DbProfile {
@@ -24,7 +24,7 @@ function dbToProfile(row: DbProfile): DogProfile {
 }
 
 export async function getProfile(): Promise<DogProfile | null> {
-  const { data, error } = await supabaseBrowser
+  const { data, error } = await getSupabaseBrowser()
     .from('dog_profiles')
     .select('*')
     .single()
@@ -42,7 +42,7 @@ export async function saveProfile(profile: DogProfile, userId: string): Promise<
     onboarding: profile.onboarding ?? null,
     assessment: profile.assessment ?? null,
   }
-  const { error } = await supabaseBrowser
+  const { error } = await getSupabaseBrowser()
     .from('dog_profiles')
     .upsert(row, { onConflict: 'user_id' })
   if (error) throw new Error(`Failed to save profile: ${error.message}`)
@@ -57,10 +57,10 @@ export async function updateProfile(fields: Partial<DogProfile>): Promise<void> 
 
   if (Object.keys(updates).length === 0) return
 
-  const { data: { user } } = await supabaseBrowser.auth.getUser()
+  const { data: { user } } = await getSupabaseBrowser().auth.getUser()
   if (!user) throw new Error('updateProfile called without authenticated user')
 
-  const { error } = await supabaseBrowser
+  const { error } = await getSupabaseBrowser()
     .from('dog_profiles')
     .update(updates)
     .eq('user_id', user.id)

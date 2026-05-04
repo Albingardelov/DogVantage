@@ -32,15 +32,14 @@ function Log() {
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   useEffect(() => {
-    const p = getDogProfile()
-    if (!p) return
-    setProfile(p)
-
     let alive = true
     ;(async () => {
+      const p = await getDogProfile()
+      if (!alive || !p) return
+      setProfile(p)
+
       try {
         const params = new URLSearchParams({ breed: p.breed })
-        if (p.dogKey) params.set('dogKey', p.dogKey)
         const res = await fetch(`/api/logs?${params}`)
         const data = await res.json()
         if (!alive) return
@@ -54,7 +53,10 @@ function Log() {
       } finally {
         if (alive) setLoading(false)
       }
-    })()
+    })().catch((e) => {
+      if (alive) setError(e instanceof Error ? e.message : 'Nätverksfel')
+      if (alive) setLoading(false)
+    })
 
     return () => {
       alive = false

@@ -5,7 +5,7 @@ import { getDogPhoto } from '@/lib/dog/photo'
 import styles from './Avatar.module.css'
 
 interface AvatarProps {
-  /** Optional explicit photo (base64 data URL). If omitted, photo is read from localStorage. */
+  /** Optional explicit photo URL. If omitted, the photo is loaded from Supabase Storage. */
   photo?: string | null
   name: string
   /** Outer diameter in pixels. */
@@ -16,16 +16,23 @@ interface AvatarProps {
 
 export default function Avatar({ photo, name, size = 64, bordered = true }: AvatarProps) {
   const [storedPhoto, setStoredPhoto] = useState<string | null>(null)
+  const [imgFailed, setImgFailed] = useState(false)
   const explicitPhotoProvided = photo !== undefined
 
   useEffect(() => {
     if (!explicitPhotoProvided) {
-      setStoredPhoto(getDogPhoto())
+      let alive = true
+      ;(async () => {
+        const url = await getDogPhoto()
+        if (alive) setStoredPhoto(url)
+      })().catch((e) => console.error('[Avatar getDogPhoto]', e))
+      return () => { alive = false }
     }
   }, [explicitPhotoProvided])
 
   const finalPhoto = explicitPhotoProvided ? photo : storedPhoto
   const initial = name.trim()[0]?.toUpperCase() || '?'
+  const showImage = Boolean(finalPhoto) && !imgFailed
 
   return (
     <div
@@ -37,8 +44,13 @@ export default function Avatar({ photo, name, size = 64, bordered = true }: Avat
       }}
       aria-label={name}
     >
-      {finalPhoto ? (
-        <img src={finalPhoto} alt={name} className={styles.image} />
+      {showImage ? (
+        <img
+          src={finalPhoto!}
+          alt={name}
+          className={styles.image}
+          onError={() => setImgFailed(true)}
+        />
       ) : (
         <span className={styles.initial}>{initial}</span>
       )}

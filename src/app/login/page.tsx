@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { supabaseBrowser } from '@/lib/supabase/browser'
+import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import styles from './page.module.css'
 
 export default function LoginPage() {
@@ -18,7 +18,7 @@ export default function LoginPage() {
     setError(null)
     setLoading(true)
     try {
-      const { error } = await supabaseBrowser.auth.signInWithPassword({ email: email.trim(), password })
+      const { error } = await getSupabaseBrowser().auth.signInWithPassword({ email: email.trim(), password })
       if (error) {
         setError('Fel e-post eller lösenord.')
         return

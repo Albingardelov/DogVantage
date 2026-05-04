@@ -7,6 +7,7 @@ import { saveDogPhoto } from '@/lib/dog/photo'
 import { getAgeInWeeks } from '@/lib/dog/age'
 import { BREED_PROFILES } from '@/lib/ai/breed-profiles'
 import { HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'
+import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import type { Breed, DogProfile, HouseholdPet, OnboardingPrefs, RewardPreference, TrainingEnvironment, TrainingGoal } from '@/types'
 import styles from './DogProfileForm.module.css'
 
@@ -17,8 +18,8 @@ const BREEDS: { value: Breed; label: string }[] = [
   { value: 'miniature_american_shepherd', label: 'Miniature American Shepherd' },
 ]
 
-const TOTAL_STEPS = 4
-const STEP_TITLES = ['Lägg till ett foto', 'Om din hund', 'När är hunden född?', 'Hur vill du använda appen?']
+const TOTAL_STEPS = 5
+const STEP_TITLES = ['Lägg till ett foto', 'Om din hund', 'När är hunden född?', 'Hur vill du använda appen?', 'Skapa konto']
 const ALL_HOUSEHOLD_PETS = Object.keys(HOUSEHOLD_PET_LABELS) as HouseholdPet[]
 
 export const GOALS: { value: TrainingGoal; label: string }[] = [
@@ -65,6 +66,10 @@ export default function DogProfileForm() {
   const [breed, setBreed] = useState<Breed | ''>('')
   const [birthdate, setBirthdate] = useState('')
   const [goals, setGoals] = useState<TrainingGoal[]>(['everyday_obedience'])
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [signupError, setSignupError] = useState<string | null>(null)
+  const [signingUp, setSigningUp] = useState(false)
 
   function handleBreedChange(value: Breed) {
     setBreed(value)
@@ -97,9 +102,11 @@ export default function DogProfileForm() {
     name.trim().length > 0 && breed.length > 0,
     birthdate.length > 0,
     true,
+    email.trim().length > 3 && password.length >= 8 && !signingUp,
   ]
 
   function handleNext() {
+    setSignupError(null)
     if (step < TOTAL_STEPS - 1) {
       setStep((s) => s + 1)
       return
@@ -107,9 +114,12 @@ export default function DogProfileForm() {
     finish()
   }
 
-  function finish() {
+  async function finish() {
     if (!name.trim() || !breed || !birthdate) return
-    if (photo) saveDogPhoto(photo)
+    if (!email.trim() || password.length < 8) return
+    setSigningUp(true)
+    setSignupError(null)
+
     const onboarding: OnboardingPrefs = {
       goals,
       environment,
@@ -121,13 +131,36 @@ export default function DogProfileForm() {
       name: name.trim(),
       breed,
       birthdate,
-      dogKey: undefined, // generated in saveDogProfile
       trainingWeek: 1,
       onboarding,
       assessment: { status: 'not_started' },
     }
-    saveDogProfile(profile)
-    router.replace('/dashboard')
+
+    try {
+      const { data, error } = await getSupabaseBrowser().auth.signUp({
+        email: email.trim(),
+        password,
+      })
+      if (error) {
+        setSignupError('Kunde inte skapa konto. Kontrollera e-post och lösenord.')
+        return
+      }
+      const userId = data.user?.id
+      if (!userId) {
+        setSignupError('Kontot skapades, men kunde inte starta session. Försök logga in.')
+        return
+      }
+
+      await saveDogProfile(profile, userId)
+      if (photo) await saveDogPhoto(photo)
+      router.replace('/dashboard')
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e)
+      console.error('[onboarding signup]', msg)
+      setSignupError('Något gick fel. Försök igen.')
+    } finally {
+      setSigningUp(false)
+    }
   }
 
   return (
@@ -334,6 +367,52 @@ export default function DogProfileForm() {
             </div>
           </div>
         )}
+
+        {step === 4 && (
+          <div className={styles.stepFields}>
+            <p className={styles.lead}>
+              Skapa ett konto så att din hundprofil och loggar kan synkas mellan enheter.
+            </p>
+
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="signup-email">E-post</label>
+              <input
+                id="signup-email"
+                className={styles.input}
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="din@email.se"
+                disabled={signingUp}
+              />
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="signup-password">Lösenord</label>
+              <input
+                id="signup-password"
+                className={styles.input}
+                type="password"
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Minst 8 tecken"
+                disabled={signingUp}
+              />
+            </div>
+
+            {signupError && (
+              <p style={{ color: 'var(--color-error)', fontSize: 'var(--text-sm)', margin: 0 }} role="alert">
+                {signupError}
+              </p>
+            )}
+
+            <p style={{ margin: 0, fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', lineHeight: 1.5 }}>
+              Har du redan ett konto? Logga in via <a href="/login" style={{ color: 'var(--color-primary)' }}>Logga in</a>.
+            </p>
+          </div>
+        )}
       </div>
 
       <footer className={styles.footer}>
@@ -343,7 +422,7 @@ export default function DogProfileForm() {
           disabled={!canContinue[step]}
           className={styles.primaryBtn}
         >
-          {step < TOTAL_STEPS - 1 ? 'Fortsätt' : 'Starta appen →'}
+          {step < TOTAL_STEPS - 1 ? 'Fortsätt' : (signingUp ? 'Skapar konto…' : 'Skapa konto →')}
         </button>
         {step === 0 && (
           <button type="button" onClick={handleNext} className={styles.skipBtn}>

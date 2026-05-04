@@ -11,6 +11,7 @@ import BottomNav from '@/components/BottomNav'
 import { getDogProfile } from '@/lib/dog/profile'
 import { getAgeInWeeks } from '@/lib/dog/age'
 import { buildBehaviorContext } from '@/lib/dog/behavior'
+import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import type { DogProfile, BehaviorProfile } from '@/types'
 import styles from './page.module.css'
 
@@ -83,7 +84,10 @@ function getContextualTips(profile: DogProfile, ageWeeks: number): ContextualTip
     })
   }
 
-  if (profile.assessment?.status === 'completed' && profile.onboarding?.trainingBackground === undefined) {
+  if (
+    profile.assessment?.status === 'completed' &&
+    profile.assessment?.behaviorProfile?.trainingBackground === 'beginner'
+  ) {
     tips.push({
       id: 'timing-tip',
       title: 'Det viktigaste en nybörjare kan lära sig',
@@ -127,8 +131,12 @@ function Dashboard() {
   const trainingWeek = profile?.trainingWeek ?? 1
 
   useEffect(() => {
-    const p = getDogProfile()
-    if (p) setProfile(p)
+    let alive = true
+    ;(async () => {
+      const p = await getDogProfile()
+      if (alive) setProfile(p)
+    })().catch((e) => console.error('[dashboard getDogProfile]', e))
+    return () => { alive = false }
   }, [])
 
   function handleLogSaved() {
@@ -161,14 +169,39 @@ function Dashboard() {
               <span className={styles.weekBadgeArrow} aria-hidden="true">›</span>
             </Link>
           </div>
-          <button
-            type="button"
-            onClick={() => router.push('/profile')}
-            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', borderRadius: '50%' }}
-            aria-label="Öppna profil"
-          >
-            <Avatar name={dogName} size={64} />
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await getSupabaseBrowser().auth.signOut()
+                } finally {
+                  router.replace('/')
+                }
+              }}
+              style={{
+                background: 'none',
+                border: '1px solid rgba(255,255,255,0.35)',
+                color: '#fff',
+                padding: '8px 10px',
+                borderRadius: 12,
+                cursor: 'pointer',
+                fontSize: 12,
+                fontWeight: 600,
+              }}
+              aria-label="Logga ut"
+            >
+              Logga ut
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push('/profile')}
+              style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', borderRadius: '50%' }}
+              aria-label="Öppna profil"
+            >
+              <Avatar name={dogName} size={64} />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -245,7 +278,6 @@ function Dashboard() {
           profile && (
             <SessionLogForm
               breed={profile.breed}
-              dogKey={profile.dogKey}
               weekNumber={trainingWeek}
               onSaved={handleLogSaved}
               onCancel={() => setShowLogForm(false)}

@@ -1,4 +1,4 @@
-import { supabaseBrowser } from '@/lib/supabase/browser'
+import { getSupabaseBrowser } from '@/lib/supabase/browser'
 
 const BUCKET = 'dog-photos'
 
@@ -7,7 +7,7 @@ function getPhotoPath(userId: string): string {
 }
 
 export async function saveDogPhoto(dataUrl: string): Promise<void> {
-  const { data: { user } } = await supabaseBrowser.auth.getUser()
+  const { data: { user } } = await getSupabaseBrowser().auth.getUser()
   if (!user) return
 
   // Convert base64 data URL to Blob
@@ -18,16 +18,16 @@ export async function saveDogPhoto(dataUrl: string): Promise<void> {
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
   const blob = new Blob([bytes], { type: mime })
 
-  await supabaseBrowser.storage
+  await getSupabaseBrowser().storage
     .from(BUCKET)
     .upload(getPhotoPath(user.id), blob, { upsert: true, contentType: mime })
 }
 
 export async function getDogPhoto(): Promise<string | null> {
-  const { data: { user } } = await supabaseBrowser.auth.getUser()
+  const { data: { user } } = await getSupabaseBrowser().auth.getUser()
   if (!user) return null
 
-  const { data, error } = await supabaseBrowser.storage
+  const { data, error } = await getSupabaseBrowser().storage
     .from(BUCKET)
     .createSignedUrl(getPhotoPath(user.id), 3600)
   if (error || !data) return null
@@ -35,9 +35,9 @@ export async function getDogPhoto(): Promise<string | null> {
 }
 
 export async function clearDogPhoto(): Promise<void> {
-  const { data: { user } } = await supabaseBrowser.auth.getUser()
+  const { data: { user } } = await getSupabaseBrowser().auth.getUser()
   if (!user) return
-  await supabaseBrowser.storage
+  await getSupabaseBrowser().storage
     .from(BUCKET)
     .remove([getPhotoPath(user.id)])
 }

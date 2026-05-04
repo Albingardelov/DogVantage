@@ -147,8 +147,8 @@ export interface ExerciseSummary {
 
 export interface SessionLog {
   id: string
+  user_id: string
   breed: Breed
-  dog_key?: string
   week_number: number
   quick_rating: QuickRating
   focus: number           // 1–5

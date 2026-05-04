@@ -1,61 +1,41 @@
-import { getSupabaseAdmin } from './client'
+import { createSupabaseServer } from '@/lib/supabase/server'
 import type { Breed, SessionLog, QuickRating, ExerciseSummary } from '@/types'
-
-export async function saveSessionLog(log: {
-  breed: Breed
-  dog_key?: string
-  week_number: number
-  quick_rating: QuickRating
-  focus: number
-  obedience: number
-  handler_timing?: number
-  handler_consistency?: number
-  handler_reading?: number
-  notes?: string
-  exercises?: ExerciseSummary[]
-}): Promise<SessionLog> {
-  const { data, error } = await getSupabaseAdmin()
-    .from('session_logs')
-    .insert(log)
-    .select()
-    .single()
-
-  if (error) throw new Error(`Failed to save session log: ${error.message}`)
-  return data as SessionLog
-}
 
 export async function getRecentLogs(
   breed: Breed,
   weekNumber: number,
-  limit = 5,
-  dogKey?: string
+  limit = 5
 ): Promise<SessionLog[]> {
-  let query = getSupabaseAdmin()
+  const supabase = await createSupabaseServer()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  const { data, error } = await supabase
     .from('session_logs')
     .select('*')
+    .eq('user_id', user.id)
     .eq('breed', breed)
     .eq('week_number', weekNumber)
     .order('created_at', { ascending: false })
     .limit(limit)
 
-  if (dogKey) query = query.eq('dog_key', dogKey)
-
-  const { data, error } = await query
   if (error) throw new Error(`Failed to fetch session logs: ${error.message}`)
   return (data ?? []) as SessionLog[]
 }
 
-export async function getAllLogs(breed: Breed, limit = 30, dogKey?: string): Promise<SessionLog[]> {
-  let query = getSupabaseAdmin()
+export async function getAllLogs(breed: Breed, limit = 30): Promise<SessionLog[]> {
+  const supabase = await createSupabaseServer()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  const { data, error } = await supabase
     .from('session_logs')
     .select('*')
+    .eq('user_id', user.id)
     .eq('breed', breed)
     .order('created_at', { ascending: false })
     .limit(limit)
 
-  if (dogKey) query = query.eq('dog_key', dogKey)
-
-  const { data, error } = await query
   if (error) throw new Error(`Failed to fetch session logs: ${error.message}`)
   return (data ?? []) as SessionLog[]
 }
