@@ -18,7 +18,7 @@ export default function LoginPage() {
     setError(null)
     setLoading(true)
     try {
-      const { error } = await supabaseBrowser.auth.signInWithPassword({ email, password })
+      const { error } = await supabaseBrowser.auth.signInWithPassword({ email: email.trim(), password })
       if (error) {
         setError('Fel e-post eller lösenord.')
         return
@@ -58,7 +58,7 @@ export default function LoginPage() {
               required
             />
           </div>
-          {error && <p className={styles.error}>{error}</p>}
+          <p className={styles.error} role="alert">{error ?? ''}</p>
           <button type="submit" disabled={loading} className={styles.btn}>
             {loading ? 'Loggar in…' : 'Logga in'}
           </button>

@@ -62,7 +62,7 @@
 
 .error {
   font-size: var(--text-sm);
-  color: #dc2626;
+  color: var(--color-error);
   margin: 0;
 }
 
@@ -80,6 +80,7 @@
 
 .btn:hover:not(:disabled) { background: var(--color-primary-dark); }
 .btn:disabled { background: var(--color-border); color: var(--color-text-muted); cursor: not-allowed; }
+.btn:active:not(:disabled) { transform: scale(0.98); }
 
 .sub {
   font-size: var(--text-sm);
@@ -92,4 +93,10 @@
   color: var(--color-primary);
   font-weight: var(--font-semibold);
   text-decoration: none;
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
