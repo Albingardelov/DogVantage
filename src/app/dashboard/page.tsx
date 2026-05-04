@@ -60,6 +60,7 @@ function Dashboard() {
             <h1 className={styles.dogName}>{dogName}</h1>
             <Link href="/calendar" className={styles.weekBadge}>
               <span aria-hidden="true">🗓️</span> Programvecka {trainingWeek}
+              <span className={styles.weekBadgeArrow} aria-hidden="true">›</span>
             </Link>
           </div>
           <button
