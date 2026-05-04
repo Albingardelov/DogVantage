@@ -160,7 +160,7 @@ function CalendarView() {
       const goalsParam = goals && goals.length > 0 ? `&goals=${goals.join(',')}` : ''
 
       const [logsRes, planRes] = await Promise.all([
-        fetch(`/api/logs?breed=${profile.breed}`),
+        fetch(`/api/logs?breed=${profile.breed}${profile.dogKey ? `&dogKey=${encodeURIComponent(profile.dogKey)}` : ''}`),
         fetch(`/api/training/week?breed=${profile.breed}&week=${trainingWeek}&ageWeeks=${ageWeeks}${goalsParam}`),
       ])
 

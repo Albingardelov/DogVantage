@@ -29,6 +29,7 @@ function Log() {
   const [logs, setLogs] = useState<SessionLog[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [expandedId, setExpandedId] = useState<string | null>(null)
 
   useEffect(() => {
     const p = getDogProfile()
@@ -38,7 +39,9 @@ function Log() {
     let alive = true
     ;(async () => {
       try {
-        const res = await fetch(`/api/logs?breed=${encodeURIComponent(p.breed)}`)
+        const params = new URLSearchParams({ breed: p.breed })
+        if (p.dogKey) params.set('dogKey', p.dogKey)
+        const res = await fetch(`/api/logs?${params}`)
         const data = await res.json()
         if (!alive) return
         if (!res.ok) {
@@ -102,10 +105,22 @@ function Log() {
         {logs.map((log) => {
           const meta = RATING_META[log.quick_rating]
           const date = DATE_FMT.format(new Date(log.created_at))
+          const isExpanded = expandedId === log.id
+          const hasExercises = log.exercises && log.exercises.length > 0
           return (
             <article
               key={log.id}
-              className={`${styles.card} ${styles[`card_${meta.tone}`]}`}
+              className={`${styles.card} ${styles[`card_${meta.tone}`]} ${isExpanded ? styles.cardExpanded : ''}`}
+              onClick={() => setExpandedId(isExpanded ? null : log.id)}
+              role="button"
+              tabIndex={0}
+              aria-expanded={isExpanded}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  setExpandedId(isExpanded ? null : log.id)
+                }
+              }}
             >
               <div className={styles.cardTop}>
                 <span className={styles.cardEmoji} aria-hidden="true">{meta.emoji}</span>
@@ -114,6 +129,7 @@ function Log() {
                   <span className={styles.dateLabel}>{date}</span>
                 </div>
                 <span className={styles.weekLabel}>v.{log.week_number}</span>
+                <span className={`${styles.chevron} ${isExpanded ? styles.chevronOpen : ''}`} aria-hidden="true">›</span>
               </div>
 
               <div className={styles.dotsRow}>
@@ -123,6 +139,32 @@ function Log() {
 
               {log.notes && (
                 <p className={styles.notes}>&ldquo;{log.notes}&rdquo;</p>
+              )}
+
+              {isExpanded && hasExercises && (
+                <div className={styles.exercises}>
+                  <span className={styles.exercisesLabel}>Övningar</span>
+                  <ul className={styles.exerciseList}>
+                    {log.exercises!.map((ex) => {
+                      const attempts = ex.success_count + ex.fail_count
+                      const rate = attempts > 0 ? Math.round((ex.success_count / attempts) * 100) : null
+                      return (
+                        <li key={ex.id} className={styles.exerciseItem}>
+                          <span className={styles.exerciseName}>{ex.label}</span>
+                          {attempts > 0 && (
+                            <span className={styles.exerciseRate}>
+                              {ex.success_count}/{attempts}{rate !== null ? ` (${rate}%)` : ''}
+                            </span>
+                          )}
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </div>
+              )}
+
+              {isExpanded && !hasExercises && !log.notes && (
+                <p className={styles.noDetails}>Inga övningsdetaljer sparade.</p>
               )}
             </article>
           )

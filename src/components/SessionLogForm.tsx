@@ -6,6 +6,7 @@ import styles from './SessionLogForm.module.css'
 
 interface Props {
   breed: Breed
+  dogKey?: string
   weekNumber: number
   exercises?: ExerciseSummary[]
   onSaved: () => void
@@ -18,7 +19,7 @@ const RATINGS: { value: QuickRating; label: string; emoji: string }[] = [
   { value: 'bad', label: 'Svårt', emoji: '😞' },
 ]
 
-export default function SessionLogForm({ breed, weekNumber, exercises, onSaved, onCancel }: Props) {
+export default function SessionLogForm({ breed, dogKey, weekNumber, exercises, onSaved, onCancel }: Props) {
   const [rating, setRating] = useState<QuickRating | null>(null)
   const [focus, setFocus] = useState(3)
   const [obedience, setObedience] = useState(3)
@@ -36,6 +37,7 @@ export default function SessionLogForm({ breed, weekNumber, exercises, onSaved, 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           breed,
+          dog_key: dogKey,
           week_number: weekNumber,
           quick_rating: rating,
           focus,

@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS training_cache (
 CREATE TABLE IF NOT EXISTS session_logs (
   id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   breed        text NOT NULL,
+  dog_key      text,                -- stable per-dog identifier; NULL = legacy row
   week_number  int  NOT NULL,
   quick_rating text NOT NULL CHECK (quick_rating IN ('good', 'mixed', 'bad')),
   focus        int  NOT NULL CHECK (focus BETWEEN 1 AND 5),
@@ -44,6 +45,12 @@ CREATE TABLE IF NOT EXISTS session_logs (
 );
 
 CREATE INDEX IF NOT EXISTS session_logs_breed_idx ON session_logs (breed, created_at DESC);
+CREATE INDEX IF NOT EXISTS session_logs_dog_key_idx ON session_logs (dog_key, created_at DESC);
+
+-- Migration: add dog_key column to existing session_logs table
+-- Run this once if the table already exists:
+-- ALTER TABLE session_logs ADD COLUMN IF NOT EXISTS dog_key text;
+-- CREATE INDEX IF NOT EXISTS session_logs_dog_key_idx ON session_logs (dog_key, created_at DESC);
 
 -- Takedown requests: document removal requests from breed clubs
 CREATE TABLE IF NOT EXISTS takedown_requests (

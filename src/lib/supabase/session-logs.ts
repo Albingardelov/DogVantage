@@ -3,6 +3,7 @@ import type { Breed, SessionLog, QuickRating, ExerciseSummary } from '@/types'
 
 export async function saveSessionLog(log: {
   breed: Breed
+  dog_key?: string
   week_number: number
   quick_rating: QuickRating
   focus: number
@@ -23,9 +24,10 @@ export async function saveSessionLog(log: {
 export async function getRecentLogs(
   breed: Breed,
   weekNumber: number,
-  limit = 5
+  limit = 5,
+  dogKey?: string
 ): Promise<SessionLog[]> {
-  const { data, error } = await getSupabaseAdmin()
+  let query = getSupabaseAdmin()
     .from('session_logs')
     .select('*')
     .eq('breed', breed)
@@ -33,18 +35,24 @@ export async function getRecentLogs(
     .order('created_at', { ascending: false })
     .limit(limit)
 
+  if (dogKey) query = query.eq('dog_key', dogKey)
+
+  const { data, error } = await query
   if (error) throw new Error(`Failed to fetch session logs: ${error.message}`)
   return (data ?? []) as SessionLog[]
 }
 
-export async function getAllLogs(breed: Breed, limit = 30): Promise<SessionLog[]> {
-  const { data, error } = await getSupabaseAdmin()
+export async function getAllLogs(breed: Breed, limit = 30, dogKey?: string): Promise<SessionLog[]> {
+  let query = getSupabaseAdmin()
     .from('session_logs')
     .select('*')
     .eq('breed', breed)
     .order('created_at', { ascending: false })
     .limit(limit)
 
+  if (dogKey) query = query.eq('dog_key', dogKey)
+
+  const { data, error } = await query
   if (error) throw new Error(`Failed to fetch session logs: ${error.message}`)
   return (data ?? []) as SessionLog[]
 }
