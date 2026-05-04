@@ -18,6 +18,14 @@ const RATINGS: { value: QuickRating; label: string; emoji: string }[] = [
   { value: 'bad', label: 'Svårt', emoji: '😞' },
 ]
 
+type NextSessionIntent = 'same' | 'easier' | 'harder'
+
+const NEXT_SESSION_OPTIONS: { value: NextSessionIntent; label: string }[] = [
+  { value: 'same', label: 'Behåll nivå' },
+  { value: 'easier', label: 'Lättare' },
+  { value: 'harder', label: 'Kan höja' },
+]
+
 export default function SessionLogForm({ breed, weekNumber, exercises, onSaved, onCancel }: Props) {
   const [rating, setRating] = useState<QuickRating | null>(null)
   const [focus, setFocus] = useState(3)
@@ -26,6 +34,7 @@ export default function SessionLogForm({ breed, weekNumber, exercises, onSaved, 
   const [handlerConsistency, setHandlerConsistency] = useState(3)
   const [handlerReading, setHandlerReading] = useState(3)
   const [notes, setNotes] = useState('')
+  const [nextSession, setNextSession] = useState<NextSessionIntent | null>(null)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
@@ -34,6 +43,16 @@ export default function SessionLogForm({ breed, weekNumber, exercises, onSaved, 
     if (!rating) return
     setSaving(true)
     try {
+      let combinedNotes = notes.trim()
+      if (nextSession) {
+        const tag =
+          nextSession === 'same'
+            ? '[Nästa pass: behåll nivå]'
+            : nextSession === 'easier'
+              ? '[Nästa pass: lättare]'
+              : '[Nästa pass: kan höja]'
+        combinedNotes = combinedNotes ? `${combinedNotes}\n${tag}` : tag
+      }
       await fetch('/api/logs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -46,7 +65,7 @@ export default function SessionLogForm({ breed, weekNumber, exercises, onSaved, 
           handler_timing: handlerTiming,
           handler_consistency: handlerConsistency,
           handler_reading: handlerReading,
-          notes: notes.trim() || undefined,
+          notes: combinedNotes || undefined,
           exercises: exercises && exercises.length > 0 ? exercises : undefined,
         }),
       })
@@ -140,6 +159,27 @@ export default function SessionLogForm({ breed, weekNumber, exercises, onSaved, 
           value={handlerReading}
           onChange={setHandlerReading}
         />
+      </div>
+
+      <div className={styles.section}>
+        <span className={styles.sectionLabel}>Efter passet — nästa gång (valfritt)</span>
+        <div className={styles.nextRow} role="radiogroup" aria-label="Plan för nästa pass">
+          {NEXT_SESSION_OPTIONS.map((opt) => {
+            const selected = nextSession === opt.value
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                className={`${styles.nextBtn} ${selected ? styles.nextBtnSelected : ''}`}
+                onClick={() => setNextSession((prev) => (prev === opt.value ? null : opt.value))}
+              >
+                {opt.label}
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       <textarea

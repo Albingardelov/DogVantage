@@ -30,11 +30,11 @@ export default function WeekFocusPanel({ copy, simpleFocus, onToggleSimple, tota
           <button type="button" className={styles.simpleToggle} onClick={onToggleSimple}>
             {simpleFocus
               ? `Visa alla ${totalExercises} övningar idag`
-              : 'Enkel vy — fokusera på två övningar'}
+              : 'Enkel vy — bara nästa övning'}
           </button>
           {simpleFocus && totalExercises > 2 && (
             <span className={styles.simpleHint}>
-              Övriga övningar finns kvar — växla vy eller öppna hela veckan.
+              Du ser första ofullständiga övningen i ordning. Växla vy för hela dagens lista.
             </span>
           )}
         </div>

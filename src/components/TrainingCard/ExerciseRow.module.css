@@ -11,6 +11,12 @@
   background: var(--color-green-100);
 }
 
+.rowSessionNext {
+  scroll-margin-top: 4.5rem;
+  box-shadow: inset 4px 0 0 var(--color-primary);
+  background: linear-gradient(90deg, var(--color-green-50) 0%, var(--color-surface) 28%);
+}
+
 .iconBox {
   width: 38px;
   height: 38px;

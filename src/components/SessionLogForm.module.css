@@ -95,6 +95,32 @@
   font-size: var(--text-sm);
 }
 
+.nextRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.nextBtn {
+  flex: 1;
+  min-width: 5.5rem;
+  padding: var(--space-2) var(--space-3);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-input);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+}
+
+.nextBtnSelected {
+  border-color: var(--color-primary);
+  background: var(--color-green-50);
+  color: var(--color-primary);
+}
+
 .sliderField {
   display: flex;
   flex-direction: column;

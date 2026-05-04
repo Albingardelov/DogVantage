@@ -39,6 +39,10 @@ interface Props {
   showTroubleshooting: boolean
   onMetricsPatch: (patch: Partial<DailyExerciseMetrics>) => void
   ageWeeks?: number
+  /** Primär “nästa övning” i dagens pass (visuell ram, ej samma som rep-prickarnas nästa) */
+  sessionNext?: boolean
+  /** Ankare för scroll när nästa övning byts (t.ex. `training-session-next`) */
+  rootId?: string
 }
 
 const LATENCY_OPTIONS: { id: LatencyBucket; label: string }[] = [
@@ -58,6 +62,8 @@ export default function ExerciseRow({
   showTroubleshooting,
   onMetricsPatch,
   ageWeeks,
+  sessionNext,
+  rootId,
 }: Props) {
   const isComplete = done >= exercise.reps
   const successCount = metrics?.success_count ?? 0
@@ -72,7 +78,10 @@ export default function ExerciseRow({
   const successRate = attempts > 0 ? successCount / attempts : null
 
   return (
-    <div className={`${styles.row} ${isComplete ? styles.rowDone : ''}`}>
+    <div
+      id={rootId}
+      className={`${styles.row} ${isComplete ? styles.rowDone : ''} ${sessionNext ? styles.rowSessionNext : ''}`}
+    >
       <div className={`${styles.iconBox} ${isComplete ? styles.iconBoxDone : ''}`}>
         <span aria-hidden="true">{getIcon(exercise.id)}</span>
       </div>

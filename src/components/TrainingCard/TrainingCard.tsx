@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import ExerciseRow from './ExerciseRow'
 import WeekView from './WeekView'
@@ -11,6 +11,7 @@ import type { Breed, TrainingGoal, TrainingEnvironment, RewardPreference, WeekPl
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
 import { buildWeekFocusCopy } from '@/lib/training/week-focus-copy'
 import WeekFocusPanel from './WeekFocusPanel'
+import PreSessionChecklist from './PreSessionChecklist'
 
 const SWEDISH_DAYS = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag']
 
@@ -126,8 +127,47 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
 
   const todayPlan = weekPlan?.days.find((d) => d.day === todayName)
   const todayExercises: Exercise[] = todayPlan?.exercises ?? []
-  const displayedExercises =
-    simpleFocus && todayExercises.length > 2 ? todayExercises.slice(0, 2) : todayExercises
+
+  const nextExerciseId = useMemo(() => {
+    for (const e of todayExercises) {
+      if ((progress[e.id] ?? 0) < e.reps) return e.id
+    }
+    return null
+  }, [todayExercises, progress])
+
+  const displayedExercises = useMemo(() => {
+    if (!simpleFocus || todayExercises.length <= 2) return todayExercises
+    if (!nextExerciseId) return todayExercises
+    const next = todayExercises.find((e) => e.id === nextExerciseId)
+    return next ? [next] : todayExercises
+  }, [simpleFocus, todayExercises, nextExerciseId])
+
+  const nextExercise = useMemo(
+    () => (nextExerciseId ? todayExercises.find((e) => e.id === nextExerciseId) ?? null : null),
+    [todayExercises, nextExerciseId]
+  )
+
+  const prevNextIdRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const id = nextExerciseId
+    if (!id) {
+      prevNextIdRef.current = null
+      return
+    }
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      prevNextIdRef.current = id
+      return
+    }
+    const prev = prevNextIdRef.current
+    prevNextIdRef.current = id
+    if (prev === null) return
+    if (prev === id) return
+    requestAnimationFrame(() => {
+      document.getElementById('training-session-next')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    })
+  }, [nextExerciseId])
+
   const completedCount = todayExercises.filter((e) => (progress[e.id] ?? 0) >= e.reps).length
   const progressPct = todayExercises.length > 0 ? (completedCount / todayExercises.length) * 100 : 0
 
@@ -140,6 +180,10 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
             <span className={styles.headerCount}>{completedCount}/{todayExercises.length} klara</span>
           )}
         </div>
+
+        {!loading && todayExercises.length > 0 && !todayPlan?.rest && (
+          <PreSessionChecklist ageWeeks={ageWeeks} dateKey={todayDate} />
+        )}
 
         {!loading && weekPlan && (
           <WeekFocusPanel
@@ -160,6 +204,16 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
             aria-valuemax={100}
           >
             <div className={styles.progressFill} style={{ '--pct': `${progressPct}%` } as React.CSSProperties} />
+          </div>
+        )}
+
+        {!loading &&
+          nextExercise &&
+          !todayPlan?.rest &&
+          !(simpleFocus && todayExercises.length > 2) && (
+          <div className={styles.nextBanner} role="status" aria-live="polite">
+            <span className={styles.nextBannerLabel}>Nästa</span>
+            <span className={styles.nextBannerName}>{nextExercise.label}</span>
           </div>
         )}
 
@@ -210,6 +264,8 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
                 showTroubleshooting={showTroubleshooting}
                 onMetricsPatch={(patch) => patchMetrics(ex.id, patch)}
                 ageWeeks={ageWeeks}
+                sessionNext={nextExerciseId === ex.id}
+                rootId={nextExerciseId === ex.id ? 'training-session-next' : undefined}
               />
                 )
               })()
