@@ -12,6 +12,7 @@ interface DbProfile {
 }
 
 function dbToProfile(row: DbProfile): DogProfile {
+  // dogKey is not persisted — user_id from Supabase Auth is the stable identity
   return {
     name: row.name,
     breed: row.breed as DogProfile['breed'],
@@ -54,9 +55,14 @@ export async function updateProfile(fields: Partial<DogProfile>): Promise<void> 
   if (fields.assessment !== undefined) updates.assessment = fields.assessment
   if (fields.name !== undefined) updates.name = fields.name
 
+  if (Object.keys(updates).length === 0) return
+
+  const { data: { user } } = await supabaseBrowser.auth.getUser()
+  if (!user) throw new Error('updateProfile called without authenticated user')
+
   const { error } = await supabaseBrowser
     .from('dog_profiles')
     .update(updates)
-    .eq('user_id', (await supabaseBrowser.auth.getUser()).data.user?.id ?? '')
+    .eq('user_id', user.id)
   if (error) throw new Error(`Failed to update profile: ${error.message}`)
 }
