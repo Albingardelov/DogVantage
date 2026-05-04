@@ -17,14 +17,134 @@ export default function CalendarPage() {
   )
 }
 
-// Swedish weekday name lookup — matches Date.getDay() (0 = Sunday)
+// WEEKDAY_NAMES: indexed by Date.getDay() (0 = Sunday)
 const WEEKDAY_NAMES = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag']
+// WEEKDAY_ABBR: Mon-first order for grid column headers (not getDay() indexed)
 const WEEKDAY_ABBR  = ['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön']
 const MONTH_NAMES   = [
   'januari', 'februari', 'mars', 'april', 'maj', 'juni',
   'juli', 'augusti', 'september', 'oktober', 'november', 'december',
 ]
 const DAY_NAMES_LC  = ['söndag', 'måndag', 'tisdag', 'onsdag', 'torsdag', 'fredag', 'lördag']
+
+type DayState = 'good' | 'mixed' | 'bad' | 'missed' | 'planned' | 'rest'
+
+function getDayState(
+  dateStr: string,
+  todayStr: string,
+  logs: Record<string, SessionLog>,
+  trainingWeekdays: Set<string>
+): DayState {
+  const log = logs[dateStr]
+  if (log) return log.quick_rating as DayState
+
+  // Use noon to avoid timezone issues when parsing date-only strings
+  const date = new Date(dateStr + 'T12:00:00')
+  const isTraining = trainingWeekdays.has(WEEKDAY_NAMES[date.getDay()])
+
+  if (dateStr < todayStr) return isTraining ? 'missed' : 'rest'
+  return isTraining ? 'planned' : 'rest'
+}
+
+// Returns array of YYYY-MM-DD strings (or null for padding cells).
+// Grid starts on Monday (offset by Mon=0…Sun=6).
+function getMonthCells(year: number, month: number): (string | null)[] {
+  const firstDay   = new Date(year, month, 1)
+  const startOffset = (firstDay.getDay() + 6) % 7 // Mon = 0
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const cells: (string | null)[] = Array(startOffset).fill(null)
+  for (let d = 1; d <= daysInMonth; d++) {
+    cells.push(
+      `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+    )
+  }
+  while (cells.length % 7 !== 0) cells.push(null)
+  return cells
+}
+
+function DayCell({
+  dateStr,
+  todayStr,
+  selected,
+  state,
+  onClick,
+}: {
+  dateStr: string
+  todayStr: string
+  selected: boolean
+  state: DayState
+  onClick: () => void
+}) {
+  const dayNum  = Number(dateStr.slice(8))
+  const isToday = dateStr === todayStr
+
+  const dotClass: string | null = {
+    good:    styles.dotGood,
+    mixed:   styles.dotMixed,
+    bad:     styles.dotBad,
+    missed:  styles.dotMissed,
+    planned: styles.dotPlanned,
+    rest:    null,
+  }[state]
+
+  return (
+    <button
+      type="button"
+      className={[
+        styles.dayCell,
+        isToday   ? styles.dayCellToday    : '',
+        selected  ? styles.dayCellSelected : '',
+      ].join(' ')}
+      onClick={onClick}
+      aria-label={dateStr}
+      aria-pressed={selected}
+    >
+      <span className={styles.dayNumber}>{dayNum}</span>
+      {dotClass && <span className={`${styles.dot} ${dotClass}`} aria-hidden="true" />}
+    </button>
+  )
+}
+
+function CalendarGrid({
+  year,
+  month,
+  todayStr,
+  selectedDate,
+  logs,
+  trainingWeekdays,
+  onSelectDate,
+}: {
+  year: number
+  month: number
+  todayStr: string
+  selectedDate: string
+  logs: Record<string, SessionLog>
+  trainingWeekdays: Set<string>
+  onSelectDate: (date: string) => void
+}) {
+  const cells = getMonthCells(year, month)
+  return (
+    <div className={styles.grid}>
+      {WEEKDAY_ABBR.map((d) => (
+        <div key={d} className={styles.weekdayHeader}>{d}</div>
+      ))}
+      {cells.map((dateStr, i) => {
+        if (!dateStr) return <div key={`pad-${i}`} className={styles.dayCellEmpty} />
+        const state = getDayState(dateStr, todayStr, logs, trainingWeekdays)
+        return (
+          <DayCell
+            key={dateStr}
+            dateStr={dateStr}
+            todayStr={todayStr}
+            selected={selectedDate === dateStr}
+            state={state}
+            onClick={() => onSelectDate(dateStr)}
+          />
+        )
+      })}
+    </div>
+  )
+}
 
 function CalendarView() {
   const router = useRouter()
@@ -83,6 +203,15 @@ function CalendarView() {
 
   if (!profile) return null
 
+  function prevMonth() {
+    if (viewMonth === 0) { setViewMonth(11); setViewYear((y) => y - 1) }
+    else setViewMonth((m) => m - 1)
+  }
+  function nextMonth() {
+    if (viewMonth === 11) { setViewMonth(0); setViewYear((y) => y + 1) }
+    else setViewMonth((m) => m + 1)
+  }
+
   return (
     <main className={styles.main}>
       <header className={styles.header}>
@@ -94,12 +223,44 @@ function CalendarView() {
           <span className={styles.headerTitle}>Träningskalender</span>
         </div>
       </header>
+
       <div className={styles.scrollArea}>
-        {loading
-          ? <p className={styles.noData}>Laddar…</p>
-          : <p className={styles.noData}>Data laddad: {Object.keys(logs).length} loggade pass</p>
-        }
+        {loading ? (
+          <p className={styles.noData}>Laddar…</p>
+        ) : (
+          <>
+            <div className={styles.monthNav}>
+              <button type="button" className={styles.monthNavBtn} onClick={prevMonth} aria-label="Föregående månad">
+                <ChevronLeft />
+              </button>
+              <span className={styles.monthLabel}>{MONTH_NAMES[viewMonth]} {viewYear}</span>
+              <button type="button" className={styles.monthNavBtn} onClick={nextMonth} aria-label="Nästa månad">
+                <ChevronRight />
+              </button>
+            </div>
+
+            <CalendarGrid
+              year={viewYear}
+              month={viewMonth}
+              todayStr={todayStr}
+              selectedDate={selectedDate}
+              logs={logs}
+              trainingWeekdays={trainingWeekdays}
+              onSelectDate={setSelectedDate}
+            />
+
+            <DayDetailPanel
+              dateStr={selectedDate}
+              todayStr={todayStr}
+              log={logs[selectedDate] ?? null}
+              trainingWeekdays={trainingWeekdays}
+            />
+
+            <Legend />
+          </>
+        )}
       </div>
+
       <BottomNav active="dashboard" />
     </main>
   )
@@ -109,6 +270,22 @@ function BackIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <polyline points="15 18 9 12 15 6" />
+    </svg>
+  )
+}
+
+function ChevronLeft() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polyline points="15 18 9 12 15 6" />
+    </svg>
+  )
+}
+
+function ChevronRight() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polyline points="9 18 15 12 9 6" />
     </svg>
   )
 }
