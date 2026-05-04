@@ -33,15 +33,18 @@ CREATE TABLE IF NOT EXISTS training_cache (
 
 -- Session logs: hybrid logging per training session
 CREATE TABLE IF NOT EXISTS session_logs (
-  id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  breed        text NOT NULL,
-  dog_key      text,                -- stable per-dog identifier; NULL = legacy row
-  week_number  int  NOT NULL,
-  quick_rating text NOT NULL CHECK (quick_rating IN ('good', 'mixed', 'bad')),
-  focus        int  NOT NULL CHECK (focus BETWEEN 1 AND 5),
-  obedience    int  NOT NULL CHECK (obedience BETWEEN 1 AND 5),
-  notes        text,
-  created_at   timestamptz DEFAULT now()
+  id                   uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  breed                text NOT NULL,
+  dog_key              text,                -- stable per-dog identifier; NULL = legacy row
+  week_number          int  NOT NULL,
+  quick_rating         text NOT NULL CHECK (quick_rating IN ('good', 'mixed', 'bad')),
+  focus                int  NOT NULL CHECK (focus BETWEEN 1 AND 5),
+  obedience            int  NOT NULL CHECK (obedience BETWEEN 1 AND 5),
+  handler_timing       int  CHECK (handler_timing BETWEEN 1 AND 5),
+  handler_consistency  int  CHECK (handler_consistency BETWEEN 1 AND 5),
+  handler_reading      int  CHECK (handler_reading BETWEEN 1 AND 5),
+  notes                text,
+  created_at           timestamptz DEFAULT now()
 );
 
 CREATE INDEX IF NOT EXISTS session_logs_breed_idx ON session_logs (breed, created_at DESC);

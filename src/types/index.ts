@@ -151,9 +151,12 @@ export interface SessionLog {
   dog_key?: string
   week_number: number
   quick_rating: QuickRating
-  focus: number      // 1–5
-  obedience: number  // 1–5
-  notes?: string     // valfri fritext
+  focus: number           // 1–5
+  obedience: number       // 1–5
+  handler_timing?: number       // 1–5 förarens timing
+  handler_consistency?: number  // 1–5 förarens konsekvens
+  handler_reading?: number      // 1–5 förarens förmåga att läsa hunden
+  notes?: string
   exercises?: ExerciseSummary[]
   created_at: string
 }

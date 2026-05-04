@@ -8,6 +8,9 @@ export async function saveSessionLog(log: {
   quick_rating: QuickRating
   focus: number
   obedience: number
+  handler_timing?: number
+  handler_consistency?: number
+  handler_reading?: number
   notes?: string
   exercises?: ExerciseSummary[]
 }): Promise<SessionLog> {

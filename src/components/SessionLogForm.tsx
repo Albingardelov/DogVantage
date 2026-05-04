@@ -23,6 +23,9 @@ export default function SessionLogForm({ breed, dogKey, weekNumber, exercises, o
   const [rating, setRating] = useState<QuickRating | null>(null)
   const [focus, setFocus] = useState(3)
   const [obedience, setObedience] = useState(3)
+  const [handlerTiming, setHandlerTiming] = useState(3)
+  const [handlerConsistency, setHandlerConsistency] = useState(3)
+  const [handlerReading, setHandlerReading] = useState(3)
   const [notes, setNotes] = useState('')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -42,6 +45,9 @@ export default function SessionLogForm({ breed, dogKey, weekNumber, exercises, o
           quick_rating: rating,
           focus,
           obedience,
+          handler_timing: handlerTiming,
+          handler_consistency: handlerConsistency,
+          handler_reading: handlerReading,
           notes: notes.trim() || undefined,
           exercises: exercises && exercises.length > 0 ? exercises : undefined,
         }),
@@ -110,8 +116,33 @@ export default function SessionLogForm({ breed, dogKey, weekNumber, exercises, o
         </div>
       </div>
 
-      <SliderField label="Fokus" value={focus} onChange={setFocus} />
-      <SliderField label="Lydnad" value={obedience} onChange={setObedience} />
+      <div className={styles.section}>
+        <span className={styles.sectionLabel}>Hundens prestation</span>
+        <SliderField label="Fokus" value={focus} onChange={setFocus} />
+        <SliderField label="Lydnad" value={obedience} onChange={setObedience} />
+      </div>
+
+      <div className={styles.section}>
+        <span className={styles.sectionLabel}>Din insats som förare</span>
+        <SliderField
+          label="Timing"
+          hint="Belönade du i rätt ögonblick?"
+          value={handlerTiming}
+          onChange={setHandlerTiming}
+        />
+        <SliderField
+          label="Konsekvens"
+          hint="Höll du samma krav under hela passet?"
+          value={handlerConsistency}
+          onChange={setHandlerConsistency}
+        />
+        <SliderField
+          label="Läsa hunden"
+          hint="Märkte du när hunden var på väg att misslyckas?"
+          value={handlerReading}
+          onChange={setHandlerReading}
+        />
+      </div>
 
       <textarea
         className={styles.notes}
@@ -146,17 +177,22 @@ export default function SessionLogForm({ breed, dogKey, weekNumber, exercises, o
 
 function SliderField({
   label,
+  hint,
   value,
   onChange,
 }: {
   label: string
+  hint?: string
   value: number
   onChange: (v: number) => void
 }) {
   return (
     <div className={styles.sliderField}>
       <div className={styles.sliderHeader}>
-        <span className={styles.sliderLabel}>{label}</span>
+        <div className={styles.sliderLabelGroup}>
+          <span className={styles.sliderLabel}>{label}</span>
+          {hint && <span className={styles.sliderHint}>{hint}</span>}
+        </div>
         <span className={styles.sliderValue}>{value}/5</span>
       </div>
       <input

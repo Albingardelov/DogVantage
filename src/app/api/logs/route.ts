@@ -10,18 +10,25 @@ export async function POST(req: NextRequest) {
     quick_rating: QuickRating
     focus: number
     obedience: number
+    handler_timing?: number
+    handler_consistency?: number
+    handler_reading?: number
     notes?: string
     exercises?: ExerciseSummary[]
   }
 
-  const { breed, dog_key, week_number, quick_rating, focus, obedience, notes, exercises } = body
+  const { breed, dog_key, week_number, quick_rating, focus, obedience,
+          handler_timing, handler_consistency, handler_reading, notes, exercises } = body
 
   if (!breed || typeof week_number !== 'number' || !quick_rating ||
       typeof focus !== 'number' || typeof obedience !== 'number') {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
-  const log = await saveSessionLog({ breed, dog_key, week_number, quick_rating, focus, obedience, notes, exercises })
+  const log = await saveSessionLog({
+    breed, dog_key, week_number, quick_rating, focus, obedience,
+    handler_timing, handler_consistency, handler_reading, notes, exercises,
+  })
   return NextResponse.json(log, { status: 201 })
 }
 

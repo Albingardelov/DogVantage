@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import styles from './BottomNav.module.css'
 
-export type BottomNavTab = 'dashboard' | 'chat' | 'log'
+export type BottomNavTab = 'dashboard' | 'chat' | 'log' | 'learn'
 
 interface BottomNavProps {
   active: BottomNavTab
@@ -13,6 +13,7 @@ const ITEMS: { id: BottomNavTab; label: string; href: string }[] = [
   { id: 'dashboard', label: 'Hem', href: '/dashboard' },
   { id: 'chat', label: 'Chatt', href: '/chat' },
   { id: 'log', label: 'Logg', href: '/log' },
+  { id: 'learn', label: 'Lär', href: '/learn' },
 ]
 
 export default function BottomNav({ active }: BottomNavProps) {
@@ -59,6 +60,14 @@ function Icon({ id }: { id: BottomNavTab }) {
     return (
       <svg {...common} aria-hidden="true">
         <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+      </svg>
+    )
+  }
+  if (id === 'learn') {
+    return (
+      <svg {...common} aria-hidden="true">
+        <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z" />
+        <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" />
       </svg>
     )
   }

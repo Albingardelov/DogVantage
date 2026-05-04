@@ -104,13 +104,24 @@
 .sliderHeader {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+}
+
+.sliderLabelGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
 }
 
 .sliderLabel {
   font-size: var(--text-sm);
   font-weight: var(--font-semibold);
   color: var(--color-text);
+}
+
+.sliderHint {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
 }
 
 .sliderValue {

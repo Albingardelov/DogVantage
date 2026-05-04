@@ -148,14 +148,28 @@ function Log() {
                     {log.exercises!.map((ex) => {
                       const attempts = ex.success_count + ex.fail_count
                       const rate = attempts > 0 ? Math.round((ex.success_count / attempts) * 100) : null
+                      const latencyLabel = ex.latency_bucket
+                        ? ({ lt1s: '< 1 s', '1to3s': '1–3 s', gt3s: '> 3 s' } as Record<string, string>)[ex.latency_bucket]
+                        : null
+                      const latencyTone = ex.latency_bucket === 'lt1s' ? styles.latencyFast
+                        : ex.latency_bucket === '1to3s' ? styles.latencyMid
+                        : ex.latency_bucket === 'gt3s' ? styles.latencySlow
+                        : ''
                       return (
                         <li key={ex.id} className={styles.exerciseItem}>
                           <span className={styles.exerciseName}>{ex.label}</span>
-                          {attempts > 0 && (
-                            <span className={styles.exerciseRate}>
-                              {ex.success_count}/{attempts}{rate !== null ? ` (${rate}%)` : ''}
-                            </span>
-                          )}
+                          <div className={styles.exerciseMeta}>
+                            {attempts > 0 && (
+                              <span className={styles.exerciseRate}>
+                                {ex.success_count}/{attempts}{rate !== null ? ` (${rate}%)` : ''}
+                              </span>
+                            )}
+                            {latencyLabel && (
+                              <span className={`${styles.latencyBadge} ${latencyTone}`}>
+                                {latencyLabel}
+                              </span>
+                            )}
+                          </div>
                         </li>
                       )
                     })}
@@ -163,7 +177,18 @@ function Log() {
                 </div>
               )}
 
-              {isExpanded && !hasExercises && !log.notes && (
+              {isExpanded && (log.handler_timing || log.handler_consistency || log.handler_reading) && (
+                <div className={styles.handlerSection}>
+                  <span className={styles.exercisesLabel}>Din insats</span>
+                  <div className={styles.handlerRow}>
+                    {log.handler_timing && <HandlerStat label="Timing" value={log.handler_timing} />}
+                    {log.handler_consistency && <HandlerStat label="Konsekvens" value={log.handler_consistency} />}
+                    {log.handler_reading && <HandlerStat label="Läsa hunden" value={log.handler_reading} />}
+                  </div>
+                </div>
+              )}
+
+              {isExpanded && !hasExercises && !log.notes && !log.handler_timing && (
                 <p className={styles.noDetails}>Inga övningsdetaljer sparade.</p>
               )}
             </article>
@@ -173,6 +198,15 @@ function Log() {
 
       <BottomNav active="log" />
     </main>
+  )
+}
+
+function HandlerStat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className={styles.handlerStat}>
+      <span className={styles.handlerStatValue}>{value}/5</span>
+      <span className={styles.handlerStatLabel}>{label}</span>
+    </div>
   )
 }
 

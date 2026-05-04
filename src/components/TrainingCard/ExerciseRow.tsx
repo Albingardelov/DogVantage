@@ -158,8 +158,15 @@ export default function ExerciseRow({
             </div>
 
             {recommendation && (
-              <div className={styles.recommendation}>
-                <span className={styles.recommendationStrong}>Nästa steg:</span> {recommendation}
+              <div className={`${styles.recommendation} ${showTroubleshooting ? styles.recommendationAlert : ''}`} role={showTroubleshooting ? 'alert' : undefined}>
+                {showTroubleshooting ? (
+                  <>
+                    <span className={styles.recommendationIcon} aria-hidden="true">⚠️</span>
+                    <span>{recommendation}</span>
+                  </>
+                ) : (
+                  <><span className={styles.recommendationStrong}>Nästa steg:</span> {recommendation}</>
+                )}
               </div>
             )}
 

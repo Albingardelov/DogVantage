@@ -1,0 +1,218 @@
+'use client'
+
+import { useState } from 'react'
+import ProfileGuard from '@/components/ProfileGuard'
+import BottomNav from '@/components/BottomNav'
+import styles from './page.module.css'
+
+export default function LearnPage() {
+  return (
+    <ProfileGuard>
+      <Learn />
+    </ProfileGuard>
+  )
+}
+
+interface Article {
+  id: string
+  title: string
+  summary: string
+  readTime: string
+  sections: { heading: string; body: string }[]
+}
+
+const ARTICLES: Article[] = [
+  {
+    id: 'stress-signals',
+    title: 'Stresssignaler — läs av din hund',
+    summary: 'Hundar pratar hela tiden. Lär dig se de subtila tecknen innan problemen uppstår.',
+    readTime: '4 min',
+    sections: [
+      {
+        heading: 'Vad är stresssignaler?',
+        body: 'Turid Rugaas kallar dem "calming signals" — beteenden hundar använder för att lugna sig själva och kommunicera med omgivningen. De syns redan innan hunden är "over threshold" och är ditt tidiga varningssystem.',
+      },
+      {
+        heading: 'Vanliga tecken att se upp för',
+        body: 'Gäspning (utanför trötthet) · Slickar sig om nosen utan mat i närheten · Vänder bort huvudet eller kroppen · Sniffar i marken plötsligt · Skakar kroppen som om den vore blöt · Klipper med öronen · Stela rörelser · Vägrar ta belöning — det sista är det starkaste tecknet.',
+      },
+      {
+        heading: 'Skillnad: stress vs. kalibrering',
+        body: 'En hund som gapar och tittar bort när du tränar i en ny miljö är inte trött — den bearbetar intryck. Det är normalt. Problemet uppstår när dessa signaler upprepas hela passet utan att lugnas ner. Då är miljön för svår.',
+      },
+      {
+        heading: 'Vad du ska göra',
+        body: 'Öka avstånd till triggern. Gör övningen enklare. Avsluta passet med en lätt övning och ett jackpot-belöning. Pressa aldrig igenom stresssignaler — det bygger negativa associationer som är svåra att reparera.',
+      },
+    ],
+  },
+  {
+    id: 'timing',
+    title: 'Timing — halv sekund avgör allt',
+    summary: 'Det handlar inte om vad du belönar utan exakt NÄR. Förstå varför och hur du tränar upp det.',
+    readTime: '3 min',
+    sections: [
+      {
+        heading: 'Varför timing är kritisk',
+        body: 'En hund kan inte koppla ihop en belöning med ett beteende om det går mer än 0,3–0,5 sekunder emellan. Belönar du 2 sekunder efter att hunden satte sig — belönar du troligen att hunden tittar upp, rör på sig eller rest sig.',
+      },
+      {
+        heading: 'Klicker-principen',
+        body: 'En klicker (eller "ja!"-markör) löser problemet — du markerar exakt rätt ögonblick och kan sedan ta fram belöningen. Utan markör måste belöningen vara i handen redan när beteendet sker. Testa: säg "ja!" i exakt det ögonblick hundens rumpa rör marken. Inte efter. Inte "bra hund satt du fint".',
+      },
+      {
+        heading: 'Hur du vet att din timing är dålig',
+        body: 'Hunden ser förvirrad ut. Den repeterar beteendet men verkar inte säker. Success-raten går inte upp trots många försök. Du märker att hunden ofta gör något annat precis när du belönar.',
+      },
+      {
+        heading: 'Träna upp din timing',
+        body: 'Titta på en video av dig själv och din hund. Notera exakt när du belönar vs. när beteendet sker. Klicka/markera när en boll studsar i marken — träna upp reflexen utan hunden. Håll belöningarna i en hand, markören i den andra, aldrig blanda.',
+      },
+    ],
+  },
+  {
+    id: 'over-threshold',
+    title: 'Over threshold — när hunden slutar tänka',
+    summary: 'En hund som är "over threshold" kan inte lära sig. Förstå skillnaden och vad du ska göra.',
+    readTime: '3 min',
+    sections: [
+      {
+        heading: 'Vad innebär "over threshold"?',
+        body: 'När ett stimuli (en hund, ett ljud, en rörelse) överstiger hundens stresströskel går den in i "fight-flight-freeze"-läge. Kortisol och adrenalin tar över. Prefrontal cortex — hjärnan som behövs för inlärning — kopplas bort. Hunden kan bokstavligen inte tänka.',
+      },
+      {
+        heading: 'Tecken på att hunden är over threshold',
+        body: 'Fixerad blick som inte bryts · Reaktivt skällande trots att du ropar · Rycker i kopplet mot triggern · Är helt ointresserad av belöning · Visar "tunnel vision" — ser inget utom triggern · Fladdrar med öronen, stelnar, andas snabbt.',
+      },
+      {
+        heading: 'Skillnaden mot fokuserat intresse',
+        body: 'En hund som är nyfiken men "under threshold" kan fortfarande ta emot belöning, titta på dig när du kallar, och återhämta sig. En over-threshold-hund kan inte det. Testet: kan hunden ta ett godis? Nej → over threshold.',
+      },
+      {
+        heading: 'Vad du gör',
+        body: 'Öka avstånd tills hunden kan ta belöning och titta på dig — det är ditt "working distance". Träna alltid på det avståndet. Minska det bara när hunden är stabil. Exponering under threshold, inte igenom den.',
+      },
+    ],
+  },
+  {
+    id: 'criteria',
+    title: 'Kriterier och progression — split, inte lump',
+    summary: '"Lumping" är det vanligaste misstaget. Lär dig vad det är och hur du undviker det.',
+    readTime: '4 min',
+    sections: [
+      {
+        heading: 'Vad är "lumping"?',
+        body: 'Lumping är när du höjer för många kriterier på en gång. Du tränar inkallning hemma utan koppel (lätt), sen ute på lång lina med tre hundar i närheten (svårt). Du "lumpade" avstånd + störning + koppel på en gång. Hunden misslyckas inte för att den är dum — den misslyckas för att steget var för stort.',
+      },
+      {
+        heading: 'Split-principen',
+        body: '"Split" innebär att du höjer ett kriterium i taget. Längre avstånd ELLER mer störning ELLER ny miljö. Aldrig allt på en gång. Det kan kännas onödigt långsamt, men det är den snabbaste vägen till ett stabilt beteende.',
+      },
+      {
+        heading: 'Hur du vet att du höjt för fort',
+        body: 'Success-raten sjunker under 60–70%. Hunden ser tveksam ut. Latensen ökar (svarar allt långsammare). Du behöver upprepa kommandot. Alla dessa signaler betyder: backa ett steg.',
+      },
+      {
+        heading: '80%-regeln',
+        body: 'Byt inte kriterium förrän hunden lyckas 8 av 10 gånger på nuvarande nivå, med kort latens, i minst två olika sessioner. Det är grunden för varför success_count och latency finns i appen — de är ditt objektiva mätetal istället för din känsla.',
+      },
+    ],
+  },
+  {
+    id: 'generalization',
+    title: 'Generalisering — "det kan hemma" ≠ "det kan ute"',
+    summary: 'Hunden lär sig inte ett beteende — den lär sig ett beteende i en specifik kontext. Förstå det och spara dig massor av frustration.',
+    readTime: '3 min',
+    sections: [
+      {
+        heading: 'Hundar generaliserar inte automatiskt',
+        body: 'När din hund kan "sitt" perfekt hemma i köket men verkar ha glömt det på promenaden har den inte glömt. Den har aldrig lärt sig att "sitt" gäller utomhus, i rörelse, med distraktioner. För hunden är det ett nytt beteende i ett nytt sammanhang.',
+      },
+      {
+        heading: 'Hur du generaliserar korrekt',
+        body: 'Träna varje övning i minst 5–8 olika miljöer och sammanhang. Starta alltid på lättaste kriteriet i ny miljö — backa till "inne-nivå" när du byter plats. Bygg upp igen snabbt (det går mycket snabbare andra gången). Variera: olika tider på dygnet, olika underlag, med och utan koppel.',
+      },
+      {
+        heading: 'Tecknet på ett generaliserat beteende',
+        body: 'Hunden reagerar på signalen oavsett var du är, vad du bär på, hur du ser ut, vilken vinkel du är i. Det tar månader — men det är vad "pålitlig lydnad" faktiskt innebär.',
+      },
+      {
+        heading: 'Och distraktioner?',
+        body: 'Distraktioner är ett separat kriterium. Börja alltid med noll störning i ny miljö, lägg till störning gradvis. Regeln: ny miljö = sänk störning. Svår störning = sänk miljösvårighet.',
+      },
+    ],
+  },
+  {
+    id: 'reinforcement',
+    title: 'Belöning — mer än bara godis',
+    summary: 'Att förstå belöningsvärde, scheman och när man ska sluta belöna varje rep gör dig till en bättre tränare.',
+    readTime: '4 min',
+    sections: [
+      {
+        heading: 'Belöningsvärde är relativt',
+        body: 'En Labrador jobbar för torrfoder hemma i lugn miljö. Samma Labrador kräver grillad kyckling för att prestera utomhus med distraktioner. Belöningsvärdet måste matcha svårighetsgraden. Hög svårighet = hög belöning. Spara den bästa belöningen för de svåraste momenten.',
+      },
+      {
+        heading: 'Continuous vs. intermittent',
+        body: 'Under inlärningsfasen: belöna VARJE lyckad rep (continuous reinforcement). Det bygger beteendet snabbt. När beteendet är stabilt: belöna varannan, var tredje (variable ratio). Det gör beteendet mer motståndskraftigt mot extinction — precis som en enarmad bandit håller folk fast.',
+      },
+      {
+        heading: 'Vad som räknas som belöning',
+        body: 'Mat (högst värde för de flesta hundar) · Leksak/lek · Frihet ("fri!") · Social kontakt · Lukta på något spännande · Rörelse och spring. Lär dig vad just din hund värderar mest — det varierar enormt även inom ras.',
+      },
+      {
+        heading: 'När belöningen inte fungerar',
+        body: 'Om hunden vägrar ta belöning: den är stressed, sjuk, trött, eller situationen är för svår. Om belöningen inte ökar beteendet: det är inte en belöning för den hunden i den situationen — byt. Belöning definieras av effekten, inte av din avsikt.',
+      },
+    ],
+  },
+]
+
+function Learn() {
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+
+  return (
+    <main className={styles.main}>
+      <header className={styles.header}>
+        <h1 className={styles.title}>Förarguider</h1>
+        <p className={styles.subtitle}>Kunskapen som gör dig till en bättre tränare</p>
+      </header>
+
+      <div className={styles.body}>
+        {ARTICLES.map((article) => {
+          const isOpen = expandedId === article.id
+          return (
+            <div key={article.id} className={`${styles.card} ${isOpen ? styles.cardOpen : ''}`}>
+              <button
+                type="button"
+                className={styles.cardHeader}
+                onClick={() => setExpandedId(isOpen ? null : article.id)}
+                aria-expanded={isOpen}
+              >
+                <div className={styles.cardMeta}>
+                  <span className={styles.readTime}>{article.readTime}</span>
+                  <h2 className={styles.cardTitle}>{article.title}</h2>
+                  <p className={styles.cardSummary}>{article.summary}</p>
+                </div>
+                <span className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`} aria-hidden="true">›</span>
+              </button>
+
+              {isOpen && (
+                <div className={styles.content}>
+                  {article.sections.map((s) => (
+                    <div key={s.heading} className={styles.section}>
+                      <h3 className={styles.sectionHeading}>{s.heading}</h3>
+                      <p className={styles.sectionBody}>{s.body}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      <BottomNav active="learn" />
+    </main>
+  )
+}
