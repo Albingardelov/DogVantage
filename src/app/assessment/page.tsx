@@ -386,12 +386,16 @@ function AssessmentExercise({
       <div className={styles.cardHeader}>
         <button
           type="button"
-          className={styles.cardTitle}
+          className={styles.cardTitleBtn}
           onClick={onOpenGuide}
-          style={{ background: 'transparent', border: 'none', padding: 0, textAlign: 'left', cursor: 'pointer' }}
           aria-label={`Öppna guide: ${prettyLabel(exerciseId)}`}
+          title="Steg-för-steg, tips och vanliga misstag"
         >
-          {prettyLabel(exerciseId)}
+          <span className={styles.cardTitleText}>{prettyLabel(exerciseId)}</span>
+          <span className={styles.cardTitleCue} aria-hidden="true">
+            <span className={styles.cardTitleCueLabel}>Guide</span>
+            <span className={styles.cardTitleCueArrow}>›</span>
+          </span>
         </button>
         <div className={styles.cardMeta}>{attempts}/5 · {rate != null ? `${rate}%` : '—'}</div>
       </div>

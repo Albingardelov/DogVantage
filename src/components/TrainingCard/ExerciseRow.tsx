@@ -78,15 +78,25 @@ export default function ExerciseRow({
       </div>
 
       <div className={styles.info}>
-        <button
-          type="button"
-          className={`${styles.label} ${isComplete ? styles.labelDone : ''}`}
-          onClick={onOpenGuide}
-          style={{ background: 'transparent', border: 'none', padding: 0, textAlign: 'left', cursor: onOpenGuide ? 'pointer' : 'default' }}
-          aria-label={`Öppna guide: ${exercise.label}`}
-        >
-          {exercise.label}
-        </button>
+        {onOpenGuide ? (
+          <button
+            type="button"
+            className={styles.labelBtn}
+            onClick={onOpenGuide}
+            aria-label={`Öppna guide: ${exercise.label}`}
+            title="Steg-för-steg, tips och vanliga misstag"
+          >
+            <span className={`${styles.labelText} ${isComplete ? styles.labelTextDone : ''}`}>
+              {exercise.label}
+            </span>
+            <span className={styles.guideCue} aria-hidden="true">
+              <span className={styles.guideCueLabel}>Guide</span>
+              <span className={styles.guideCueArrow}>›</span>
+            </span>
+          </button>
+        ) : (
+          <span className={`${styles.label} ${isComplete ? styles.labelDone : ''}`}>{exercise.label}</span>
+        )}
         {exercise.desc && (
           <span className={styles.desc}>{exercise.desc}</span>
         )}
