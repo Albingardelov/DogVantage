@@ -36,7 +36,7 @@ function getDayState(
   trainingWeekdays: Set<string>
 ): DayState {
   const log = logs[dateStr]
-  if (log) return log.quick_rating as DayState
+  if (log) return log.quick_rating
 
   // Use noon to avoid timezone issues when parsing date-only strings
   const date = new Date(dateStr + 'T12:00:00')
@@ -77,6 +77,9 @@ function DayCell({
 }) {
   const dayNum  = Number(dateStr.slice(8))
   const isToday = dateStr === todayStr
+  const label   = new Date(dateStr + 'T12:00:00').toLocaleDateString('sv-SE', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+  })
 
   const dotClass: string | null = {
     good:    styles.dotGood,
@@ -96,7 +99,7 @@ function DayCell({
         selected  ? styles.dayCellSelected : '',
       ].join(' ')}
       onClick={onClick}
-      aria-label={dateStr}
+      aria-label={label}
       aria-pressed={selected}
     >
       <span className={styles.dayNumber}>{dayNum}</span>
@@ -142,6 +145,106 @@ function CalendarGrid({
           />
         )
       })}
+    </div>
+  )
+}
+
+const RATING_CONFIG: Record<string, { label: string; cls: string }> = {
+  good:  { label: 'Bra',     cls: styles.ratingGood },
+  mixed: { label: 'Blandat', cls: styles.ratingMixed },
+  bad:   { label: 'Svårt',   cls: styles.ratingBad },
+}
+
+function formatDateLabel(dateStr: string): string {
+  const d = new Date(dateStr + 'T12:00:00')
+  return `${DAY_NAMES_LC[d.getDay()]} ${d.getDate()} ${MONTH_NAMES[d.getMonth()]}`
+}
+
+function DayDetailPanel({
+  dateStr,
+  todayStr,
+  log,
+  trainingWeekdays,
+}: {
+  dateStr: string
+  todayStr: string
+  log: SessionLog | null
+  trainingWeekdays: Set<string>
+}) {
+  const date      = new Date(dateStr + 'T12:00:00')
+  const isTraining = trainingWeekdays.has(WEEKDAY_NAMES[date.getDay()])
+  const isFuture  = dateStr > todayStr
+  const rating    = log ? RATING_CONFIG[log.quick_rating] : null
+
+  return (
+    <div className={styles.detailPanel}>
+      <span className={styles.detailDate}>{formatDateLabel(dateStr)}</span>
+
+      {log ? (
+        <>
+          {rating && (
+            <span className={`${styles.detailRating} ${rating.cls}`}>
+              {rating.label}
+            </span>
+          )}
+          <div className={styles.detailStats}>
+            <span><strong>{log.focus}/5</strong> fokus</span>
+            <span><strong>{log.obedience}/5</strong> lydnad</span>
+          </div>
+          {log.exercises && log.exercises.length > 0 && (
+            <ul className={styles.exerciseList}>
+              {log.exercises.map((ex) => {
+                const attempts = ex.success_count + ex.fail_count
+                const rate = attempts > 0 ? Math.round((ex.success_count / attempts) * 100) : null
+                return (
+                  <li key={ex.id} className={styles.exerciseItem}>
+                    <span>{ex.label}</span>
+                    {rate !== null && (
+                      <span className={styles.exerciseRate}>
+                        {ex.success_count}/{attempts} ({rate}%)
+                      </span>
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+          {log.notes && <p className={styles.detailSub}>"{log.notes}"</p>}
+        </>
+      ) : isFuture ? (
+        <>
+          <span className={styles.detailLabel}>
+            {isTraining ? 'Planerad träningsdag' : 'Vilodag'}
+          </span>
+          {!isTraining && (
+            <span className={styles.detailSub}>Vila och återhämtning</span>
+          )}
+        </>
+      ) : isTraining ? (
+        <span className={styles.noData}>Inget pass loggat</span>
+      ) : (
+        <span className={styles.detailLabel}>Vilodag</span>
+      )}
+    </div>
+  )
+}
+
+function Legend() {
+  const items = [
+    { cls: styles.dotGood,    label: 'Bra pass' },
+    { cls: styles.dotMixed,   label: 'Blandat' },
+    { cls: styles.dotBad,     label: 'Svårt' },
+    { cls: styles.dotMissed,  label: 'Missat' },
+    { cls: styles.dotPlanned, label: 'Planerat' },
+  ]
+  return (
+    <div className={styles.legend}>
+      {items.map((item) => (
+        <div key={item.label} className={styles.legendItem}>
+          <span className={`${styles.legendDot} ${item.cls}`} />
+          <span>{item.label}</span>
+        </div>
+      ))}
     </div>
   )
 }
