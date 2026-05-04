@@ -1,4 +1,4 @@
-import { supabaseBrowser } from './browser'
+import { getSupabaseAdmin } from './client'
 import type { ChunkMatch, Breed } from '@/types'
 
 /**
@@ -11,7 +11,7 @@ export async function searchBreedChunks(
   breed: Breed,
   matchCount = 6
 ): Promise<ChunkMatch[]> {
-  const supabase = supabaseBrowser
+  const supabase = getSupabaseAdmin()
   // Fetch breed-specific chunks
   const { data: breedData, error: breedError } = await supabase.rpc('match_breed_chunks', {
     query_embedding: queryEmbedding,

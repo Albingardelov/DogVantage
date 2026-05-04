@@ -17,7 +17,7 @@ export async function createSupabaseServer() {
               cookieStore.set(name, value, options)
             )
           } catch {
-            // Read-only cookie store in middleware context — safe to ignore
+            // Server Components cannot set cookies — ignore write failures.
           }
         },
       },
