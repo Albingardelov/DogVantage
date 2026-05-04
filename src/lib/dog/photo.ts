@@ -1,18 +1,43 @@
-const KEY = 'dogPhoto'
+import { supabaseBrowser } from '@/lib/supabase/browser'
 
-export function getDogPhoto(): string | null {
-  if (typeof window === 'undefined') return null
-  return localStorage.getItem(KEY)
+const BUCKET = 'dog-photos'
+
+function getPhotoPath(userId: string): string {
+  return `${userId}/avatar`
 }
 
-export function saveDogPhoto(dataUrl: string): void {
-  try {
-    localStorage.setItem(KEY, dataUrl)
-  } catch {
-    // Photo is optional — ignore QuotaExceededError (common on iOS Safari with large images)
-  }
+export async function saveDogPhoto(dataUrl: string): Promise<void> {
+  const { data: { user } } = await supabaseBrowser.auth.getUser()
+  if (!user) return
+
+  // Convert base64 data URL to Blob
+  const [header, base64] = dataUrl.split(',')
+  const mime = header.match(/:(.*?);/)?.[1] ?? 'image/jpeg'
+  const binary = atob(base64)
+  const bytes = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+  const blob = new Blob([bytes], { type: mime })
+
+  await supabaseBrowser.storage
+    .from(BUCKET)
+    .upload(getPhotoPath(user.id), blob, { upsert: true, contentType: mime })
 }
 
-export function clearDogPhoto(): void {
-  localStorage.removeItem(KEY)
+export async function getDogPhoto(): Promise<string | null> {
+  const { data: { user } } = await supabaseBrowser.auth.getUser()
+  if (!user) return null
+
+  const { data, error } = await supabaseBrowser.storage
+    .from(BUCKET)
+    .createSignedUrl(getPhotoPath(user.id), 3600)
+  if (error || !data) return null
+  return data.signedUrl
+}
+
+export async function clearDogPhoto(): Promise<void> {
+  const { data: { user } } = await supabaseBrowser.auth.getUser()
+  if (!user) return
+  await supabaseBrowser.storage
+    .from(BUCKET)
+    .remove([getPhotoPath(user.id)])
 }
