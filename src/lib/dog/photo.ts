@@ -6,7 +6,11 @@ export function getDogPhoto(): string | null {
 }
 
 export function saveDogPhoto(dataUrl: string): void {
-  localStorage.setItem(KEY, dataUrl)
+  try {
+    localStorage.setItem(KEY, dataUrl)
+  } catch {
+    // Photo is optional — ignore QuotaExceededError (common on iOS Safari with large images)
+  }
 }
 
 export function clearDogPhoto(): void {
