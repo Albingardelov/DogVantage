@@ -1,5 +1,18 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { getDogProfile, saveDogProfile, clearDogProfile } from './profile'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+const { mockGetProfile, mockSaveProfile, mockUpdateProfile } = vi.hoisted(() => ({
+  mockGetProfile: vi.fn(),
+  mockSaveProfile: vi.fn(),
+  mockUpdateProfile: vi.fn(),
+}))
+
+vi.mock('@/lib/supabase/dog-profiles', () => ({
+  getProfile: mockGetProfile,
+  saveProfile: mockSaveProfile,
+  updateProfile: mockUpdateProfile,
+}))
+
+import { getDogProfile, saveDogProfile, updateDogProfile } from './profile'
 import type { DogProfile } from '@/types'
 
 const mockProfile: DogProfile = {
@@ -17,38 +30,33 @@ const mockProfile: DogProfile = {
 }
 
 beforeEach(() => {
-  localStorage.clear()
   vi.clearAllMocks()
 })
 
 describe('getDogProfile', () => {
-  it('returns null when no profile is stored', () => {
-    expect(getDogProfile()).toBeNull()
+  it('returns null when getProfile returns null', async () => {
+    mockGetProfile.mockResolvedValue(null)
+    expect(await getDogProfile()).toBeNull()
   })
 
-  it('returns the stored profile', () => {
-    localStorage.setItem('dogProfile', JSON.stringify(mockProfile))
-    const stored = getDogProfile()
-    expect(stored).toMatchObject(mockProfile)
-    expect(typeof stored?.dogKey).toBe('string')
-    expect(stored?.dogKey?.length).toBeGreaterThan(5)
+  it('returns the profile from DB', async () => {
+    mockGetProfile.mockResolvedValue(mockProfile)
+    expect(await getDogProfile()).toEqual(mockProfile)
   })
 })
 
 describe('saveDogProfile', () => {
-  it('stores the profile in localStorage', () => {
-    saveDogProfile(mockProfile)
-    // dogKey is generated on save if missing, so avoid strict JSON equality here
-    expect(localStorage.setItem).toHaveBeenCalledWith(
-      'dogProfile',
-      expect.any(String)
-    )
+  it('calls saveProfile with the profile and userId', async () => {
+    mockSaveProfile.mockResolvedValue(undefined)
+    await saveDogProfile(mockProfile, 'user-abc')
+    expect(mockSaveProfile).toHaveBeenCalledWith(mockProfile, 'user-abc')
   })
 })
 
-describe('clearDogProfile', () => {
-  it('removes the profile from localStorage', () => {
-    clearDogProfile()
-    expect(localStorage.removeItem).toHaveBeenCalledWith('dogProfile')
+describe('updateDogProfile', () => {
+  it('calls updateProfile with the fields', async () => {
+    mockUpdateProfile.mockResolvedValue(undefined)
+    await updateDogProfile({ trainingWeek: 3 })
+    expect(mockUpdateProfile).toHaveBeenCalledWith({ trainingWeek: 3 })
   })
 })
