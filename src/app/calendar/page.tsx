@@ -1,13 +1,17 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import ProfileGuard from '@/components/ProfileGuard'
 import BottomNav from '@/components/BottomNav'
 import { getDogProfile } from '@/lib/dog/profile'
 import { getAgeInWeeks } from '@/lib/dog/age'
-import type { DogProfile, QuickRating, SessionLog, WeekPlan } from '@/types'
+import type { DayPlan, DogProfile, QuickRating, SessionLog, WeekPlan } from '@/types'
 import styles from './page.module.css'
+
+// Indexed by Date.getDay() (0 = Sunday)
+const WEEKDAY_NAMES = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag']
+const MONTH_NAMES_SHORT = ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec']
 
 export default function CalendarPage() {
   return (
@@ -17,136 +21,24 @@ export default function CalendarPage() {
   )
 }
 
-// WEEKDAY_NAMES: indexed by Date.getDay() (0 = Sunday)
-const WEEKDAY_NAMES = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag']
-// WEEKDAY_ABBR: Mon-first order for grid column headers (not getDay() indexed)
-const WEEKDAY_ABBR  = ['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön']
-const MONTH_NAMES   = [
-  'januari', 'februari', 'mars', 'april', 'maj', 'juni',
-  'juli', 'augusti', 'september', 'oktober', 'november', 'december',
-]
-const DAY_NAMES_LC  = ['söndag', 'måndag', 'tisdag', 'onsdag', 'torsdag', 'fredag', 'lördag']
-
-type DayState = 'good' | 'mixed' | 'bad' | 'missed' | 'planned' | 'rest'
-
-function getDayState(
-  dateStr: string,
-  todayStr: string,
-  logs: Record<string, SessionLog>,
-  trainingWeekdays: Set<string>
-): DayState {
-  const log = logs[dateStr]
-  if (log) return log.quick_rating
-
-  // Use noon to avoid timezone issues when parsing date-only strings
-  const date = new Date(dateStr + 'T12:00:00')
-  const isTraining = trainingWeekdays.has(WEEKDAY_NAMES[date.getDay()])
-
-  if (dateStr < todayStr) return isTraining ? 'missed' : 'rest'
-  return isTraining ? 'planned' : 'rest'
+function getISOWeek(date: Date): number {
+  const d = new Date(date)
+  d.setHours(0, 0, 0, 0)
+  d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7))
+  const week1 = new Date(d.getFullYear(), 0, 4)
+  return 1 + Math.round(((d.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7)
 }
 
-// Returns array of YYYY-MM-DD strings (or null for padding cells).
-// Grid starts on Monday (offset by Mon=0…Sun=6).
-function getMonthCells(year: number, month: number): (string | null)[] {
-  const firstDay   = new Date(year, month, 1)
-  const startOffset = (firstDay.getDay() + 6) % 7 // Mon = 0
-  const daysInMonth = new Date(year, month + 1, 0).getDate()
-  const cells: (string | null)[] = Array(startOffset).fill(null)
-  for (let d = 1; d <= daysInMonth; d++) {
-    cells.push(
-      `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
-    )
-  }
-  while (cells.length % 7 !== 0) cells.push(null)
-  return cells
+function addDays(dateStr: string, days: number): string {
+  const d = new Date(dateStr + 'T12:00:00')
+  d.setDate(d.getDate() + days)
+  return d.toISOString().slice(0, 10)
 }
 
-function DayCell({
-  dateStr,
-  todayStr,
-  selected,
-  state,
-  onClick,
-}: {
-  dateStr: string
-  todayStr: string
-  selected: boolean
-  state: DayState
-  onClick: () => void
-}) {
-  const dayNum  = Number(dateStr.slice(8))
-  const isToday = dateStr === todayStr
-  const label   = new Date(dateStr + 'T12:00:00').toLocaleDateString('sv-SE', {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-  })
-
-  const dotClass: string | null = {
-    good:    styles.dotGood,
-    mixed:   styles.dotMixed,
-    bad:     styles.dotBad,
-    missed:  styles.dotMissed,
-    planned: styles.dotPlanned,
-    rest:    null,
-  }[state]
-
-  return (
-    <button
-      type="button"
-      className={[
-        styles.dayCell,
-        isToday   ? styles.dayCellToday    : '',
-        selected  ? styles.dayCellSelected : '',
-      ].join(' ')}
-      onClick={onClick}
-      aria-label={label}
-      aria-pressed={selected}
-    >
-      <span className={styles.dayNumber}>{dayNum}</span>
-      {dotClass && <span className={`${styles.dot} ${dotClass}`} aria-hidden="true" />}
-    </button>
-  )
-}
-
-function CalendarGrid({
-  year,
-  month,
-  todayStr,
-  selectedDate,
-  logs,
-  trainingWeekdays,
-  onSelectDate,
-}: {
-  year: number
-  month: number
-  todayStr: string
-  selectedDate: string
-  logs: Record<string, SessionLog>
-  trainingWeekdays: Set<string>
-  onSelectDate: (date: string) => void
-}) {
-  const cells = getMonthCells(year, month)
-  return (
-    <div className={styles.grid}>
-      {WEEKDAY_ABBR.map((d) => (
-        <div key={d} className={styles.weekdayHeader}>{d}</div>
-      ))}
-      {cells.map((dateStr, i) => {
-        if (!dateStr) return <div key={`pad-${i}`} className={styles.dayCellEmpty} />
-        const state = getDayState(dateStr, todayStr, logs, trainingWeekdays)
-        return (
-          <DayCell
-            key={dateStr}
-            dateStr={dateStr}
-            todayStr={todayStr}
-            selected={selectedDate === dateStr}
-            state={state}
-            onClick={() => onSelectDate(dateStr)}
-          />
-        )
-      })}
-    </div>
-  )
+function getMondayOf(dateStr: string): string {
+  const d = new Date(dateStr + 'T12:00:00')
+  d.setDate(d.getDate() - (d.getDay() + 6) % 7)
+  return d.toISOString().slice(0, 10)
 }
 
 const RATING_CONFIG: Record<QuickRating, { label: string; cls: string }> = {
@@ -155,39 +47,57 @@ const RATING_CONFIG: Record<QuickRating, { label: string; cls: string }> = {
   bad:   { label: 'Svårt',   cls: styles.ratingBad },
 }
 
-function formatDateLabel(dateStr: string): string {
-  const d = new Date(dateStr + 'T12:00:00')
-  return `${DAY_NAMES_LC[d.getDay()]} ${d.getDate()} ${MONTH_NAMES[d.getMonth()]}`
-}
-
-function DayDetailPanel({
+function AgendaDay({
   dateStr,
   todayStr,
+  dayPlan,
   log,
-  trainingWeekdays,
 }: {
   dateStr: string
   todayStr: string
+  dayPlan: DayPlan | null
   log: SessionLog | null
-  trainingWeekdays: Set<string>
 }) {
-  const date      = new Date(dateStr + 'T12:00:00')
-  const isTraining = trainingWeekdays.has(WEEKDAY_NAMES[date.getDay()])
-  const isFuture  = dateStr > todayStr
-  const rating    = log ? RATING_CONFIG[log.quick_rating] : null
+  const d = new Date(dateStr + 'T12:00:00')
+  const dayName = WEEKDAY_NAMES[d.getDay()]
+  const dateLabel = `${d.getDate()} ${MONTH_NAMES_SHORT[d.getMonth()]}`
+  const isToday = dateStr === todayStr
+  const isFuture = dateStr > todayStr
+  const isRest = !dayPlan || dayPlan.rest
+
+  if (isRest) {
+    return (
+      <div className={styles.restDay}>
+        <span className={styles.restDayText}>{dayName} {dateLabel}</span>
+        <span className={styles.restBadge}>Vila</span>
+      </div>
+    )
+  }
+
+  const rating = log ? RATING_CONFIG[log.quick_rating] : null
 
   return (
-    <div className={styles.detailPanel}>
-      <span className={styles.detailDate}>{formatDateLabel(dateStr)}</span>
+    <div className={`${styles.trainingDay} ${isToday ? styles.trainingDayToday : ''}`}>
+      <div className={styles.trainingDayHeader}>
+        <div className={styles.trainingDayMeta}>
+          {isToday && <span className={styles.todayPip} aria-hidden="true" />}
+          <span className={`${styles.trainingDayName} ${isToday ? styles.trainingDayNameToday : ''}`}>
+            {dayName}
+          </span>
+          <span className={styles.trainingDayDate}>{dateLabel}</span>
+        </div>
+        {log ? (
+          <span className={`${styles.badge} ${rating!.cls}`}>{rating!.label}</span>
+        ) : isFuture ? (
+          <span className={`${styles.badge} ${styles.badgePlanned}`}>Planerat</span>
+        ) : (
+          <span className={`${styles.badge} ${styles.badgeMissed}`}>Missat</span>
+        )}
+      </div>
 
       {log ? (
-        <>
-          {rating && (
-            <span className={`${styles.detailRating} ${rating.cls}`}>
-              {rating.label}
-            </span>
-          )}
-          <div className={styles.detailStats}>
+        <div className={styles.logContent}>
+          <div className={styles.logStats}>
             <span><strong>{log.focus}/5</strong> fokus</span>
             <span><strong>{log.obedience}/5</strong> lydnad</span>
           </div>
@@ -200,51 +110,27 @@ function DayDetailPanel({
                   <li key={ex.id} className={styles.exerciseItem}>
                     <span>{ex.label}</span>
                     {rate !== null && (
-                      <span className={styles.exerciseRate}>
-                        {ex.success_count}/{attempts} ({rate}%)
-                      </span>
+                      <span className={styles.exerciseMeta}>{ex.success_count}/{attempts} ({rate}%)</span>
                     )}
                   </li>
                 )
               })}
             </ul>
           )}
-          {log.notes && <p className={styles.detailSub}>"{log.notes}"</p>}
-        </>
-      ) : isFuture ? (
-        <>
-          <span className={styles.detailLabel}>
-            {isTraining ? 'Planerad träningsdag' : 'Vilodag'}
-          </span>
-          {!isTraining && (
-            <span className={styles.detailSub}>Vila och återhämtning</span>
-          )}
-        </>
-      ) : isTraining ? (
-        <span className={styles.noData}>Inget pass loggat</span>
-      ) : (
-        <span className={styles.detailLabel}>Vilodag</span>
-      )}
-    </div>
-  )
-}
-
-function Legend() {
-  const items = [
-    { cls: styles.dotGood,    label: 'Bra pass' },
-    { cls: styles.dotMixed,   label: 'Blandat' },
-    { cls: styles.dotBad,     label: 'Svårt' },
-    { cls: styles.dotMissed,  label: 'Missat' },
-    { cls: styles.dotPlanned, label: 'Planerat' },
-  ]
-  return (
-    <div className={styles.legend}>
-      {items.map((item) => (
-        <div key={item.label} className={styles.legendItem}>
-          <span className={`${styles.legendDot} ${item.cls}`} />
-          <span>{item.label}</span>
+          {log.notes && <p className={styles.logNotes}>"{log.notes}"</p>}
         </div>
-      ))}
+      ) : isFuture && dayPlan.exercises && dayPlan.exercises.length > 0 ? (
+        <ul className={styles.exerciseList}>
+          {dayPlan.exercises.map((ex) => (
+            <li key={ex.id} className={`${styles.exerciseItem} ${styles.exerciseItemPlanned}`}>
+              <span>{ex.label}</span>
+              <span className={styles.exerciseMeta}>{ex.reps}×</span>
+            </li>
+          ))}
+        </ul>
+      ) : !isFuture ? (
+        <p className={styles.missedText}>Inget pass loggat</p>
+      ) : null}
     </div>
   )
 }
@@ -253,14 +139,11 @@ function CalendarView() {
   const router = useRouter()
   const [profile, setProfile] = useState<DogProfile | null>(null)
   const [logs, setLogs] = useState<Record<string, SessionLog>>({})
-  const [trainingWeekdays, setTrainingWeekdays] = useState<Set<string>>(new Set())
+  const [weekPlan, setWeekPlan] = useState<WeekPlan | null>(null)
   const [loading, setLoading] = useState(true)
+  const todayRef = useRef<HTMLDivElement>(null)
 
-  const today = new Date()
-  const todayStr = today.toISOString().split('T')[0]
-  const [viewYear, setViewYear]     = useState(today.getFullYear())
-  const [viewMonth, setViewMonth]   = useState(today.getMonth()) // 0-based
-  const [selectedDate, setSelectedDate] = useState<string>(todayStr)
+  const todayStr = new Date().toISOString().slice(0, 10)
 
   useEffect(() => {
     const p = getDogProfile()
@@ -286,16 +169,13 @@ function CalendarView() {
         const byDate: Record<string, SessionLog> = {}
         for (const log of allLogs) {
           const date = log.created_at.slice(0, 10)
-          if (!byDate[date]) byDate[date] = log // keep first (most recent) per day
+          if (!byDate[date]) byDate[date] = log
         }
         setLogs(byDate)
       }
 
       if (planRes.ok) {
-        const plan: WeekPlan = await planRes.json()
-        setTrainingWeekdays(
-          new Set(plan.days.filter((d) => !d.rest).map((d) => d.day))
-        )
+        setWeekPlan(await planRes.json())
       }
     } finally {
       setLoading(false)
@@ -304,15 +184,35 @@ function CalendarView() {
 
   useEffect(() => { fetchData() }, [fetchData])
 
+  useEffect(() => {
+    if (!loading) {
+      todayRef.current?.scrollIntoView({ behavior: 'instant', block: 'start' })
+    }
+  }, [loading])
+
   if (!profile) return null
 
-  function prevMonth() {
-    if (viewMonth === 0) { setViewMonth(11); setViewYear((y) => y - 1) }
-    else setViewMonth((m) => m - 1)
+  const dayPlanByWeekday: Record<string, DayPlan> = {}
+  if (weekPlan) {
+    for (const dp of weekPlan.days) dayPlanByWeekday[dp.day] = dp
   }
-  function nextMonth() {
-    if (viewMonth === 11) { setViewMonth(0); setViewYear((y) => y + 1) }
-    else setViewMonth((m) => m + 1)
+
+  // 2 weeks back → 5 weeks forward, always starting on Monday
+  const startStr = addDays(getMondayOf(todayStr), -14)
+  const endStr   = addDays(getMondayOf(todayStr), 34)
+
+  type WeekGroup = { isoWeek: number; year: number; dates: string[] }
+  const weeks: WeekGroup[] = []
+  let cur = startStr
+  while (cur <= endStr) {
+    const d = new Date(cur + 'T12:00:00')
+    const iso = getISOWeek(d)
+    const yr  = d.getFullYear()
+    if (weeks.length === 0 || weeks[weeks.length - 1].isoWeek !== iso) {
+      weeks.push({ isoWeek: iso, year: yr, dates: [] })
+    }
+    weeks[weeks.length - 1].dates.push(cur)
+    cur = addDays(cur, 1)
   }
 
   return (
@@ -323,44 +223,37 @@ function CalendarView() {
           <button type="button" className={styles.backBtn} onClick={() => router.back()} aria-label="Tillbaka">
             <BackIcon />
           </button>
-          <span className={styles.headerTitle}>Träningskalender</span>
+          <span className={styles.headerTitle}>Träningsschema</span>
         </div>
       </header>
 
       <div className={styles.scrollArea}>
         {loading ? (
-          <p className={styles.noData}>Laddar…</p>
+          <p className={styles.loadingText}>Laddar…</p>
         ) : (
-          <>
-            <div className={styles.monthNav}>
-              <button type="button" className={styles.monthNavBtn} onClick={prevMonth} aria-label="Föregående månad">
-                <ChevronLeft />
-              </button>
-              <span className={styles.monthLabel}>{MONTH_NAMES[viewMonth]} {viewYear}</span>
-              <button type="button" className={styles.monthNavBtn} onClick={nextMonth} aria-label="Nästa månad">
-                <ChevronRight />
-              </button>
+          weeks.map((week) => (
+            <div key={`${week.year}-${week.isoWeek}`} className={styles.weekSection}>
+              <div className={styles.weekHeader}>
+                <span className={styles.weekLabel}>Vecka {week.isoWeek}</span>
+              </div>
+              <div className={styles.weekDays}>
+                {week.dates.map((dateStr) => {
+                  const d = new Date(dateStr + 'T12:00:00')
+                  const dayPlan = dayPlanByWeekday[WEEKDAY_NAMES[d.getDay()]] ?? null
+                  return (
+                    <div key={dateStr} ref={dateStr === todayStr ? todayRef : undefined}>
+                      <AgendaDay
+                        dateStr={dateStr}
+                        todayStr={todayStr}
+                        dayPlan={dayPlan}
+                        log={logs[dateStr] ?? null}
+                      />
+                    </div>
+                  )
+                })}
+              </div>
             </div>
-
-            <CalendarGrid
-              year={viewYear}
-              month={viewMonth}
-              todayStr={todayStr}
-              selectedDate={selectedDate}
-              logs={logs}
-              trainingWeekdays={trainingWeekdays}
-              onSelectDate={setSelectedDate}
-            />
-
-            <DayDetailPanel
-              dateStr={selectedDate}
-              todayStr={todayStr}
-              log={logs[selectedDate] ?? null}
-              trainingWeekdays={trainingWeekdays}
-            />
-
-            <Legend />
-          </>
+          ))
         )}
       </div>
 
@@ -373,22 +266,6 @@ function BackIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <polyline points="15 18 9 12 15 6" />
-    </svg>
-  )
-}
-
-function ChevronLeft() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <polyline points="15 18 9 12 15 6" />
-    </svg>
-  )
-}
-
-function ChevronRight() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <polyline points="9 18 15 12 9 6" />
     </svg>
   )
 }
