@@ -40,8 +40,16 @@ export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQu
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query, breed, ageWeeks, trainingWeek, dogKey, onboardingContext }),
       })
-      const data: TrainingResult = await res.json()
+      const data = await res.json() as TrainingResult & { error?: string }
+      if (!res.ok || !data.content) {
+        const msg = data.error ?? `Fel ${res.status} — försök igen.`
+        setMessages((prev) => [...prev, { role: 'model', content: `Något gick fel: ${msg}` }])
+        return
+      }
       setMessages((prev) => [...prev, { role: 'model', content: data.content }])
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Nätverksfel'
+      setMessages((prev) => [...prev, { role: 'model', content: `Kunde inte nå assistenten: ${msg}` }])
     } finally {
       setLoading(false)
     }

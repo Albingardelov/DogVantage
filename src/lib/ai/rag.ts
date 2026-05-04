@@ -123,7 +123,9 @@ INSTRUKTIONER:
     temperature: 0.4,
   })
 
-  const content = completion.choices[0].message.content ?? ''
+  const raw = completion.choices[0].message.content?.trim() ?? ''
+  const content = raw ||
+    'Jag kunde inte generera ett svar på den frågan. Prova att ställa en mer specifik träningsfråga, till exempel: "Hur tränar jag inkallning?" eller "Hur länge bör ett pass vara?"'
 
   const primaryChunk = chunks[0]
   const primarySource = primaryChunk
