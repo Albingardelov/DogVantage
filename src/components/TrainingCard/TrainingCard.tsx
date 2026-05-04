@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import ExerciseRow from './ExerciseRow'
 import WeekView from './WeekView'
@@ -9,6 +9,8 @@ import ExerciseGuideSheet from '@/components/ExerciseGuideSheet'
 import styles from './TrainingCard.module.css'
 import type { Breed, TrainingGoal, TrainingEnvironment, RewardPreference, WeekPlan, Exercise, DailyExerciseMetrics, LatencyBucket, ExerciseSummary } from '@/types'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
+import { buildWeekFocusCopy } from '@/lib/training/week-focus-copy'
+import WeekFocusPanel from './WeekFocusPanel'
 
 const SWEDISH_DAYS = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag']
 
@@ -40,8 +42,14 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
   const [showLogForm, setShowLogForm] = useState(false)
   const [guideExerciseId, setGuideExerciseId] = useState<string | null>(null)
   const [sessionGuard, setSessionGuard] = useState<Record<string, { consecutiveFails: number; consecutiveSlow: number }>>({})
+  const [simpleFocus, setSimpleFocus] = useState(false)
   const todayDate = todayDateString()
   const todayName = SWEDISH_DAYS[new Date().getDay()]
+
+  const weekFocusCopy = useMemo(
+    () => buildWeekFocusCopy({ breed, ageWeeks, trainingWeek, goals }),
+    [breed, ageWeeks, trainingWeek, goals]
+  )
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -118,6 +126,8 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
 
   const todayPlan = weekPlan?.days.find((d) => d.day === todayName)
   const todayExercises: Exercise[] = todayPlan?.exercises ?? []
+  const displayedExercises =
+    simpleFocus && todayExercises.length > 2 ? todayExercises.slice(0, 2) : todayExercises
   const completedCount = todayExercises.filter((e) => (progress[e.id] ?? 0) >= e.reps).length
   const progressPct = todayExercises.length > 0 ? (completedCount / todayExercises.length) * 100 : 0
 
@@ -130,6 +140,16 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
             <span className={styles.headerCount}>{completedCount}/{todayExercises.length} klara</span>
           )}
         </div>
+
+        {!loading && weekPlan && (
+          <WeekFocusPanel
+            copy={weekFocusCopy}
+            simpleFocus={simpleFocus}
+            onToggleSimple={() => setSimpleFocus((s) => !s)}
+            totalExercises={todayExercises.length}
+            canSimple={todayExercises.length > 2 && !todayPlan?.rest}
+          />
+        )}
 
         {!loading && todayExercises.length > 0 && (
           <div
@@ -164,7 +184,7 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
 
         {!loading && todayExercises.length > 0 && (
           <div className={styles.exercises}>
-            {todayExercises.map((ex) => (
+            {displayedExercises.map((ex) => (
               (() => {
                 const spec = getExerciseSpec(ex.id)
                 const m = metrics[ex.id] ?? null
@@ -295,7 +315,11 @@ function buildRecommendation(
   const isPuppy = ageWeeks > 0 && ageWeeks < 16
 
   if (guard.consecutiveFails >= 2 || guard.consecutiveSlow >= 2) {
-    return { kind: 'stop', message: 'Pausa och backa nivån direkt. Avsluta efter 1 lyckad rep.' }
+    return {
+      kind: 'stop',
+      message:
+        'Pausa och backa nivån direkt — avsluta efter en lyckad rep. Om hunden inte tar belöning kan den vara stressad eller över tröskeln: gör lättare eller öka avstånd.',
+    }
   }
   if (attempts < 5) return { kind: 'keep', message: 'Kör några fler försök på samma nivå och bygg flyt.' }
 
@@ -304,7 +328,11 @@ function buildRecommendation(
     return { kind: 'raise', message: 'Höj kriteriet ett steg (lite svårare miljö/störning/avstånd).' }
   }
   if (rate <= 0.5 || latencyBucket === 'gt3s') {
-    return { kind: 'lower', message: 'Sänk kriteriet ett steg och höj belöningsvärdet.' }
+    return {
+      kind: 'lower',
+      message:
+        'Sänk kriteriet ett steg och höj belöningsvärdet. Många miss eller långsam svarstid betyder oftast att kraven är för höga just nu.',
+    }
   }
   return { kind: 'keep', message: 'Behåll nivån och stabilisera (sikta på ≥80% och kort latens).' }
 }

@@ -8,6 +8,7 @@ import TrainingCard from '@/components/TrainingCard/TrainingCard'
 import SessionLogForm from '@/components/SessionLogForm'
 import Avatar from '@/components/Avatar'
 import BottomNav from '@/components/BottomNav'
+import LearningChecklistCard from '@/components/LearningChecklistCard'
 import { getDogProfile } from '@/lib/dog/profile'
 import { getAgeInWeeks } from '@/lib/dog/age'
 import { buildBehaviorContext } from '@/lib/dog/behavior'
@@ -287,6 +288,8 @@ function Dashboard() {
             </button>
           </div>
         ))}
+
+        {profile && (profile.trainingWeek ?? 1) <= 3 && <LearningChecklistCard />}
 
         {needsAssessment && (
           <button

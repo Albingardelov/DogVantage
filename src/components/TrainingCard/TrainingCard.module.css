@@ -142,6 +142,90 @@
   text-align: center;
 }
 
+.weekFocus {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-alt);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.weekFocusLead {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  color: var(--color-text);
+}
+
+.weekFocusDetails {
+  margin: 0;
+}
+
+.weekFocusSummary {
+  cursor: pointer;
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: var(--color-primary);
+  list-style: none;
+}
+
+.weekFocusSummary::-webkit-details-marker {
+  display: none;
+}
+
+.weekFocusList {
+  margin: var(--space-2) 0 var(--space-2);
+  padding-left: 1.1rem;
+  font-size: var(--text-xs);
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+.weekFocusMethod,
+.weekFocusQuality {
+  margin: 0 0 var(--space-2);
+  font-size: 0.7rem;
+  line-height: 1.45;
+  color: var(--color-text-muted);
+}
+
+.weekFocusQuality {
+  margin-bottom: 0;
+  padding: var(--space-2);
+  background: var(--color-green-50);
+  border-radius: var(--radius-input);
+  border: 1px solid var(--color-green-100);
+  color: var(--color-text);
+}
+
+.simpleRow {
+  margin-top: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.simpleToggle {
+  align-self: flex-start;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: var(--color-primary);
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-primary);
+  border-radius: var(--radius-input);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.simpleToggle:hover {
+  background: var(--color-green-50);
+}
+
+.simpleHint {
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
 .logOverlay {
   position: fixed;
   inset: 0;
