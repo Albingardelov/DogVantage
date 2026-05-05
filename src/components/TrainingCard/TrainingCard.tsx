@@ -13,6 +13,7 @@ import type { ExerciseSpec } from '@/lib/training/exercise-specs'
 import { buildWeekFocusCopy } from '@/lib/training/week-focus-copy'
 import WeekFocusPanel from './WeekFocusPanel'
 import PreSessionChecklist from './PreSessionChecklist'
+import AddCustomExerciseModal from '@/components/AddCustomExerciseModal'
 
 const SWEDISH_DAYS = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag']
 
@@ -45,6 +46,7 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
   const [guideExerciseId, setGuideExerciseId] = useState<string | null>(null)
   const [sessionGuard, setSessionGuard] = useState<Record<string, { consecutiveFails: number; consecutiveSlow: number }>>({})
   const [customSpecs, setCustomSpecs] = useState<Record<string, ExerciseSpec>>({})
+  const [showAddCustom, setShowAddCustom] = useState(false)
   const [simpleFocus, setSimpleFocus] = useState(false)
   const todayDate = todayDateString()
   const todayName = SWEDISH_DAYS[new Date().getDay()]
@@ -309,6 +311,14 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
                 <ChevronRight />
               </button>
             )}
+            <button
+              type="button"
+              className={styles.weekBtn}
+              onClick={() => setShowAddCustom(true)}
+            >
+              + Lägg till eget pass
+              <ChevronRight />
+            </button>
           </div>
         )}
       </section>
@@ -338,6 +348,23 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
           metrics={metrics[guideExerciseId] ?? null}
           onClose={() => setGuideExerciseId(null)}
           customSpecs={customSpecs}
+        />
+      )}
+
+      {showAddCustom && (
+        <AddCustomExerciseModal
+          onClose={() => setShowAddCustom(false)}
+          onCreated={() => {
+            setShowAddCustom(false)
+            fetch('/api/training/custom')
+              .then((r) => r.ok ? r.json() : [])
+              .then((rows: Array<{ exercise_id: string; spec: ExerciseSpec }>) => {
+                const map: Record<string, ExerciseSpec> = {}
+                for (const row of rows) map[row.exercise_id] = row.spec
+                setCustomSpecs(map)
+              })
+              .catch(() => {})
+          }}
         />
       )}
     </>
