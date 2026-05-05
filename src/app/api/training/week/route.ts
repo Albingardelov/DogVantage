@@ -135,6 +135,10 @@ export async function GET(req: NextRequest) {
     if (message.includes('rate_limit') || message.includes('429') || message.includes('quota')) {
       return NextResponse.json({ error: 'AI-tjänsten är tillfälligt otillgänglig. Försök igen om en stund.' }, { status: 429 })
     }
+    if (message.includes('503') || message.includes('unavailable') || message.includes('high demand')) {
+      const { buildFallbackPlan } = await import('@/lib/ai/week-plan')
+      return NextResponse.json(buildFallbackPlan())
+    }
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }
