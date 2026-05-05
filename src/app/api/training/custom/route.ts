@@ -64,11 +64,18 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    const raw = aiResult.response.text() ?? '{}'
+    const rawText = aiResult.response.text()
+    if (!rawText?.trim()) {
+      console.error('[POST /api/training/custom] empty AI response')
+      return NextResponse.json({ error: 'AI gav inget svar. Försök igen.' }, { status: 422 })
+    }
+    // Strip markdown code fences if model wraps response despite responseMimeType
+    const raw = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
     let parsed: unknown
     try {
       parsed = JSON.parse(raw)
     } catch {
+      console.error('[POST /api/training/custom] invalid JSON:', raw.slice(0, 200))
       return NextResponse.json({ error: 'AI returned invalid JSON' }, { status: 422 })
     }
 
