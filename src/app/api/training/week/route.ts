@@ -82,32 +82,18 @@ export async function GET(req: NextRequest) {
   // Build onboarding context from query params
   const onboardingContext = buildOnboardingContext(p)
 
-  // Resolve user id for per-user cache isolation
-  let userId: string | undefined
-  try {
-    const supabase = await createSupabaseServer()
-    const { data: { user } } = await supabase.auth.getUser()
-    userId = user?.id
-  } catch {
-    // continue without user id — cache will be shared but not incorrect
-  }
+  // Fetch all context in parallel — these are independent and were previously sequential
+  const [userId, recentLogs, customRows] = await Promise.all([
+    createSupabaseServer()
+      .then((s) => s.auth.getUser())
+      .then((r) => r.data.user?.id)
+      .catch(() => undefined),
+    getRecentLogs(breed, trainingWeek, 3).catch(() => []),
+    getActiveCustomExercises().catch(() => []),
+  ])
 
-  // Fetch recent session logs for feedback-loop (best-effort)
-  let performanceSummary: string | undefined
-  try {
-    const recentLogs = await getRecentLogs(breed, trainingWeek, 3)
-    performanceSummary = formatPerformanceSummary(formatLogsForPrompt(recentLogs))
-  } catch {
-    // Not critical — continue without performance data
-  }
-
-  let customExercises: Array<{ exercise_id: string; label: string }> = []
-  try {
-    const rows = await getActiveCustomExercises()
-    customExercises = rows.map((r) => ({ exercise_id: r.exercise_id, label: r.label }))
-  } catch {
-    // Not critical — continue without custom exercises
-  }
+  const performanceSummary = formatPerformanceSummary(formatLogsForPrompt(recentLogs))
+  const customExercises = customRows.map((r) => ({ exercise_id: r.exercise_id, label: r.label }))
 
   // Plans with performance data are cached per ISO-week so the plan adapts to
   // recent logs without triggering a fresh Groq call on every page load.
