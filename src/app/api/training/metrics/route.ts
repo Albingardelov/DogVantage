@@ -70,8 +70,9 @@ function parsePatch(body: unknown): {
     } else if (typeof level !== 'string') {
       return { error: 'criteria_level_id must be a string or null', status: 400 }
     } else {
-      if (!getExerciseSpec(exerciseId)) return { error: 'Unknown exerciseId', status: 400 }
-      if (!isValidCriteriaLevel(exerciseId, level)) {
+      const isCustom = exerciseId.startsWith('custom_')
+      if (!isCustom && !getExerciseSpec(exerciseId)) return { error: 'Unknown exerciseId', status: 400 }
+      if (!isCustom && !isValidCriteriaLevel(exerciseId, level)) {
         return { error: 'criteria_level_id invalid for exerciseId', status: 400 }
       }
       patch.criteria_level_id = level
