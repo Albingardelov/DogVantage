@@ -100,7 +100,7 @@ export async function generateWeekPlan(
   let chunks: import('@/types').ChunkMatch[] = []
   try {
     const embedding = await embedText(`träning programvecka ${trainingWeek} ${breed}`)
-    chunks = await searchBreedChunks(embedding, breed, 2)
+    chunks = await searchBreedChunks(embedding, breed)
   } catch {
     // Continue without RAG chunks if embedding fails
   }
