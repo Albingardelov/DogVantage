@@ -17,7 +17,7 @@
 
   /* Text */
   --color-text: #1c1917;
-  --color-text-muted: #78716c;
+  --color-text-muted: #5c5752;    /* darkened for WCAG AA on all app backgrounds */
 
   /* Borders & feedback */
   --color-border: #e7e0d8;

@@ -45,7 +45,7 @@
 .greeting {
   font-size: var(--text-xs);
   font-weight: var(--font-medium);
-  color: rgb(255 255 255 / 0.65);
+  color: rgb(255 255 255 / 0.9);
 }
 
 .dogName {
@@ -224,7 +224,7 @@
   padding: var(--space-4);
   border-radius: var(--radius-btn);
   background: var(--color-accent);
-  color: #fff;
+  color: #1c1917;
   font-size: var(--text-base);
   font-weight: var(--font-semibold);
   border: none;

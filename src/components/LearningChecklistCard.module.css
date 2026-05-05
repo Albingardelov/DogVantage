@@ -46,7 +46,7 @@
 
 .restNote {
   margin: var(--space-3) 0 0;
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   color: var(--color-text-muted);
   line-height: 1.4;
 }
