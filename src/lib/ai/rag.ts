@@ -120,7 +120,7 @@ Regler: svara på svenska, max 150 ord, anpassa till hundens ålder i veckor. N�
     systemInstruction: systemPrompt,
     generationConfig: {
       temperature: 0.4,
-      maxOutputTokens: 400,
+      maxOutputTokens: 800,
     },
   })
 
