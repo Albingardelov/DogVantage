@@ -161,31 +161,11 @@ export async function generateWeekPlan(
     ? `\n=== SENASTE PRESTATION (anpassa nästkommande vecka efter detta) ===\n${performanceSummary}\nJustera svårighetsgrad och val av övningar baserat på ovanstående.\n`
     : ''
 
-  const systemPrompt = `Du är DogVantage träningsassistent för rasen ${breed}. Returnera ett veckoschema som giltig JSON.
+  const systemPrompt = `Du är DogVantage träningsassistent för rasen ${breed}. Returnera veckoschema som JSON: {"days":[{"day":"Måndag","rest":false,"exercises":[{"id":"...","label":"...","desc":"...","reps":3}]},{"day":"Tisdag","rest":true},...]}
 
 ${formatBreedProfile(breed)}
-${ageInfo}${typeof ageWeeks === 'number' && Number.isFinite(ageWeeks) ? formatCurrentPhase(ageWeeks) : ''}${goalContext}${onboardingSection}${performanceSection}${customSection}
-${documentContext ? `\n=== KÄLLDOKUMENT ===\n${documentContext}\n` : ''}
-Returnera ENBART detta JSON-schema (inga förklaringar, inga kommentarer):
-{
-  "days": [
-    { "day": "Måndag", "rest": false, "exercises": [
-      { "id": "inkallning", "label": "Inkallning", "desc": "Kalla med glad röst", "reps": 3 }
-    ]},
-    { "day": "Tisdag", "rest": true }
-  ]
-}
-
-Regler:
-- Exakt 7 dagar i ordning: Måndag, Tisdag, Onsdag, Torsdag, Fredag, Lördag, Söndag
-- Träningsdagar: 2–3 exercises, reps 1–5
-- Vilodagar: rest: true, utelämna exercises
-- Minst 1 och max 2 vilodagar per vecka
-- id: lowercase, inga mellanslag, inga specialtecken (t.ex. "inkallning", "apportering")
-- Tillåtna id för rasen ${breed}: ${[...allowedIds, ...customIds].join(', ')}
-- Använd bara id från listan ovan (om osäker: välj "inkallning", "namn", "stoppsignal", "stadga")
-- desc: max 12 ord på svenska — inkludera ALLTID hur länge (t.ex. "5 min per gång", "3 × 1 min", "10–15 min")
-- Detta är programvecka ${trainingWeek}. Anpassa fokus och progression till programveckan, men låt biologisk ålder styra belastning.\n- Anpassa övningarna till rasens egenskaper${idRules ? `\n${idRules}\n` : ''}`
+${ageInfo}${typeof ageWeeks === 'number' && Number.isFinite(ageWeeks) ? formatCurrentPhase(ageWeeks) : ''}${goalContext}${onboardingSection}${performanceSection}${customSection}${documentContext ? `\n=== KÄLLDOKUMENT ===\n${documentContext}\n` : ''}
+Regler: exakt 7 dagar (Måndag–Söndag) · 1–2 vilodagar (rest:true, inga exercises) · träningsdagar 2–3 exercises, reps 1–5 · id lowercase utan mellanslag · tillåtna id: ${[...allowedIds, ...customIds].join(', ')} · desc max 12 ord inkl. hur länge · programvecka ${trainingWeek}${idRules ? ` · ${idRules.replace(/\n/g, ' · ')}` : ''}`
 
   const completion = await getGroqClient().chat.completions.create({
     model: GROQ_MODEL,

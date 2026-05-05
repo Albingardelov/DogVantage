@@ -23,37 +23,11 @@ function validateCustomExerciseSpec(raw: unknown): (Omit<ExerciseSpec, 'exercise
   return raw as Omit<ExerciseSpec, 'exerciseId'> & { label: string }
 }
 
-const SYSTEM_PROMPT = `Du är en expertträningsinstruktör för hundar. Generera ett JSON-objekt för en hundträningsövning baserat på användarens beskrivning. Svara ENBART med giltig JSON, inga förklaringar.
+const SYSTEM_PROMPT = `Du är en hundträningsinstruktör. Generera ett JSON-objekt för en träningsövning. Svara ENBART med giltig JSON.
 
-JSON-schema:
-{
-  "label": "Kort visningsnamn (2-3 ord, svenska)",
-  "definition": "En mening — vad räknas som en lyckad repetition",
-  "ladder": [
-    { "id": "level_1", "label": "Steg 1 (lättast)", "criteria": "Vad som krävs för att nå denna nivå" },
-    { "id": "level_2", "label": "Steg 2", "criteria": "..." },
-    { "id": "level_3", "label": "Steg 3 (svårast)", "criteria": "..." }
-  ],
-  "troubleshooting": [
-    "Råd 1 för när det inte funkar",
-    "Råd 2",
-    "Råd 3"
-  ],
-  "guide": {
-    "setup": ["Förberedelse 1", "Förberedelse 2"],
-    "steps": ["Steg 1 för föraren", "Steg 2", "Steg 3", "Steg 4"],
-    "logging": ["Tryck 'Lyckad' när...", "Tryck 'Miss' när..."],
-    "commonMistakes": ["Vanligt misstag 1", "Vanligt misstag 2"],
-    "stopRules": ["Stoppregel 1", "Stoppregel 2"]
-  }
-}
+Fält: label (2–3 ord, svenska) · definition (en mening: vad är en lyckad rep) · ladder (2–4 nivåer [{id:snake_case, label, criteria}], enklast→svårast) · troubleshooting (2–3 råd, array av strängar) · guide{setup[],steps[],logging[],commonMistakes[],stopRules[]}
 
-Regler:
-- 2-4 ladder-nivåer, ordnade enklast → svårast
-- 2-3 troubleshooting-punkter
-- Allt på svenska
-- id i ladder: snake_case, t.ex. "inne_bas", "ute_latta_miljoer"
-- För fysiskt krävande övningar (löpning, cykling, hopp): inkludera ålders-/hälsovarning i stopRules (t.ex. "Träna inte detta med valpar under 12 månader utan veterinärens godkännande.")`
+Regler: allt på svenska · id i ladder: snake_case · för fysiskt krävande övningar: lägg ålders-/hälsovarning i stopRules`
 
 export async function GET() {
   try {

@@ -3,6 +3,7 @@ import { generateWeekPlan } from '@/lib/ai/week-plan'
 import { getCachedWeekPlan, setCachedWeekPlan } from '@/lib/supabase/training-cache'
 import { getRecentLogs, formatLogsForPrompt } from '@/lib/supabase/session-logs'
 import { getActiveCustomExercises } from '@/lib/supabase/custom-exercises'
+import { createSupabaseServer } from '@/lib/supabase/server'
 import type { Breed, TrainingGoal, TrainingEnvironment, RewardPreference } from '@/types'
 
 const VALID_GOALS: TrainingGoal[] = [
@@ -81,6 +82,16 @@ export async function GET(req: NextRequest) {
   // Build onboarding context from query params
   const onboardingContext = buildOnboardingContext(p)
 
+  // Resolve user id for per-user cache isolation
+  let userId: string | undefined
+  try {
+    const supabase = await createSupabaseServer()
+    const { data: { user } } = await supabase.auth.getUser()
+    userId = user?.id
+  } catch {
+    // continue without user id — cache will be shared but not incorrect
+  }
+
   // Fetch recent session logs for feedback-loop (best-effort)
   let performanceSummary: string | undefined
   try {
@@ -102,13 +113,14 @@ export async function GET(req: NextRequest) {
   // recent logs without triggering a fresh Groq call on every page load.
   // Plans without performance data are cached indefinitely (static baseline).
   const cacheKey = performanceSummary ? isoWeekKey() : undefined
+  const customIds = customExercises.map((e) => e.exercise_id)
 
-  const cached = await getCachedWeekPlan(breed, trainingWeek, ageWeeks, goals, cacheKey)
+  const cached = await getCachedWeekPlan(breed, trainingWeek, ageWeeks, goals, cacheKey, userId, onboardingContext, customIds)
   if (cached) return NextResponse.json(cached)
 
   const plan = await generateWeekPlan(breed, trainingWeek, ageWeeks, goals, onboardingContext, performanceSummary, customExercises)
 
-  await setCachedWeekPlan(breed, trainingWeek, plan, ageWeeks, goals, cacheKey).catch(() => {})
+  await setCachedWeekPlan(breed, trainingWeek, plan, ageWeeks, goals, cacheKey, userId, onboardingContext, customIds).catch(() => {})
 
   return NextResponse.json(plan)
 }

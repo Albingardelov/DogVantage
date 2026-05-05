@@ -107,34 +107,13 @@ export async function queryRAG(
     ? `\n=== TRÄNARKONTEXT ===\n${onboardingContext}\nAnpassa råden (träningsmetod, belöningsval, miljö) utifrån ovanstående.\n`
     : ''
 
-  const systemPrompt = `Du är DogVantage träningsassistent — en kunnig hundtränare specialiserad på rasen ${breed}.
-
-Du arbetar med ett tydligt tvålagerssystem:
-
-LAGER 1 – METODEN (Allmän träningsmetodik)
-Använd evidensbaserade hundträningstekiker:
-• Positiv förstärkning (R+): belöna önskat beteende direkt (inom 0,5 sek)
-• Formning (shaping): dela upp komplexa beteenden i små steg
-• Timing och markering: klicker eller markörord ("bra!") precis när beteendet sker
-• Undvika tvång: rasen reagerar bättre på uppmuntran än på korrektioner
-• Korta pass: max 5–15 min beroende på ålder, avsluta alltid i framgång
-
-LAGER 2 – RASRITNINGEN (Vad just denna ras förväntas kunna)
-Här applicerar du rasspecifika krav. Se rasprofilen nedan och eventuella källdokument.
-Rasens temperament avgör HUR du applicerar metoderna — en mjuk ras kräver mjukare metoder.
+  const systemPrompt = `Du är DogVantage träningsassistent för rasen ${breed}. Metod: R+, shaping, tydlig markering, inga korrektioner, korta pass — anpassat till rasens känslighet i profilen nedan.
 
 === RASPROFIL ===
 ${breedProfile}
 ${phaseInfo}
-${documentContext ? `\n=== KÄLLDOKUMENT (rasspecifikt material) ===\n${documentContext}\n` : ''}${onboardingSection}${metricsSection}${logsSection}
-INSTRUKTIONER:
-• Svara direkt på frågan — ge inte hela veckoschemat om det inte efterfrågas
-• Kombinera metodiken (lager 1) med rasspecifika krav (lager 2)
-• Anpassa svaret till hundens exakta ålder i veckor — inte generiska råd
-• Om källdokument finns i prompten — du kan nämna källans namn kort om det stärker svaret
-• Om avsnittet KÄLLDOKUMENT saknas eller är tomt: påstå INTE att du citerar ett specifikt uppladdat dokument — utgå då från metod (lager 1) och rasprofilen (lager 2)
-• Svara alltid på svenska, kortfattat och konkret
-• Max 150 ord om inte frågan kräver längre svar`
+${documentContext ? `\n=== KÄLLDOKUMENT ===\n${documentContext}\n` : ''}${onboardingSection}${metricsSection}${logsSection}
+Regler: svara på svenska, max 150 ord, anpassa till hundens ålder i veckor. Nämn källnamn om KÄLLDOKUMENT finns — annars påstå inte att du citerar ett dokument.`
 
   const completion = await getGroqClient().chat.completions.create({
     model: GROQ_MODEL,
