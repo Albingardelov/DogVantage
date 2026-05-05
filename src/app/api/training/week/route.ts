@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { generateWeekPlan } from '@/lib/ai/week-plan'
 import { getCachedWeekPlan, setCachedWeekPlan } from '@/lib/supabase/training-cache'
 import { getRecentLogs, formatLogsForPrompt } from '@/lib/supabase/session-logs'
+import { getActiveCustomExercises } from '@/lib/supabase/custom-exercises'
 import type { Breed, TrainingGoal, TrainingEnvironment, RewardPreference } from '@/types'
 
 const VALID_GOALS: TrainingGoal[] = [
@@ -78,13 +79,21 @@ export async function GET(req: NextRequest) {
     // Not critical — continue without performance data
   }
 
+  let customExercises: Array<{ exercise_id: string; label: string }> = []
+  try {
+    const rows = await getActiveCustomExercises()
+    customExercises = rows.map((r) => ({ exercise_id: r.exercise_id, label: r.label }))
+  } catch {
+    // Not critical — continue without custom exercises
+  }
+
   // Skip cache when we have fresh performance data so the plan adapts to reality
   if (!performanceSummary) {
     const cached = await getCachedWeekPlan(breed, trainingWeek, ageWeeks, goals)
     if (cached) return NextResponse.json(cached)
   }
 
-  const plan = await generateWeekPlan(breed, trainingWeek, ageWeeks, goals, onboardingContext, performanceSummary)
+  const plan = await generateWeekPlan(breed, trainingWeek, ageWeeks, goals, onboardingContext, performanceSummary, customExercises)
 
   // Only cache plans without performance context (static plans can be reused)
   if (!performanceSummary) {

@@ -94,7 +94,8 @@ export async function generateWeekPlan(
   ageWeeks?: number,
   goals?: TrainingGoal[],
   onboardingContext?: string,
-  performanceSummary?: string
+  performanceSummary?: string,
+  customExercises?: Array<{ exercise_id: string; label: string }>
 ): Promise<WeekPlan> {
   let chunks: import('@/types').ChunkMatch[] = []
   try {
@@ -142,6 +143,12 @@ export async function generateWeekPlan(
     goalRules || null,
   ].filter(Boolean).join('\n')
 
+  const customSection = customExercises && customExercises.length > 0
+    ? `\n=== EGNA ÖVNINGAR (inkludera om lämpligt, max 1 per dag) ===\n${customExercises.map((e) => `- ${e.exercise_id}: ${e.label}`).join('\n')}\n`
+    : ''
+
+  const customIds = customExercises?.map((e) => e.exercise_id) ?? []
+
   const ageInfo = typeof ageWeeks === 'number' && Number.isFinite(ageWeeks)
     ? `\nBiologisk ålder: ${ageWeeks} veckor. Anpassa belastning, passlängd och förväntningar efter detta.\n`
     : ''
@@ -157,7 +164,7 @@ export async function generateWeekPlan(
   const systemPrompt = `Du är DogVantage träningsassistent för rasen ${breed}. Returnera ett veckoschema som giltig JSON.
 
 ${formatBreedProfile(breed)}
-${ageInfo}${typeof ageWeeks === 'number' && Number.isFinite(ageWeeks) ? formatCurrentPhase(ageWeeks) : ''}${goalContext}${onboardingSection}${performanceSection}
+${ageInfo}${typeof ageWeeks === 'number' && Number.isFinite(ageWeeks) ? formatCurrentPhase(ageWeeks) : ''}${goalContext}${onboardingSection}${performanceSection}${customSection}
 ${documentContext ? `\n=== KÄLLDOKUMENT ===\n${documentContext}\n` : ''}
 Returnera ENBART detta JSON-schema (inga förklaringar, inga kommentarer):
 {
@@ -175,7 +182,7 @@ Regler:
 - Vilodagar: rest: true, utelämna exercises
 - Minst 1 och max 2 vilodagar per vecka
 - id: lowercase, inga mellanslag, inga specialtecken (t.ex. "inkallning", "apportering")
-- Tillåtna id för rasen ${breed}: ${allowedIds.join(', ')}
+- Tillåtna id för rasen ${breed}: ${[...allowedIds, ...customIds].join(', ')}
 - Använd bara id från listan ovan (om osäker: välj "inkallning", "namn", "stoppsignal", "stadga")
 - desc: max 12 ord på svenska — inkludera ALLTID hur länge (t.ex. "5 min per gång", "3 × 1 min", "10–15 min")
 - Detta är programvecka ${trainingWeek}. Anpassa fokus och progression till programveckan, men låt biologisk ålder styra belastning.\n- Anpassa övningarna till rasens egenskaper${idRules ? `\n${idRules}\n` : ''}`
