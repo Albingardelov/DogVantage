@@ -1,29 +1,31 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
-import Groq from 'groq-sdk'
 
-export const GROQ_MODEL = 'llama-3.3-70b-versatile'
+export const GEMINI_TEXT_MODEL = 'gemini-2.0-flash'
 
-let _groq: Groq | null = null
+let _genAI: GoogleGenerativeAI | null = null
 let _embedModel: ReturnType<GoogleGenerativeAI['getGenerativeModel']> | null = null
+let _textModel: ReturnType<GoogleGenerativeAI['getGenerativeModel']> | null = null
 
 function requireEnv(name: string, value: string | undefined): string {
   if (value && value.length > 0) return value
   throw new Error(`Missing ${name}`)
 }
 
-// Groq for text generation (free tier, fast)
-export function getGroqClient(): Groq {
-  if (_groq) return _groq
-  const apiKey = requireEnv('GROQ_API_KEY', process.env.GROQ_API_KEY)
-  _groq = new Groq({ apiKey })
-  return _groq
+function getGenAI(): GoogleGenerativeAI {
+  if (_genAI) return _genAI
+  const apiKey = requireEnv('GOOGLE_AI_API_KEY', process.env.GOOGLE_AI_API_KEY)
+  _genAI = new GoogleGenerativeAI(apiKey)
+  return _genAI
 }
 
-// Google for embeddings (gemini-embedding-001 works on free tier)
 export function getEmbedModel() {
   if (_embedModel) return _embedModel
-  const apiKey = requireEnv('GOOGLE_AI_API_KEY', process.env.GOOGLE_AI_API_KEY)
-  const genAI = new GoogleGenerativeAI(apiKey)
-  _embedModel = genAI.getGenerativeModel({ model: 'gemini-embedding-001' })
+  _embedModel = getGenAI().getGenerativeModel({ model: 'gemini-embedding-001' })
   return _embedModel
+}
+
+export function getGeminiTextModel() {
+  if (_textModel) return _textModel
+  _textModel = getGenAI().getGenerativeModel({ model: GEMINI_TEXT_MODEL })
+  return _textModel
 }

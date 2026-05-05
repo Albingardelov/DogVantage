@@ -1,4 +1,4 @@
-import { getGroqClient, GROQ_MODEL } from './client'
+import { getGeminiTextModel } from './client'
 import { embedText } from './embed'
 import { searchBreedChunks } from '@/lib/supabase/breed-chunks'
 import { formatBreedProfile, formatCurrentPhase } from './breed-profiles'
@@ -184,17 +184,16 @@ Regler:
 - desc max 12 ord på svenska, inkludera hur länge
 - Programvecka ${trainingWeek}; anpassa övningar till rasens egenskaper${idRules ? `\n- ${idRules.replace(/\n/g, '\n- ')}` : ''}`
 
-  const completion = await getGroqClient().chat.completions.create({
-    model: GROQ_MODEL,
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: `Veckoschema JSON för ${breed}, programvecka ${trainingWeek}` },
-    ],
-    temperature: 0.3,
-    response_format: { type: 'json_object' },
-    max_tokens: 900,
+  const result = await getGeminiTextModel().generateContent({
+    contents: [{ role: 'user', parts: [{ text: `Veckoschema JSON för ${breed}, programvecka ${trainingWeek}` }] }],
+    systemInstruction: systemPrompt,
+    generationConfig: {
+      temperature: 0.3,
+      maxOutputTokens: 900,
+      responseMimeType: 'application/json',
+    },
   })
 
-  const raw = completion.choices[0].message.content ?? '{}'
+  const raw = result.response.text() ?? '{}'
   return parseWeekPlan(raw) ?? buildFallbackPlan()
 }

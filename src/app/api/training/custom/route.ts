@@ -6,7 +6,7 @@ import {
   toggleCustomExercise,
   deleteCustomExercise,
 } from '@/lib/supabase/custom-exercises'
-import { getGroqClient, GROQ_MODEL } from '@/lib/ai/client'
+import { getGeminiTextModel } from '@/lib/ai/client'
 import { slugify, randomSuffix } from '@/lib/utils/slugify'
 import type { ExerciseSpec } from '@/lib/training/exercise-specs'
 
@@ -54,18 +54,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'prompt max 300 chars' }, { status: 400 })
     }
 
-    const completion = await getGroqClient().chat.completions.create({
-      model: GROQ_MODEL,
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user', content: `Skapa en träningsövningsspec för: ${prompt}` },
-      ],
-      temperature: 0.4,
-      response_format: { type: 'json_object' },
-      max_tokens: 1200,
+    const aiResult = await getGeminiTextModel().generateContent({
+      contents: [{ role: 'user', parts: [{ text: `Skapa en träningsövningsspec för: ${prompt}` }] }],
+      systemInstruction: SYSTEM_PROMPT,
+      generationConfig: {
+        temperature: 0.4,
+        maxOutputTokens: 1200,
+        responseMimeType: 'application/json',
+      },
     })
 
-    const raw = completion.choices[0].message.content ?? '{}'
+    const raw = aiResult.response.text() ?? '{}'
     let parsed: unknown
     try {
       parsed = JSON.parse(raw)
@@ -85,8 +84,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(exercise, { status: 201 })
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
-    if (message.includes('rate_limit') || message.includes('429')) {
-      return NextResponse.json({ error: 'Groq rate limit nådd. Försök igen om en stund.' }, { status: 429 })
+    if (message.includes('rate_limit') || message.includes('429') || message.includes('quota')) {
+      return NextResponse.json({ error: 'AI-tjänsten är tillfälligt otillgänglig. Försök igen om en stund.' }, { status: 429 })
     }
     console.error('[POST /api/training/custom]', message)
     return NextResponse.json({ error: message }, { status: 500 })
