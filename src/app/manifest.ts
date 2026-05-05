@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'DogVantage',
     short_name: 'DogVantage',
     description: 'Personlig hundträning baserad på din ras och ålder',
-    start_url: '/dashboard',
+    start_url: '/',
     display: 'standalone',
     background_color: '#faf8f4',
     theme_color: '#2d6a4f',
