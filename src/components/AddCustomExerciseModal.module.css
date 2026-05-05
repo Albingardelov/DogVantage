@@ -14,10 +14,13 @@
   border-radius: 20px 20px 0 0;
   width: 100%;
   max-width: 480px;
+  max-height: 90dvh;
   padding: 24px 20px 32px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .header {
