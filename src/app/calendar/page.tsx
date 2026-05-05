@@ -4,9 +4,10 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import ProfileGuard from '@/components/ProfileGuard'
 import BottomNav from '@/components/BottomNav'
+import ExerciseGuideSheet from '@/components/ExerciseGuideSheet'
 import { getDogProfile } from '@/lib/dog/profile'
 import { getAgeInWeeks } from '@/lib/dog/age'
-import type { DayPlan, DogProfile, QuickRating, SessionLog, WeekPlan } from '@/types'
+import type { DayPlan, DogProfile, Exercise, QuickRating, SessionLog, WeekPlan } from '@/types'
 import styles from './page.module.css'
 
 // Indexed by Date.getDay() (0 = Sunday)
@@ -47,16 +48,53 @@ const RATING_CONFIG: Record<QuickRating, { label: string; cls: string }> = {
   bad:   { label: 'Svårt',   cls: styles.ratingBad },
 }
 
+function DaySheet({
+  dayPlan,
+  dayLabel,
+  onClose,
+  onExerciseClick,
+}: {
+  dayPlan: DayPlan
+  dayLabel: string
+  onClose: () => void
+  onExerciseClick: (ex: Exercise) => void
+}) {
+  return (
+    <div className={styles.sheetOverlay} onClick={onClose} role="dialog" aria-modal="true" aria-label={dayLabel}>
+      <div className={styles.sheetPanel} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.sheetHeader}>
+          <span className={styles.sheetTitle}>{dayLabel}</span>
+          <button type="button" className={styles.sheetClose} onClick={onClose} aria-label="Stäng">✕</button>
+        </div>
+        {dayPlan.exercises?.map((ex) => (
+          <div key={ex.id} className={styles.sheetExercise}>
+            <div className={styles.sheetExerciseTop}>
+              <span className={styles.sheetExerciseName}>{ex.label}</span>
+              <span className={styles.sheetExerciseReps}>{ex.reps}×</span>
+            </div>
+            {ex.desc && <p className={styles.sheetExerciseDesc}>{ex.desc}</p>}
+            <button type="button" className={styles.sheetGuideBtn} onClick={() => onExerciseClick(ex)}>
+              Se guide
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function AgendaDay({
   dateStr,
   todayStr,
   dayPlan,
   log,
+  onClick,
 }: {
   dateStr: string
   todayStr: string
   dayPlan: DayPlan | null
   log: SessionLog | null
+  onClick?: () => void
 }) {
   const d = new Date(dateStr + 'T12:00:00')
   const dayName = WEEKDAY_NAMES[d.getDay()]
@@ -77,7 +115,13 @@ function AgendaDay({
   const rating = log ? RATING_CONFIG[log.quick_rating] : null
 
   return (
-    <div className={`${styles.trainingDay} ${isToday ? styles.trainingDayToday : ''}`}>
+    <div
+      className={`${styles.trainingDay} ${isToday ? styles.trainingDayToday : ''} ${onClick ? styles.trainingDayClickable : ''}`}
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') onClick() } : undefined}
+    >
       <div className={styles.trainingDayHeader}>
         <div className={styles.trainingDayMeta}>
           {isToday && <span className={styles.todayPip} aria-hidden="true" />}
@@ -141,6 +185,8 @@ function CalendarView() {
   const [logs, setLogs] = useState<Record<string, SessionLog>>({})
   const [weekPlan, setWeekPlan] = useState<WeekPlan | null>(null)
   const [loading, setLoading] = useState(true)
+  const [sheetDay, setSheetDay] = useState<{ plan: DayPlan; label: string } | null>(null)
+  const [guideExercise, setGuideExercise] = useState<Exercise | null>(null)
   const todayRef = useRef<HTMLDivElement>(null)
 
   const todayStr = new Date().toISOString().slice(0, 10)
@@ -251,6 +297,11 @@ function CalendarView() {
                         todayStr={todayStr}
                         dayPlan={dayPlan}
                         log={logs[dateStr] ?? null}
+                        onClick={dayPlan && !dayPlan.rest && dayPlan.exercises?.length ? () => {
+                          const d = new Date(dateStr + 'T12:00:00')
+                          const label = `${WEEKDAY_NAMES[d.getDay()]} ${d.getDate()} ${MONTH_NAMES_SHORT[d.getMonth()]}`
+                          setSheetDay({ plan: dayPlan, label })
+                        } : undefined}
                       />
                     </div>
                   )
@@ -262,6 +313,23 @@ function CalendarView() {
       </div>
 
       <BottomNav active="dashboard" />
+
+      {sheetDay && !guideExercise && (
+        <DaySheet
+          dayPlan={sheetDay.plan}
+          dayLabel={sheetDay.label}
+          onClose={() => setSheetDay(null)}
+          onExerciseClick={(ex) => setGuideExercise(ex)}
+        />
+      )}
+
+      {guideExercise && (
+        <ExerciseGuideSheet
+          exerciseId={guideExercise.id}
+          exerciseLabel={guideExercise.label}
+          onClose={() => setGuideExercise(null)}
+        />
+      )}
     </main>
   )
 }
