@@ -161,11 +161,28 @@ export async function generateWeekPlan(
     ? `\n=== SENASTE PRESTATION (anpassa nästkommande vecka efter detta) ===\n${performanceSummary}\nJustera svårighetsgrad och val av övningar baserat på ovanstående.\n`
     : ''
 
-  const systemPrompt = `Du är DogVantage träningsassistent för rasen ${breed}. Returnera veckoschema som JSON: {"days":[{"day":"Måndag","rest":false,"exercises":[{"id":"...","label":"...","desc":"...","reps":3}]},{"day":"Tisdag","rest":true},...]}
+  const systemPrompt = `Du är DogVantage träningsassistent för rasen ${breed}. Returnera ett veckoschema som giltig JSON.
 
 ${formatBreedProfile(breed)}
 ${ageInfo}${typeof ageWeeks === 'number' && Number.isFinite(ageWeeks) ? formatCurrentPhase(ageWeeks) : ''}${goalContext}${onboardingSection}${performanceSection}${customSection}${documentContext ? `\n=== KÄLLDOKUMENT ===\n${documentContext}\n` : ''}
-Regler: exakt 7 dagar (Måndag–Söndag) · 1–2 vilodagar (rest:true, inga exercises) · träningsdagar 2–3 exercises, reps 1–5 · id lowercase utan mellanslag · tillåtna id: ${[...allowedIds, ...customIds].join(', ')} · desc max 12 ord inkl. hur länge · programvecka ${trainingWeek}${idRules ? ` · ${idRules.replace(/\n/g, ' · ')}` : ''}`
+Returnera ENBART JSON i detta format (inga förklaringar):
+{"days":[
+  {"day":"Måndag","rest":false,"exercises":[{"id":"inkallning","label":"Inkallning","desc":"Kalla med glad röst, 3 min","reps":3}]},
+  {"day":"Tisdag","rest":true},
+  {"day":"Onsdag","rest":false,"exercises":[{"id":"sitt","label":"Sitt","desc":"Håll godis över nosen, 5 min","reps":5}]},
+  {"day":"Torsdag","rest":false,"exercises":[{"id":"namn","label":"Namnkontakt","desc":"Säg namn, belöna blick, 3 min","reps":5}]},
+  {"day":"Fredag","rest":true},
+  {"day":"Lördag","rest":false,"exercises":[{"id":"stanna","label":"Stanna","desc":"En hand upp, 1–2 min","reps":3}]},
+  {"day":"Söndag","rest":false,"exercises":[{"id":"inkallning","label":"Inkallning","desc":"Öka avstånd, 5 min","reps":3}]}
+]}
+
+Regler:
+- Exakt 7 dagar i ordning: Måndag–Söndag
+- 1–2 vilodagar: rest:true, utelämna exercises
+- Träningsdagar: 2–3 exercises, reps 1–5
+- id lowercase, inga mellanslag; tillåtna id: ${[...allowedIds, ...customIds].join(', ')}
+- desc max 12 ord på svenska, inkludera hur länge
+- Programvecka ${trainingWeek}; anpassa övningar till rasens egenskaper${idRules ? `\n- ${idRules.replace(/\n/g, '\n- ')}` : ''}`
 
   const completion = await getGroqClient().chat.completions.create({
     model: GROQ_MODEL,

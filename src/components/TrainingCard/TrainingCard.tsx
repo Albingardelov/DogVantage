@@ -66,6 +66,7 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
         fetch(`/api/training/metrics?breed=${breed}&date=${todayDate}&dogKey=${encodeURIComponent(dogKey)}`),
       ])
       if (planRes.ok) setWeekPlan(await planRes.json())
+      else setError(true)
       if (progressRes.ok) setProgress(await progressRes.json())
       if (metricsRes.ok) setMetrics(await metricsRes.json())
     } catch {

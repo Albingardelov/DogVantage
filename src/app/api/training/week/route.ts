@@ -118,9 +118,16 @@ export async function GET(req: NextRequest) {
   const cached = await getCachedWeekPlan(breed, trainingWeek, ageWeeks, goals, cacheKey, userId, onboardingContext, customIds)
   if (cached) return NextResponse.json(cached)
 
-  const plan = await generateWeekPlan(breed, trainingWeek, ageWeeks, goals, onboardingContext, performanceSummary, customExercises)
-
-  await setCachedWeekPlan(breed, trainingWeek, plan, ageWeeks, goals, cacheKey, userId, onboardingContext, customIds).catch(() => {})
-
-  return NextResponse.json(plan)
+  try {
+    const plan = await generateWeekPlan(breed, trainingWeek, ageWeeks, goals, onboardingContext, performanceSummary, customExercises)
+    await setCachedWeekPlan(breed, trainingWeek, plan, ageWeeks, goals, cacheKey, userId, onboardingContext, customIds).catch(() => {})
+    return NextResponse.json(plan)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[GET /api/training/week]', message)
+    if (message.includes('rate_limit') || message.includes('429') || message.includes('quota')) {
+      return NextResponse.json({ error: 'AI-tjänsten är tillfälligt otillgänglig. Försök igen om en stund.' }, { status: 429 })
+    }
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
 }
