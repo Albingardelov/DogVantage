@@ -3,20 +3,25 @@
 import { useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
+import type { ExerciseSpec } from '@/lib/training/exercise-specs'
 import type { DailyExerciseMetrics } from '@/types'
 import styles from './ExerciseGuideSheet.module.css'
 
 export default function ExerciseGuideSheet({
   exerciseId,
+  exerciseLabel,
   onClose,
   metrics,
+  customSpecs,
 }: {
   exerciseId: string
+  exerciseLabel?: string
   metrics?: DailyExerciseMetrics | null
   onClose: () => void
+  customSpecs?: Record<string, ExerciseSpec>
 }) {
   const router = useRouter()
-  const spec = getExerciseSpec(exerciseId)
+  const spec = customSpecs?.[exerciseId] ?? getExerciseSpec(exerciseId)
 
   const coachQuestion = useMemo(() => {
     const attempts = (metrics?.success_count ?? 0) + (metrics?.fail_count ?? 0)
@@ -39,7 +44,7 @@ export default function ExerciseGuideSheet({
       <div className={styles.sheet}>
         <div className={styles.header}>
           <div>
-            <div className={styles.title}>{prettyLabel(exerciseId)}</div>
+            <div className={styles.title}>{exerciseLabel ?? prettyLabel(exerciseId)}</div>
           </div>
           <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Stäng">
             ✕
