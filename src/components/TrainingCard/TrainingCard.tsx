@@ -9,6 +9,7 @@ import ExerciseGuideSheet from '@/components/ExerciseGuideSheet'
 import styles from './TrainingCard.module.css'
 import type { Breed, TrainingGoal, TrainingEnvironment, RewardPreference, WeekPlan, Exercise, DailyExerciseMetrics, LatencyBucket, ExerciseSummary } from '@/types'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
+import type { ExerciseSpec } from '@/lib/training/exercise-specs'
 import { buildWeekFocusCopy } from '@/lib/training/week-focus-copy'
 import WeekFocusPanel from './WeekFocusPanel'
 import PreSessionChecklist from './PreSessionChecklist'
@@ -43,6 +44,7 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
   const [showLogForm, setShowLogForm] = useState(false)
   const [guideExerciseId, setGuideExerciseId] = useState<string | null>(null)
   const [sessionGuard, setSessionGuard] = useState<Record<string, { consecutiveFails: number; consecutiveSlow: number }>>({})
+  const [customSpecs, setCustomSpecs] = useState<Record<string, ExerciseSpec>>({})
   const [simpleFocus, setSimpleFocus] = useState(false)
   const todayDate = todayDateString()
   const todayName = SWEDISH_DAYS[new Date().getDay()]
@@ -72,6 +74,20 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
   }, [breed, trainingWeek, ageWeeks, todayDate, goals, environment, rewardPreference, takesRewardsOutdoors, behaviorContext])
 
   useEffect(() => { fetchData() }, [fetchData])
+
+  useEffect(() => {
+    let alive = true
+    fetch('/api/training/custom')
+      .then((r) => r.ok ? r.json() : [])
+      .then((rows: Array<{ exercise_id: string; spec: ExerciseSpec }>) => {
+        if (!alive) return
+        const map: Record<string, ExerciseSpec> = {}
+        for (const row of rows) map[row.exercise_id] = row.spec
+        setCustomSpecs(map)
+      })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [])
 
   function handleRepClick(exerciseId: string, currentDone: number, maxReps: number) {
     if (currentDone >= maxReps) return
@@ -240,7 +256,7 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
           <div className={styles.exercises}>
             {displayedExercises.map((ex) => (
               (() => {
-                const spec = getExerciseSpec(ex.id)
+                const spec = customSpecs[ex.id] ?? getExerciseSpec(ex.id)
                 const m = metrics[ex.id] ?? null
                 const guard = sessionGuard[ex.id] ?? { consecutiveFails: 0, consecutiveSlow: 0 }
                 const rec = buildRecommendation(
@@ -318,8 +334,10 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
       {guideExerciseId && (
         <ExerciseGuideSheet
           exerciseId={guideExerciseId}
+          exerciseLabel={todayExercises.find((e) => e.id === guideExerciseId)?.label}
           metrics={metrics[guideExerciseId] ?? null}
           onClose={() => setGuideExerciseId(null)}
+          customSpecs={customSpecs}
         />
       )}
     </>
