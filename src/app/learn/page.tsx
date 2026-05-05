@@ -47,6 +47,55 @@ const ARTICLES: Article[] = [
     ],
   },
   {
+    id: 'basis-kommandon',
+    title: 'Grundsignalerna — vad de betyder och hur du använder dem',
+    summary:
+      'Sitt, stanna, fri, fot, inkallning och plats: sex signaler många tycker alla hundar bör förstå. Här förklaras vad varje signal betyder och hur du tränar steg för steg på svenska.',
+    readTime: '7 min',
+    sections: [
+      {
+        heading: 'En signal — ett ömsesidigt löfte',
+        body:
+          'Ett kommando är inte en order hunden måste lyda utan ett ömsesidigt erbjudande: om du gör detta kan du få något du tycker är värt mödan. Hunden lär sig koppla signal och belöning. Var stadig i språket: samma ord, samma ton, belöna rätt ögonblicksbeteende. Öva i korta pass och sluta med en lyckad rep. Nedan beskrivs orden som många förare i Sverige använder för de viktigaste vardagsbeteendena.',
+      },
+      {
+        heading: 'Sitt',
+        body:
+          'Sitt betyder att hunden sätter skinkan på golvet eller marken och avslutar rörelsen lugnt (det är okej att bröstkorg och huvud är uppe). Signalen säger vad som ska hända just nu. Lås in beteendet med godbit som lockar nedåt eller med formning; belöna i samma ögonblick som bakdelen når marken — annars lär sig många ett halvsitt som blir knepigt att träna bort senare.', Öva först hemma och generalisera långsamt till hall, innergården och lugna promenader innan livliga miljöer.',
+      },
+      {
+        heading: 'Stanna eller bliv kvar',
+        body:
+          'Stanna eller bliv kvar brukar betyda att hunden inte får lämna plats eller rörelseläge förrän du säger släpp. Ibland säger förare vänta, ligg kvar eller sitt kvar — definiera själv om tassarna ska stå stilla till du släpper eller om det mer är ett kort stopp vid din sida. Höj var för sig väntetid, avstånd till dig och mängd störning; aldrig allt på en gång.',
+      },
+      {
+        heading: 'Fri (släppsignal)',
+        body:
+          'Fri eller varsågod är en släppsignal: övningen eller kravläget är slut för stunden och hunden får göra det som är tillåtet inom ramen för säkerhet. Välj ett ord som inte förväxlas med vardagsprat i familjen. Koppla i början alltid släpp till en riktigt fin belöning så fri inte bara betyder att ingenting händer. Säg inte fri när hunden är förvirrad eller kraven blev för höga — då lär fel beteenden följa släpp.',
+      },
+      {
+        heading: 'Fot (gå vid sida)',
+        body:
+          'Att gå i fot är att gå vid förarens sida utan drag i kopplet: blick eller kropp mot dig och utan näsan ständigt framför. Det skiljer sig från lös nosgång där hunden får utforska. Öva på korta raksträckor, belöna kontakt och mjuk ledning på linan. Höj fart, svängar och sträcka först när flödet sitter stadigt.',
+      },
+      {
+        heading: 'Inkallning',
+        body:
+          'Inkallning betyder att hunden kommer gladlynt till dig och ofta sätter sig eller vidrör handen vid benet för avslut. Bygg långsamt hemma och i trädgården, sedan med långlina, och belöna varje framkomst rejält i början — en riktigt stor belöning här lönar sig. Kalla bara när förutsättningarna för lyckade försök är rimliga, inte mitt bland starka störningar eller när kopplet rycker. Namnet eller ett kort kommando räcker; upprepa inte om hunden inte svarar — backa eller sänk svårigheten.',
+      },
+      {
+        heading: 'Plats (målyta)',
+        body:
+          'Plats är att gå till en bestämd yta — madrass, filt, pall eller ett ställe vid matbordskanten där du vill ha lugn. Syftet kan vara en lugn zon vid mat eller andrum mellan besök och servering. Visa ytan först, belöna när alla fyra trampdynorna är på ytan; lägg sedan till separat krav för ligg eller sitt om du vill. Ny yta eller flyttad madrass gör ofta målet till ny inlärning — börja då lätt.',
+      },
+      {
+        heading: 'Ordning och helhet',
+        body:
+          'Många börjar med sitt och fri, därefter stanna eller inkallning och fot — alltid i korta pass. Ett ord för varje beteende; undvik många synonymer. Läs sedan guiderna om timing, hur du höjer ett kriterium i taget och hur beteendet följer med till nya platser.',
+      },
+    ],
+  },
+  {
     id: 'timing',
     title: 'Timing — halv sekund avgör allt',
     summary: 'Det handlar inte om vad du belönar utan exakt NÄR. Förstå varför och hur du tränar upp det.',
