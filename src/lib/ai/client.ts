@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
-export const GEMINI_TEXT_MODEL = 'gemini-1.5-flash'
+export const GEMINI_TEXT_MODEL = 'gemini-2.0-flash'
 
 let _genAI: GoogleGenerativeAI | null = null
 let _embedModel: ReturnType<GoogleGenerativeAI['getGenerativeModel']> | null = null
