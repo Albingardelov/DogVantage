@@ -44,20 +44,22 @@ function goalsBucket(goals?: string[]): string {
   return [...goals].sort().join('+')
 }
 
-function weekPlanCacheKey(breed: Breed, ageWeeks?: number, goals?: string[]): string {
-  return `weekplan_${breed}_${ageBucket(ageWeeks)}_${goalsBucket(goals)}`
+function weekPlanCacheKey(breed: Breed, ageWeeks?: number, goals?: string[], dateKey?: string): string {
+  const datePart = dateKey ? `_${dateKey}` : ''
+  return `weekplan_${breed}_${ageBucket(ageWeeks)}_${goalsBucket(goals)}${datePart}`
 }
 
 export async function getCachedWeekPlan(
   breed: Breed,
   weekNumber: number,
   ageWeeks?: number,
-  goals?: string[]
+  goals?: string[],
+  dateKey?: string
 ): Promise<WeekPlan | null> {
   const { data, error } = await getSupabaseAdmin()
     .from('training_cache')
     .select('content')
-    .eq('breed', weekPlanCacheKey(breed, ageWeeks, goals))
+    .eq('breed', weekPlanCacheKey(breed, ageWeeks, goals, dateKey))
     .eq('week_number', weekNumber)
     .single()
 
@@ -74,12 +76,13 @@ export async function setCachedWeekPlan(
   weekNumber: number,
   plan: WeekPlan,
   ageWeeks?: number,
-  goals?: string[]
+  goals?: string[],
+  dateKey?: string
 ): Promise<void> {
   const { error } = await getSupabaseAdmin()
     .from('training_cache')
     .upsert({
-      breed: weekPlanCacheKey(breed, ageWeeks, goals),
+      breed: weekPlanCacheKey(breed, ageWeeks, goals, dateKey),
       week_number: weekNumber,
       content: JSON.stringify(plan),
       source: 'week_plan',

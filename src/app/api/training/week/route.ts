@@ -50,6 +50,17 @@ function formatPerformanceSummary(logStrings: string[]): string | undefined {
   return logStrings.map((l) => `• ${l}`).join('\n')
 }
 
+/** Returns a string like "2026-W19" — changes once per calendar week. */
+function isoWeekKey(): string {
+  const now = new Date()
+  const d = new Date(now)
+  d.setHours(0, 0, 0, 0)
+  d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7))
+  const week1 = new Date(d.getFullYear(), 0, 4)
+  const week = 1 + Math.round(((d.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7)
+  return `${d.getFullYear()}-W${String(week).padStart(2, '0')}`
+}
+
 export async function GET(req: NextRequest) {
   const p = req.nextUrl.searchParams
   const breed = p.get('breed') as Breed | null
@@ -87,18 +98,17 @@ export async function GET(req: NextRequest) {
     // Not critical — continue without custom exercises
   }
 
-  // Skip cache when we have fresh performance data so the plan adapts to reality
-  if (!performanceSummary) {
-    const cached = await getCachedWeekPlan(breed, trainingWeek, ageWeeks, goals)
-    if (cached) return NextResponse.json(cached)
-  }
+  // Plans with performance data are cached per ISO-week so the plan adapts to
+  // recent logs without triggering a fresh Groq call on every page load.
+  // Plans without performance data are cached indefinitely (static baseline).
+  const cacheKey = performanceSummary ? isoWeekKey() : undefined
+
+  const cached = await getCachedWeekPlan(breed, trainingWeek, ageWeeks, goals, cacheKey)
+  if (cached) return NextResponse.json(cached)
 
   const plan = await generateWeekPlan(breed, trainingWeek, ageWeeks, goals, onboardingContext, performanceSummary, customExercises)
 
-  // Only cache plans without performance context (static plans can be reused)
-  if (!performanceSummary) {
-    await setCachedWeekPlan(breed, trainingWeek, plan, ageWeeks, goals).catch(() => {})
-  }
+  await setCachedWeekPlan(breed, trainingWeek, plan, ageWeeks, goals, cacheKey).catch(() => {})
 
   return NextResponse.json(plan)
 }

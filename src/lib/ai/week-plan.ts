@@ -195,6 +195,7 @@ Regler:
     ],
     temperature: 0.3,
     response_format: { type: 'json_object' },
+    max_tokens: 900,
   })
 
   const raw = completion.choices[0].message.content ?? '{}'

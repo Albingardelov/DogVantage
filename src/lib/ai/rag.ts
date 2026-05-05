@@ -143,6 +143,7 @@ INSTRUKTIONER:
       { role: 'user', content: query },
     ],
     temperature: 0.4,
+    max_tokens: 400,
   })
 
   const raw = completion.choices[0].message.content?.trim() ?? ''
