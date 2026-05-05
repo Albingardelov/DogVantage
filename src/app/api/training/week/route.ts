@@ -115,12 +115,19 @@ export async function GET(req: NextRequest) {
   const cacheKey = performanceSummary ? isoWeekKey() : undefined
   const customIds = customExercises.map((e) => e.exercise_id)
 
-  const cached = await getCachedWeekPlan(breed, trainingWeek, ageWeeks, goals, cacheKey, userId, onboardingContext, customIds)
+  let cached: import('@/types').WeekPlan | null = null
+  try {
+    cached = await getCachedWeekPlan(breed, trainingWeek, ageWeeks, goals, cacheKey, userId, onboardingContext, customIds)
+  } catch (e) {
+    console.error('[GET /api/training/week] cache read failed:', e)
+  }
   if (cached) return NextResponse.json(cached)
 
   try {
     const plan = await generateWeekPlan(breed, trainingWeek, ageWeeks, goals, onboardingContext, performanceSummary, customExercises)
-    await setCachedWeekPlan(breed, trainingWeek, plan, ageWeeks, goals, cacheKey, userId, onboardingContext, customIds).catch(() => {})
+    await setCachedWeekPlan(breed, trainingWeek, plan, ageWeeks, goals, cacheKey, userId, onboardingContext, customIds).catch((e) => {
+      console.error('[GET /api/training/week] cache write failed:', e)
+    })
     return NextResponse.json(plan)
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)

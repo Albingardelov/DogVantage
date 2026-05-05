@@ -114,7 +114,7 @@ export async function setCachedWeekPlan(
       week_number: weekNumber,
       content: JSON.stringify(plan),
       source: 'week_plan',
-    })
+    }, { onConflict: 'breed,week_number' })
 
   if (error) throw new Error(`Week plan cache write failed: ${error.message}`)
 }
