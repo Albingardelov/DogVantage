@@ -10,6 +10,7 @@ import { getAgeInWeeks } from '@/lib/dog/age'
 import { GOALS, ENVIRONMENTS, REWARDS } from '@/components/DogProfileForm'
 import type { DogProfile, TrainingGoal, TrainingEnvironment, RewardPreference } from '@/types'
 import styles from './page.module.css'
+import CustomExerciseList from '@/components/CustomExerciseList'
 
 export default function ProfilePage() {
   return (
@@ -161,6 +162,11 @@ function ProfileView() {
             options={OUTDOOR_OPTS}
             onChange={(v) => { setTakesRewardsOutdoors(v === 'true'); setSaved(false) }}
           />
+        </div>
+
+        <div className={styles.section}>
+          <span className={styles.sectionTitle}>Egna träningspass</span>
+          <CustomExerciseList />
         </div>
 
         {saved ? (
