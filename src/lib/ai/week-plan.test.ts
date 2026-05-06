@@ -24,7 +24,7 @@ vi.mock('./breed-profiles', () => ({
   formatCurrentPhase: vi.fn().mockReturnValue(''),
 }))
 
-import { parseWeekPlan, buildFallbackPlan } from './week-plan'
+import { parseWeekPlan } from './week-plan'
 
 describe('parseWeekPlan', () => {
   it('parses valid JSON with 7 days', () => {
@@ -60,14 +60,3 @@ describe('parseWeekPlan', () => {
   })
 })
 
-describe('buildFallbackPlan', () => {
-  it('always returns exactly 7 days', () => {
-    const plan = buildFallbackPlan()
-    expect(plan.days).toHaveLength(7)
-  })
-
-  it('all days have a day name', () => {
-    const plan = buildFallbackPlan()
-    plan.days.forEach((d) => expect(typeof d.day).toBe('string'))
-  })
-})

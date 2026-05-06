@@ -6,7 +6,7 @@ import { GOAL_EXERCISE_IDS, GOAL_LABELS, GOAL_RULES } from '@/lib/training/goal-
 import type { Breed, TrainingGoal, WeekPlan, HouseholdPet } from '@/types'
 
 // Bump this when plan generation logic changes significantly — forces cache invalidation
-export const PLAN_VERSION = 'v3'
+export const PLAN_VERSION = 'v4'
 
 function allowedExerciseIdsForBreed(breed: Breed, ageWeeks?: number): string[] {
   const isPuppy = typeof ageWeeks === 'number' && ageWeeks > 0 && ageWeeks < 16
@@ -76,19 +76,6 @@ export function parseWeekPlan(raw: string): WeekPlan | null {
   }
 }
 
-export function buildFallbackPlan(): WeekPlan {
-  return {
-    days: [
-      { day: 'Måndag', exercises: [{ id: 'inkallning', label: 'Inkallning', desc: 'Kalla med glad röst', reps: 3 }, { id: 'sitt', label: 'Sitt', desc: 'Håll godis över nosen', reps: 5 }] },
-      { day: 'Tisdag', rest: true },
-      { day: 'Onsdag', exercises: [{ id: 'ligg', label: 'Ligg', desc: 'Sjunk ner från sitt', reps: 3 }, { id: 'namn', label: 'Namnträning', desc: 'Säg namn, belöna blick', reps: 5 }] },
-      { day: 'Torsdag', exercises: [{ id: 'inkallning', label: 'Inkallning', desc: 'Kalla med glad röst', reps: 3 }] },
-      { day: 'Fredag', rest: true },
-      { day: 'Lördag', exercises: [{ id: 'sitt', label: 'Sitt', desc: 'Håll godis över nosen', reps: 5 }, { id: 'ligg', label: 'Ligg', desc: 'Sjunk ner från sitt', reps: 3 }] },
-      { day: 'Söndag', exercises: [{ id: 'inkallning', label: 'Inkallning', desc: 'Kalla med glad röst', reps: 3 }] },
-    ],
-  }
-}
 
 export async function generateWeekPlan(
   breed: Breed,
@@ -212,11 +199,16 @@ Regler:
     systemInstruction: systemPrompt,
     generationConfig: {
       temperature: 0.3,
-      maxOutputTokens: 900,
+      maxOutputTokens: 1200,
       responseMimeType: 'application/json',
     },
   })
 
   const raw = result.response.text() ?? '{}'
-  return parseWeekPlan(raw) ?? buildFallbackPlan()
+  const plan = parseWeekPlan(raw)
+  if (!plan) {
+    console.error('[generateWeekPlan] AI returned unparseable plan:', raw.slice(0, 300))
+    throw new Error('AI returned invalid plan structure')
+  }
+  return plan
 }
