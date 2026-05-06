@@ -53,11 +53,13 @@ function DaySheet({
   dayLabel,
   onClose,
   onExerciseClick,
+  onLogClick,
 }: {
   dayPlan: DayPlan
   dayLabel: string
   onClose: () => void
   onExerciseClick: (ex: Exercise) => void
+  onLogClick?: () => void
 }) {
   return (
     <div className={styles.sheetOverlay} onClick={onClose} role="dialog" aria-modal="true" aria-label={dayLabel}>
@@ -78,6 +80,11 @@ function DaySheet({
             </button>
           </div>
         ))}
+        {onLogClick && (
+          <button type="button" className={styles.sheetLogBtn} onClick={onLogClick}>
+            Logga passet
+          </button>
+        )}
       </div>
     </div>
   )
@@ -185,7 +192,7 @@ function CalendarView() {
   const [logs, setLogs] = useState<Record<string, SessionLog>>({})
   const [weekPlan, setWeekPlan] = useState<WeekPlan | null>(null)
   const [loading, setLoading] = useState(true)
-  const [sheetDay, setSheetDay] = useState<{ plan: DayPlan; label: string } | null>(null)
+  const [sheetDay, setSheetDay] = useState<{ plan: DayPlan; label: string; dateStr: string } | null>(null)
   const [guideExercise, setGuideExercise] = useState<Exercise | null>(null)
   const todayRef = useRef<HTMLDivElement>(null)
 
@@ -300,7 +307,7 @@ function CalendarView() {
                         onClick={dayPlan && !dayPlan.rest && dayPlan.exercises?.length ? () => {
                           const d = new Date(dateStr + 'T12:00:00')
                           const label = `${WEEKDAY_NAMES[d.getDay()]} ${d.getDate()} ${MONTH_NAMES_SHORT[d.getMonth()]}`
-                          setSheetDay({ plan: dayPlan, label })
+                          setSheetDay({ plan: dayPlan, label, dateStr })
                         } : undefined}
                       />
                     </div>
@@ -320,6 +327,9 @@ function CalendarView() {
           dayLabel={sheetDay.label}
           onClose={() => setSheetDay(null)}
           onExerciseClick={(ex) => setGuideExercise(ex)}
+          onLogClick={sheetDay.dateStr <= todayStr && !logs[sheetDay.dateStr]
+            ? () => router.push('/log')
+            : undefined}
         />
       )}
 

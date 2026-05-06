@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import ProfileGuard from '@/components/ProfileGuard'
 import BottomNav from '@/components/BottomNav'
 import styles from './page.module.css'
@@ -255,7 +256,8 @@ const ARTICLES: Article[] = [
 ]
 
 function Learn() {
-  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const searchParams = useSearchParams()
+  const [expandedId, setExpandedId] = useState<string | null>(searchParams.get('article'))
 
   return (
     <main className={styles.main}>

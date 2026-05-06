@@ -12,8 +12,8 @@ function allowedExerciseIdsForBreed(breed: Breed, ageWeeks?: number): string[] {
     return [
       'namn', 'inkallning', 'stoppsignal', 'stanna', 'hantering', 'socialisering',
       'stadga', 'orientering', 'kontrollerat_sok', 'impulskontroll',
-      'koppel', 'ligg', 'sitt',
-      ...(isPuppy ? [] : ['apportering', 'vatten']),
+      'koppel', 'ligg', 'sitt', 'plats',
+      ...(isPuppy ? [] : ['apportering', 'vatten', 'fot']),
     ]
   }
 
@@ -21,8 +21,8 @@ function allowedExerciseIdsForBreed(breed: Breed, ageWeeks?: number): string[] {
     return [
       'namn', 'inkallning', 'stoppsignal', 'stanna', 'sitt', 'ligg',
       'koppel', 'hantering', 'socialisering', 'fokus',
-      'apportering', // central rasinstinkt — tillgänglig från start
-      ...(isPuppy ? [] : ['vatten']),
+      'apportering', 'plats',
+      ...(isPuppy ? [] : ['vatten', 'fot']),
     ]
   }
 
@@ -30,8 +30,7 @@ function allowedExerciseIdsForBreed(breed: Breed, ageWeeks?: number): string[] {
     return [
       'namn', 'inkallning', 'stanna', 'sitt', 'ligg',
       'koppel', 'hantering', 'socialisering',
-      'fokus', 'impulskontroll',
-      // Ingen hunting/pointing/herding — rasen är sällskap/lure coursing
+      'fokus', 'impulskontroll', 'plats',
     ]
   }
 
@@ -40,8 +39,8 @@ function allowedExerciseIdsForBreed(breed: Breed, ageWeeks?: number): string[] {
       'namn', 'inkallning', 'stoppsignal', 'stanna', 'sitt', 'ligg',
       'koppel', 'hantering', 'socialisering',
       'fokus', 'impulskontroll', 'stadga', 'orientering',
-      'nosework',
-      ...(isPuppy ? [] : ['vallning']), // introduseras från ungdomsfas och framåt
+      'nosework', 'plats',
+      ...(isPuppy ? [] : ['vallning', 'fot']),
     ]
   }
 
@@ -49,7 +48,7 @@ function allowedExerciseIdsForBreed(breed: Breed, ageWeeks?: number): string[] {
   return [
     'namn', 'inkallning', 'sitt', 'ligg', 'stanna',
     'koppel', 'hantering', 'socialisering', 'stoppsignal',
-    'fokus', 'apportering', 'vatten',
+    'fokus', 'apportering', 'vatten', 'fot', 'plats',
   ]
 }
 

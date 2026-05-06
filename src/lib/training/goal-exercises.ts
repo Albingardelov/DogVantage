@@ -7,8 +7,8 @@
 import type { TrainingGoal } from '@/types'
 
 export const GOAL_EXERCISE_IDS: Record<TrainingGoal, string[]> = {
-  everyday_obedience: ['namn', 'inkallning', 'koppel', 'stanna', 'hantering', 'socialisering'],
-  sport:              ['namn', 'stanna', 'sitt', 'ligg', 'inkallning', 'fokus'],
+  everyday_obedience: ['namn', 'inkallning', 'koppel', 'stanna', 'hantering', 'socialisering', 'fot', 'plats'],
+  sport:              ['namn', 'stanna', 'sitt', 'ligg', 'inkallning', 'fokus', 'fot'],
   hunting:            ['inkallning', 'stoppsignal', 'stadga', 'orientering', 'kontrollerat_sok', 'apportering', 'vatten'],
   herding:            ['vallning', 'inkallning', 'stoppsignal', 'impulskontroll', 'stadga', 'orientering', 'fokus'],
   impulse_control:    ['impulskontroll', 'stanna', 'stadga', 'namn', 'hantering'],

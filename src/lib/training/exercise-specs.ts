@@ -820,6 +820,92 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
     },
   }),
 
+  fot: spec({
+    exerciseId: 'fot',
+    definition: 'Lyckad rep när hunden går i fotsteg (vänster sida, axeln vid ditt knä) i 3–5 steg med blickkontakt.',
+    ladder: [
+      { id: 'home_position', label: 'Inne · position', criteria: 'Hunden ställer sig bredvid vänster ben och tar belöning vid höften.' },
+      { id: 'home_3steps', label: 'Inne · 3 steg', criteria: 'Hunden håller fotposition i 3 steg. Belöna vid höften, inte framför.' },
+      { id: 'outdoor_low', label: 'Ute · låg störning', criteria: '5 steg med fokus. Stopp, stopp → belöna. Håll hög frekvens.' },
+      { id: 'outdoor_turns', label: 'Ute · vändningar', criteria: 'Hunden håller position vid svängningar åt båda håll.' },
+    ],
+    troubleshooting: [
+      'Om hunden drar framåt: gör fler riktningsändringar, belöna när hunden är vid ditt knä.',
+      'Om hunden tappar fokus: sänk svårighetsgraden och belöna tätare.',
+      'Blanda in korta fotsteg-sekvenser i vanliga promenader.',
+    ],
+    guide: {
+      setup: [
+        'Ha belöning i vänster hand eller ficka — inte framför hunden.',
+        'Börja inne med låg distraktion.',
+        'Skilj tydligt på "fot" (exakt position) och vanlig koppelgång.',
+      ],
+      steps: [
+        'Locka hunden till vänster sida med belöning vid din vänstra höft.',
+        'Ge signalen "fot" + gå 2–3 steg → belöna vid din höft om hunden håller position.',
+        'Öka stegantalet gradvis när hunden förstår positionen.',
+        'Lägg till riktningsändringar för att hålla uppmärksamheten.',
+      ],
+      logging: [
+        'Lyckad = hunden höll fotsteg-positionen under hela rep-sträckan.',
+        'Miss = hunden drev framåt, utåt eller tappade fokus.',
+        'Latens = hur snabbt hunden återtar position efter signal.',
+      ],
+      commonMistakes: [
+        'Belöna framför hunden — driver drag och tappar position.',
+        'Träna fot för länge utan paus — stelnar och tappar glädje.',
+        'Blanda ihop fot-krav med vanlig promenad — ha tydliga signaler.',
+      ],
+      stopRules: [
+        'Tre missar i rad → sänk till kortare sträcka och avsluta på lyckad.',
+        'Hunden visar stresssignaler (gäspar, vänder bort) → avsluta och träna lättare nästa gång.',
+      ],
+    },
+  }),
+
+  plats: spec({
+    exerciseId: 'plats',
+    definition: 'Lyckad rep när hunden självmant går till sin matta, lägger sig och väntar tills fri-signal ges.',
+    ladder: [
+      { id: 'intro_mat', label: 'Intro matta', criteria: 'Hunden utforskar och trampar på mattan. Belöna all kontakt.' },
+      { id: 'go_to_mat', label: 'Gå till matta', criteria: 'Hunden går till mattan och lägger sig på signal "plats".' },
+      { id: 'duration_5s', label: 'Durationer 5s', criteria: 'Hunden stannar liggandes 5 sekunder med lätta distraktioner.' },
+      { id: 'duration_30s', label: 'Durationer 30s', criteria: 'Hunden stannar 30s medan du rör dig runtomkring. Avsluta med "fri".' },
+    ],
+    troubleshooting: [
+      'Om hunden inte lägger sig: forma ligg på mattan med luringlocket och belöna.',
+      'Om hunden stiger upp tidigt: minska durationen och belöna tätare på mattan.',
+      'Bygg upp durationen i väldigt små steg — 1s, 3s, 5s, 10s.',
+    ],
+    guide: {
+      setup: [
+        'Välj en specifik matta/plats — hunden kopplar tydligt objekt till beteendet.',
+        'Lägg mattan synlig men inte mitt i vägen.',
+        'Ha många små belöningar redo — belöna på mattan, inte vid dig.',
+      ],
+      steps: [
+        'Locka/peka mot mattan → belöna direkt när hunden kliver på.',
+        'Vänta på att hunden lägger sig (forma om det behövs) → jackpot-belöning på mattan.',
+        'Ge "plats"-signalen precis innan hunden rör sig mot mattan.',
+        'Öka duration gradvis. Avsluta alltid med tydlig "fri"-signal.',
+      ],
+      logging: [
+        'Lyckad = hunden gick till mattan och stannade tills fri-signal.',
+        'Miss = hunden steg upp utan signal eller vägrade lägga sig.',
+        'Latens = hur snabbt hunden når mattan och lägger sig efter signal.',
+      ],
+      commonMistakes: [
+        'Belöna hunden när den kommer till dig — ska belönas på mattan.',
+        'Hoppa till lång duration för tidigt — bygg stegvis.',
+        'Glömma "fri"-signalen — hunden vet inte när beteendet är slut.',
+      ],
+      stopRules: [
+        'Tre missar → gå tillbaka till kortare duration och avsluta på lyckad.',
+        'Om hunden vägrar ligga → träna ligg separat och återkom till plats.',
+      ],
+    },
+  }),
+
 } as const
 
 export function getExerciseSpec(exerciseId: string): ExerciseSpec | null {

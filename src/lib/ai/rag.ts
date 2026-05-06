@@ -1,7 +1,7 @@
 import { embedText } from './embed'
 import { getGeminiTextModel } from './client'
 import { searchBreedChunks } from '@/lib/supabase/breed-chunks'
-import { formatBreedProfile, formatCurrentPhase } from './breed-profiles'
+import { formatBreedProfileShort, formatCurrentPhase } from './breed-profiles'
 import type { Breed, ChunkMatch, TrainingResult, TrainingSourceRef } from '@/types'
 
 // ─── Vet-guard ────────────────────────────────────────────────────────────────
@@ -58,16 +58,17 @@ export async function queryRAG(
   // 1. Embed the query and retrieve breed-specific document chunks (best-effort)
   // If the embedding API is unavailable (rate limit, quota), we fall back
   // gracefully to breed-profile-only answers — which are already very good.
+  const matchCount = query.length > 80 ? 6 : 3
   let chunks: ChunkMatch[] = []
   try {
     const embedding = await embedText(query)
-    chunks = await searchBreedChunks(embedding, breed)
+    chunks = await searchBreedChunks(embedding, breed, matchCount)
   } catch {
     // Embedding failed — continue with breed profile only
   }
 
   // 2. Build the "ritning" (blueprint) — breed profile + training phase
-  const breedProfile = formatBreedProfile(breed)
+  const breedProfile = formatBreedProfileShort(breed)
   const phaseInfo = weekAge != null ? `\n${formatCurrentPhase(weekAge)}` : ''
 
   // 3. Build the document context from RAG (when available)

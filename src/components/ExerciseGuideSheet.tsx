@@ -7,6 +7,24 @@ import type { ExerciseSpec } from '@/lib/training/exercise-specs'
 import type { DailyExerciseMetrics } from '@/types'
 import styles from './ExerciseGuideSheet.module.css'
 
+const EXERCISE_ARTICLE: Record<string, { id: string; label: string }> = {
+  namn:            { id: 'timing',          label: 'Timing' },
+  fokus:           { id: 'timing',          label: 'Timing' },
+  inkallning:      { id: 'basis-kommandon', label: 'Grundsignalerna' },
+  stanna:          { id: 'basis-kommandon', label: 'Grundsignalerna' },
+  koppel:          { id: 'basis-kommandon', label: 'Grundsignalerna' },
+  fot:             { id: 'basis-kommandon', label: 'Grundsignalerna' },
+  plats:           { id: 'basis-kommandon', label: 'Grundsignalerna' },
+  sitt:            { id: 'criteria',        label: 'Kriterier' },
+  ligg:            { id: 'criteria',        label: 'Kriterier' },
+  socialisering:   { id: 'over-threshold',  label: 'Over threshold' },
+  impulskontroll:  { id: 'over-threshold',  label: 'Over threshold' },
+  stadga:          { id: 'over-threshold',  label: 'Over threshold' },
+  hantering:       { id: 'stress-signals',  label: 'Stresssignaler' },
+  nosework:        { id: 'generalization',  label: 'Generalisering' },
+  apportering:     { id: 'reinforcement',   label: 'Förstärkning' },
+}
+
 export default function ExerciseGuideSheet({
   exerciseId,
   exerciseLabel,
@@ -79,6 +97,15 @@ export default function ExerciseGuideSheet({
           >
             Förklara mer (fråga assistenten)
           </button>
+          {EXERCISE_ARTICLE[exerciseId] && (
+            <button
+              type="button"
+              className={styles.secondary}
+              onClick={() => router.push(`/learn?article=${EXERCISE_ARTICLE[exerciseId].id}`)}
+            >
+              Läs om {EXERCISE_ARTICLE[exerciseId].label}
+            </button>
+          )}
           <button type="button" className={styles.secondary} onClick={onClose}>
             Tillbaka
           </button>
@@ -114,6 +141,8 @@ function prettyLabel(id: string): string {
     kontrollerat_sok: 'Kontrollerat sök',
     impulskontroll: 'Impulskontroll',
     hantering: 'Hantering',
+    fot: 'Fot (fotsteg)',
+    plats: 'Plats (matta)',
   }
   return map[id] ?? id
 }

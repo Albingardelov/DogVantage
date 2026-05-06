@@ -533,6 +533,16 @@ ${milestones}
 `.trim()
 }
 
+/** Shorter breed summary for chat RAG — omits breed skills and activity guidelines to save tokens */
+export function formatBreedProfileShort(breed: Breed): string {
+  const p = getBreedProfile(breed)
+  const topTraits = p.temperament.slice(0, 3).map((t) => `• ${t}`).join('\n')
+  const topCautions = p.trainingCautions.slice(0, 2).map((c) => `• ${c}`).join('\n')
+  return `Ras: ${p.name} | Känslighet: ${p.sensitivity} | Ändamål: ${p.purpose}
+Temperament: ${topTraits}
+Varningar: ${topCautions}`.trim()
+}
+
 /** Render the breed profile as a compact text block for use in prompts */
 export function formatBreedProfile(breed: Breed): string {
   const p = getBreedProfile(breed)
