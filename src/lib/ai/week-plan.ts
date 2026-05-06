@@ -199,8 +199,10 @@ Regler:
     systemInstruction: systemPrompt,
     generationConfig: {
       temperature: 0.3,
-      maxOutputTokens: 1200,
+      maxOutputTokens: 8192,
       responseMimeType: 'application/json',
+      // @ts-expect-error thinkingConfig is valid for gemini-2.5-flash but not yet in SDK types
+      thinkingConfig: { thinkingBudget: 0 },
     },
   })
 
