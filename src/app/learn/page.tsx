@@ -61,7 +61,7 @@ const ARTICLES: Article[] = [
       {
         heading: 'Sitt',
         body:
-          'Sitt betyder att hunden sätter skinkan på golvet eller marken och avslutar rörelsen lugnt (det är okej att bröstkorg och huvud är uppe). Signalen säger vad som ska hända just nu. Lås in beteendet med godbit som lockar nedåt eller med formning; belöna i samma ögonblick som bakdelen når marken — annars lär sig många ett halvsitt som blir knepigt att träna bort senare.', Öva först hemma och generalisera långsamt till hall, innergården och lugna promenader innan livliga miljöer.',
+          'Sitt betyder att hunden sätter skinkan på golvet eller marken och avslutar rörelsen lugnt (det är okej att bröstkorg och huvud är uppe). Signalen säger vad som ska hända just nu. Lås in beteendet med godbit som lockar nedåt eller med formning; belöna i samma ögonblick som bakdelen når marken — annars lär sig många ett halvsitt som blir knepigt att träna bort senare. Öva först hemma och generalisera långsamt till hall, innergården och lugna promenader innan livliga miljöer.',
       },
       {
         heading: 'Stanna eller bliv kvar',
