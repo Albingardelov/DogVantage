@@ -8,7 +8,10 @@ import BottomNav from '@/components/BottomNav'
 import { getDogProfile, updateDogProfile } from '@/lib/dog/profile'
 import { getAgeInWeeks } from '@/lib/dog/age'
 import { GOALS, ENVIRONMENTS, REWARDS } from '@/components/DogProfileForm'
-import type { DogProfile, TrainingGoal, TrainingEnvironment, RewardPreference } from '@/types'
+import { HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'
+import type { DogProfile, TrainingGoal, TrainingEnvironment, RewardPreference, HouseholdPet } from '@/types'
+
+const ALL_HOUSEHOLD_PETS = Object.keys(HOUSEHOLD_PET_LABELS) as HouseholdPet[]
 import styles from './page.module.css'
 import CustomExerciseList from '@/components/CustomExerciseList'
 
@@ -27,6 +30,7 @@ function ProfileView() {
   const [environment, setEnvironment] = useState<TrainingEnvironment>('suburb')
   const [rewardPreference, setRewardPreference] = useState<RewardPreference>('mixed')
   const [takesRewardsOutdoors, setTakesRewardsOutdoors] = useState(true)
+  const [householdPets, setHouseholdPets] = useState<HouseholdPet[]>([])
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
@@ -39,6 +43,7 @@ function ProfileView() {
       setEnvironment(p.onboarding?.environment ?? 'suburb')
       setRewardPreference(p.onboarding?.rewardPreference ?? 'mixed')
       setTakesRewardsOutdoors(p.onboarding?.takesRewardsOutdoors ?? true)
+      setHouseholdPets(p.onboarding?.householdPets ?? [])
     })().catch((e) => console.error('[profile getDogProfile]', e))
     return () => { alive = false }
   }, [])
@@ -64,6 +69,7 @@ function ProfileView() {
         environment,
         rewardPreference,
         takesRewardsOutdoors,
+        householdPets: householdPets.length > 0 ? householdPets : undefined,
       },
     }
     try {
@@ -162,6 +168,36 @@ function ProfileView() {
             options={OUTDOOR_OPTS}
             onChange={(v) => { setTakesRewardsOutdoors(v === 'true'); setSaved(false) }}
           />
+        </div>
+
+        <div className={styles.section}>
+          <span className={styles.sectionTitle}>Husdjur i hemmet</span>
+          <div className={styles.field}>
+            <span className={styles.fieldLabel}>Finns det andra husdjur hemma? <span style={{ fontWeight: 400, color: 'var(--color-text-muted)', fontSize: 'var(--text-xs)' }}>(valfritt)</span></span>
+            <div className={styles.optionList} role="group" aria-label="Husdjur hemma">
+              {ALL_HOUSEHOLD_PETS.map((p) => {
+                const selected = householdPets.includes(p)
+                return (
+                  <button
+                    key={p}
+                    type="button"
+                    role="checkbox"
+                    aria-checked={selected}
+                    onClick={() => {
+                      setHouseholdPets((prev) =>
+                        prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]
+                      )
+                      setSaved(false)
+                    }}
+                    className={`${styles.optionBtn} ${selected ? styles.optionBtnSelected : ''}`}
+                  >
+                    <span>{HOUSEHOLD_PET_LABELS[p]}</span>
+                    {selected && <span aria-hidden="true">✓</span>}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
         </div>
 
         <div className={styles.section}>
