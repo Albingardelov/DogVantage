@@ -820,6 +820,48 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
     },
   }),
 
+  fri: spec({
+    exerciseId: 'fri',
+    definition: 'Lyckad rep när hunden håller ett beteende (sitt/ligg/stanna/plats) tills "fri" ges — och inte bryter utan signal.',
+    ladder: [
+      { id: 'after_sitt_1s', label: 'Efter sitt · 1s', criteria: 'Hunden sitter tills du säger "fri" med glad ton. Belöna frihet (låt den röra sig).' },
+      { id: 'after_ligg_3s', label: 'Efter ligg · 3s', criteria: 'Hunden ligger 3s tills fri. Avsluta varje ligg/stanna med fri-signal.' },
+      { id: 'duration_10s', label: 'Durationer · 10s', criteria: 'Hunden väntar avspänd 10s i position tills fri ges.' },
+      { id: 'duration_30s', label: 'Durationer · 30s', criteria: 'Hunden väntar 30s med lätt distraktion runtomkring.' },
+    ],
+    troubleshooting: [
+      'Ge ALLTID fri-signal — hunden ska aldrig avsluta beteendet på eget initiativ.',
+      'Om hunden bryter: ingen kommentar, gör om med kortare duration, avsluta på lyckad.',
+      'Fri är en belöning — ge det med glad ton och låt hunden njuta av friheten.',
+    ],
+    guide: {
+      setup: [
+        'Välj ett konsekvent ord: "fri", "ok" — och håll det.',
+        'Träna alltid fri i kombination med ett annat beteende (sitt, ligg, stanna, plats).',
+        'Avsluta varje träningspass med en fri-signal efter sista rep.',
+      ],
+      steps: [
+        'Be om sitt. Vänta 1s. Ge "fri" med glad ton → uppmuntra att hunden rör sig.',
+        'Be om ligg. Vänta 3s. Ge "fri" → belöna frihet.',
+        'Öka väntetiden gradvis: 1s → 3s → 5s → 10s → 30s.',
+        'Variera varaktigheten inom passet — ibland kort, ibland lång.',
+      ],
+      logging: [
+        'Lyckad = hunden höll beteendet tills "fri" gavs.',
+        'Miss = hunden bröt beteendet utan signal.',
+        'Latens = hur länge hunden höll (logga i sekunder i anteckningar).',
+      ],
+      commonMistakes: [
+        'Glömma fri-signalen — hunden lär sig att bryta när de vill.',
+        'Ge fri när hunden just börjat röra på sig (belönar ett brott).',
+        'Träna fri utan ett annat beteende som grund.',
+      ],
+      stopRules: [
+        'Tre brott i rad → förkorta duration till 1s och avsluta på lyckad.',
+      ],
+    },
+  }),
+
   fot: spec({
     exerciseId: 'fot',
     definition: 'Lyckad rep när hunden går i fotsteg (vänster sida, axeln vid ditt knä) i 3–5 steg med blickkontakt.',

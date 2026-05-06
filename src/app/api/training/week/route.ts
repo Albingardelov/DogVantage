@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generateWeekPlan } from '@/lib/ai/week-plan'
+import { generateWeekPlan, PLAN_VERSION } from '@/lib/ai/week-plan'
 import { getCachedWeekPlan, setCachedWeekPlan } from '@/lib/supabase/training-cache'
 import { getRecentLogs, formatLogsForPrompt } from '@/lib/supabase/session-logs'
 import { getActiveCustomExercises } from '@/lib/supabase/custom-exercises'
@@ -119,7 +119,7 @@ export async function GET(req: NextRequest) {
 
   let cached: import('@/types').WeekPlan | null = null
   try {
-    cached = await getCachedWeekPlan(breed, trainingWeek, ageWeeks, goals, cacheKey, userId, onboardingContext, customIds)
+    cached = await getCachedWeekPlan(breed, trainingWeek, ageWeeks, goals, cacheKey, userId, onboardingContext, customIds, PLAN_VERSION)
   } catch (e) {
     console.error('[GET /api/training/week] cache read failed:', e)
   }
@@ -127,7 +127,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const plan = await generateWeekPlan(breed, trainingWeek, ageWeeks, goals, onboardingContext, performanceSummary, customExercises, pets)
-    await setCachedWeekPlan(breed, trainingWeek, plan, ageWeeks, goals, cacheKey, userId, onboardingContext, customIds).catch((e) => {
+    await setCachedWeekPlan(breed, trainingWeek, plan, ageWeeks, goals, cacheKey, userId, onboardingContext, customIds, PLAN_VERSION).catch((e) => {
       console.error('[GET /api/training/week] cache write failed:', e)
     })
     return NextResponse.json(plan)

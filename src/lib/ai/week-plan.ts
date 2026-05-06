@@ -5,6 +5,9 @@ import { formatBreedProfile, formatCurrentPhase } from './breed-profiles'
 import { GOAL_EXERCISE_IDS, GOAL_LABELS, GOAL_RULES } from '@/lib/training/goal-exercises'
 import type { Breed, TrainingGoal, WeekPlan, HouseholdPet } from '@/types'
 
+// Bump this when plan generation logic changes significantly — forces cache invalidation
+export const PLAN_VERSION = 'v3'
+
 function allowedExerciseIdsForBreed(breed: Breed, ageWeeks?: number): string[] {
   const isPuppy = typeof ageWeeks === 'number' && ageWeeks > 0 && ageWeeks < 16
 
@@ -12,7 +15,7 @@ function allowedExerciseIdsForBreed(breed: Breed, ageWeeks?: number): string[] {
     return [
       'namn', 'inkallning', 'stoppsignal', 'stanna', 'hantering', 'socialisering',
       'stadga', 'orientering', 'kontrollerat_sok', 'impulskontroll',
-      'koppel', 'ligg', 'sitt', 'plats',
+      'koppel', 'ligg', 'sitt', 'plats', 'fri',
       ...(isPuppy ? [] : ['apportering', 'vatten', 'fot']),
     ]
   }
@@ -21,7 +24,7 @@ function allowedExerciseIdsForBreed(breed: Breed, ageWeeks?: number): string[] {
     return [
       'namn', 'inkallning', 'stoppsignal', 'stanna', 'sitt', 'ligg',
       'koppel', 'hantering', 'socialisering', 'fokus',
-      'apportering', 'plats',
+      'apportering', 'plats', 'fri', 'impulskontroll',
       ...(isPuppy ? [] : ['vatten', 'fot']),
     ]
   }
@@ -30,7 +33,7 @@ function allowedExerciseIdsForBreed(breed: Breed, ageWeeks?: number): string[] {
     return [
       'namn', 'inkallning', 'stanna', 'sitt', 'ligg',
       'koppel', 'hantering', 'socialisering',
-      'fokus', 'impulskontroll', 'plats',
+      'fokus', 'impulskontroll', 'plats', 'fri',
     ]
   }
 
@@ -39,7 +42,7 @@ function allowedExerciseIdsForBreed(breed: Breed, ageWeeks?: number): string[] {
       'namn', 'inkallning', 'stoppsignal', 'stanna', 'sitt', 'ligg',
       'koppel', 'hantering', 'socialisering',
       'fokus', 'impulskontroll', 'stadga', 'orientering',
-      'nosework', 'plats',
+      'nosework', 'plats', 'fri',
       ...(isPuppy ? [] : ['vallning', 'fot']),
     ]
   }
@@ -48,7 +51,7 @@ function allowedExerciseIdsForBreed(breed: Breed, ageWeeks?: number): string[] {
   return [
     'namn', 'inkallning', 'sitt', 'ligg', 'stanna',
     'koppel', 'hantering', 'socialisering', 'stoppsignal',
-    'fokus', 'apportering', 'vatten', 'fot', 'plats',
+    'fokus', 'apportering', 'vatten', 'fot', 'plats', 'fri', 'impulskontroll',
   ]
 }
 
@@ -200,6 +203,8 @@ Regler:
 - Träningsdagar: 2–3 exercises, reps 1–5
 - id lowercase, inga mellanslag; tillåtna id: ${[...allowedIds, ...customIds].join(', ')}
 - desc max 12 ord på svenska, inkludera hur länge
+- VARIATION: samma id max 2 gånger per vecka — sprid ut övningarna, undvik att upprepa samma kombination två dagar i rad
+- FRI-SIGNAL: varje dag som innehåller sitt, ligg, stanna eller plats MÅSTE också innehålla fri (id: fri) som sista eller näst sista exercise — de tränas alltid ihop
 - Programvecka ${trainingWeek}; anpassa övningar till rasens egenskaper${idRules ? `\n- ${idRules.replace(/\n/g, '\n- ')}` : ''}`
 
   const result = await getGeminiTextModel().generateContent({
