@@ -113,7 +113,11 @@ export async function generateWeekPlan(
   const goalIds = goals && goals.length > 0
     ? goals.flatMap((g) => GOAL_EXERCISE_IDS[g] ?? [])
     : []
-  const allowedIds = [...new Set([...breedIds, ...goalIds])]
+  // Always unlock pet-relevant exercises so the pet rule never contradicts allowedIds
+  const petIds = householdPets && householdPets.length > 0
+    ? ['socialisering', 'impulskontroll', 'fokus', 'plats']
+    : []
+  const allowedIds = [...new Set([...breedIds, ...goalIds, ...petIds])]
 
   const isPuppy = typeof ageWeeks === 'number' && ageWeeks > 0 && ageWeeks < 16
 
@@ -141,11 +145,11 @@ export async function generateWeekPlan(
   const hasLivestock = householdPets?.includes('livestock')
 
   const petRule = hasCats
-    ? `Husdjursregel (katter i hemmet): inkludera socialisering och impulskontroll varje träningsdag. Prioritera plats och stadga i veckan. Mål: valpen lär sig att katter är neutrala — inte triggers.${hasOutdoorCats ? ' Extra viktigt: stoppsignal och koppelkontroll.' : ''}`
+    ? `Husdjursregel (katter i hemmet): inkludera socialisering OCH impulskontroll varje träningsdag (båda är tillåtna id). Lägg in plats minst 2 dagar. Skriv "katt" i desc för dessa övningar, t.ex. "Socialisering: lugn katt synlig, 3 min". Mål: valpen lär sig att katter är neutrala.${hasOutdoorCats ? ' Inkludera dessutom stoppsignal varje träningsdag.' : ''}`
     : hasSmallAnimals
-    ? 'Husdjursregel (smådjur i hemmet): inkludera impulskontroll och stadga varje träningsdag. Bygg artfrid.'
+    ? 'Husdjursregel (smådjur): inkludera impulskontroll och fokus varje träningsdag (båda är tillåtna id). Skriv "smådjur" i desc. Bygg artfrid.'
     : hasLivestock
-    ? 'Husdjursregel (gårdsdjur i närmiljön): inkludera stoppsignal och stadga varje träningsdag. Introduktion till boskap sker kontrollerat.'
+    ? 'Husdjursregel (gårdsdjur): inkludera stoppsignal och impulskontroll varje träningsdag (båda är tillåtna id). Introduktion till boskap sker kontrollerat.'
     : null
 
   const idRules = [
