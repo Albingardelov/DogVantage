@@ -3,7 +3,7 @@ import { embedText } from './embed'
 import { searchBreedChunks } from '@/lib/supabase/breed-chunks'
 import { formatBreedProfile, formatCurrentPhase } from './breed-profiles'
 import { GOAL_EXERCISE_IDS, GOAL_LABELS, GOAL_RULES } from '@/lib/training/goal-exercises'
-import type { Breed, TrainingGoal, WeekPlan } from '@/types'
+import type { Breed, TrainingGoal, WeekPlan, HouseholdPet } from '@/types'
 
 function allowedExerciseIdsForBreed(breed: Breed, ageWeeks?: number): string[] {
   const isPuppy = typeof ageWeeks === 'number' && ageWeeks > 0 && ageWeeks < 16
@@ -94,7 +94,8 @@ export async function generateWeekPlan(
   goals?: TrainingGoal[],
   onboardingContext?: string,
   performanceSummary?: string,
-  customExercises?: Array<{ exercise_id: string; label: string }>
+  customExercises?: Array<{ exercise_id: string; label: string }>,
+  householdPets?: HouseholdPet[]
 ): Promise<WeekPlan> {
   let chunks: import('@/types').ChunkMatch[] = []
   try {
@@ -134,12 +135,26 @@ export async function generateWeekPlan(
     ? 'Rasregel (vallhund, valp): inkludera impulskontroll och hantering varje vecka. Inga direkta vallningsövningar ännu — bygg grunden.'
     : null
 
+  const hasCats = householdPets?.some((p) => p === 'cats_indoor' || p === 'cats_outdoor')
+  const hasOutdoorCats = householdPets?.includes('cats_outdoor')
+  const hasSmallAnimals = householdPets?.includes('small_animals')
+  const hasLivestock = householdPets?.includes('livestock')
+
+  const petRule = hasCats
+    ? `Husdjursregel (katter i hemmet): inkludera socialisering och impulskontroll varje träningsdag. Prioritera plats och stadga i veckan. Mål: valpen lär sig att katter är neutrala — inte triggers.${hasOutdoorCats ? ' Extra viktigt: stoppsignal och koppelkontroll.' : ''}`
+    : hasSmallAnimals
+    ? 'Husdjursregel (smådjur i hemmet): inkludera impulskontroll och stadga varje träningsdag. Bygg artfrid.'
+    : hasLivestock
+    ? 'Husdjursregel (gårdsdjur i närmiljön): inkludera stoppsignal och stadga varje träningsdag. Introduktion till boskap sker kontrollerat.'
+    : null
+
   const idRules = [
     breedSpecificRule,
     isPuppy
       ? 'Valpregel: inkludera hantering och socialisering flera dagar. Inga "tunga" distans/störnings-ökningar.'
       : null,
     goalRules || null,
+    petRule,
   ].filter(Boolean).join('\n')
 
   const customSection = customExercises && customExercises.length > 0

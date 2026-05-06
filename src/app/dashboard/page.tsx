@@ -313,6 +313,7 @@ function Dashboard() {
             rewardPreference={profile.onboarding?.rewardPreference}
             takesRewardsOutdoors={profile.onboarding?.takesRewardsOutdoors}
             behaviorContext={buildBehaviorContext(profile)}
+            householdPets={profile.onboarding?.householdPets}
           />
         )}
 

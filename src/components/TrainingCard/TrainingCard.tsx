@@ -7,7 +7,7 @@ import WeekView from './WeekView'
 import SessionLogForm from '@/components/SessionLogForm'
 import ExerciseGuideSheet from '@/components/ExerciseGuideSheet'
 import styles from './TrainingCard.module.css'
-import type { Breed, TrainingGoal, TrainingEnvironment, RewardPreference, WeekPlan, Exercise, DailyExerciseMetrics, LatencyBucket, ExerciseSummary } from '@/types'
+import type { Breed, TrainingGoal, TrainingEnvironment, RewardPreference, WeekPlan, Exercise, DailyExerciseMetrics, LatencyBucket, ExerciseSummary, HouseholdPet } from '@/types'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
 import type { ExerciseSpec } from '@/lib/training/exercise-specs'
 import { buildWeekFocusCopy } from '@/lib/training/week-focus-copy'
@@ -32,9 +32,10 @@ interface Props {
   rewardPreference?: RewardPreference
   takesRewardsOutdoors?: boolean
   behaviorContext?: string
+  householdPets?: HouseholdPet[]
 }
 
-export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, dogKey, goals, environment, rewardPreference, takesRewardsOutdoors, behaviorContext }: Props) {
+export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, dogKey, goals, environment, rewardPreference, takesRewardsOutdoors, behaviorContext, householdPets }: Props) {
   const router = useRouter()
   const [weekPlan, setWeekPlan] = useState<WeekPlan | null>(null)
   const [progress, setProgress] = useState<Record<string, number>>({})
@@ -61,7 +62,7 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
     setError(false)
     try {
       const [planRes, progressRes, metricsRes] = await Promise.all([
-        fetch(`/api/training/week?breed=${breed}&week=${trainingWeek}&ageWeeks=${ageWeeks}${goals && goals.length > 0 ? `&goals=${goals.join(',')}` : ''}${dogKey ? `&dogKey=${dogKey}` : ''}${environment ? `&environment=${environment}` : ''}${rewardPreference ? `&rewardPreference=${rewardPreference}` : ''}${takesRewardsOutdoors != null ? `&takesRewardsOutdoors=${takesRewardsOutdoors}` : ''}${behaviorContext ? `&behaviorContext=${encodeURIComponent(behaviorContext)}` : ''}`),
+        fetch(`/api/training/week?breed=${breed}&week=${trainingWeek}&ageWeeks=${ageWeeks}${goals && goals.length > 0 ? `&goals=${goals.join(',')}` : ''}${dogKey ? `&dogKey=${dogKey}` : ''}${environment ? `&environment=${environment}` : ''}${rewardPreference ? `&rewardPreference=${rewardPreference}` : ''}${takesRewardsOutdoors != null ? `&takesRewardsOutdoors=${takesRewardsOutdoors}` : ''}${behaviorContext ? `&behaviorContext=${encodeURIComponent(behaviorContext)}` : ''}${householdPets && householdPets.length > 0 ? `&householdPets=${householdPets.join(',')}` : ''}`),
         fetch(`/api/training/progress?breed=${breed}&date=${todayDate}&dogKey=${encodeURIComponent(dogKey)}`),
         fetch(`/api/training/metrics?breed=${breed}&date=${todayDate}&dogKey=${encodeURIComponent(dogKey)}`),
       ])
@@ -74,7 +75,7 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
     } finally {
       setLoading(false)
     }
-  }, [breed, trainingWeek, ageWeeks, todayDate, goals, environment, rewardPreference, takesRewardsOutdoors, behaviorContext])
+  }, [breed, trainingWeek, ageWeeks, todayDate, goals, environment, rewardPreference, takesRewardsOutdoors, behaviorContext, householdPets])
 
   useEffect(() => { fetchData() }, [fetchData])
 

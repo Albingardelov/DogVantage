@@ -4,7 +4,8 @@ import { getCachedWeekPlan, setCachedWeekPlan } from '@/lib/supabase/training-ca
 import { getRecentLogs, formatLogsForPrompt } from '@/lib/supabase/session-logs'
 import { getActiveCustomExercises } from '@/lib/supabase/custom-exercises'
 import { createSupabaseServer } from '@/lib/supabase/server'
-import type { Breed, TrainingGoal, TrainingEnvironment, RewardPreference } from '@/types'
+import type { Breed, TrainingGoal, TrainingEnvironment, RewardPreference, HouseholdPet } from '@/types'
+import { householdPetNotes, HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'
 
 const VALID_GOALS: TrainingGoal[] = [
   'everyday_obedience', 'sport', 'hunting', 'herding', 'impulse_control', 'nosework', 'problem_solving',
@@ -27,7 +28,15 @@ const REWARD_LABELS: Record<RewardPreference, string> = {
   mixed:   'Blandat',
 }
 
-function buildOnboardingContext(params: URLSearchParams): string | undefined {
+const VALID_PETS = ['cats_indoor', 'cats_outdoor', 'dogs', 'small_animals', 'livestock'] as const
+
+function parsePets(params: URLSearchParams): HouseholdPet[] {
+  const raw = params.get('householdPets')
+  if (!raw) return []
+  return raw.split(',').filter((p): p is HouseholdPet => VALID_PETS.includes(p as HouseholdPet))
+}
+
+function buildOnboardingContext(params: URLSearchParams, pets: HouseholdPet[]): string | undefined {
   const environment = params.get('environment') as TrainingEnvironment | null
   const rewardPreference = params.get('rewardPreference') as RewardPreference | null
   const takesRewardsOutdoors = params.get('takesRewardsOutdoors')
@@ -38,6 +47,12 @@ function buildOnboardingContext(params: URLSearchParams): string | undefined {
   if (rewardPreference && REWARD_LABELS[rewardPreference]) lines.push(`Belöning som funkar bäst: ${REWARD_LABELS[rewardPreference]}`)
   if (takesRewardsOutdoors != null) {
     lines.push(`Tar belöning utomhus: ${takesRewardsOutdoors === 'true' ? 'Ja' : 'Nej — träna inne eller med extra hög-värde belöning ute'}`)
+  }
+  if (pets.length > 0 && !behaviorContext?.includes('HUSDJUR')) {
+    lines.push('')
+    lines.push(`=== HUSDJUR I HEMMET ===`)
+    lines.push(`Husdjur: ${pets.map((p) => HOUSEHOLD_PET_LABELS[p]).join(', ')}`)
+    for (const note of householdPetNotes(pets)) lines.push(note)
   }
   if (behaviorContext) {
     lines.push('')
@@ -80,7 +95,8 @@ export async function GET(req: NextRequest) {
   }
 
   // Build onboarding context from query params
-  const onboardingContext = buildOnboardingContext(p)
+  const pets = parsePets(p)
+  const onboardingContext = buildOnboardingContext(p, pets)
 
   // Fetch all context in parallel — these are independent and were previously sequential
   const [userId, recentLogs, customRows] = await Promise.all([
@@ -110,7 +126,7 @@ export async function GET(req: NextRequest) {
   if (cached) return NextResponse.json(cached)
 
   try {
-    const plan = await generateWeekPlan(breed, trainingWeek, ageWeeks, goals, onboardingContext, performanceSummary, customExercises)
+    const plan = await generateWeekPlan(breed, trainingWeek, ageWeeks, goals, onboardingContext, performanceSummary, customExercises, pets)
     await setCachedWeekPlan(breed, trainingWeek, plan, ageWeeks, goals, cacheKey, userId, onboardingContext, customIds).catch((e) => {
       console.error('[GET /api/training/week] cache write failed:', e)
     })

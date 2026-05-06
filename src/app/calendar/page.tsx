@@ -7,6 +7,7 @@ import BottomNav from '@/components/BottomNav'
 import ExerciseGuideSheet from '@/components/ExerciseGuideSheet'
 import { getDogProfile } from '@/lib/dog/profile'
 import { getAgeInWeeks } from '@/lib/dog/age'
+import { buildBehaviorContext } from '@/lib/dog/behavior'
 import type { DayPlan, DogProfile, Exercise, QuickRating, SessionLog, WeekPlan } from '@/types'
 import styles from './page.module.css'
 
@@ -216,9 +217,14 @@ function CalendarView() {
       const goals = profile.onboarding?.goals
       const goalsParam = goals && goals.length > 0 ? `&goals=${goals.join(',')}` : ''
 
+      const behaviorContext = buildBehaviorContext(profile)
+      const pets = profile.onboarding?.householdPets
+      const petsParam = pets && pets.length > 0 ? `&householdPets=${pets.join(',')}` : ''
+      const behaviorParam = behaviorContext ? `&behaviorContext=${encodeURIComponent(behaviorContext)}` : ''
+
       const [logsRes, planRes] = await Promise.all([
         fetch(`/api/logs?breed=${profile.breed}`),
-        fetch(`/api/training/week?breed=${profile.breed}&week=${trainingWeek}&ageWeeks=${ageWeeks}${goalsParam}`),
+        fetch(`/api/training/week?breed=${profile.breed}&week=${trainingWeek}&ageWeeks=${ageWeeks}${goalsParam}${petsParam}${behaviorParam}`),
       ])
 
       if (logsRes.ok) {
