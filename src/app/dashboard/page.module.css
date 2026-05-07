@@ -220,6 +220,25 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+.tipCardHandler {
+  border-left-color: var(--color-accent);
+  background: linear-gradient(180deg, rgb(245 158 11 / 0.06) 0%, var(--color-surface) 60%);
+}
+
+.tipBadge {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 0.625rem;
+  font-weight: var(--font-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  background: rgb(245 158 11 / 0.12);
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-1);
+}
+
 .logCta {
   padding: var(--space-4);
   border-radius: var(--radius-btn);

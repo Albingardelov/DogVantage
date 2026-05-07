@@ -15,6 +15,7 @@ import { useActiveDog } from '@/lib/dog/active-dog-context'
 import { getAgeInWeeks } from '@/lib/dog/age'
 import { buildBehaviorContext } from '@/lib/dog/behavior'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
+import { getHandlerFeedbackTip, type HandlerFeedbackTip } from '@/lib/training/handler-feedback'
 import type { DogProfile, BehaviorProfile, SessionLog } from '@/types'
 import styles from './page.module.css'
 
@@ -144,6 +145,7 @@ function Dashboard() {
     } catch { return [] }
   })
   const [weekStats, setWeekStats] = useState<{ count: number; avg: number | null } | null>(null)
+  const [handlerTip, setHandlerTip] = useState<HandlerFeedbackTip | null>(null)
 
   const ageWeeks = profile ? Math.max(1, getAgeInWeeks(profile.birthdate)) : 0
   const trainingWeek = profile?.trainingWeek ?? 1
@@ -177,18 +179,38 @@ function Dashboard() {
     }
   }, [profile?.breed])
 
+  const refreshHandlerTip = useCallback(async () => {
+    if (!profile?.breed || !profile?.name) return
+    try {
+      const params = new URLSearchParams({ breed: profile.breed, limit: '5' })
+      const res = await fetch(`/api/logs?${params}`)
+      if (!res.ok) {
+        setHandlerTip(null)
+        return
+      }
+      const logs = (await res.json()) as SessionLog[]
+      setHandlerTip(getHandlerFeedbackTip(logs, profile.name))
+    } catch (e) {
+      console.error('[dashboard handler tip]', e)
+      setHandlerTip(null)
+    }
+  }, [profile?.breed, profile?.name])
+
   useEffect(() => {
     if (!profile?.breed) {
       setWeekStats(null)
+      setHandlerTip(null)
       return
     }
     setWeekStats(null)
     refreshWeekStats()
-  }, [profile?.breed, refreshWeekStats])
+    refreshHandlerTip()
+  }, [profile?.breed, refreshWeekStats, refreshHandlerTip])
 
   function handleLogSaved() {
     setShowLogForm(false)
     refreshWeekStats()
+    refreshHandlerTip()
   }
 
   function dismissTip(id: string) {
@@ -203,6 +225,7 @@ function Dashboard() {
   const contextualTips = profile
     ? getContextualTips(profile, ageWeeks).filter((t) => !dismissedTips.includes(t.id))
     : []
+  const showHandlerTip = handlerTip && !dismissedTips.includes(handlerTip.id)
 
   return (
     <main className={styles.main}>
@@ -261,13 +284,37 @@ function Dashboard() {
           </div>
         )}
 
+        {showHandlerTip && handlerTip && (
+          <div className={`${styles.tipCard} ${styles.tipCardHandler}`}>
+            <div className={styles.tipContent}>
+              <span className={styles.tipBadge}>För dig som förare</span>
+              <p className={styles.tipTitle}>{handlerTip.title}</p>
+              <p className={styles.tipBody}>{handlerTip.body}</p>
+              <Link
+                href={`/learn?article=${handlerTip.learnArticleId}`}
+                className={styles.tipLink}
+              >
+                Läs guiden ›
+              </Link>
+            </div>
+            <button
+              type="button"
+              className={styles.tipDismiss}
+              onClick={() => dismissTip(handlerTip.id)}
+              aria-label="Stäng tips"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         {contextualTips.map((tip) => (
           <div key={tip.id} className={styles.tipCard}>
             <div className={styles.tipContent}>
               <p className={styles.tipTitle}>{tip.title}</p>
               <p className={styles.tipBody}>{tip.body}</p>
               {tip.learnId && (
-                <Link href={`/learn`} className={styles.tipLink}>
+                <Link href={`/learn?article=${tip.learnId}`} className={styles.tipLink}>
                   Läs guiden ›
                 </Link>
               )}
