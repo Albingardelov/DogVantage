@@ -7,6 +7,10 @@ export type Breed = 'labrador' | 'italian_greyhound' | 'braque_francais' | 'mini
  */
 export type BreedOrGeneral = Breed | 'general'
 
+export type DogSex = 'male' | 'female'
+
+export type CastrationStatus = 'intact' | 'castrated' | 'unknown'
+
 export interface DogProfile {
   id?: string        // dog_profiles.id (uuid); undefined until first save
   name: string
@@ -17,6 +21,8 @@ export interface DogProfile {
    * Separate from biological age (derived from birthdate).
    */
   trainingWeek?: number
+  sex?: DogSex
+  castrationStatus?: CastrationStatus
   onboarding?: OnboardingPrefs
   assessment?: AssessmentState
 }

@@ -1,5 +1,5 @@
 import { getSupabaseBrowser } from './browser'
-import type { DogProfile } from '@/types'
+import type { DogProfile, DogSex, CastrationStatus } from '@/types'
 
 interface DbProfile {
   id: string
@@ -8,6 +8,8 @@ interface DbProfile {
   breed: string
   birthdate: string
   training_week: number
+  sex: string | null
+  castration_status: string | null
   onboarding: DogProfile['onboarding'] | null
   assessment: DogProfile['assessment'] | null
 }
@@ -19,6 +21,8 @@ function dbToProfile(row: DbProfile): DogProfile {
     breed: row.breed as DogProfile['breed'],
     birthdate: row.birthdate,
     trainingWeek: row.training_week,
+    sex: (row.sex as DogSex) ?? undefined,
+    castrationStatus: (row.castration_status as CastrationStatus) ?? undefined,
     onboarding: row.onboarding ?? undefined,
     assessment: row.assessment ?? undefined,
   }
@@ -44,6 +48,8 @@ export async function saveProfile(profile: DogProfile, userId: string): Promise<
     breed: profile.breed,
     birthdate: profile.birthdate,
     training_week: profile.trainingWeek ?? 1,
+    sex: profile.sex ?? null,
+    castration_status: profile.castrationStatus ?? null,
     onboarding: profile.onboarding ?? null,
     assessment: profile.assessment ?? null,
   }
@@ -76,6 +82,8 @@ export async function updateProfile(fields: Partial<DogProfile>): Promise<void> 
   if (fields.onboarding !== undefined) updates.onboarding = fields.onboarding
   if (fields.assessment !== undefined) updates.assessment = fields.assessment
   if (fields.name !== undefined) updates.name = fields.name
+  if (fields.sex !== undefined) updates.sex = fields.sex
+  if (fields.castrationStatus !== undefined) updates.castration_status = fields.castrationStatus
 
   if (Object.keys(updates).length === 0) return
 

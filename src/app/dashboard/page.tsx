@@ -146,6 +146,7 @@ function Dashboard() {
   })
   const [weekStats, setWeekStats] = useState<{ count: number; avg: number | null } | null>(null)
   const [handlerTip, setHandlerTip] = useState<HandlerFeedbackTip | null>(null)
+  const [heatState, setHeatState] = useState<{ isInHeat: boolean; skenfasActive: boolean } | null>(null)
 
   const ageWeeks = profile ? Math.max(1, getAgeInWeeks(profile.birthdate)) : 0
   const trainingWeek = profile?.trainingWeek ?? 1
@@ -200,12 +201,21 @@ function Dashboard() {
     if (!profile?.breed) {
       setWeekStats(null)
       setHandlerTip(null)
+      setHeatState(null)
       return
     }
     setWeekStats(null)
     refreshWeekStats()
     refreshHandlerTip()
-  }, [profile?.breed, refreshWeekStats, refreshHandlerTip])
+    if (profile.id && profile.sex === 'female' && profile.castrationStatus === 'intact') {
+      fetch(`/api/training/heat?dogId=${encodeURIComponent(profile.id)}`)
+        .then((r) => r.ok ? r.json() : null)
+        .then((d) => { if (d) setHeatState({ isInHeat: d.isInHeat, skenfasActive: d.skenfasActive }) })
+        .catch(() => {})
+    } else {
+      setHeatState(null)
+    }
+  }, [profile?.breed, profile?.id, profile?.sex, profile?.castrationStatus, refreshWeekStats, refreshHandlerTip])
 
   function handleLogSaved() {
     setShowLogForm(false)
@@ -281,6 +291,20 @@ function Dashboard() {
           <div className={`${styles.ageAlert} ${ageAlert.tone === 'warning' ? styles.ageAlertWarning : styles.ageAlertInfo}`}>
             <p className={styles.ageAlertTitle}>{ageAlert.title}</p>
             <p className={styles.ageAlertBody}>{ageAlert.body}</p>
+          </div>
+        )}
+
+        {heatState?.isInHeat && (
+          <div className={`${styles.ageAlert} ${styles.ageAlertWarning}`}>
+            <p className={styles.ageAlertTitle}>Tiken löper just nu</p>
+            <p className={styles.ageAlertBody}>Håll träningspassen korta (max 5 min), undvik socialisering med okända hundar och prioritera lugna inomhusövningar. Veckoplanen är anpassad.</p>
+          </div>
+        )}
+
+        {heatState?.skenfasActive && !heatState.isInHeat && (
+          <div className={`${styles.ageAlert} ${styles.ageAlertWarning}`}>
+            <p className={styles.ageAlertTitle}>Skenfas-fönster (6–9 v efter löp)</p>
+            <p className={styles.ageAlertBody}>Tiken kan visa beteendeförändringar — ökad distraktion, rastlöshet eller mild agitation. Håll lågstimulans-träning och prioritera plats och impulskontroll. Veckoplanen är anpassad.</p>
           </div>
         )}
 

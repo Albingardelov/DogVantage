@@ -8,7 +8,7 @@ import { getAgeInWeeks } from '@/lib/dog/age'
 import { BREED_PROFILES } from '@/lib/ai/breed-profiles'
 import { HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
-import type { Breed, DogProfile, HouseholdPet, OnboardingPrefs, RewardPreference, TrainingEnvironment, TrainingGoal } from '@/types'
+import type { Breed, DogProfile, DogSex, CastrationStatus, HouseholdPet, OnboardingPrefs, RewardPreference, TrainingEnvironment, TrainingGoal } from '@/types'
 import styles from './DogProfileForm.module.css'
 
 export const BREEDS: { value: Breed; label: string }[] = [
@@ -71,6 +71,8 @@ export default function DogProfileForm({ onSaved }: Props = {}) {
   const [photo, setPhoto] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [breed, setBreed] = useState<Breed | ''>('')
+  const [sex, setSex] = useState<DogSex | ''>('')
+  const [castrationStatus, setCastrationStatus] = useState<CastrationStatus | ''>('')
   const [birthdate, setBirthdate] = useState('')
   const [goals, setGoals] = useState<TrainingGoal[]>(['everyday_obedience'])
   const [email, setEmail] = useState('')
@@ -135,6 +137,8 @@ export default function DogProfileForm({ onSaved }: Props = {}) {
       name: name.trim(),
       breed,
       birthdate,
+      sex: sex || undefined,
+      castrationStatus: castrationStatus || undefined,
       trainingWeek: 1,
       onboarding,
       assessment: { status: 'not_started' },
@@ -270,6 +274,48 @@ export default function DogProfileForm({ onSaved }: Props = {}) {
                 })}
               </div>
             </div>
+
+            <div className={styles.field}>
+              <span className={styles.label}>Kön <span style={{ fontWeight: 400, color: 'var(--color-text-muted)', fontSize: 'var(--text-xs)' }}>(valfritt)</span></span>
+              <div className={styles.breedList} role="radiogroup" aria-label="Kön">
+                {([{ value: 'male', label: 'Hane' }, { value: 'female', label: 'Tik' }] as const).map((o) => {
+                  const selected = sex === o.value
+                  return (
+                    <button key={o.value} type="button" role="radio" aria-checked={selected}
+                      onClick={() => { setSex(o.value); setCastrationStatus('') }}
+                      className={`${styles.breedOption} ${selected ? styles.breedOptionSelected : ''}`}
+                    >
+                      <span>{o.label}</span>
+                      {selected && <span aria-hidden="true">✓</span>}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {sex && (
+              <div className={styles.field}>
+                <span className={styles.label}>Kastrerad?</span>
+                <div className={styles.breedList} role="radiogroup" aria-label="Kastrerad">
+                  {([
+                    { value: 'intact', label: 'Nej, intakt' },
+                    { value: 'castrated', label: 'Ja, kastrerad' },
+                    { value: 'unknown', label: 'Vet ej' },
+                  ] as const).map((o) => {
+                    const selected = castrationStatus === o.value
+                    return (
+                      <button key={o.value} type="button" role="radio" aria-checked={selected}
+                        onClick={() => setCastrationStatus(o.value)}
+                        className={`${styles.breedOption} ${selected ? styles.breedOptionSelected : ''}`}
+                      >
+                        <span>{o.label}</span>
+                        {selected && <span aria-hidden="true">✓</span>}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

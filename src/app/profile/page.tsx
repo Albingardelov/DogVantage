@@ -10,7 +10,7 @@ import { getDogProfile, updateDogProfile } from '@/lib/dog/profile'
 import { getAgeInWeeks } from '@/lib/dog/age'
 import { GOALS, ENVIRONMENTS, REWARDS } from '@/components/DogProfileForm'
 import { HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'
-import type { DogProfile, TrainingGoal, TrainingEnvironment, RewardPreference, HouseholdPet } from '@/types'
+import type { DogProfile, DogSex, CastrationStatus, TrainingGoal, TrainingEnvironment, RewardPreference, HouseholdPet } from '@/types'
 
 const ALL_HOUSEHOLD_PETS = Object.keys(HOUSEHOLD_PET_LABELS) as HouseholdPet[]
 import styles from './page.module.css'
@@ -34,6 +34,11 @@ function ProfileView() {
   const [householdPets, setHouseholdPets] = useState<HouseholdPet[]>([])
   const [ownerNotes, setOwnerNotes] = useState('')
   const [trainingWeek, setTrainingWeek] = useState(1)
+  const [sex, setSex] = useState<DogSex | ''>('')
+  const [castrationStatus, setCastrationStatus] = useState<CastrationStatus | ''>('')
+  const [isInHeat, setIsInHeat] = useState(false)
+  const [skenfasActive, setSkenfasActive] = useState(false)
+  const [heatLoading, setHeatLoading] = useState(false)
   const [saved, setSaved] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -51,6 +56,19 @@ function ProfileView() {
       setHouseholdPets(p.onboarding?.householdPets ?? [])
       setOwnerNotes(p.onboarding?.ownerNotes ?? '')
       setTrainingWeek(p.trainingWeek ?? 1)
+      setSex(p.sex ?? '')
+      setCastrationStatus(p.castrationStatus ?? '')
+      if (p.id) {
+        fetch(`/api/training/heat?dogId=${encodeURIComponent(p.id)}`)
+          .then((r) => r.ok ? r.json() : null)
+          .then((d) => {
+            if (d) {
+              setIsInHeat(d.isInHeat ?? false)
+              setSkenfasActive(d.skenfasActive ?? false)
+            }
+          })
+          .catch(() => {})
+      }
     })().catch((e) => console.error('[profile getDogProfile]', e))
     return () => { alive = false }
   }, [])
@@ -64,6 +82,28 @@ function ProfileView() {
       return [...prev, goal]
     })
     setSaved(false)
+  }
+
+  async function handleHeatToggle() {
+    if (!profile?.id) return
+    setHeatLoading(true)
+    try {
+      const method = isInHeat ? 'DELETE' : 'POST'
+      const res = await fetch('/api/training/heat', {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dogId: profile.id }),
+      })
+      if (res.ok) {
+        const d = await res.json()
+        setIsInHeat(d.isInHeat ?? false)
+        setSkenfasActive(d.skenfasActive ?? false)
+      }
+    } catch (e) {
+      console.error('[heatToggle]', e)
+    } finally {
+      setHeatLoading(false)
+    }
   }
 
   async function handleDeleteAccount() {
@@ -102,6 +142,8 @@ function ProfileView() {
         id: profile.id,
         onboarding: updated.onboarding,
         trainingWeek: safeWeek,
+        sex: sex || undefined,
+        castrationStatus: castrationStatus || undefined,
       })
       setProfile(updated)
       setTrainingWeek(safeWeek)
@@ -228,6 +270,72 @@ function ProfileView() {
               })}
             </div>
           </div>
+        </div>
+
+        <div className={styles.section}>
+          <span className={styles.sectionTitle}>Kön &amp; hälsa</span>
+
+          <div className={styles.field}>
+            <span className={styles.fieldLabel}>Kön <span style={{ fontWeight: 400, color: 'var(--color-text-muted)', fontSize: 'var(--text-xs)' }}>(valfritt)</span></span>
+            <div className={styles.optionList} role="radiogroup" aria-label="Kön">
+              {([{ value: 'male', label: 'Hane' }, { value: 'female', label: 'Tik' }] as const).map((o) => {
+                const selected = sex === o.value
+                return (
+                  <button key={o.value} type="button" role="radio" aria-checked={selected}
+                    onClick={() => { setSex(o.value); setCastrationStatus(''); setSaved(false) }}
+                    className={`${styles.optionBtn} ${selected ? styles.optionBtnSelected : ''}`}
+                  >
+                    <span>{o.label}</span>
+                    {selected && <span aria-hidden="true">✓</span>}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {sex && (
+            <div className={styles.field}>
+              <span className={styles.fieldLabel}>Kastrerad?</span>
+              <div className={styles.optionList} role="radiogroup" aria-label="Kastrerad">
+                {([
+                  { value: 'intact', label: 'Nej, intakt' },
+                  { value: 'castrated', label: 'Ja, kastrerad' },
+                  { value: 'unknown', label: 'Vet ej' },
+                ] as const).map((o) => {
+                  const selected = castrationStatus === o.value
+                  return (
+                    <button key={o.value} type="button" role="radio" aria-checked={selected}
+                      onClick={() => { setCastrationStatus(o.value); setSaved(false) }}
+                      className={`${styles.optionBtn} ${selected ? styles.optionBtnSelected : ''}`}
+                    >
+                      <span>{o.label}</span>
+                      {selected && <span aria-hidden="true">✓</span>}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {sex === 'female' && castrationStatus === 'intact' && (
+            <div className={styles.field}>
+              <span className={styles.fieldLabel}>Löpcykel</span>
+              <button
+                type="button"
+                className={`${styles.heatToggleBtn} ${isInHeat ? styles.heatToggleBtnActive : ''}`}
+                onClick={handleHeatToggle}
+                disabled={heatLoading}
+                aria-pressed={isInHeat}
+              >
+                {heatLoading ? 'Uppdaterar…' : isInHeat ? '🔴 Min tik löper just nu — klicka för att avsluta' : '⚪ Min tik löper just nu'}
+              </button>
+              {skenfasActive && !isInHeat && (
+                <span className={styles.skenfasAlert}>
+                  ⚠️ Skenfas-fönster aktivt (6–9 v efter löpet). Läs mer om träning under skenfas.
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         <div className={styles.section}>

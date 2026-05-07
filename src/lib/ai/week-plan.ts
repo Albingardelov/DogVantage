@@ -8,7 +8,7 @@ import {
   focusPromptRule,
   type WeeklyFocusArea,
 } from '@/lib/training/weekly-focus'
-import type { Breed, TrainingGoal, WeekPlan, HouseholdPet } from '@/types'
+import type { Breed, DogSex, CastrationStatus, TrainingGoal, WeekPlan, HouseholdPet } from '@/types'
 
 // Bump this when plan generation logic changes significantly — forces cache invalidation
 export const PLAN_VERSION = 'v5'
@@ -91,7 +91,11 @@ export async function generateWeekPlan(
   performanceSummary?: string,
   customExercises?: Array<{ exercise_id: string; label: string }>,
   householdPets?: HouseholdPet[],
-  weeklyFocus?: WeeklyFocusArea[]
+  weeklyFocus?: WeeklyFocusArea[],
+  dogSex?: DogSex,
+  castrationStatus?: CastrationStatus,
+  isInHeat?: boolean,
+  skenfasActive?: boolean
 ): Promise<WeekPlan> {
   let chunks: import('@/types').ChunkMatch[] = []
   try {
@@ -128,6 +132,12 @@ export async function generateWeekPlan(
 
   const isMasAdult = breed === 'miniature_american_shepherd' && !(typeof ageWeeks === 'number' && ageWeeks < 26)
 
+  const isIntactMaleAdolescent =
+    dogSex === 'male' &&
+    castrationStatus === 'intact' &&
+    typeof ageWeeks === 'number' &&
+    ageWeeks >= 28 && ageWeeks <= 78 // ~7–18 månader
+
   const breedSpecificRule = breed === 'braque_francais'
     ? 'Rasregel (stående fågelhund): inkludera minst 1 av: stadga, orientering, kontrollerat_sok, impulskontroll under veckan.'
     : isMasAdult
@@ -151,6 +161,14 @@ export async function generateWeekPlan(
 
   const focusRule = weeklyFocus && weeklyFocus.length > 0 ? focusPromptRule(weeklyFocus) : null
 
+  const sexRule = isInHeat
+    ? 'Könsregel (tik i löp): förkorta alla pass till max 5 min, undvik socialisering med okända hundar, prioritera impulskontroll och lugna inomhusövningar. Skriv "löp" i desc för berörda övningar.'
+    : skenfasActive
+    ? 'Könsregel (skenfas-fönster): tiken kan visa beteendeförändringar (ökad distraktion, mild agitation). Håll lågstimulans-träning, prioritera plats och impulskontroll. Undvik att introducera nya svåra övningar.'
+    : isIntactMaleAdolescent
+    ? 'Könsmognadsregel (intakt hane, 7–18 mån): ökad hormonstimulans kan ge distraktion och rivalitet. Inkludera impulskontroll minst 3 dagar. Håll pass korta (5–8 min). Öka inte kriterier snabbt — konsolidera befintliga beteenden.'
+    : null
+
   const idRules = [
     breedSpecificRule,
     isPuppy
@@ -159,6 +177,7 @@ export async function generateWeekPlan(
     goalRules || null,
     petRule,
     focusRule,
+    sexRule,
   ].filter(Boolean).join('\n')
 
   const customSection = customExercises && customExercises.length > 0

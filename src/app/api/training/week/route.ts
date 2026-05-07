@@ -6,8 +6,9 @@ import { getRecentLogs, formatLogsForPrompt } from '@/lib/supabase/session-logs'
 import { getActiveCustomExercises } from '@/lib/supabase/custom-exercises'
 import { getWeeklyFocus } from '@/lib/supabase/weekly-focus'
 import { currentIsoWeek } from '@/lib/training/weekly-focus'
+import { getActiveHeatCycle, getLastEndedHeatCycle, isSkenfasActive } from '@/lib/supabase/heat-cycles'
 import { createSupabaseServer } from '@/lib/supabase/server'
-import type { Breed, TrainingGoal, TrainingEnvironment, RewardPreference, HouseholdPet } from '@/types'
+import type { Breed, DogSex, CastrationStatus, TrainingGoal, TrainingEnvironment, RewardPreference, HouseholdPet } from '@/types'
 import { householdPetNotes, HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'
 
 const VALID_GOALS: TrainingGoal[] = [
@@ -100,7 +101,7 @@ export async function GET(req: NextRequest) {
 
   // Build onboarding context from query params
   const pets = parsePets(p)
-  const onboardingContext = buildOnboardingContext(p, pets)
+  const baseOnboardingContext = buildOnboardingContext(p, pets)
 
   const supabase = await createSupabaseServer()
   const { data: { user } } = await supabase.auth.getUser()
@@ -108,19 +109,36 @@ export async function GET(req: NextRequest) {
 
   const { data: dog } = await supabase
     .from('dog_profiles')
-    .select('id')
+    .select('id, sex, castration_status')
     .eq('id', dogId)
     .eq('user_id', user.id)
     .single()
   if (!dog) return NextResponse.json({ error: 'forbidden' }, { status: 403 })
+  const dogSex = (dog as { sex: string | null }).sex as DogSex | undefined ?? undefined
+  const castrationStatus = (dog as { castration_status: string | null }).castration_status as CastrationStatus | undefined ?? undefined
 
   // Fetch all context in parallel — these are independent and were previously sequential
   const isoWeek = currentIsoWeek()
-  const [recentLogs, customRows, focusAreas] = await Promise.all([
+  const needsHeatData = dogSex === 'female' && castrationStatus === 'intact'
+  const [recentLogs, customRows, focusAreas, activeHeat, lastEnded] = await Promise.all([
     getRecentLogs(breed, trainingWeek, 3).catch(() => []),
     getActiveCustomExercises().catch(() => []),
     getWeeklyFocus(dogId, isoWeek).catch(() => []),
+    needsHeatData ? getActiveHeatCycle(dogId).catch(() => null) : Promise.resolve(null),
+    needsHeatData ? getLastEndedHeatCycle(dogId).catch(() => null) : Promise.resolve(null),
   ])
+  const isInHeat = !!activeHeat
+  const skenfasActive = isSkenfasActive(lastEnded)
+
+  // Appending heat state to context ensures cache key changes when state changes
+  const sexLines: string[] = []
+  if (dogSex) sexLines.push(`Kön: ${dogSex === 'female' ? 'Tik' : 'Hane'}`)
+  if (castrationStatus) sexLines.push(`Kastration: ${castrationStatus === 'intact' ? 'Intakt' : castrationStatus === 'castrated' ? 'Kastrerad' : 'Okänt'}`)
+  if (isInHeat) sexLines.push('Status: Löper just nu')
+  if (skenfasActive) sexLines.push('Status: Skenfas-fönster aktivt (6–9 v efter löp)')
+  const onboardingContext = sexLines.length > 0
+    ? [baseOnboardingContext, sexLines.join('\n')].filter(Boolean).join('\n')
+    : baseOnboardingContext
 
   const performanceSummary = formatPerformanceSummary(formatLogsForPrompt(recentLogs))
   const customExercises = customRows.map((r) => ({ exercise_id: r.exercise_id, label: r.label }))
@@ -141,7 +159,7 @@ export async function GET(req: NextRequest) {
   if (cached) return NextResponse.json(cached)
 
   try {
-    const plan = await generateWeekPlan(breed, trainingWeek, ageWeeks, goals, onboardingContext, performanceSummary, customExercises, pets, focusAreas)
+    const plan = await generateWeekPlan(breed, trainingWeek, ageWeeks, goals, onboardingContext, performanceSummary, customExercises, pets, focusAreas, dogSex, castrationStatus, isInHeat, skenfasActive)
     // Only cache AI-generated plans — never cache the fallback
     await setCachedWeekPlan(breed, trainingWeek, plan, ageWeeks, goals, cacheKey, dogId, onboardingContext, customIds, PLAN_VERSION, focusAreas).catch((e) => {
       console.error('[GET /api/training/week] cache write failed:', e)
