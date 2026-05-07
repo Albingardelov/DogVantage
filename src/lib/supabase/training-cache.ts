@@ -62,13 +62,13 @@ function weekPlanCacheKey(
   ageWeeks?: number,
   goals?: string[],
   dateKey?: string,
-  userId?: string,
+  dogId?: string,
   onboardingHash?: string,
   customHash?: string,
   planVersion?: string,
 ): string {
   const parts = [`weekplan`, breed, ageBucket(ageWeeks), goalsBucket(goals)]
-  if (userId) parts.push(userId)
+  if (dogId) parts.push(dogId)
   if (onboardingHash) parts.push(`o${onboardingHash}`)
   if (customHash) parts.push(`c${customHash}`)
   if (planVersion) parts.push(planVersion)
@@ -82,7 +82,7 @@ export async function getCachedWeekPlan(
   ageWeeks?: number,
   goals?: string[],
   dateKey?: string,
-  userId?: string,
+  dogId?: string,
   onboardingContext?: string,
   customIds?: string[],
   planVersion?: string,
@@ -91,7 +91,7 @@ export async function getCachedWeekPlan(
   const { data, error } = await getSupabaseAdmin()
     .from('training_cache')
     .select('content')
-    .eq('breed', weekPlanCacheKey(breed, ageWeeks, goals, dateKey, userId, onboardingHash, customHash, planVersion))
+    .eq('breed', weekPlanCacheKey(breed, ageWeeks, goals, dateKey, dogId, onboardingHash, customHash, planVersion))
     .eq('week_number', weekNumber)
     .single()
 
@@ -110,7 +110,7 @@ export async function setCachedWeekPlan(
   ageWeeks?: number,
   goals?: string[],
   dateKey?: string,
-  userId?: string,
+  dogId?: string,
   onboardingContext?: string,
   customIds?: string[],
   planVersion?: string,
@@ -119,7 +119,7 @@ export async function setCachedWeekPlan(
   const { error } = await getSupabaseAdmin()
     .from('training_cache')
     .upsert({
-      breed: weekPlanCacheKey(breed, ageWeeks, goals, dateKey, userId, onboardingHash, customHash, planVersion),
+      breed: weekPlanCacheKey(breed, ageWeeks, goals, dateKey, dogId, onboardingHash, customHash, planVersion),
       week_number: weekNumber,
       content: JSON.stringify(plan),
       source: 'week_plan',

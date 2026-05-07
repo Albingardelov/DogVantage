@@ -14,12 +14,12 @@ type Row = {
 export async function getMetrics(
   breed: Breed,
   date: string,
-  dogKey: string
+  dogId: string
 ): Promise<Record<string, DailyExerciseMetrics>> {
   const { data, error } = await getSupabaseAdmin()
     .from('daily_exercise_metrics')
     .select('exercise_id, success_count, fail_count, latency_bucket, criteria_level_id, notes')
-    .eq('dog_key', dogKey)
+    .eq('dog_id', dogId)
     .eq('breed', breed)
     .eq('date', date)
 
@@ -38,7 +38,7 @@ export async function getMetrics(
 export async function upsertMetrics(
   breed: Breed,
   date: string,
-  dogKey: string,
+  dogId: string,
   exerciseId: string,
   patch: Partial<DailyExerciseMetrics>
 ): Promise<void> {
@@ -46,7 +46,8 @@ export async function upsertMetrics(
     .from('daily_exercise_metrics')
     .upsert(
       {
-        dog_key: dogKey,
+        dog_key: dogId,
+        dog_id: dogId,
         breed,
         date,
         exercise_id: exerciseId,
@@ -61,4 +62,3 @@ export async function upsertMetrics(
 
   if (error) throw new Error(`Metrics upsert failed: ${error.message}`)
 }
-

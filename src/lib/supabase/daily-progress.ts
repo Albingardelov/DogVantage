@@ -1,16 +1,15 @@
-// src/lib/supabase/daily-progress.ts
 import { getSupabaseAdmin } from './client'
 import type { Breed } from '@/types'
 
 export async function getProgress(
   breed: Breed,
   date: string,
-  dogKey: string
+  dogId: string
 ): Promise<Record<string, number>> {
   const { data, error } = await getSupabaseAdmin()
     .from('daily_progress')
     .select('exercise_id, reps_done')
-    .eq('dog_key', dogKey)
+    .eq('dog_id', dogId)
     .eq('breed', breed)
     .eq('date', date)
 
@@ -21,14 +20,14 @@ export async function getProgress(
 export async function upsertProgress(
   breed: Breed,
   date: string,
-  dogKey: string,
+  dogId: string,
   exerciseId: string,
   repsDone: number
 ): Promise<void> {
   const { error } = await getSupabaseAdmin()
     .from('daily_progress')
     .upsert(
-      { dog_key: dogKey, breed, date, exercise_id: exerciseId, reps_done: repsDone },
+      { dog_key: dogId, dog_id: dogId, breed, date, exercise_id: exerciseId, reps_done: repsDone },
       { onConflict: 'dog_key,breed,date,exercise_id' }
     )
 
