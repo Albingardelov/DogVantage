@@ -38,15 +38,6 @@ export async function getProfile(): Promise<DogProfile | null> {
 export async function saveProfile(profile: DogProfile, userId: string): Promise<DogProfile> {
   const supabase = getSupabaseBrowser()
 
-  // Check if a profile already exists for this user (first-dog case)
-  const { data: existing } = await supabase
-    .from('dog_profiles')
-    .select('id')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: true })
-    .limit(1)
-    .single()
-
   const row = {
     user_id: userId,
     name: profile.name,
@@ -57,11 +48,13 @@ export async function saveProfile(profile: DogProfile, userId: string): Promise<
     assessment: profile.assessment ?? null,
   }
 
-  if (existing?.id) {
+  // If the profile already has an id, update that specific record (edit flow).
+  // Otherwise always insert — a new dog should never overwrite an existing one.
+  if (profile.id) {
     const { data, error } = await supabase
       .from('dog_profiles')
       .update(row)
-      .eq('id', existing.id)
+      .eq('id', profile.id)
       .select('id')
       .single()
     if (error) throw new Error(`Failed to save profile: ${error.message}`)
