@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import ProfileGuard from '@/components/ProfileGuard'
 import Avatar from '@/components/Avatar'
 import BottomNav from '@/components/BottomNav'
@@ -32,6 +33,8 @@ function ProfileView() {
   const [takesRewardsOutdoors, setTakesRewardsOutdoors] = useState(true)
   const [householdPets, setHouseholdPets] = useState<HouseholdPet[]>([])
   const [saved, setSaved] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     let alive = true
@@ -57,6 +60,20 @@ function ProfileView() {
       return [...prev, goal]
     })
     setSaved(false)
+  }
+
+  async function handleDeleteAccount() {
+    setDeleting(true)
+    try {
+      const res = await fetch('/api/account', { method: 'DELETE' })
+      if (!res.ok) throw new Error('Fel vid radering')
+      await getSupabaseBrowser().auth.signOut()
+      router.replace('/login')
+    } catch (e) {
+      console.error('[deleteAccount]', e)
+      setDeleting(false)
+      setShowDeleteConfirm(false)
+    }
   }
 
   async function handleSave() {
@@ -211,6 +228,50 @@ function ProfileView() {
           <button type="button" className={styles.saveBtn} onClick={handleSave}>
             Spara ändringar
           </button>
+        )}
+
+        <div className={styles.section}>
+          <span className={styles.sectionTitle}>Dataskydd</span>
+          <button
+            type="button"
+            className={styles.linkBtn}
+            onClick={() => router.push('/privacy')}
+          >
+            Integritetspolicy
+          </button>
+          <button
+            type="button"
+            className={styles.dangerBtn}
+            onClick={() => setShowDeleteConfirm(true)}
+          >
+            Radera mitt konto
+          </button>
+        </div>
+
+        {showDeleteConfirm && (
+          <div className={styles.confirmOverlay}>
+            <div className={styles.confirmSheet}>
+              <p className={styles.confirmText}>
+                All din data raderas permanent — träningsloggar, hundprofil och egna övningar. Det går inte att ångra.
+              </p>
+              <button
+                type="button"
+                className={styles.dangerBtn}
+                onClick={handleDeleteAccount}
+                disabled={deleting}
+              >
+                {deleting ? 'Raderar…' : 'Ja, radera mitt konto'}
+              </button>
+              <button
+                type="button"
+                className={styles.cancelBtn}
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleting}
+              >
+                Avbryt
+              </button>
+            </div>
+          </div>
         )}
       </div>
 
