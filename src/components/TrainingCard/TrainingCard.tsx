@@ -49,7 +49,7 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
   const [customSpecs, setCustomSpecs] = useState<Record<string, ExerciseSpec>>({})
   const [showAddCustom, setShowAddCustom] = useState(false)
   const [simpleFocus, setSimpleFocus] = useState(false)
-  const todayDate = todayDateString()
+  const todayDate = useMemo(todayDateString, [])
   const todayName = SWEDISH_DAYS[new Date().getDay()]
 
   const weekFocusCopy = useMemo(

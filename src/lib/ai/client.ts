@@ -29,3 +29,12 @@ export function getGeminiTextModel() {
   _textModel = getGenAI().getGenerativeModel({ model: GEMINI_TEXT_MODEL })
   return _textModel
 }
+
+export function jsonGenConfig(temperature: number, maxOutputTokens: number) {
+  return {
+    temperature,
+    maxOutputTokens,
+    responseMimeType: 'application/json' as const,
+    thinkingConfig: { thinkingBudget: 0 },
+  }
+}

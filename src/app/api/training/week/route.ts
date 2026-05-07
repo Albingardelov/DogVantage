@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { aiErrorResponse } from '@/lib/ai/errors'
 import { generateWeekPlan, PLAN_VERSION } from '@/lib/ai/week-plan'
 import { getCachedWeekPlan, setCachedWeekPlan } from '@/lib/supabase/training-cache'
 import { getRecentLogs, formatLogsForPrompt } from '@/lib/supabase/session-logs'
@@ -135,12 +136,6 @@ export async function GET(req: NextRequest) {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     console.error('[GET /api/training/week]', message)
-    if (message.includes('rate_limit') || message.includes('429') || message.includes('quota')) {
-      return NextResponse.json({ error: 'AI-tjänsten är tillfälligt otillgänglig. Försök igen om en stund.' }, { status: 429 })
-    }
-    if (message.includes('503') || message.includes('unavailable') || message.includes('high demand')) {
-      return NextResponse.json({ error: 'AI-tjänsten är tillfälligt otillgänglig. Försök igen om en stund.' }, { status: 503 })
-    }
-    return NextResponse.json({ error: message }, { status: 500 })
+    return aiErrorResponse(message) ?? NextResponse.json({ error: message }, { status: 500 })
   }
 }

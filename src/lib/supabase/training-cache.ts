@@ -50,6 +50,13 @@ function shortHash(s: string): string {
   return Math.abs(h).toString(36)
 }
 
+function resolveHashes(onboardingContext?: string, customIds?: string[]) {
+  return {
+    onboardingHash: onboardingContext ? shortHash(onboardingContext) : undefined,
+    customHash: customIds && customIds.length > 0 ? shortHash(customIds.sort().join(',')) : undefined,
+  }
+}
+
 function weekPlanCacheKey(
   breed: Breed,
   ageWeeks?: number,
@@ -80,8 +87,7 @@ export async function getCachedWeekPlan(
   customIds?: string[],
   planVersion?: string,
 ): Promise<WeekPlan | null> {
-  const onboardingHash = onboardingContext ? shortHash(onboardingContext) : undefined
-  const customHash = customIds && customIds.length > 0 ? shortHash(customIds.sort().join(',')) : undefined
+  const { onboardingHash, customHash } = resolveHashes(onboardingContext, customIds)
   const { data, error } = await getSupabaseAdmin()
     .from('training_cache')
     .select('content')
@@ -109,8 +115,7 @@ export async function setCachedWeekPlan(
   customIds?: string[],
   planVersion?: string,
 ): Promise<void> {
-  const onboardingHash = onboardingContext ? shortHash(onboardingContext) : undefined
-  const customHash = customIds && customIds.length > 0 ? shortHash(customIds.sort().join(',')) : undefined
+  const { onboardingHash, customHash } = resolveHashes(onboardingContext, customIds)
   const { error } = await getSupabaseAdmin()
     .from('training_cache')
     .upsert({

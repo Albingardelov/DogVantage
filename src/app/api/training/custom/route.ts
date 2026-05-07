@@ -6,7 +6,8 @@ import {
   toggleCustomExercise,
   deleteCustomExercise,
 } from '@/lib/supabase/custom-exercises'
-import { getGeminiTextModel } from '@/lib/ai/client'
+import { getGeminiTextModel, jsonGenConfig } from '@/lib/ai/client'
+import { aiErrorResponse } from '@/lib/ai/errors'
 import { slugify, randomSuffix } from '@/lib/utils/slugify'
 import type { ExerciseSpec } from '@/lib/training/exercise-specs'
 
@@ -25,9 +26,25 @@ function validateCustomExerciseSpec(raw: unknown): (Omit<ExerciseSpec, 'exercise
 
 const SYSTEM_PROMPT = `Du är en hundträningsinstruktör. Generera ett JSON-objekt för en träningsövning. Svara ENBART med giltig JSON.
 
-Fält: label (2–3 ord, svenska) · definition (en mening: vad är en lyckad rep) · ladder (2–4 nivåer [{id:snake_case, label, criteria}], enklast→svårast) · troubleshooting (2–3 råd, array av strängar) · guide{setup[],steps[],logging[],commonMistakes[],stopRules[]}
+Fält:
+- label: 2–3 ord på svenska
+- definition: EN mening — vad räknas som en lyckad rep, konkret och mätbart
+- ladder: 2–4 nivåer [{id:snake_case, label, criteria}], sorterat enklast→svårast; id = snake_case utan mellanslag
+- troubleshooting: 3 råd på svenska (array av strängar), konkreta åtgärder om det kör ihop sig
+- guide: objekt med exakt dessa fält (alla arrays, minst 3 poster vardera):
+  - setup: praktiska förberedelser innan passet startar (3–4 punkter)
+  - steps: numrerade steg-för-steg-instruktioner för föraren (4–5 punkter, exakt timing/teknik)
+  - logging: hur man loggar i appen — förklara Lyckad, Miss och Latens (3 punkter)
+  - commonMistakes: vanliga handlermisstag och hur man undviker dem (3–4 punkter)
+  - stopRules: tydliga stopp-kriterier med konkreta trösklar, t.ex. "Tre miss i rad → ..." (1–2 punkter)
 
-Regler: allt på svenska · id i ladder: snake_case · för fysiskt krävande övningar: lägg ålders-/hälsovarning i stopRules`
+Exempel på rätt detaljnivå (guide.steps):
+["Be om sitt. Vänta 1s. Ge 'fri' med glad ton → uppmuntra att hunden rör sig.",
+ "Be om ligg. Vänta 3s. Ge 'fri' → belöna friheten.",
+ "Öka väntetiden gradvis: 1s → 3s → 5s → 10s → 30s.",
+ "Variera varaktigheten inom passet — ibland kort, ibland lång."]
+
+Regler: allt på svenska · konkret och praktiskt, inte vagt · för fysiskt krävande övningar: lägg ålders-/hälsovarning i stopRules`
 
 export async function GET() {
   try {
@@ -57,11 +74,7 @@ export async function POST(req: NextRequest) {
     const aiResult = await getGeminiTextModel().generateContent({
       contents: [{ role: 'user', parts: [{ text: `Skapa en träningsövningsspec för: ${prompt}` }] }],
       systemInstruction: SYSTEM_PROMPT,
-      generationConfig: {
-        temperature: 0.4,
-        maxOutputTokens: 1200,
-        responseMimeType: 'application/json',
-      },
+      generationConfig: jsonGenConfig(0.4, 4096),
     })
 
     const rawText = aiResult.response.text()
@@ -91,11 +104,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(exercise, { status: 201 })
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
-    if (message.includes('rate_limit') || message.includes('429') || message.includes('quota')) {
-      return NextResponse.json({ error: 'AI-tjänsten är tillfälligt otillgänglig. Försök igen om en stund.' }, { status: 429 })
-    }
     console.error('[POST /api/training/custom]', message)
-    return NextResponse.json({ error: message }, { status: 500 })
+    return aiErrorResponse(message) ?? NextResponse.json({ error: message }, { status: 500 })
   }
 }
 

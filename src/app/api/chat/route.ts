@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { aiErrorResponse } from '@/lib/ai/errors'
 import { queryRAG } from '@/lib/ai/rag'
 import { getRecentLogs, formatLogsForPrompt } from '@/lib/supabase/session-logs'
 import { getMetrics } from '@/lib/supabase/daily-exercise-metrics'
@@ -63,9 +64,6 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     console.error('[/api/chat]', message)
-    if (message.includes('rate_limit') || message.includes('429') || message.includes('quota')) {
-      return NextResponse.json({ error: 'AI-tjänsten är tillfälligt otillgänglig (rate limit). Försök igen om en stund.' }, { status: 429 })
-    }
-    return NextResponse.json({ error: message }, { status: 500 })
+    return aiErrorResponse(message) ?? NextResponse.json({ error: message }, { status: 500 })
   }
 }

@@ -1,4 +1,4 @@
-import { getGeminiTextModel } from './client'
+import { getGeminiTextModel, jsonGenConfig } from './client'
 import { embedText } from './embed'
 import { searchBreedChunks } from '@/lib/supabase/breed-chunks'
 import { formatBreedProfile, formatCurrentPhase } from './breed-profiles'
@@ -197,13 +197,7 @@ Regler:
   const result = await getGeminiTextModel().generateContent({
     contents: [{ role: 'user', parts: [{ text: `Veckoschema JSON för ${breed}, programvecka ${trainingWeek}` }] }],
     systemInstruction: systemPrompt,
-    generationConfig: {
-      temperature: 0.3,
-      maxOutputTokens: 8192,
-      responseMimeType: 'application/json',
-      // @ts-expect-error thinkingConfig is valid for gemini-2.5-flash but not yet in SDK types
-      thinkingConfig: { thinkingBudget: 0 },
-    },
+    generationConfig: jsonGenConfig(0.3, 8192),
   })
 
   const raw = result.response.text() ?? '{}'
