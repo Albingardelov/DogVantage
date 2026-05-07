@@ -6,7 +6,8 @@ import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import ProfileGuard from '@/components/ProfileGuard'
 import Avatar from '@/components/Avatar'
 import BottomNav from '@/components/BottomNav'
-import { getDogProfile, updateDogProfile } from '@/lib/dog/profile'
+import { updateDogProfile } from '@/lib/dog/profile'
+import { useActiveDog } from '@/lib/dog/active-dog-context'
 import { getAgeInWeeks, daysUntilHomecoming } from '@/lib/dog/age'
 import { GOALS, ENVIRONMENTS, REWARDS } from '@/components/DogProfileForm'
 import { HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'
@@ -26,6 +27,7 @@ export default function ProfilePage() {
 
 function ProfileView() {
   const router = useRouter()
+  const { activeDog, refreshDogs } = useActiveDog()
   const [profile, setProfile] = useState<DogProfile | null>(null)
   const [goals, setGoals] = useState<TrainingGoal[]>(['everyday_obedience'])
   const [environment, setEnvironment] = useState<TrainingEnvironment>('suburb')
@@ -44,36 +46,33 @@ function ProfileView() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
+  // Initialize edit state from the active dog (context) — re-runs when dog switches
   useEffect(() => {
-    let alive = true
-    ;(async () => {
-      const p = await getDogProfile()
-      if (!alive || !p) return
-      setProfile(p)
-      setGoals(p.onboarding?.goals ?? ['everyday_obedience'])
-      setEnvironment(p.onboarding?.environment ?? 'suburb')
-      setRewardPreference(p.onboarding?.rewardPreference ?? 'mixed')
-      setTakesRewardsOutdoors(p.onboarding?.takesRewardsOutdoors ?? true)
-      setHouseholdPets(p.onboarding?.householdPets ?? [])
-      setOwnerNotes(p.onboarding?.ownerNotes ?? '')
-      setTrainingWeek(p.trainingWeek ?? 1)
-      setSex(p.sex ?? '')
-      setCastrationStatus(p.castrationStatus ?? '')
-      setHomecomeDate(p.onboarding?.homecomeDate ?? '')
-      if (p.id) {
-        fetch(`/api/training/heat?dogId=${encodeURIComponent(p.id)}`)
-          .then((r) => r.ok ? r.json() : null)
-          .then((d) => {
-            if (d) {
-              setIsInHeat(d.isInHeat ?? false)
-              setSkenfasActive(d.skenfasActive ?? false)
-            }
-          })
-          .catch(() => {})
-      }
-    })().catch((e) => console.error('[profile getDogProfile]', e))
-    return () => { alive = false }
-  }, [])
+    if (!activeDog) return
+    setProfile(activeDog)
+    setGoals(activeDog.onboarding?.goals ?? ['everyday_obedience'])
+    setEnvironment(activeDog.onboarding?.environment ?? 'suburb')
+    setRewardPreference(activeDog.onboarding?.rewardPreference ?? 'mixed')
+    setTakesRewardsOutdoors(activeDog.onboarding?.takesRewardsOutdoors ?? true)
+    setHouseholdPets(activeDog.onboarding?.householdPets ?? [])
+    setOwnerNotes(activeDog.onboarding?.ownerNotes ?? '')
+    setTrainingWeek(activeDog.trainingWeek ?? 1)
+    setSex(activeDog.sex ?? '')
+    setCastrationStatus(activeDog.castrationStatus ?? '')
+    setHomecomeDate(activeDog.onboarding?.homecomeDate ?? '')
+    setSaved(false)
+    if (activeDog.id) {
+      fetch(`/api/training/heat?dogId=${encodeURIComponent(activeDog.id)}`)
+        .then((r) => r.ok ? r.json() : null)
+        .then((d) => {
+          if (d) {
+            setIsInHeat(d.isInHeat ?? false)
+            setSkenfasActive(d.skenfasActive ?? false)
+          }
+        })
+        .catch(() => {})
+    }
+  }, [activeDog?.id])
 
   function toggleGoal(goal: TrainingGoal) {
     setGoals((prev) => {
@@ -152,6 +151,7 @@ function ProfileView() {
       setTrainingWeek(safeWeek)
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
+      refreshDogs()
     } catch (e) {
       console.error('[profile save]', e)
     }
