@@ -2,49 +2,55 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getDogProfile } from '@/lib/dog/profile'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
+import { ActiveDogProvider, useActiveDog } from '@/lib/dog/active-dog-context'
 import styles from './ProfileGuard.module.css'
 
 export default function ProfileGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter()
-  const [ready, setReady] = useState(false)
+  const [authed, setAuthed] = useState(false)
 
   useEffect(() => {
-    let cancelled = false
-    async function run() {
-      const { data: { session } } = await getSupabaseBrowser().auth.getSession()
-      if (!session) {
-        router.replace('/login')
-        return
-      }
-
-      const profile = await getDogProfile()
-      if (cancelled) return
-
-      if (!profile) {
-        router.replace('/onboarding')
-        return
-      }
-      setReady(true)
-    }
-
-    run().catch((e) => {
-      const msg = e instanceof Error ? e.message : String(e)
-      console.error('[ProfileGuard]', msg)
-      router.replace('/login')
-    })
-
-    return () => { cancelled = true }
+    getSupabaseBrowser().auth.getSession().then(({ data: { session } }) => {
+      if (!session) router.replace('/login')
+      else setAuthed(true)
+    }).catch(() => router.replace('/login'))
   }, [router])
 
-  if (!ready) {
+  if (!authed) {
     return (
       <div className={styles.loader} aria-label="Laddar…">
         <span className={styles.spinner} />
       </div>
     )
   }
+
+  return (
+    <ActiveDogProvider>
+      <ProfileGuardInner>{children}</ProfileGuardInner>
+    </ActiveDogProvider>
+  )
+}
+
+function ProfileGuardInner({ children }: { children: React.ReactNode }) {
+  const router = useRouter()
+  const { activeDog, isLoading } = useActiveDog()
+
+  useEffect(() => {
+    if (!isLoading && !activeDog) {
+      router.replace('/onboarding')
+    }
+  }, [isLoading, activeDog, router])
+
+  if (isLoading) {
+    return (
+      <div className={styles.loader} aria-label="Laddar…">
+        <span className={styles.spinner} />
+      </div>
+    )
+  }
+
+  if (!activeDog) return null
 
   return <>{children}</>
 }
