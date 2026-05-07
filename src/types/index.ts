@@ -8,14 +8,10 @@ export type Breed = 'labrador' | 'italian_greyhound' | 'braque_francais' | 'mini
 export type BreedOrGeneral = Breed | 'general'
 
 export interface DogProfile {
+  id?: string        // dog_profiles.id (uuid); undefined until first save
   name: string
   breed: Breed
-  birthdate: string // ISO 8601, e.g. "2024-10-15"
-  /**
-   * Stable identifier for this dog's data in storage/DB.
-   * Needed to separate training progress between dogs of the same breed.
-   */
-  dogKey?: string
+  birthdate: string  // ISO 8601, e.g. "2024-10-15"
   /**
    * "Programvecka" – weeks since starting in the app / baseline assessment.
    * Separate from biological age (derived from birthdate).

@@ -5,7 +5,7 @@ export async function getDogProfile(): Promise<DogProfile | null> {
   return getProfile()
 }
 
-export async function saveDogProfile(profile: DogProfile, userId: string): Promise<void> {
+export async function saveDogProfile(profile: DogProfile, userId: string): Promise<DogProfile> {
   return saveProfile(profile, userId)
 }
 

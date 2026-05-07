@@ -307,7 +307,7 @@ function Dashboard() {
             ageWeeks={ageWeeks}
             breed={profile.breed}
             dogName={dogName}
-            dogKey={profile.dogKey ?? 'default'}
+            dogKey={profile.id ?? 'default'}
             goals={profile.onboarding?.goals}
             environment={profile.onboarding?.environment}
             rewardPreference={profile.onboarding?.rewardPreference}
