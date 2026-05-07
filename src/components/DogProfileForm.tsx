@@ -18,8 +18,6 @@ export const BREEDS: { value: Breed; label: string }[] = [
   { value: 'miniature_american_shepherd', label: 'Miniature American Shepherd' },
 ]
 
-const TOTAL_STEPS = 5
-const STEP_TITLES = ['Lägg till ett foto', 'Om din hund', 'När är hunden född?', 'Hur vill du använda appen?', 'Skapa konto']
 const ALL_HOUSEHOLD_PETS = Object.keys(HOUSEHOLD_PET_LABELS) as HouseholdPet[]
 
 export const GOALS: { value: TrainingGoal; label: string }[] = [
@@ -56,9 +54,18 @@ export const REWARDS: { value: RewardPreference; label: string }[] = [
   { value: 'mixed', label: 'Blandat' },
 ]
 
-export default function DogProfileForm() {
+interface Props {
+  onSaved?: (profile: DogProfile, photo: string | null) => Promise<void>
+}
+
+export default function DogProfileForm({ onSaved }: Props = {}) {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const isAddMode = !!onSaved
+  const totalSteps = isAddMode ? 4 : 5
+  const stepTitles = isAddMode
+    ? ['Lägg till ett foto', 'Om din hund', 'När är hunden född?', 'Hur vill du använda appen?']
+    : ['Lägg till ett foto', 'Om din hund', 'När är hunden född?', 'Hur vill du använda appen?', 'Skapa konto']
 
   const [step, setStep] = useState(0)
   const [photo, setPhoto] = useState<string | null>(null)
@@ -97,17 +104,13 @@ export default function DogProfileForm() {
     reader.readAsDataURL(file)
   }
 
-  const canContinue = [
-    true,
-    name.trim().length > 0 && breed.length > 0,
-    birthdate.length > 0,
-    true,
-    email.trim().length > 3 && password.length >= 8 && !signingUp,
-  ]
+  const canContinue = isAddMode
+    ? [true, name.trim().length > 0 && breed.length > 0, birthdate.length > 0, true]
+    : [true, name.trim().length > 0 && breed.length > 0, birthdate.length > 0, true, email.trim().length > 3 && password.length >= 8 && !signingUp]
 
   function handleNext() {
     setSignupError(null)
-    if (step < TOTAL_STEPS - 1) {
+    if (step < totalSteps - 1) {
       setStep((s) => s + 1)
       return
     }
@@ -116,7 +119,6 @@ export default function DogProfileForm() {
 
   async function finish() {
     if (!name.trim() || !breed || !birthdate) return
-    if (!email.trim() || password.length < 8) return
     setSigningUp(true)
     setSignupError(null)
 
@@ -137,6 +139,12 @@ export default function DogProfileForm() {
     }
 
     try {
+      if (onSaved) {
+        await onSaved(profile, photo)
+        return
+      }
+
+      if (!email.trim() || password.length < 8) return
       const { data, error } = await getSupabaseBrowser().auth.signUp({
         email: email.trim(),
         password,
@@ -166,7 +174,7 @@ export default function DogProfileForm() {
   return (
     <div className={styles.wizard}>
       <div className={styles.progress} aria-hidden="true">
-        {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
+        {Array.from({ length: totalSteps }).map((_, i) => (
           <span
             key={i}
             className={`${styles.progressBar} ${i <= step ? styles.progressBarActive : ''}`}
@@ -175,8 +183,8 @@ export default function DogProfileForm() {
       </div>
 
       <header className={styles.header}>
-        <p className={styles.stepCounter}>Steg {step + 1} av {TOTAL_STEPS}</p>
-        <h2 className={styles.title}>{STEP_TITLES[step]}</h2>
+        <p className={styles.stepCounter}>Steg {step + 1} av {totalSteps}</p>
+        <h2 className={styles.title}>{stepTitles[step]}</h2>
       </header>
 
       <div className={styles.body}>
@@ -422,7 +430,7 @@ export default function DogProfileForm() {
           disabled={!canContinue[step]}
           className={styles.primaryBtn}
         >
-          {step < TOTAL_STEPS - 1 ? 'Fortsätt' : (signingUp ? 'Skapar konto…' : 'Skapa konto →')}
+          {step < totalSteps - 1 ? 'Fortsätt' : (isAddMode ? (signingUp ? 'Sparar…' : 'Lägg till hund →') : (signingUp ? 'Skapar konto…' : 'Skapa konto →'))}
         </button>
         {step === 0 && (
           <button type="button" onClick={handleNext} className={styles.skipBtn}>
