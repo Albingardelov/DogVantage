@@ -1,4 +1,4 @@
-import { getProfile, saveProfile, updateProfile } from '@/lib/supabase/dog-profiles'
+import { getProfile, saveProfile, updateProfile, getAllProfiles } from '@/lib/supabase/dog-profiles'
 import type { DogProfile } from '@/types'
 
 export async function getDogProfile(): Promise<DogProfile | null> {
@@ -11,4 +11,8 @@ export async function saveDogProfile(profile: DogProfile, userId: string): Promi
 
 export async function updateDogProfile(fields: Partial<DogProfile>): Promise<void> {
   return updateProfile(fields)
+}
+
+export async function getAllDogProfiles(): Promise<DogProfile[]> {
+  return getAllProfiles()
 }

@@ -98,3 +98,12 @@ export async function updateProfile(fields: Partial<DogProfile>): Promise<void> 
   const { error } = await filter
   if (error) throw new Error(`Failed to update profile: ${error.message}`)
 }
+
+export async function getAllProfiles(): Promise<DogProfile[]> {
+  const { data, error } = await getSupabaseBrowser()
+    .from('dog_profiles')
+    .select('*')
+    .order('created_at', { ascending: true })
+  if (error || !data) return []
+  return (data as DbProfile[]).map(dbToProfile)
+}
