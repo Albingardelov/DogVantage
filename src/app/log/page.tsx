@@ -5,6 +5,7 @@ import ProfileGuard from '@/components/ProfileGuard'
 import Avatar from '@/components/Avatar'
 import BottomNav from '@/components/BottomNav'
 import { getDogProfile } from '@/lib/dog/profile'
+import SkillProgressSection from '@/components/SkillProgressSection'
 import type { DogProfile, QuickRating, SessionLog } from '@/types'
 import styles from './page.module.css'
 
@@ -103,6 +104,10 @@ function Log() {
       <div className={styles.body}>
         {error && (
           <p className={styles.error} role="alert">Fel: {error}</p>
+        )}
+
+        {profile && profile.id && logs.length > 0 && (
+          <SkillProgressSection breed={profile.breed} dogId={profile.id} />
         )}
 
         {!loading && !error && logs.length === 0 && (
