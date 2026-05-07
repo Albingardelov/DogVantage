@@ -32,6 +32,8 @@ function ProfileView() {
   const [rewardPreference, setRewardPreference] = useState<RewardPreference>('mixed')
   const [takesRewardsOutdoors, setTakesRewardsOutdoors] = useState(true)
   const [householdPets, setHouseholdPets] = useState<HouseholdPet[]>([])
+  const [ownerNotes, setOwnerNotes] = useState('')
+  const [trainingWeek, setTrainingWeek] = useState(1)
   const [saved, setSaved] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -47,6 +49,8 @@ function ProfileView() {
       setRewardPreference(p.onboarding?.rewardPreference ?? 'mixed')
       setTakesRewardsOutdoors(p.onboarding?.takesRewardsOutdoors ?? true)
       setHouseholdPets(p.onboarding?.householdPets ?? [])
+      setOwnerNotes(p.onboarding?.ownerNotes ?? '')
+      setTrainingWeek(p.trainingWeek ?? 1)
     })().catch((e) => console.error('[profile getDogProfile]', e))
     return () => { alive = false }
   }, [])
@@ -78,20 +82,29 @@ function ProfileView() {
 
   async function handleSave() {
     if (!profile) return
+    const trimmedNotes = ownerNotes.trim()
+    const safeWeek = Math.max(1, Math.min(520, Math.round(trainingWeek)))
     const updated: DogProfile = {
       ...profile,
+      trainingWeek: safeWeek,
       onboarding: {
-        ...(profile.onboarding ?? { takesRewardsOutdoors: true }),
+        ...(profile.onboarding ?? { takesRewardsOutdoors: true, goals, environment, rewardPreference }),
         goals,
         environment,
         rewardPreference,
         takesRewardsOutdoors,
         householdPets: householdPets.length > 0 ? householdPets : undefined,
+        ownerNotes: trimmedNotes.length > 0 ? trimmedNotes : undefined,
       },
     }
     try {
-      await updateDogProfile({ onboarding: updated.onboarding })
+      await updateDogProfile({
+        id: profile.id,
+        onboarding: updated.onboarding,
+        trainingWeek: safeWeek,
+      })
       setProfile(updated)
+      setTrainingWeek(safeWeek)
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch (e) {
@@ -218,6 +231,73 @@ function ProfileView() {
         </div>
 
         <div className={styles.section}>
+          <span className={styles.sectionTitle}>Om hunden</span>
+          <div className={styles.field}>
+            <label className={styles.fieldLabel} htmlFor="owner-notes">
+              Något vi bör veta?{' '}
+              <span style={{ fontWeight: 400, color: 'var(--color-text-muted)', fontSize: 'var(--text-xs)' }}>(valfritt)</span>
+            </label>
+            <textarea
+              id="owner-notes"
+              className={styles.textarea}
+              rows={4}
+              value={ownerNotes}
+              onChange={(e) => { setOwnerNotes(e.target.value); setSaved(false) }}
+              placeholder="T.ex. rädd för barn, koppelaggressiv mot hundar, behöver fokus på avslappning och off-knapp…"
+              maxLength={500}
+            />
+            <span className={styles.helper}>
+              Används av träningsassistenten och i veckoplanen för att anpassa råd och övningar.
+            </span>
+          </div>
+        </div>
+
+        <div className={styles.section}>
+          <span className={styles.sectionTitle}>Programvecka</span>
+          <div className={styles.field}>
+            <span className={styles.fieldLabel}>Aktuell programvecka</span>
+            <div className={styles.weekStepper}>
+              <button
+                type="button"
+                className={styles.stepperBtn}
+                onClick={() => { setTrainingWeek((w) => Math.max(1, w - 1)); setSaved(false) }}
+                aria-label="Minska programvecka"
+                disabled={trainingWeek <= 1}
+              >
+                −
+              </button>
+              <input
+                type="number"
+                min={1}
+                max={520}
+                inputMode="numeric"
+                className={styles.weekInput}
+                value={trainingWeek}
+                onChange={(e) => {
+                  const n = Number(e.target.value)
+                  if (Number.isFinite(n)) {
+                    setTrainingWeek(Math.max(1, Math.min(520, Math.round(n))))
+                    setSaved(false)
+                  }
+                }}
+                aria-label="Programvecka"
+              />
+              <button
+                type="button"
+                className={styles.stepperBtn}
+                onClick={() => { setTrainingWeek((w) => Math.min(520, w + 1)); setSaved(false) }}
+                aria-label="Öka programvecka"
+              >
+                +
+              </button>
+            </div>
+            <span className={styles.helper}>
+              Justera om du vill backa eller hoppa fram i programmet. Påverkar nästa veckoplan.
+            </span>
+          </div>
+        </div>
+
+        <div className={styles.section}>
           <span className={styles.sectionTitle}>Egna träningspass</span>
           <CustomExerciseList />
         </div>
@@ -321,6 +401,7 @@ function breedLabel(breed: string): string {
     braque_francais: 'Braque Français',
     labrador: 'Labrador Retriever',
     italian_greyhound: 'Italiensk Vinthund',
+    miniature_american_shepherd: 'Miniature American Shepherd',
   }
   return map[breed] ?? breed
 }
