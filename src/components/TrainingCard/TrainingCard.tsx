@@ -11,7 +11,13 @@ import type { Breed, TrainingGoal, TrainingEnvironment, RewardPreference, WeekPl
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
 import type { ExerciseSpec } from '@/lib/training/exercise-specs'
 import { buildWeekFocusCopy } from '@/lib/training/week-focus-copy'
+import {
+  focusExerciseIds,
+  FOCUS_EXERCISE_LABELS,
+  type WeeklyFocusArea,
+} from '@/lib/training/weekly-focus'
 import WeekFocusPanel from './WeekFocusPanel'
+import WeeklyFocusPicker from './WeeklyFocusPicker'
 import PreSessionChecklist from './PreSessionChecklist'
 import AddCustomExerciseModal from '@/components/AddCustomExerciseModal'
 
@@ -49,6 +55,8 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
   const [customSpecs, setCustomSpecs] = useState<Record<string, ExerciseSpec>>({})
   const [showAddCustom, setShowAddCustom] = useState(false)
   const [simpleFocus, setSimpleFocus] = useState(false)
+  const [focusAreas, setFocusAreas] = useState<WeeklyFocusArea[]>([])
+  const [swaps, setSwaps] = useState<Record<number, Exercise>>({})
   const todayDate = useMemo(todayDateString, [])
   const todayName = SWEDISH_DAYS[new Date().getDay()]
 
@@ -146,7 +154,45 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
   }
 
   const todayPlan = weekPlan?.days.find((d) => d.day === todayName)
-  const todayExercises: Exercise[] = todayPlan?.exercises ?? []
+  const todayExercisesWithIndex = useMemo(
+    () =>
+      (todayPlan?.exercises ?? []).map((ex, originalIdx) => ({
+        current: swaps[originalIdx] ?? ex,
+        originalIdx,
+      })),
+    [todayPlan, swaps]
+  )
+  const todayExercises: Exercise[] = useMemo(
+    () => todayExercisesWithIndex.map((e) => e.current),
+    [todayExercisesWithIndex]
+  )
+
+  const swapCandidates = useMemo(() => {
+    if (focusAreas.length === 0) return [] as string[]
+    const focusIds = focusExerciseIds(focusAreas)
+    const usedIds = new Set(todayExercises.map((e) => e.id))
+    return focusIds.filter((id) => !usedIds.has(id))
+  }, [focusAreas, todayExercises])
+
+  function handleSwap(originalIdx: number) {
+    if (swapCandidates.length === 0) return
+    const pickId = swapCandidates[Math.floor(Math.random() * swapCandidates.length)]
+    const spec = customSpecs[pickId] ?? getExerciseSpec(pickId)
+    const baseExercise = (todayPlan?.exercises ?? [])[originalIdx]
+    const reps = baseExercise?.reps ?? 3
+    const replacement: Exercise = {
+      id: pickId,
+      label: FOCUS_EXERCISE_LABELS[pickId] ?? spec?.exerciseId ?? pickId,
+      desc: `${reps} × kort pass`,
+      reps,
+    }
+    setSwaps((prev) => ({ ...prev, [originalIdx]: replacement }))
+  }
+
+  // Reset local swaps when the underlying plan changes (new day, new fetch).
+  useEffect(() => {
+    setSwaps({})
+  }, [todayPlan])
 
   const nextExerciseId = useMemo(() => {
     for (const e of todayExercises) {
@@ -156,11 +202,11 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
   }, [todayExercises, progress])
 
   const displayedExercises = useMemo(() => {
-    if (!simpleFocus || todayExercises.length <= 2) return todayExercises
-    if (!nextExerciseId) return todayExercises
-    const next = todayExercises.find((e) => e.id === nextExerciseId)
-    return next ? [next] : todayExercises
-  }, [simpleFocus, todayExercises, nextExerciseId])
+    if (!simpleFocus || todayExercisesWithIndex.length <= 2) return todayExercisesWithIndex
+    if (!nextExerciseId) return todayExercisesWithIndex
+    const next = todayExercisesWithIndex.find((e) => e.current.id === nextExerciseId)
+    return next ? [next] : todayExercisesWithIndex
+  }, [simpleFocus, todayExercisesWithIndex, nextExerciseId])
 
   const nextExercise = useMemo(
     () => (nextExerciseId ? todayExercises.find((e) => e.id === nextExerciseId) ?? null : null),
@@ -215,6 +261,17 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
           />
         )}
 
+        {dogId && (
+          <WeeklyFocusPicker
+            dogId={dogId}
+            onLoaded={(areas) => setFocusAreas(areas)}
+            onChange={(areas) => {
+              setFocusAreas(areas)
+              fetchData()
+            }}
+          />
+        )}
+
         {!loading && todayExercises.length > 0 && (
           <div
             className={styles.progressBar}
@@ -258,7 +315,7 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
 
         {!loading && todayExercises.length > 0 && (
           <div className={styles.exercises}>
-            {displayedExercises.map((ex) => (
+            {displayedExercises.map(({ current: ex, originalIdx }) => (
               (() => {
                 const spec = customSpecs[ex.id] ?? getExerciseSpec(ex.id)
                 const m = metrics[ex.id] ?? null
@@ -273,7 +330,7 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
                 const showTroubleshooting = rec?.kind === 'lower' || rec?.kind === 'stop'
                 return (
               <ExerciseRow
-                key={ex.id}
+                key={`${originalIdx}-${ex.id}`}
                 exercise={ex}
                 done={progress[ex.id] ?? 0}
                 onRepClick={() => handleRepClick(ex.id, progress[ex.id] ?? 0, ex.reps)}
@@ -286,6 +343,7 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
                 ageWeeks={ageWeeks}
                 sessionNext={nextExerciseId === ex.id}
                 rootId={nextExerciseId === ex.id ? 'training-session-next' : undefined}
+                onSwap={swapCandidates.length > 0 ? () => handleSwap(originalIdx) : undefined}
               />
                 )
               })()

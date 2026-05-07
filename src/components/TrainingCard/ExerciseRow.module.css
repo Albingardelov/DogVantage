@@ -127,6 +127,25 @@
   line-height: 1.4;
 }
 
+.swapBtn {
+  align-self: flex-start;
+  margin-top: 0.25rem;
+  background: none;
+  border: 1px dashed var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.6875rem;
+  font-weight: var(--font-semibold);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.swapBtn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
 .counter {
   flex-shrink: 0;
   display: flex;

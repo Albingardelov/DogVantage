@@ -4,6 +4,8 @@ import { generateWeekPlan, PLAN_VERSION } from '@/lib/ai/week-plan'
 import { getCachedWeekPlan, setCachedWeekPlan } from '@/lib/supabase/training-cache'
 import { getRecentLogs, formatLogsForPrompt } from '@/lib/supabase/session-logs'
 import { getActiveCustomExercises } from '@/lib/supabase/custom-exercises'
+import { getWeeklyFocus } from '@/lib/supabase/weekly-focus'
+import { currentIsoWeek } from '@/lib/training/weekly-focus'
 import { createSupabaseServer } from '@/lib/supabase/server'
 import type { Breed, TrainingGoal, TrainingEnvironment, RewardPreference, HouseholdPet } from '@/types'
 import { householdPetNotes, HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'
@@ -113,9 +115,11 @@ export async function GET(req: NextRequest) {
   if (!dog) return NextResponse.json({ error: 'forbidden' }, { status: 403 })
 
   // Fetch all context in parallel — these are independent and were previously sequential
-  const [recentLogs, customRows] = await Promise.all([
+  const isoWeek = currentIsoWeek()
+  const [recentLogs, customRows, focusAreas] = await Promise.all([
     getRecentLogs(breed, trainingWeek, 3).catch(() => []),
     getActiveCustomExercises().catch(() => []),
+    getWeeklyFocus(dogId, isoWeek).catch(() => []),
   ])
 
   const performanceSummary = formatPerformanceSummary(formatLogsForPrompt(recentLogs))
@@ -124,21 +128,22 @@ export async function GET(req: NextRequest) {
   // Plans with performance data are cached per ISO-week so the plan adapts to
   // recent logs without triggering a fresh Groq call on every page load.
   // Plans without performance data are cached indefinitely (static baseline).
-  const cacheKey = performanceSummary ? isoWeekKey() : undefined
+  // A non-empty weekly focus also forces per-ISO-week caching so changes apply within the week.
+  const cacheKey = performanceSummary || focusAreas.length > 0 ? isoWeekKey() : undefined
   const customIds = customExercises.map((e) => e.exercise_id)
 
   let cached: import('@/types').WeekPlan | null = null
   try {
-    cached = await getCachedWeekPlan(breed, trainingWeek, ageWeeks, goals, cacheKey, dogId, onboardingContext, customIds, PLAN_VERSION)
+    cached = await getCachedWeekPlan(breed, trainingWeek, ageWeeks, goals, cacheKey, dogId, onboardingContext, customIds, PLAN_VERSION, focusAreas)
   } catch (e) {
     console.error('[GET /api/training/week] cache read failed:', e)
   }
   if (cached) return NextResponse.json(cached)
 
   try {
-    const plan = await generateWeekPlan(breed, trainingWeek, ageWeeks, goals, onboardingContext, performanceSummary, customExercises, pets)
+    const plan = await generateWeekPlan(breed, trainingWeek, ageWeeks, goals, onboardingContext, performanceSummary, customExercises, pets, focusAreas)
     // Only cache AI-generated plans — never cache the fallback
-    await setCachedWeekPlan(breed, trainingWeek, plan, ageWeeks, goals, cacheKey, dogId, onboardingContext, customIds, PLAN_VERSION).catch((e) => {
+    await setCachedWeekPlan(breed, trainingWeek, plan, ageWeeks, goals, cacheKey, dogId, onboardingContext, customIds, PLAN_VERSION, focusAreas).catch((e) => {
       console.error('[GET /api/training/week] cache write failed:', e)
     })
     return NextResponse.json(plan)

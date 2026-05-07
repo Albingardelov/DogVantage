@@ -3,10 +3,15 @@ import { embedText } from './embed'
 import { searchBreedChunks } from '@/lib/supabase/breed-chunks'
 import { formatBreedProfile, formatCurrentPhase } from './breed-profiles'
 import { GOAL_EXERCISE_IDS, GOAL_LABELS, GOAL_RULES } from '@/lib/training/goal-exercises'
+import {
+  focusExerciseIds,
+  focusPromptRule,
+  type WeeklyFocusArea,
+} from '@/lib/training/weekly-focus'
 import type { Breed, TrainingGoal, WeekPlan, HouseholdPet } from '@/types'
 
 // Bump this when plan generation logic changes significantly — forces cache invalidation
-export const PLAN_VERSION = 'v4'
+export const PLAN_VERSION = 'v5'
 
 function allowedExerciseIdsForBreed(breed: Breed, ageWeeks?: number): string[] {
   const isPuppy = typeof ageWeeks === 'number' && ageWeeks > 0 && ageWeeks < 16
@@ -85,7 +90,8 @@ export async function generateWeekPlan(
   onboardingContext?: string,
   performanceSummary?: string,
   customExercises?: Array<{ exercise_id: string; label: string }>,
-  householdPets?: HouseholdPet[]
+  householdPets?: HouseholdPet[],
+  weeklyFocus?: WeeklyFocusArea[]
 ): Promise<WeekPlan> {
   let chunks: import('@/types').ChunkMatch[] = []
   try {
@@ -107,7 +113,8 @@ export async function generateWeekPlan(
   const petIds = householdPets && householdPets.length > 0
     ? ['socialisering', 'impulskontroll', 'fokus', 'plats']
     : []
-  const allowedIds = [...new Set([...breedIds, ...goalIds, ...petIds])]
+  const focusIds = weeklyFocus && weeklyFocus.length > 0 ? focusExerciseIds(weeklyFocus) : []
+  const allowedIds = [...new Set([...breedIds, ...goalIds, ...petIds, ...focusIds])]
 
   const isPuppy = typeof ageWeeks === 'number' && ageWeeks > 0 && ageWeeks < 16
 
@@ -142,6 +149,8 @@ export async function generateWeekPlan(
     ? 'Husdjursregel (gårdsdjur): inkludera stoppsignal och impulskontroll varje träningsdag (båda är tillåtna id). Introduktion till boskap sker kontrollerat.'
     : null
 
+  const focusRule = weeklyFocus && weeklyFocus.length > 0 ? focusPromptRule(weeklyFocus) : null
+
   const idRules = [
     breedSpecificRule,
     isPuppy
@@ -149,6 +158,7 @@ export async function generateWeekPlan(
       : null,
     goalRules || null,
     petRule,
+    focusRule,
   ].filter(Boolean).join('\n')
 
   const customSection = customExercises && customExercises.length > 0

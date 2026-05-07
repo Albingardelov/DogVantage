@@ -43,6 +43,8 @@ interface Props {
   sessionNext?: boolean
   /** Ankare för scroll när nästa övning byts (t.ex. `training-session-next`) */
   rootId?: string
+  /** Visas bara om callbacken är satt — byt ut till annan övning ur veckofokus */
+  onSwap?: () => void
 }
 
 const LATENCY_OPTIONS: { id: LatencyBucket; label: string }[] = [
@@ -64,6 +66,7 @@ export default function ExerciseRow({
   ageWeeks,
   sessionNext,
   rootId,
+  onSwap,
 }: Props) {
   const isComplete = done >= exercise.reps
   const successCount = metrics?.success_count ?? 0
@@ -108,6 +111,17 @@ export default function ExerciseRow({
         )}
         {exercise.desc && (
           <span className={styles.desc}>{exercise.desc}</span>
+        )}
+
+        {onSwap && !isComplete && (
+          <button
+            type="button"
+            className={styles.swapBtn}
+            onClick={onSwap}
+            aria-label={`Byt ut ${exercise.label} mot något ur veckofokus`}
+          >
+            <span aria-hidden="true">↻</span> Byt mot fokus
+          </button>
         )}
 
         {(spec || recommendation) && (
