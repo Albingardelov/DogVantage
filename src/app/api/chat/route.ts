@@ -32,13 +32,13 @@ export async function POST(req: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 
-    const { query, breed, weekNumber, ageWeeks, trainingWeek, dogKey, onboardingContext } = await req.json() as {
+    const { query, breed, weekNumber, ageWeeks, trainingWeek, dogId, onboardingContext } = await req.json() as {
       query: string
       breed: Breed
       weekNumber?: number
       ageWeeks?: number
       trainingWeek?: number
-      dogKey?: string
+      dogId?: string
       onboardingContext?: string
     }
 
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
 
     let metricsStrings: string[] = []
     try {
-      const metrics = await getMetrics(breed, todayDateString(), dogKey ?? 'default')
+      const metrics = await getMetrics(breed, todayDateString(), dogId ?? '')
       metricsStrings = formatMetricsForPrompt(metrics)
     } catch {
       // best-effort

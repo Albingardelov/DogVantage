@@ -89,7 +89,8 @@ export async function GET(req: NextRequest) {
   const goals = goalsStr
     ? (goalsStr.split(',').filter((g) => VALID_GOALS.includes(g as TrainingGoal)) as TrainingGoal[])
     : undefined
-  const dogKey = p.get('dogKey') ?? undefined
+  const dogId = p.get('dogId')
+  if (!dogId) return NextResponse.json({ error: 'dogId required' }, { status: 400 })
 
   if (!breed || isNaN(trainingWeek) || !VALID_BREEDS.includes(breed)) {
     return NextResponse.json({ error: 'breed and week required' }, { status: 400 })
@@ -103,12 +104,19 @@ export async function GET(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 
+  const { data: dog } = await supabase
+    .from('dog_profiles')
+    .select('id')
+    .eq('id', dogId)
+    .eq('user_id', user.id)
+    .single()
+  if (!dog) return NextResponse.json({ error: 'forbidden' }, { status: 403 })
+
   // Fetch all context in parallel — these are independent and were previously sequential
   const [recentLogs, customRows] = await Promise.all([
     getRecentLogs(breed, trainingWeek, 3).catch(() => []),
     getActiveCustomExercises().catch(() => []),
   ])
-  const userId = user.id
 
   const performanceSummary = formatPerformanceSummary(formatLogsForPrompt(recentLogs))
   const customExercises = customRows.map((r) => ({ exercise_id: r.exercise_id, label: r.label }))
@@ -121,7 +129,7 @@ export async function GET(req: NextRequest) {
 
   let cached: import('@/types').WeekPlan | null = null
   try {
-    cached = await getCachedWeekPlan(breed, trainingWeek, ageWeeks, goals, cacheKey, userId, onboardingContext, customIds, PLAN_VERSION)
+    cached = await getCachedWeekPlan(breed, trainingWeek, ageWeeks, goals, cacheKey, dogId, onboardingContext, customIds, PLAN_VERSION)
   } catch (e) {
     console.error('[GET /api/training/week] cache read failed:', e)
   }
@@ -130,7 +138,7 @@ export async function GET(req: NextRequest) {
   try {
     const plan = await generateWeekPlan(breed, trainingWeek, ageWeeks, goals, onboardingContext, performanceSummary, customExercises, pets)
     // Only cache AI-generated plans — never cache the fallback
-    await setCachedWeekPlan(breed, trainingWeek, plan, ageWeeks, goals, cacheKey, userId, onboardingContext, customIds, PLAN_VERSION).catch((e) => {
+    await setCachedWeekPlan(breed, trainingWeek, plan, ageWeeks, goals, cacheKey, dogId, onboardingContext, customIds, PLAN_VERSION).catch((e) => {
       console.error('[GET /api/training/week] cache write failed:', e)
     })
     return NextResponse.json(plan)

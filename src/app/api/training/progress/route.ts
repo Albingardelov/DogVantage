@@ -6,29 +6,34 @@ import type { Breed } from '@/types'
 const VALID_BREEDS = ['labrador', 'italian_greyhound', 'braque_francais', 'miniature_american_shepherd']
 
 export async function GET(req: NextRequest) {
-  const { data: { user } } = await (await createSupabaseServer()).auth.getUser()
+  const supabase = await createSupabaseServer()
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 
   const breed = req.nextUrl.searchParams.get('breed') as Breed | null
   const date = req.nextUrl.searchParams.get('date')
-  const dogKey = req.nextUrl.searchParams.get('dogKey') ?? 'default'
+  const dogId = req.nextUrl.searchParams.get('dogId') ?? ''
 
   if (!breed || !date || !VALID_BREEDS.includes(breed)) {
     return NextResponse.json({ error: 'breed and date required' }, { status: 400 })
   }
+  if (!dogId) return NextResponse.json({ error: 'dogId required' }, { status: 400 })
+  const { data: dog } = await supabase.from('dog_profiles').select('id').eq('id', dogId).eq('user_id', user.id).single()
+  if (!dog) return NextResponse.json({ error: 'forbidden' }, { status: 403 })
 
-  const progress = await getProgress(breed, date, dogKey)
+  const progress = await getProgress(breed, date, dogId)
   return NextResponse.json(progress)
 }
 
 export async function PATCH(req: NextRequest) {
-  const { data: { user } } = await (await createSupabaseServer()).auth.getUser()
+  const supabase = await createSupabaseServer()
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 
-  const { breed, date, dogKey, exerciseId, count } = (await req.json()) as {
+  const { breed, date, dogId, exerciseId, count } = (await req.json()) as {
     breed: Breed
     date: string
-    dogKey?: string
+    dogId?: string
     exerciseId: string
     count: number
   }
@@ -36,7 +41,10 @@ export async function PATCH(req: NextRequest) {
   if (!breed || !date || !exerciseId || count === undefined || !VALID_BREEDS.includes(breed)) {
     return NextResponse.json({ error: 'breed, date, exerciseId, count required' }, { status: 400 })
   }
+  if (!dogId) return NextResponse.json({ error: 'dogId required' }, { status: 400 })
+  const { data: dog } = await supabase.from('dog_profiles').select('id').eq('id', dogId).eq('user_id', user.id).single()
+  if (!dog) return NextResponse.json({ error: 'forbidden' }, { status: 403 })
 
-  await upsertProgress(breed, date, dogKey ?? 'default', exerciseId, count)
+  await upsertProgress(breed, date, dogId ?? '', exerciseId, count)
   return NextResponse.json({ ok: true })
 }

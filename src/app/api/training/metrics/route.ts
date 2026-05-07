@@ -30,7 +30,7 @@ function parseLatencyBucket(v: unknown): LatencyBucket | null {
 function parsePatch(body: unknown): {
   breed: Breed
   date: string
-  dogKey: string
+  dogId: string
   exerciseId: string
   patch: Partial<DailyExerciseMetrics>
 } | { error: string; status: number } {
@@ -39,7 +39,7 @@ function parsePatch(body: unknown): {
 
   const breed = b.breed
   const date = b.date
-  const dogKey = typeof b.dogKey === 'string' && b.dogKey ? b.dogKey : 'default'
+  const dogId = typeof b.dogId === 'string' && b.dogId ? b.dogId : ''
   const exerciseId = b.exerciseId
   const patchRaw = b.patch
 
@@ -88,32 +88,41 @@ function parsePatch(body: unknown): {
 
   if (Object.keys(patch).length === 0) return { error: 'patch must include at least one field', status: 400 }
 
-  return { breed, date, dogKey, exerciseId, patch }
+  return { breed, date, dogId, exerciseId, patch }
 }
 
 export async function GET(req: NextRequest) {
-  const { data: { user } } = await (await createSupabaseServer()).auth.getUser()
+  const supabase = await createSupabaseServer()
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 
   const breed = req.nextUrl.searchParams.get('breed')
   const date = req.nextUrl.searchParams.get('date')
-  const dogKey = req.nextUrl.searchParams.get('dogKey') ?? 'default'
+  const dogId = req.nextUrl.searchParams.get('dogId') ?? ''
   if (!isValidBreed(breed) || !isValidDateString(date)) {
     return NextResponse.json({ error: 'breed and date required' }, { status: 400 })
   }
+  if (!dogId) return NextResponse.json({ error: 'dogId required' }, { status: 400 })
+  const { data: dog } = await supabase.from('dog_profiles').select('id').eq('id', dogId).eq('user_id', user.id).single()
+  if (!dog) return NextResponse.json({ error: 'forbidden' }, { status: 403 })
 
-  const metrics = await getMetrics(breed, date, dogKey)
+  const metrics = await getMetrics(breed, date, dogId)
   return NextResponse.json(metrics)
 }
 
 export async function PATCH(req: NextRequest) {
-  const { data: { user } } = await (await createSupabaseServer()).auth.getUser()
+  const supabase = await createSupabaseServer()
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 
   const parsed = parsePatch(await req.json())
   if ('error' in parsed) return NextResponse.json({ error: parsed.error }, { status: parsed.status })
 
-  await upsertMetrics(parsed.breed, parsed.date, parsed.dogKey, parsed.exerciseId, parsed.patch)
+  if (!parsed.dogId) return NextResponse.json({ error: 'dogId required' }, { status: 400 })
+  const { data: dog } = await supabase.from('dog_profiles').select('id').eq('id', parsed.dogId).eq('user_id', user.id).single()
+  if (!dog) return NextResponse.json({ error: 'forbidden' }, { status: 403 })
+
+  await upsertMetrics(parsed.breed, parsed.date, parsed.dogId, parsed.exerciseId, parsed.patch)
   return NextResponse.json({ ok: true })
 }
 
