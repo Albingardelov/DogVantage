@@ -59,6 +59,8 @@ export interface OnboardingPrefs {
   householdPets?: HouseholdPet[]
   /** Free-text owner notes about the dog's specific needs, fears, or focus areas */
   ownerNotes?: string
+  /** ISO date when the dog comes home — training schedule starts from this date */
+  homecomeDate?: string
 }
 
 // ─── Behavior profile (collected in assessment step 1) ───────────────────────

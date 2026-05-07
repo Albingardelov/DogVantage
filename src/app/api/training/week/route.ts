@@ -7,6 +7,7 @@ import { getActiveCustomExercises } from '@/lib/supabase/custom-exercises'
 import { getWeeklyFocus } from '@/lib/supabase/weekly-focus'
 import { currentIsoWeek } from '@/lib/training/weekly-focus'
 import { getActiveHeatCycle, getLastEndedHeatCycle, isSkenfasActive } from '@/lib/supabase/heat-cycles'
+import { getHomecomeWeekPlan } from '@/lib/training/homecoming-plan'
 import { createSupabaseServer } from '@/lib/supabase/server'
 import type { Breed, DogSex, CastrationStatus, TrainingGoal, TrainingEnvironment, RewardPreference, HouseholdPet } from '@/types'
 import { householdPetNotes, HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'
@@ -149,6 +150,13 @@ export async function GET(req: NextRequest) {
   // A non-empty weekly focus also forces per-ISO-week caching so changes apply within the week.
   const cacheKey = performanceSummary || focusAreas.length > 0 ? isoWeekKey() : undefined
   const customIds = customExercises.map((e) => e.exercise_id)
+
+  // Homecoming week: hardcoded gentle plan for week-1 puppies (< 14 weeks old)
+  const isHomecomeWeek = trainingWeek === 1 && typeof ageWeeks === 'number' && ageWeeks < 14
+  if (isHomecomeWeek) {
+    const hasCats = pets.some((p) => p === 'cats_indoor' || p === 'cats_outdoor')
+    return NextResponse.json(getHomecomeWeekPlan(hasCats))
+  }
 
   let cached: import('@/types').WeekPlan | null = null
   try {

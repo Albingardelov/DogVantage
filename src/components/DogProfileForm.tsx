@@ -74,6 +74,7 @@ export default function DogProfileForm({ onSaved }: Props = {}) {
   const [sex, setSex] = useState<DogSex | ''>('')
   const [castrationStatus, setCastrationStatus] = useState<CastrationStatus | ''>('')
   const [birthdate, setBirthdate] = useState('')
+  const [homecomeDate, setHomecomeDate] = useState('')
   const [goals, setGoals] = useState<TrainingGoal[]>(['everyday_obedience'])
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -132,6 +133,7 @@ export default function DogProfileForm({ onSaved }: Props = {}) {
       takesRewardsOutdoors,
       householdPets: householdPets.length > 0 ? householdPets : undefined,
       ownerNotes: ownerNotes.trim() || undefined,
+      homecomeDate: homecomeDate || undefined,
     }
     const profile: DogProfile = {
       name: name.trim(),
@@ -345,6 +347,24 @@ export default function DogProfileForm({ onSaved }: Props = {}) {
                 </span>
               </div>
             )}
+
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="homecome-date">
+                Hämtningsdatum{' '}
+                <span style={{ fontWeight: 400, color: 'var(--color-text-muted)', fontSize: 'var(--text-xs)' }}>(valfritt)</span>
+              </label>
+              <input
+                id="homecome-date"
+                className={styles.input}
+                type="date"
+                value={homecomeDate}
+                onChange={(e) => setHomecomeDate(e.target.value)}
+                min={new Date().toISOString().slice(0, 10)}
+              />
+              <p style={{ margin: '4px 0 0', fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', lineHeight: 1.4 }}>
+                Träningsschemat börjar räkna från detta datum. Visar nedräkning tills dess.
+              </p>
+            </div>
           </div>
         )}
 

@@ -12,7 +12,7 @@ import LearningChecklistCard from '@/components/LearningChecklistCard'
 import DogSwitcher from '@/components/DogSwitcher'
 import AddDogModal from '@/components/AddDogModal'
 import { useActiveDog } from '@/lib/dog/active-dog-context'
-import { getAgeInWeeks } from '@/lib/dog/age'
+import { getAgeInWeeks, daysUntilHomecoming, trainingWeekFromHomecoming } from '@/lib/dog/age'
 import { buildBehaviorContext } from '@/lib/dog/behavior'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import { getHandlerFeedbackTip, type HandlerFeedbackTip } from '@/lib/training/handler-feedback'
@@ -149,7 +149,13 @@ function Dashboard() {
   const [heatState, setHeatState] = useState<{ isInHeat: boolean; skenfasActive: boolean } | null>(null)
 
   const ageWeeks = profile ? Math.max(1, getAgeInWeeks(profile.birthdate)) : 0
-  const trainingWeek = profile?.trainingWeek ?? 1
+  const homecomeDate = profile?.onboarding?.homecomeDate
+  const daysUntilHome = homecomeDate ? daysUntilHomecoming(homecomeDate) : null
+  const beforeHomecoming = daysUntilHome !== null && daysUntilHome > 0
+  // Auto-derive training week from homecoming date when set; fall back to stored value
+  const trainingWeek = homecomeDate && daysUntilHome !== null && daysUntilHome <= 0
+    ? trainingWeekFromHomecoming(homecomeDate)
+    : (profile?.trainingWeek ?? 1)
 
   const refreshWeekStats = useCallback(async () => {
     if (!profile?.breed) return
@@ -366,7 +372,27 @@ function Dashboard() {
             <span>Gör snabb screening (10–12 min)</span>
           </button>
         )}
-        {profile && (
+        {profile && beforeHomecoming ? (
+          <div className={styles.countdownCard}>
+            <div className={styles.countdownIcon} aria-hidden="true">🐾</div>
+            <p className={styles.countdownTitle}>
+              {dogName} kommer hem om {daysUntilHome} {daysUntilHome === 1 ? 'dag' : 'dagar'}
+            </p>
+            <p className={styles.countdownBody}>
+              Träningsschemat aktiveras automatiskt när hämtningsdatumet är inne.
+              Vecka 1 börjar med ett anpassat ankomstprogram — inga krav, bara trygghet.
+            </p>
+            <div className={styles.countdownChecklist}>
+              <p className={styles.countdownChecklistTitle}>Förberedelser att bocka av:</p>
+              <ul className={styles.countdownChecklistItems}>
+                <li>Kattens viloplats på annan våning/rum tillgänglig</li>
+                <li>Valpsäker plats/hörna med bädd och vatten redo</li>
+                <li>Lägg en filt/tröja nära kull ett dygn innan (tar hem din doft)</li>
+                <li>Boka veterinärbesök inom 1–2 veckor</li>
+              </ul>
+            </div>
+          </div>
+        ) : profile ? (
           <TrainingCard
             trainingWeek={trainingWeek}
             ageWeeks={ageWeeks}
@@ -380,7 +406,7 @@ function Dashboard() {
             behaviorContext={buildBehaviorContext(profile)}
             householdPets={profile.onboarding?.householdPets}
           />
-        )}
+        ) : null}
 
         {profile && (
           <div className={styles.statsGrid}>

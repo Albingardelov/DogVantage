@@ -7,7 +7,7 @@ import ProfileGuard from '@/components/ProfileGuard'
 import Avatar from '@/components/Avatar'
 import BottomNav from '@/components/BottomNav'
 import { getDogProfile, updateDogProfile } from '@/lib/dog/profile'
-import { getAgeInWeeks } from '@/lib/dog/age'
+import { getAgeInWeeks, daysUntilHomecoming } from '@/lib/dog/age'
 import { GOALS, ENVIRONMENTS, REWARDS } from '@/components/DogProfileForm'
 import { HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'
 import type { DogProfile, DogSex, CastrationStatus, TrainingGoal, TrainingEnvironment, RewardPreference, HouseholdPet } from '@/types'
@@ -36,6 +36,7 @@ function ProfileView() {
   const [trainingWeek, setTrainingWeek] = useState(1)
   const [sex, setSex] = useState<DogSex | ''>('')
   const [castrationStatus, setCastrationStatus] = useState<CastrationStatus | ''>('')
+  const [homecomeDate, setHomecomeDate] = useState('')
   const [isInHeat, setIsInHeat] = useState(false)
   const [skenfasActive, setSkenfasActive] = useState(false)
   const [heatLoading, setHeatLoading] = useState(false)
@@ -58,6 +59,7 @@ function ProfileView() {
       setTrainingWeek(p.trainingWeek ?? 1)
       setSex(p.sex ?? '')
       setCastrationStatus(p.castrationStatus ?? '')
+      setHomecomeDate(p.onboarding?.homecomeDate ?? '')
       if (p.id) {
         fetch(`/api/training/heat?dogId=${encodeURIComponent(p.id)}`)
           .then((r) => r.ok ? r.json() : null)
@@ -135,6 +137,7 @@ function ProfileView() {
         takesRewardsOutdoors,
         householdPets: householdPets.length > 0 ? householdPets : undefined,
         ownerNotes: trimmedNotes.length > 0 ? trimmedNotes : undefined,
+        homecomeDate: homecomeDate || undefined,
       },
     }
     try {
@@ -400,8 +403,31 @@ function ProfileView() {
               </button>
             </div>
             <span className={styles.helper}>
-              Justera om du vill backa eller hoppa fram i programmet. Påverkar nästa veckoplan.
+              {homecomeDate
+                ? 'Veckan beräknas automatiskt från hämtningsdatumet nedan — justera bara om du vill avvika.'
+                : 'Justera om du vill backa eller hoppa fram i programmet. Påverkar nästa veckoplan.'}
             </span>
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.fieldLabel} htmlFor="homecome-date">
+              Hämtningsdatum{' '}
+              <span style={{ fontWeight: 400, color: 'var(--color-text-muted)', fontSize: 'var(--text-xs)' }}>(valfritt)</span>
+            </label>
+            <input
+              id="homecome-date"
+              className={styles.textarea}
+              type="date"
+              value={homecomeDate}
+              onChange={(e) => { setHomecomeDate(e.target.value); setSaved(false) }}
+            />
+            {homecomeDate && (
+              <span className={styles.helper}>
+                {daysUntilHomecoming(homecomeDate) > 0
+                  ? `${daysUntilHomecoming(homecomeDate)} dagar kvar tills hunden är hemma.`
+                  : 'Hunden är hemma — schemat räknas från detta datum.'}
+              </span>
+            )}
           </div>
         </div>
 
