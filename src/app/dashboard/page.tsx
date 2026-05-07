@@ -9,7 +9,9 @@ import SessionLogForm from '@/components/SessionLogForm'
 import Avatar from '@/components/Avatar'
 import BottomNav from '@/components/BottomNav'
 import LearningChecklistCard from '@/components/LearningChecklistCard'
-import { getDogProfile } from '@/lib/dog/profile'
+import DogSwitcher from '@/components/DogSwitcher'
+import AddDogModal from '@/components/AddDogModal'
+import { useActiveDog } from '@/lib/dog/active-dog-context'
 import { getAgeInWeeks } from '@/lib/dog/age'
 import { buildBehaviorContext } from '@/lib/dog/behavior'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
@@ -133,8 +135,9 @@ function getAgeAlert(ageWeeks: number): AgeAlert | null {
 
 function Dashboard() {
   const router = useRouter()
-  const [profile, setProfile] = useState<DogProfile | null>(null)
+  const { activeDog: profile } = useActiveDog()
   const [showLogForm, setShowLogForm] = useState(false)
+  const [showAddDog, setShowAddDog] = useState(false)
   const [dismissedTips, setDismissedTips] = useState<string[]>(() => {
     try {
       return JSON.parse(localStorage.getItem('dismissedTips') ?? '[]')
@@ -144,15 +147,6 @@ function Dashboard() {
 
   const ageWeeks = profile ? Math.max(1, getAgeInWeeks(profile.birthdate)) : 0
   const trainingWeek = profile?.trainingWeek ?? 1
-
-  useEffect(() => {
-    let alive = true
-    ;(async () => {
-      const p = await getDogProfile()
-      if (alive) setProfile(p)
-    })().catch((e) => console.error('[dashboard getDogProfile]', e))
-    return () => { alive = false }
-  }, [])
 
   const refreshWeekStats = useCallback(async () => {
     if (!profile?.breed) return
@@ -217,7 +211,7 @@ function Dashboard() {
         <div className={styles.headerContent}>
           <div className={styles.headerText}>
             <span className={styles.greeting}>{getGreeting()}</span>
-            <h1 className={styles.dogName}>{dogName}</h1>
+            <DogSwitcher onAddDog={() => setShowAddDog(true)} />
             <Link href="/calendar" className={styles.weekBadge}>
               <span aria-hidden="true">🗓️</span> Programvecka {trainingWeek}
               <span className={styles.weekBadgeArrow} aria-hidden="true">›</span>
@@ -362,6 +356,7 @@ function Dashboard() {
       </div>
 
       <BottomNav active="dashboard" />
+      {showAddDog && <AddDogModal onClose={() => setShowAddDog(false)} />}
     </main>
   )
 }
