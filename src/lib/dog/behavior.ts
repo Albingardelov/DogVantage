@@ -115,15 +115,26 @@ export function formatBehaviorProfile(bp: BehaviorProfile): string {
  */
 export function buildBehaviorContext(profile: {
   assessment?: { behaviorProfile?: BehaviorProfile }
-  onboarding?: { householdPets?: HouseholdPet[] }
+  onboarding?: { householdPets?: HouseholdPet[]; ownerNotes?: string }
 }): string | undefined {
+  const sections: string[] = []
+
   if (profile.assessment?.behaviorProfile) {
-    return formatBehaviorProfile(profile.assessment.behaviorProfile)
+    sections.push(formatBehaviorProfile(profile.assessment.behaviorProfile))
+  } else {
+    const pets = profile.onboarding?.householdPets ?? []
+    if (pets.length > 0) {
+      const lines = ['=== HUSDJUR I HEMMET ===']
+      lines.push(`Husdjur: ${pets.map((p) => HOUSEHOLD_PET_LABELS[p]).join(', ')}`)
+      for (const note of householdPetNotes(pets)) lines.push(note)
+      sections.push(lines.join('\n'))
+    }
   }
-  const pets = profile.onboarding?.householdPets ?? []
-  if (pets.length === 0) return undefined
-  const lines = ['=== HUSDJUR I HEMMET ===']
-  lines.push(`Husdjur: ${pets.map((p) => HOUSEHOLD_PET_LABELS[p]).join(', ')}`)
-  for (const note of householdPetNotes(pets)) lines.push(note)
-  return lines.join('\n')
+
+  const ownerNotes = profile.onboarding?.ownerNotes?.trim()
+  if (ownerNotes) {
+    sections.push(`=== ÄGARENS ANTECKNINGAR ===\n${ownerNotes}`)
+  }
+
+  return sections.length > 0 ? sections.join('\n\n') : undefined
 }

@@ -51,6 +51,8 @@ export interface OnboardingPrefs {
   takesRewardsOutdoors: boolean
   /** Other animals living in the same household — captured at onboarding */
   householdPets?: HouseholdPet[]
+  /** Free-text owner notes about the dog's specific needs, fears, or focus areas */
+  ownerNotes?: string
 }
 
 // ─── Behavior profile (collected in assessment step 1) ───────────────────────

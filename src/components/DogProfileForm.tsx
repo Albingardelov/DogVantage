@@ -86,6 +86,7 @@ export default function DogProfileForm({ onSaved }: Props = {}) {
   const [rewardPreference, setRewardPreference] = useState<RewardPreference>('mixed')
   const [takesRewardsOutdoors, setTakesRewardsOutdoors] = useState(true)
   const [householdPets, setHouseholdPets] = useState<HouseholdPet[]>([])
+  const [ownerNotes, setOwnerNotes] = useState('')
 
   function togglePet(p: HouseholdPet) {
     setHouseholdPets((prev) =>
@@ -128,6 +129,7 @@ export default function DogProfileForm({ onSaved }: Props = {}) {
       rewardPreference,
       takesRewardsOutdoors,
       householdPets: householdPets.length > 0 ? householdPets : undefined,
+      ownerNotes: ownerNotes.trim() || undefined,
     }
     const profile: DogProfile = {
       name: name.trim(),
@@ -372,6 +374,22 @@ export default function DogProfileForm({ onSaved }: Props = {}) {
                   )
                 })}
               </div>
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="owner-notes">
+                Något vi bör veta om hunden?{' '}
+                <span style={{ fontWeight: 400, color: 'var(--color-text-muted)', fontSize: 'var(--text-xs)' }}>(valfritt)</span>
+              </label>
+              <textarea
+                id="owner-notes"
+                className={styles.input}
+                rows={3}
+                value={ownerNotes}
+                onChange={(e) => setOwnerNotes(e.target.value)}
+                placeholder="T.ex. rädd för barn, koppelaggressiv mot hundar, behöver fokus på avslappning och off-knapp…"
+                style={{ resize: 'vertical' }}
+              />
             </div>
           </div>
         )}
