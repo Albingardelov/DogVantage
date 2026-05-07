@@ -11,7 +11,7 @@ import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import type { Breed, DogProfile, HouseholdPet, OnboardingPrefs, RewardPreference, TrainingEnvironment, TrainingGoal } from '@/types'
 import styles from './DogProfileForm.module.css'
 
-const BREEDS: { value: Breed; label: string }[] = [
+export const BREEDS: { value: Breed; label: string }[] = [
   { value: 'braque_francais', label: 'Braque Français' },
   { value: 'labrador', label: 'Labrador Retriever' },
   { value: 'italian_greyhound', label: 'Italiensk Vinthund' },
