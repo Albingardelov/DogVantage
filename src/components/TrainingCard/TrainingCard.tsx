@@ -26,7 +26,7 @@ interface Props {
   ageWeeks: number
   breed: Breed
   dogName: string
-  dogKey: string
+  dogId: string
   goals?: TrainingGoal[]
   environment?: TrainingEnvironment
   rewardPreference?: RewardPreference
@@ -35,7 +35,7 @@ interface Props {
   householdPets?: HouseholdPet[]
 }
 
-export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, dogKey, goals, environment, rewardPreference, takesRewardsOutdoors, behaviorContext, householdPets }: Props) {
+export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, dogId, goals, environment, rewardPreference, takesRewardsOutdoors, behaviorContext, householdPets }: Props) {
   const router = useRouter()
   const [weekPlan, setWeekPlan] = useState<WeekPlan | null>(null)
   const [progress, setProgress] = useState<Record<string, number>>({})
@@ -62,9 +62,9 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
     setError(false)
     try {
       const [planRes, progressRes, metricsRes] = await Promise.all([
-        fetch(`/api/training/week?breed=${breed}&week=${trainingWeek}&ageWeeks=${ageWeeks}${goals && goals.length > 0 ? `&goals=${goals.join(',')}` : ''}${dogKey ? `&dogKey=${dogKey}` : ''}${environment ? `&environment=${environment}` : ''}${rewardPreference ? `&rewardPreference=${rewardPreference}` : ''}${takesRewardsOutdoors != null ? `&takesRewardsOutdoors=${takesRewardsOutdoors}` : ''}${behaviorContext ? `&behaviorContext=${encodeURIComponent(behaviorContext)}` : ''}${householdPets && householdPets.length > 0 ? `&householdPets=${householdPets.join(',')}` : ''}`),
-        fetch(`/api/training/progress?breed=${breed}&date=${todayDate}&dogKey=${encodeURIComponent(dogKey)}`),
-        fetch(`/api/training/metrics?breed=${breed}&date=${todayDate}&dogKey=${encodeURIComponent(dogKey)}`),
+        fetch(`/api/training/week?breed=${breed}&week=${trainingWeek}&ageWeeks=${ageWeeks}${goals && goals.length > 0 ? `&goals=${goals.join(',')}` : ''}${dogId ? `&dogId=${dogId}` : ''}${environment ? `&environment=${environment}` : ''}${rewardPreference ? `&rewardPreference=${rewardPreference}` : ''}${takesRewardsOutdoors != null ? `&takesRewardsOutdoors=${takesRewardsOutdoors}` : ''}${behaviorContext ? `&behaviorContext=${encodeURIComponent(behaviorContext)}` : ''}${householdPets && householdPets.length > 0 ? `&householdPets=${householdPets.join(',')}` : ''}`),
+        fetch(`/api/training/progress?breed=${breed}&date=${todayDate}&dogId=${encodeURIComponent(dogId)}`),
+        fetch(`/api/training/metrics?breed=${breed}&date=${todayDate}&dogId=${encodeURIComponent(dogId)}`),
       ])
       if (planRes.ok) setWeekPlan(await planRes.json())
       else setError(true)
@@ -106,7 +106,7 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
     fetch('/api/training/progress', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ breed, date: todayDate, dogKey, exerciseId, count: newDone }),
+      body: JSON.stringify({ breed, date: todayDate, dogId, exerciseId, count: newDone }),
     }).catch(console.error)
   }
 
@@ -141,7 +141,7 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
     fetch('/api/training/metrics', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ breed, date: todayDate, dogKey, exerciseId, patch }),
+      body: JSON.stringify({ breed, date: todayDate, dogId, exerciseId, patch }),
     }).catch(console.error)
   }
 

@@ -83,7 +83,7 @@ function Chat() {
           ageWeeks={ageWeeks}
           trainingWeek={trainingWeek}
           initialQuestion={initialQuestion}
-          dogKey={profile.id}
+          dogId={profile.id}
           onboardingContext={buildOnboardingContext(profile)}
         />
       )}

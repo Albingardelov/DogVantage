@@ -111,7 +111,7 @@ function Assessment() {
     await fetch('/api/training/metrics', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ breed: profile.breed, date: today, dogKey: profile.id ?? 'default', exerciseId, patch }),
+      body: JSON.stringify({ breed: profile.breed, date: today, dogId: profile.id ?? '', exerciseId, patch }),
     })
   }
 
