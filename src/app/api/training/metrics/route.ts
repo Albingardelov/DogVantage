@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getMetrics, upsertMetrics } from '@/lib/supabase/daily-exercise-metrics'
 import { getExerciseSpec, isValidCriteriaLevel } from '@/lib/training/exercise-specs'
+import { createSupabaseServer } from '@/lib/supabase/server'
 import type { Breed, DailyExerciseMetrics, LatencyBucket } from '@/types'
 
 const VALID_BREEDS = ['labrador', 'italian_greyhound', 'braque_francais', 'miniature_american_shepherd'] as const
@@ -91,6 +92,9 @@ function parsePatch(body: unknown): {
 }
 
 export async function GET(req: NextRequest) {
+  const { data: { user } } = await (await createSupabaseServer()).auth.getUser()
+  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+
   const breed = req.nextUrl.searchParams.get('breed')
   const date = req.nextUrl.searchParams.get('date')
   const dogKey = req.nextUrl.searchParams.get('dogKey') ?? 'default'
@@ -103,6 +107,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
+  const { data: { user } } = await (await createSupabaseServer()).auth.getUser()
+  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+
   const parsed = parsePatch(await req.json())
   if ('error' in parsed) return NextResponse.json({ error: parsed.error }, { status: parsed.status })
 

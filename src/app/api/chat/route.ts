@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { aiErrorResponse } from '@/lib/ai/errors'
+import { createSupabaseServer } from '@/lib/supabase/server'
 import { queryRAG } from '@/lib/ai/rag'
 import { getRecentLogs, formatLogsForPrompt } from '@/lib/supabase/session-logs'
 import { getMetrics } from '@/lib/supabase/daily-exercise-metrics'
@@ -27,6 +28,10 @@ function formatMetricsForPrompt(metrics: Record<string, import('@/types').DailyE
 
 export async function POST(req: NextRequest) {
   try {
+    const supabase = await createSupabaseServer()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+
     const { query, breed, weekNumber, ageWeeks, trainingWeek, dogKey, onboardingContext } = await req.json() as {
       query: string
       breed: Breed

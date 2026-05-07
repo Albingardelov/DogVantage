@@ -99,15 +99,16 @@ export async function GET(req: NextRequest) {
   const pets = parsePets(p)
   const onboardingContext = buildOnboardingContext(p, pets)
 
+  const supabase = await createSupabaseServer()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+
   // Fetch all context in parallel — these are independent and were previously sequential
-  const [userId, recentLogs, customRows] = await Promise.all([
-    createSupabaseServer()
-      .then((s) => s.auth.getUser())
-      .then((r) => r.data.user?.id)
-      .catch(() => undefined),
+  const [recentLogs, customRows] = await Promise.all([
     getRecentLogs(breed, trainingWeek, 3).catch(() => []),
     getActiveCustomExercises().catch(() => []),
   ])
+  const userId = user.id
 
   const performanceSummary = formatPerformanceSummary(formatLogsForPrompt(recentLogs))
   const customExercises = customRows.map((r) => ({ exercise_id: r.exercise_id, label: r.label }))
