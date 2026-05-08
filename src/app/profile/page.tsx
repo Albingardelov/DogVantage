@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import ProfileGuard from '@/components/ProfileGuard'
 import Avatar from '@/components/Avatar'
 import BottomNav from '@/components/BottomNav'
 import { updateDogProfile } from '@/lib/dog/profile'
+import { saveDogPhoto } from '@/lib/dog/photo'
 import { useActiveDog } from '@/lib/dog/active-dog-context'
 import { getAgeInWeeks, daysUntilHomecoming } from '@/lib/dog/age'
 import { GOALS, ENVIRONMENTS, REWARDS } from '@/components/DogProfileForm'
@@ -45,6 +46,8 @@ function ProfileView() {
   const [saved, setSaved] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [photoKey, setPhotoKey] = useState(0)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Initialize edit state from the active dog (context) — re-runs when dog switches
   useEffect(() => {
@@ -121,6 +124,19 @@ function ProfileView() {
     }
   }
 
+  async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !profile) return
+    const reader = new FileReader()
+    reader.onload = async (ev) => {
+      const dataUrl = ev.target?.result
+      if (typeof dataUrl !== 'string') return
+      await saveDogPhoto(dataUrl, profile.id)
+      setPhotoKey((k) => k + 1)
+    }
+    reader.readAsDataURL(file)
+  }
+
   async function handleSave() {
     if (!profile) return
     const trimmedNotes = ownerNotes.trim()
@@ -189,7 +205,22 @@ function ProfileView() {
       </header>
 
       <div className={styles.dogInfo}>
-        <Avatar name={profile.name} size={72} />
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={handlePhotoChange}
+        />
+        <button
+          type="button"
+          className={styles.avatarBtn}
+          onClick={() => fileInputRef.current?.click()}
+          aria-label="Byt profilbild"
+        >
+          <Avatar key={photoKey} name={profile.name} dogId={profile.id} size={72} bordered={false} />
+          <span className={styles.avatarEditBadge}>✎</span>
+        </button>
         <span className={styles.dogName}>{profile.name}</span>
         <span className={styles.dogMeta}>{breedLabel(profile.breed)} · {ageLabel} · Vecka {profile.trainingWeek ?? 1}</span>
       </div>

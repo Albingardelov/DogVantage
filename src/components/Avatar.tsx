@@ -8,13 +8,15 @@ interface AvatarProps {
   /** Optional explicit photo URL. If omitted, the photo is loaded from Supabase Storage. */
   photo?: string | null
   name: string
+  /** Dog UUID — used to load the correct per-dog photo from storage. */
+  dogId?: string
   /** Outer diameter in pixels. */
   size?: number
   /** When false, removes the white border ring (used inside dark headers). */
   bordered?: boolean
 }
 
-export default function Avatar({ photo, name, size = 64, bordered = true }: AvatarProps) {
+export default function Avatar({ photo, name, dogId, size = 64, bordered = true }: AvatarProps) {
   const [storedPhoto, setStoredPhoto] = useState<string | null>(null)
   const [imgFailed, setImgFailed] = useState(false)
   const explicitPhotoProvided = photo !== undefined
@@ -23,12 +25,12 @@ export default function Avatar({ photo, name, size = 64, bordered = true }: Avat
     if (!explicitPhotoProvided) {
       let alive = true
       ;(async () => {
-        const url = await getDogPhoto()
+        const url = await getDogPhoto(dogId)
         if (alive) setStoredPhoto(url)
       })().catch((e) => console.error('[Avatar getDogPhoto]', e))
       return () => { alive = false }
     }
-  }, [explicitPhotoProvided])
+  }, [explicitPhotoProvided, dogId])
 
   const finalPhoto = explicitPhotoProvided ? photo : storedPhoto
   const initial = name.trim()[0]?.toUpperCase() || '?'
