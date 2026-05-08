@@ -286,7 +286,7 @@ function Dashboard() {
               style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', borderRadius: '50%' }}
               aria-label="Öppna profil"
             >
-              <Avatar name={dogName} size={64} />
+              <Avatar name={dogName} dogId={profile?.id} size={64} />
             </button>
           </div>
         </div>
