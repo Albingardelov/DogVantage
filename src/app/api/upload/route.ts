@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createSupabaseServer } from '@/lib/supabase/server'
 import { getSupabaseAdmin } from '@/lib/supabase/client'
 import type { Breed } from '@/types'
 
 // Community submission endpoint — stores file metadata for admin review.
 // Does NOT ingest directly; admin uses /admin/ingest after vetting.
+// Requires auth so the table can't be flooded anonymously.
 export async function POST(req: NextRequest) {
+  const supabase = await createSupabaseServer()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+
   const form = await req.formData()
   const file = form.get('file') as File | null
   const breed = form.get('breed') as Breed | null

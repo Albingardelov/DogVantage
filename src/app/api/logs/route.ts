@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServer } from '@/lib/supabase/server'
+import type { Json } from '@/types/database'
 import type { Breed, QuickRating, ExerciseSummary } from '@/types'
 
 async function assertDogOwnership(
@@ -63,7 +64,8 @@ export async function POST(req: NextRequest) {
       handler_consistency,
       handler_reading,
       notes,
-      exercises,
+      // ExerciseSummary[] is structurally Json but TS needs the cast at the boundary
+      exercises: (exercises ?? null) as Json,
     })
     .select()
     .single()

@@ -19,7 +19,8 @@ export async function getRecentLogs(
     .limit(limit)
 
   if (error) throw new Error(`Failed to fetch session logs: ${error.message}`)
-  return (data ?? []) as SessionLog[]
+  // exercises is stored as Json; we trust the writer kept it as ExerciseSummary[]
+  return (data ?? []) as unknown as SessionLog[]
 }
 
 export async function getAllLogs(dogId: string, limit = 30): Promise<SessionLog[]> {
@@ -35,7 +36,8 @@ export async function getAllLogs(dogId: string, limit = 30): Promise<SessionLog[
     .limit(limit)
 
   if (error) throw new Error(`Failed to fetch session logs: ${error.message}`)
-  return (data ?? []) as SessionLog[]
+  // exercises is stored as Json; we trust the writer kept it as ExerciseSummary[]
+  return (data ?? []) as unknown as SessionLog[]
 }
 
 export function formatLogsForPrompt(logs: SessionLog[]): string[] {

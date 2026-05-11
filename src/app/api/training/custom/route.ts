@@ -142,6 +142,10 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
+    const supabase = await createSupabaseServer()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+
     const body = await req.json() as { id?: unknown; active?: unknown }
     if (typeof body.id !== 'string' || typeof body.active !== 'boolean') {
       return NextResponse.json({ error: 'id and active required' }, { status: 400 })
@@ -156,6 +160,10 @@ export async function PATCH(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
+    const supabase = await createSupabaseServer()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+
     const body = await req.json() as { id?: unknown }
     if (typeof body.id !== 'string') {
       return NextResponse.json({ error: 'id required' }, { status: 400 })

@@ -1,4 +1,5 @@
 import { createSupabaseServer } from './server'
+import type { Json } from '@/types/database'
 import type { ExerciseSpec } from '@/lib/training/exercise-specs'
 
 export interface CustomExercise {
@@ -26,7 +27,8 @@ export async function getActiveCustomExercises(dogId: string): Promise<CustomExe
     .order('created_at', { ascending: true })
 
   if (error) throw new Error(`custom_exercises fetch failed: ${error.message}`)
-  return (data ?? []) as CustomExercise[]
+  // spec is stored as Json; we trust the writer kept it as ExerciseSpec
+  return (data ?? []) as unknown as CustomExercise[]
 }
 
 export async function getAllCustomExercises(dogId: string): Promise<CustomExercise[]> {
@@ -41,7 +43,7 @@ export async function getAllCustomExercises(dogId: string): Promise<CustomExerci
     .order('created_at', { ascending: true })
 
   if (error) throw new Error(`custom_exercises fetch failed: ${error.message}`)
-  return (data ?? []) as CustomExercise[]
+  return (data ?? []) as unknown as CustomExercise[]
 }
 
 export async function createCustomExercise(
@@ -55,12 +57,19 @@ export async function createCustomExercise(
   const supabase = await createSupabaseServer()
   const { data, error } = await supabase
     .from('custom_exercises')
-    .insert({ user_id: userId, dog_id: dogId, exercise_id: exerciseId, label, prompt, spec })
+    .insert({
+      user_id: userId,
+      dog_id: dogId,
+      exercise_id: exerciseId,
+      label,
+      prompt,
+      spec: spec as unknown as Json,
+    })
     .select()
     .single()
 
   if (error) throw new Error(`custom_exercises insert failed: ${error.message}`)
-  return data as CustomExercise
+  return data as unknown as CustomExercise
 }
 
 export async function toggleCustomExercise(id: string, active: boolean): Promise<void> {

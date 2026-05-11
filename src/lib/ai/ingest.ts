@@ -43,7 +43,8 @@ export async function ingestPDF(
       doc_version: docVersion,
       page_ref: '',
       content,
-      embedding,
+      // pgvector accepts number[] at runtime but generated types say string
+      embedding: embedding as unknown as string,
     })
     if (error) throw new Error(`Insert failed: ${error.message}`)
     inserted++

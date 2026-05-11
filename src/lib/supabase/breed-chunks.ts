@@ -12,9 +12,12 @@ export async function searchBreedChunks(
   matchCount = 6
 ): Promise<ChunkMatch[]> {
   const supabase = getSupabaseAdmin()
+  // pgvector accepts number[] at runtime but generated types say string — cast at the boundary
+  const embeddingArg = queryEmbedding as unknown as string
+
   // Fetch breed-specific chunks
   const { data: breedData, error: breedError } = await supabase.rpc('match_breed_chunks', {
-    query_embedding: queryEmbedding,
+    query_embedding: embeddingArg,
     match_breed: breed,
     match_count: matchCount,
   })
@@ -22,7 +25,7 @@ export async function searchBreedChunks(
 
   // Fetch general training chunks (not breed-specific)
   const { data: generalData } = await supabase.rpc('match_breed_chunks', {
-    query_embedding: queryEmbedding,
+    query_embedding: embeddingArg,
     match_breed: 'general',
     match_count: matchCount,
   })

@@ -1,4 +1,5 @@
 import { getSupabaseBrowser } from './browser'
+import type { Json } from '@/types/database'
 import type { DogProfile, DogSex, CastrationStatus } from '@/types'
 
 interface DbProfile {
@@ -50,8 +51,8 @@ export async function saveProfile(profile: DogProfile, userId: string): Promise<
     training_week: profile.trainingWeek ?? 1,
     sex: profile.sex ?? null,
     castration_status: profile.castrationStatus ?? null,
-    onboarding: profile.onboarding ?? null,
-    assessment: profile.assessment ?? null,
+    onboarding: (profile.onboarding ?? null) as unknown as Json | null,
+    assessment: (profile.assessment ?? null) as unknown as Json | null,
   }
 
   // If the profile already has an id, update that specific record (edit flow).
@@ -79,13 +80,20 @@ export async function saveProfile(profile: DogProfile, userId: string): Promise<
 export async function updateProfile(fields: Partial<DogProfile>): Promise<void> {
   if (!fields.id) throw new Error('updateProfile requires fields.id — refusing to update without dog id')
 
-  const updates: Record<string, unknown> = {}
+  const updates: {
+    training_week?: number
+    onboarding?: Json | null
+    assessment?: Json | null
+    name?: string
+    sex?: DogSex | null
+    castration_status?: CastrationStatus | null
+  } = {}
   if (fields.trainingWeek !== undefined) updates.training_week = fields.trainingWeek
-  if (fields.onboarding !== undefined) updates.onboarding = fields.onboarding
-  if (fields.assessment !== undefined) updates.assessment = fields.assessment
+  if (fields.onboarding !== undefined) updates.onboarding = fields.onboarding as unknown as Json | null
+  if (fields.assessment !== undefined) updates.assessment = fields.assessment as unknown as Json | null
   if (fields.name !== undefined) updates.name = fields.name
-  if (fields.sex !== undefined) updates.sex = fields.sex
-  if (fields.castrationStatus !== undefined) updates.castration_status = fields.castrationStatus
+  if (fields.sex !== undefined) updates.sex = fields.sex ?? null
+  if (fields.castrationStatus !== undefined) updates.castration_status = fields.castrationStatus ?? null
 
   if (Object.keys(updates).length === 0) return
 
