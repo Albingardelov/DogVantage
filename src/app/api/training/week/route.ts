@@ -4,6 +4,8 @@ import { generateWeekPlan, PLAN_VERSION } from '@/lib/ai/week-plan'
 import { getCachedWeekPlan, setCachedWeekPlan } from '@/lib/supabase/training-cache'
 import { getRecentLogs, formatLogsForPrompt } from '@/lib/supabase/session-logs'
 import { getActiveCustomExercises } from '@/lib/supabase/custom-exercises'
+import { getSupabaseAdmin } from '@/lib/supabase/client'
+import { computeProgressionDecisions, formatProgressionRule, type ProgressionMetricRow } from '@/lib/training/progression-rules'
 import { getWeeklyFocus } from '@/lib/supabase/weekly-focus'
 import { currentIsoWeek } from '@/lib/training/weekly-focus'
 import { getActiveHeatCycle, getLastEndedHeatCycle, isSkenfasActive } from '@/lib/supabase/heat-cycles'
@@ -132,12 +134,29 @@ export async function GET(req: NextRequest) {
   // Fetch all context in parallel — these are independent and were previously sequential
   const isoWeek = currentIsoWeek()
   const needsHeatData = dogSex === 'female' && castrationStatus === 'intact'
-  const [recentLogs, customRows, focusAreas, activeHeat, lastEnded] = await Promise.all([
+  const sevenDaysAgo = (() => {
+    const d = new Date()
+    d.setUTCDate(d.getUTCDate() - 7)
+    return d.toISOString().slice(0, 10)
+  })()
+  const [recentLogs, customRows, focusAreas, activeHeat, lastEnded, recentMetrics] = await Promise.all([
     getRecentLogs(dogId, trainingWeek, 3).catch(() => []),
     getActiveCustomExercises(dogId).catch(() => []),
     getWeeklyFocus(dogId, isoWeek).catch(() => []),
     needsHeatData ? getActiveHeatCycle(dogId).catch(() => null) : Promise.resolve(null),
     needsHeatData ? getLastEndedHeatCycle(dogId).catch(() => null) : Promise.resolve(null),
+    (async (): Promise<ProgressionMetricRow[]> => {
+      try {
+        const { data } = await getSupabaseAdmin()
+          .from('daily_exercise_metrics')
+          .select('exercise_id, date, success_count, fail_count, latency_bucket, criteria_level_id')
+          .eq('dog_id', dogId)
+          .gte('date', sevenDaysAgo)
+        return (data ?? []) as ProgressionMetricRow[]
+      } catch {
+        return []
+      }
+    })(),
   ])
   const isInHeat = !!activeHeat
   const skenfasActive = isSkenfasActive(lastEnded)
@@ -154,6 +173,11 @@ export async function GET(req: NextRequest) {
 
   const performanceSummary = formatPerformanceSummary(formatLogsForPrompt(recentLogs))
   const customExercises = customRows.map((r) => ({ exercise_id: r.exercise_id, label: r.label }))
+  const progressionDecisions = computeProgressionDecisions(recentMetrics)
+  const progressionRule = formatProgressionRule(
+    progressionDecisions,
+    Object.fromEntries(customExercises.map((e) => [e.exercise_id, e.label])),
+  )
 
   // Plans with performance data are cached per ISO-week so the plan adapts to
   // recent logs without triggering a fresh Groq call on every page load.
@@ -178,7 +202,7 @@ export async function GET(req: NextRequest) {
   if (cached) return NextResponse.json(cached)
 
   try {
-    const plan = await generateWeekPlan(breed, trainingWeek, ageWeeks, goals, onboardingContext, performanceSummary, customExercises, pets, focusAreas, dogSex, castrationStatus, isInHeat, skenfasActive)
+    const plan = await generateWeekPlan(breed, trainingWeek, ageWeeks, goals, onboardingContext, performanceSummary, customExercises, pets, focusAreas, dogSex, castrationStatus, isInHeat, skenfasActive, progressionRule)
     // Only cache AI-generated plans — never cache the fallback
     await setCachedWeekPlan(breed, trainingWeek, plan, ageWeeks, goals, cacheKey, dogId, onboardingContext, customIds, PLAN_VERSION, focusAreas).catch((e) => {
       console.error('[GET /api/training/week] cache write failed:', e)

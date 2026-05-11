@@ -2,6 +2,7 @@ import { getGeminiTextModel, jsonGenConfig } from './client'
 import { embedText } from './embed'
 import { searchBreedChunks } from '@/lib/supabase/breed-chunks'
 import { formatBreedProfile, formatCurrentPhase } from './breed-profiles'
+import { formatDevelopmentalContext, getMaxSessionMinutes } from '@/lib/training/developmental-context'
 import { GOAL_EXERCISE_IDS, GOAL_LABELS, GOAL_RULES } from '@/lib/training/goal-exercises'
 import {
   focusExerciseIds,
@@ -11,7 +12,7 @@ import {
 import type { Breed, DogSex, CastrationStatus, TrainingGoal, WeekPlan, HouseholdPet } from '@/types'
 
 // Bump this when plan generation logic changes significantly — forces cache invalidation
-export const PLAN_VERSION = 'v6'
+export const PLAN_VERSION = 'v7'
 
 /**
  * R+ foundation exercises that should be available for every breed and age.
@@ -115,7 +116,8 @@ export async function generateWeekPlan(
   dogSex?: DogSex,
   castrationStatus?: CastrationStatus,
   isInHeat?: boolean,
-  skenfasActive?: boolean
+  skenfasActive?: boolean,
+  progressionRule?: string | null,
 ): Promise<WeekPlan> {
   let chunks: import('@/types').ChunkMatch[] = []
   try {
@@ -205,7 +207,20 @@ export async function generateWeekPlan(
     ? 'Capturing vs. luring: för sitt/ligg/plats — inkludera laddertrappstegen "fasa ut locket" och "fånga erbjudet beteende" istället för att fastna i luring. Lure-beroende hund följer maten, inte signalen.'
     : null
 
+  // Developmental window: fear periods, teething, adolescent regression
+  const developmentalRule = typeof ageWeeks === 'number'
+    ? formatDevelopmentalContext(ageWeeks)
+    : null
+
+  // Hard session-length cap for very young puppies (under 12 weeks: 60–90 sec micro-sessions)
+  const sessionCap = typeof ageWeeks === 'number'
+    ? `Passlängdsregel (ålder ${ageWeeks} v): MAX ${getMaxSessionMinutes(ageWeeks)} min per pass i desc-fältet. Korta micro-sessions för valpar under 12 v.`
+    : null
+
   const idRules = [
+    progressionRule,    // deterministic advance/hold/regress decisions
+    developmentalRule,  // fear periods + adolescence
+    sessionCap,
     markerRule,
     scheduleRule,
     capturingRule,

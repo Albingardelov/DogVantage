@@ -135,7 +135,7 @@ const braqueFrancais: BreedProfile = {
   ],
   activityGuidelines: {
     puppy:
-      '5 min aktiv träning per session, 2–3 ggr/dag. Fokus: namn, inkallning, stoppsignal, socialisering. Inga långa promenader — benen är känsliga.',
+      '60–90 sek micro-sessions, 4–6 ggr/dag (under 12 v). Fokus: namn, marker-laddning, mjuk hantering, socialisering. Inga långa promenader — benen är känsliga. Från 12–16 v: upp till 3 min/pass.',
     junior:
       '10–20 min strukturerad träning. Introducera sökmönster, stånd med dummy/vilt, apportering. Fria lekar i lagom terräng.',
     adolescent:
@@ -461,13 +461,13 @@ export const TRAINING_CURRICULUM: TrainingPhase[] = [
     ],
   },
   {
-    label: 'Ungdomsperiod',
+    label: 'Ungdomsperiod (adolescent regression)',
     weeks: { from: 26, to: 52 },
     focus: [
-      'Konsekvens viktigare än ny träning — teen-fasen testar gränser',
-      'Fortsätt med kortare, roliga pass',
-      'Fördjupa rasspecifika färdigheter',
-      'Introduktion av tävling/prov om relevant',
+      'Kortikal pruning omformar nervsystemet — tidigare inlärda beteenden kan verka "försvinna". Det är neurobiologi, inte attityd.',
+      'Andra frykperiod kan inträffa här — stötta hunden vid plötsliga rädslor istället för att tvinga.',
+      'Konsolidera befintliga beteenden, höj inte kriterier under regressionsfasen.',
+      'Korta, lyckade pass med generös förstärkning — minska luringen, öka markörarbetet.',
     ],
     weeklyExercises: [
       'Upprepa alla grundövningar men med ökad distans och distraktion.',
