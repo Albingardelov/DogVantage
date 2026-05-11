@@ -20,15 +20,17 @@ export const TRIGGER_LABELS: Record<TriggerType, string> = {
 }
 
 export const LEASH_LABELS: Record<LeashBehavior, string> = {
+  not_yet_out:         'Har inte varit ute regelbundet än',
   calm:                'Slakt koppel — lugnt och fint',
   pulls_some:          'Drar lite, men hanterbart',
   pulls_hard_reactive: 'Drar hårt eller reagerar/skäller i koppel',
 }
 
 export const ENV_REACTION_LABELS: Record<NewEnvironmentReaction, string> = {
-  curious:  'Nyfiken och trygg direkt',
-  cautious: 'Lite försiktig men lugnar ner sig',
-  avoidant: 'Undviker eller verkar rädd',
+  not_yet_out: 'Har inte exponerats för nya miljöer än',
+  curious:     'Nyfiken och trygg direkt',
+  cautious:    'Lite försiktig men lugnar ner sig',
+  avoidant:    'Undviker eller verkar rädd',
 }
 
 export const BACKGROUND_LABELS: Record<TrainingBackground, string> = {
@@ -82,13 +84,23 @@ export function formatBehaviorProfile(bp: BehaviorProfile): string {
   const lines: string[] = ['=== BETEENDEPROFIL ===']
 
   lines.push(`Träningsbakgrund: ${BACKGROUND_LABELS[bp.trainingBackground]}`)
-  lines.push(`Koppelbeteende: ${LEASH_LABELS[bp.leashBehavior]}`)
-  lines.push(`Reaktion på ny miljö/folk: ${ENV_REACTION_LABELS[bp.newEnvironmentReaction]}`)
 
-  if (bp.triggers.length > 0) {
-    lines.push(`Kända triggers: ${bp.triggers.map((t) => TRIGGER_LABELS[t]).join(', ')}`)
+  const notYetOut = bp.leashBehavior === 'not_yet_out' && bp.newEnvironmentReaction === 'not_yet_out'
+  if (notYetOut) {
+    lines.push('Status: Hunden har inte varit ute regelbundet ännu — börja med första-promenadens ladder (sele inne → koppel släpas → inne 2 steg → första gatan).')
   } else {
-    lines.push('Kända triggers: Inga specifika triggers angivna')
+    if (bp.leashBehavior !== 'not_yet_out') {
+      lines.push(`Koppelbeteende: ${LEASH_LABELS[bp.leashBehavior]}`)
+    }
+    if (bp.newEnvironmentReaction !== 'not_yet_out') {
+      lines.push(`Reaktion på ny miljö/folk: ${ENV_REACTION_LABELS[bp.newEnvironmentReaction]}`)
+    }
+
+    if (bp.triggers.length > 0) {
+      lines.push(`Kända triggers: ${bp.triggers.map((t) => TRIGGER_LABELS[t]).join(', ')}`)
+    } else {
+      lines.push('Kända triggers: Inga specifika triggers angivna')
+    }
   }
 
   if (bp.householdPets.length > 0) {

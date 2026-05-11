@@ -253,6 +253,118 @@ const ARTICLES: Article[] = [
       },
     ],
   },
+  {
+    id: 'rastning',
+    title: 'Rentränа valpen — schema, belöning och varför straff inte fungerar',
+    summary: 'Rentränan är inte uppfostran — det är blåsmuskulatur och rutin. Här är schemat som faktiskt funkar.',
+    readTime: '5 min',
+    sections: [
+      {
+        heading: 'Det här handlar om kropp, inte beteende',
+        body: 'En valp under 16 veckor har inte muskelkontroll nog att hålla sig länge. Olyckor inne är inte olydnad — det är att kroppen är snabbare än hjärnan. Du tränar inte hunden att "hålla sig", du bygger en rutin där varje kiss/bajs hamnar på rätt plats. Resten kommer när muskulaturen utvecklas.',
+      },
+      {
+        heading: 'Schemat: ut direkt vid varje trigger',
+        body: 'Trigger-tillfällen där valpen MÅSTE ut omedelbart: efter sömn (även 5 min tupplur), efter mat, efter lek, och var 60–90 min vaken tid. Bär valpen ut, sätt inte ner i hallen — de kissar i trappan. Stå still ute, säg en lugn signal ("kissa") och vänta 2 minuter. När det händer, belöna direkt på platsen (godis i fickan).',
+      },
+      {
+        heading: 'Belöna ute, aldrig efteråt inne',
+        body: 'Belöning sker exakt där och då. Belönar du när ni kommit in igen kopplar valpen ihop "gå in" med belöning, inte "kissa ute". Stå sedan kvar 1–2 minuter och låt valpen utforska — det blir bonusbelöningen.',
+      },
+      {
+        heading: 'Vad du INTE ska göra vid olyckor',
+        body: 'Skäll aldrig. Stryk inte nosen i det. Visa inte upp det med fördömande röst. Allt detta lär hunden att kissa = obehag = göm dig, vilket leder till smyg-olyckor bakom soffan. Torka upp neutralt med enzymatisk rengöring (vanlig rengöring tar inte bort doften — hunden gör det igen där).',
+      },
+      {
+        heading: 'När sitter rutinen?',
+        body: 'För de flesta valpar: cirka 4–8 veckor med strikt schema och tät belöning innan rentränan är pålitlig. Vissa raser (italiensk vinthund t.ex.) tar längre tid. Olyckor under den här perioden = ditt schema är för långt, inte att valpen är dum.',
+      },
+    ],
+  },
+  {
+    id: 'bett-inhibition',
+    title: 'Valpen biter mig — vad det faktiskt är och vad du gör',
+    summary: 'Lek-bett är normalt, inte aggression. Här är skillnaden mellan bett-hämning och problem.',
+    readTime: '5 min',
+    sections: [
+      {
+        heading: 'Bett är språk, inte attack',
+        body: 'Valpar utforskar världen med munnen. Lek-bett är hur de testar trycknivåer mot syskon — och nu mot dig. Att helt eliminera bettande är inte målet; målet är **bett-hämning**: hunden lär sig hur hårt den får bita utan att skada. En vuxen hund med bra bett-hämning kan ta en tjuvkikande sandwich ur handen utan att tugga på huden.',
+      },
+      {
+        heading: 'Tekniken: Aj + frys + omdirigera',
+        body: 'Vid hårt bett: säg "Aj!" med mjuk röst (inte arg) + frys helt i 3 sekunder. När valpen släpper: erbjud en godkänd tuggleksak. Tar valpen leksaken? 30 sek lek med den som belöning för rätt val. Skiljs händer från mun blir leksak en bättre belöning än hud.',
+      },
+      {
+        heading: 'När det blir för mycket: time-out',
+        body: 'Om "Aj" inte funkar efter 2–3 reps är valpen överstimulerad. Res dig och gå ifrån (eller bär valpen lugnt till sin vilo-plats). Time-out är inte straff — det är "leken tar slut när tänderna är på huden". Återkom efter 30 sek, lugnare. Värre på kvällar? Lägg in vila i bur INNAN överstimuleringen börjar.',
+      },
+      {
+        heading: 'Vad du ALDRIG ska göra',
+        body: 'Skrika eller dra hårt undan handen → triggar mer lek-bett (det blir spel). Knäppa på nosen, hålla munnen stängd, dra i nackskinnet → fysisk korrigering bygger rädsla, inte bett-hämning. Och rädsla → riktiga bett senare, inte färre.',
+      },
+      {
+        heading: 'När du ska söka hjälp',
+        body: 'Bett mot barn, morrande före bett, vakande av mat/leksaker, eller bett som blir hårdare i stället för mjukare över tid — det är inte normalt valp-bett. Sluta träna själv och kontakta certifierad beteendekonsulent (SBBK/IAABC).',
+      },
+    ],
+  },
+  {
+    id: 'box-traning',
+    title: 'Burträning — så bygger du en plats hunden älskar',
+    summary: 'En bur är inte ett straff. Rätt introducerad blir den hundens favorit-vilo-plats.',
+    readTime: '5 min',
+    sections: [
+      {
+        heading: 'Varför bur överhuvudtaget',
+        body: 'En bur ger hunden en egen tydlig vilo-plats där den inte blir störd. Det hjälper renträning (de flesta hundar håller sig på sin sov-plats), gör resor säkrare, ger dig en plats att lägga hunden när du har hantverkare/gäster, och bygger självständighet (lugn när du går).',
+      },
+      {
+        heading: 'Rätt storlek',
+        body: 'Hunden ska kunna stå, vända sig om och ligga utsträckt — men inte mycket större. En valp i en stor bur kissar i ena hörnet och sover i andra. Köp bur för slutstorleken och blocka ena halvan tills valpen växer.',
+      },
+      {
+        heading: 'Introduktionsfas (1–2 veckor)',
+        body: 'Vecka 1: mata ALLA måltider i öppen bur. Kasta godis in i buren. Hunden går in och ut frivilligt. Inget krav, ingen stängd dörr. Vecka 2: stäng dörren medan hunden äter, öppna innan den är klar. Bygg från 5 sek till 1 minut.',
+      },
+      {
+        heading: 'Bygga duration + frånvaro',
+        body: 'Först vila med dig i rummet: 5 min → 15 min → 30 min. Sedan korta stunder utan dig: gå ut för posten, kort ärende. Aldrig hoppa direkt till 4 timmar — då lär sig hunden att buren = panik. Variera tider så hunden inte räknar minuter.',
+      },
+      {
+        heading: 'Aldrig som straff, aldrig vid skäll',
+        body: 'Använder du buren som "skamvrå" hatar hunden den för alltid. Och släpper du ut när hunden skäller lär du den: skälla = öppen dörr. Vänta tystnad (även 5 sek räcker) innan du öppnar. Om hunden får panik-attack (hyperventilerar, vägrar mat, river dörren) — STOPP. Det är möjlig separationsångest, kontakta beteendekonsulent.',
+      },
+    ],
+  },
+  {
+    id: 'ensam-traning',
+    title: 'Ensam hemma — bygg upp tiden gradvis',
+    summary: 'Hopp direkt till 4 timmar = panik. Här är ladd-stegen från 30 sekunder.',
+    readTime: '5 min',
+    sections: [
+      {
+        heading: 'Börja innan du behöver det',
+        body: 'Vänta inte tills första arbetsdagen efter pappaledigheten. Träna ensamhet från vecka 1 hemma, även om du jobbar hemifrån. Hundar som "alltid haft sällskap" får oftast störst problem när det väl behövs.',
+      },
+      {
+        heading: 'Konditionera bort avskedscues',
+        body: 'Hunden börjar reagera redan när du tar på morgonrocken eller plockar nycklarna. Plocka upp nycklarna 20 gånger om dagen utan att gå någonstans. Ta på skorna, sätt dig igen. Cues förlorar betydelse. När hunden inte längre vänder huvudet — då kan du börja gå.',
+      },
+      {
+        heading: 'Bygg upp tiden i små steg',
+        body: 'Gå ut genom dörren → kom tillbaka direkt (5 sek). Belöna lugn hund. Sedan 30 sek → 1 min → 2 min → 5 min → 15 min → 30 min. Variera ordningen så hunden inte räknar. Filma första gångerna (telefon eller baby-monitor) — du behöver se vad som händer.',
+      },
+      {
+        heading: 'Före varje gång du går',
+        body: 'Tröttkör fysiskt + mentalt: promenad + nosework eller trick-träning. Sömnig hund klarar mer. Lämna en fryst kong (frusen leverpate håller 20–30 min). Lugnt avsked — inget "hej då lilla älskling!" som höjer arousal. Lugn hälsning hem — inte stort kalas, det bygger förväntan om dramatiska återkomster.',
+      },
+      {
+        heading: 'Signaler på riktiga problem',
+        body: 'Förstör möbler, dörrar, golv → backa nivån till 50%. Saliv-fläckar, häftig hyperventilation, självskada (sliter päls, river tassar), vägrar mat efter du varit borta → det är separationsångest, inte ouppfostran. Träna inte vidare själv — det blir värre. Boka tid med beteendekonsulent (SBBK/IAABC).',
+      },
+    ],
+  },
 ]
 
 function Learn() {

@@ -80,15 +80,17 @@ export type TriggerType =
 
 /** How the dog behaves on leash in general */
 export type LeashBehavior =
+  | 'not_yet_out'           // Hunden har inte varit ute regelbundet (t.ex. ny valp före promenader)
   | 'calm'                  // Slakt koppel, lugnt
   | 'pulls_some'            // Drar lite, men hanterbart
   | 'pulls_hard_reactive'   // Drar konstant eller reaktiv/skäller
 
 /** How the dog reacts to new environments and people */
 export type NewEnvironmentReaction =
-  | 'curious'   // Nyfiken och trygg
-  | 'cautious'  // Lite försiktig, men lugnar ner sig
-  | 'avoidant'  // Undviker eller verkar rädd
+  | 'not_yet_out'  // Hunden har inte exponerats för nya miljöer än
+  | 'curious'      // Nyfiken och trygg
+  | 'cautious'     // Lite försiktig, men lugnar ner sig
+  | 'avoidant'     // Undviker eller verkar rädd
 
 /** Handler's experience level */
 export type TrainingBackground =

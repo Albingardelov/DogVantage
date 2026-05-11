@@ -55,6 +55,9 @@ function Assessment() {
   const [step, setStep] = useState<0 | 1>(0)
 
   // Step 0 — behavior profile
+  // Gate: if the dog hasn't been out yet (new puppy before walks), don't pretend
+  // we know leash/env-reaction/triggers. Avoids fabricated answers poisoning the plan.
+  const [hasBeenOut, setHasBeenOut] = useState<boolean | null>(null)
   const [triggers, setTriggers] = useState<TriggerType[]>([])
   const [leashBehavior, setLeashBehavior] = useState<LeashBehavior>('calm')
   const [envReaction, setEnvReaction] = useState<NewEnvironmentReaction>('curious')
@@ -183,45 +186,89 @@ function Assessment() {
               </div>
             </div>
 
-            {/* Koppelbeteende */}
+            {/* Har hunden varit ute regelbundet? — gate för beteendefrågor */}
             <div className={styles.card}>
-              <p className={styles.question}>Hur fungerar koppeln generellt?</p>
+              <p className={styles.question}>
+                Har hunden varit ute regelbundet i okända miljöer?
+                <span className={styles.questionSub}> Hoppa över beteendefrågor om svaret är nej — vi vill inte att ni gissar.</span>
+              </p>
               <div className={styles.optionList}>
-                {(Object.keys(LEASH_LABELS) as LeashBehavior[]).map((k) => (
+                {[
+                  { v: true, label: 'Ja, går promenader och möter andra miljöer' },
+                  { v: false, label: 'Nej, ny valp eller hund som inte börjat ute ännu' },
+                ].map((o) => (
                   <button
-                    key={k}
+                    key={String(o.v)}
                     type="button"
-                    className={`${styles.optionBtn} ${leashBehavior === k ? styles.optionBtnSelected : ''}`}
-                    onClick={() => setLeashBehavior(k)}
-                    aria-pressed={leashBehavior === k}
+                    className={`${styles.optionBtn} ${hasBeenOut === o.v ? styles.optionBtnSelected : ''}`}
+                    onClick={() => {
+                      setHasBeenOut(o.v)
+                      if (!o.v) {
+                        setLeashBehavior('not_yet_out')
+                        setEnvReaction('not_yet_out')
+                        setTriggers([])
+                      } else if (leashBehavior === 'not_yet_out') {
+                        setLeashBehavior('calm')
+                        setEnvReaction('curious')
+                      }
+                    }}
+                    aria-pressed={hasBeenOut === o.v}
                   >
-                    {leashBehavior === k && <span className={styles.optionCheck}>✓</span>}
-                    {LEASH_LABELS[k]}
+                    {hasBeenOut === o.v && <span className={styles.optionCheck}>✓</span>}
+                    {o.label}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Ny miljö */}
-            <div className={styles.card}>
-              <p className={styles.question}>Hur reagerar hunden på ny miljö och okända?</p>
-              <div className={styles.optionList}>
-                {(Object.keys(ENV_REACTION_LABELS) as NewEnvironmentReaction[]).map((k) => (
-                  <button
-                    key={k}
-                    type="button"
-                    className={`${styles.optionBtn} ${envReaction === k ? styles.optionBtnSelected : ''}`}
-                    onClick={() => setEnvReaction(k)}
-                    aria-pressed={envReaction === k}
-                  >
-                    {envReaction === k && <span className={styles.optionCheck}>✓</span>}
-                    {ENV_REACTION_LABELS[k]}
-                  </button>
-                ))}
+            {/* Koppelbeteende — gömd om hunden inte varit ute ännu */}
+            {hasBeenOut !== false && (
+              <div className={styles.card}>
+                <p className={styles.question}>Hur fungerar koppeln generellt?</p>
+                <div className={styles.optionList}>
+                  {(Object.keys(LEASH_LABELS) as LeashBehavior[])
+                    .filter((k) => k !== 'not_yet_out')
+                    .map((k) => (
+                    <button
+                      key={k}
+                      type="button"
+                      className={`${styles.optionBtn} ${leashBehavior === k ? styles.optionBtnSelected : ''}`}
+                      onClick={() => setLeashBehavior(k)}
+                      aria-pressed={leashBehavior === k}
+                    >
+                      {leashBehavior === k && <span className={styles.optionCheck}>✓</span>}
+                      {LEASH_LABELS[k]}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Triggers */}
+            {/* Ny miljö — gömd om hunden inte varit ute ännu */}
+            {hasBeenOut !== false && (
+              <div className={styles.card}>
+                <p className={styles.question}>Hur reagerar hunden på ny miljö och okända?</p>
+                <div className={styles.optionList}>
+                  {(Object.keys(ENV_REACTION_LABELS) as NewEnvironmentReaction[])
+                    .filter((k) => k !== 'not_yet_out')
+                    .map((k) => (
+                    <button
+                      key={k}
+                      type="button"
+                      className={`${styles.optionBtn} ${envReaction === k ? styles.optionBtnSelected : ''}`}
+                      onClick={() => setEnvReaction(k)}
+                      aria-pressed={envReaction === k}
+                    >
+                      {envReaction === k && <span className={styles.optionCheck}>✓</span>}
+                      {ENV_REACTION_LABELS[k]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Triggers — gömd om hunden inte varit ute ännu */}
+            {hasBeenOut !== false && (
             <div className={styles.card}>
               <p className={styles.question}>Vad brukar trigga hunden? <span className={styles.questionSub}>(välj alla som stämmer)</span></p>
               <div className={styles.triggerGrid}>
@@ -244,6 +291,7 @@ function Assessment() {
                 <p className={styles.triggerNone}>Inga kända triggers — lämna tomt och fortsätt.</p>
               )}
             </div>
+            )}
 
             {/* Husdjur */}
             <div className={styles.card}>
@@ -288,6 +336,7 @@ function Assessment() {
               type="button"
               className={styles.primary}
               onClick={() => setStep(1)}
+              disabled={hasBeenOut === null}
             >
               Fortsätt till övningstest →
             </button>

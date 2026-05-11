@@ -3,20 +3,38 @@ import type { WeekPlan } from '@/types'
 /**
  * Week 1 homecoming plan for new puppies (< 14 weeks).
  * No formal criteria — pure decompression, positive association, and very gentle exposure.
+ * Rastning and sleep are core every day (3-3-3 rule); only training-style exercises are gated.
  * Adapts cat introduction exercises if cats are in the household.
  */
 export function getHomecomeWeekPlan(hasCats: boolean): WeekPlan {
+  // Rastning + sömn-vila is default on every day — even decompression days.
+  // Inserted as the first exercises on each day so they're never forgotten.
+  const rastningEx = {
+    id: 'rastning',
+    label: 'Rastning',
+    desc: 'Ut var 60 min vaken tid + efter sömn/mat/lek',
+    reps: 8,
+  }
+  const sleepReminder = {
+    id: 'ensam_traning',
+    label: 'Vila i bur',
+    desc: 'Valpen ska sova ~18 h/dygn — lägg in vila i bur mellan varje aktivitet, 1–2 h',
+    reps: 4,
+  }
+
   return {
     days: [
       {
-        // Day 1: pure decompression — explore home on own terms
         day: 'Måndag',
-        rest: true,
+        rest: false,
+        exercises: [rastningEx, sleepReminder],
       },
       {
         day: 'Tisdag',
         rest: false,
         exercises: [
+          rastningEx,
+          sleepReminder,
           {
             id: 'socialisering',
             label: 'Hemkänsla',
@@ -35,12 +53,15 @@ export function getHomecomeWeekPlan(hasCats: boolean): WeekPlan {
       },
       {
         day: 'Onsdag',
-        rest: true,
+        rest: false,
+        exercises: [rastningEx, sleepReminder],
       },
       {
         day: 'Torsdag',
         rest: false,
         exercises: [
+          rastningEx,
+          sleepReminder,
           {
             id: 'namn',
             label: 'Namnkontakt',
@@ -57,12 +78,15 @@ export function getHomecomeWeekPlan(hasCats: boolean): WeekPlan {
       },
       {
         day: 'Fredag',
-        rest: true,
+        rest: false,
+        exercises: [rastningEx, sleepReminder],
       },
       {
         day: 'Lördag',
         rest: false,
         exercises: [
+          rastningEx,
+          sleepReminder,
           {
             id: 'socialisering',
             label: 'Ljud & miljö',
@@ -81,6 +105,8 @@ export function getHomecomeWeekPlan(hasCats: boolean): WeekPlan {
         day: 'Söndag',
         rest: false,
         exercises: [
+          rastningEx,
+          sleepReminder,
           {
             id: 'hantering',
             label: 'Varsam hantering',

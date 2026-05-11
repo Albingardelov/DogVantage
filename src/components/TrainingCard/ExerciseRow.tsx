@@ -215,6 +215,11 @@ export default function ExerciseRow({
       </div>
 
       <div className={styles.counter} aria-label={`${done} av ${exercise.reps} gjorda`}>
+        {!isComplete && (
+          <span className={styles.repLabel} title={spec?.definition ?? 'En lyckad rep'}>
+            {done}/{exercise.reps} rep{spec?.definition ? ' · ?' : ''}
+          </span>
+        )}
         {isComplete ? (
           <div className={styles.checkCircle} aria-hidden="true">✓</div>
         ) : (
@@ -228,7 +233,8 @@ export default function ExerciseRow({
                   type="button"
                   className={`${styles.dot} ${filled ? styles.dotFilled : ''} ${isNext ? styles.dotNext : ''}`}
                   onClick={onRepClick}
-                  aria-label={`Markera rep ${i + 1}`}
+                  aria-label={`Markera rep ${i + 1}: ${spec?.definition ?? 'En lyckad rep enligt övningens kriterium'}`}
+                  title={spec?.definition}
                 />
               )
             })}

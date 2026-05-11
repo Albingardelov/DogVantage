@@ -13,6 +13,7 @@ import DogSwitcher from '@/components/DogSwitcher'
 import AddDogModal from '@/components/AddDogModal'
 import { useActiveDog } from '@/lib/dog/active-dog-context'
 import { getAgeInWeeks, daysUntilHomecoming, trainingWeekFromHomecoming } from '@/lib/dog/age'
+import ProgramWeekTimeline from '@/components/ProgramWeekTimeline/ProgramWeekTimeline'
 import { buildBehaviorContext } from '@/lib/dog/behavior'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import { getHandlerFeedbackTip, type HandlerFeedbackTip } from '@/lib/training/handler-feedback'
@@ -60,8 +61,17 @@ function getContextualTips(profile: DogProfile, ageWeeks: number): ContextualTip
     tips.push({
       id: 'puppy-fundamentals',
       title: `Valpens grundbehov — börja här med ${profile.name}`,
-      body: 'Rastning, bett-hämning, sömn (18 h/dygn!) och ensam-träning är viktigare än formella övningar de första veckorna. Bygg rutinerna nu — utan dem fungerar inget annat. Lägg till "Rastning", "Bett-inhibition", "Box-träning" och "Ensam-träning" som egna pass.',
-      learnId: 'timing',
+      body: 'Rastning, bett-hämning, box-träning och ensam-träning är viktigare än formella övningar de första veckorna. Bygg rutinerna nu — utan dem fungerar inget annat. Läs guiderna och lägg till övningarna i schemat.',
+      learnId: 'rastning',
+    })
+  }
+
+  if (isPuppy && ageWeeks < 16) {
+    tips.push({
+      id: 'puppy-sleep',
+      title: 'Valpen behöver 18 timmar sömn per dygn',
+      body: `${profile.name} ska sova ca 18 h/dygn. För lite vila → överstimulering, bett-attacker, oförmåga att lära sig. Lägg in 1–2 h vila mellan varje aktivitet, gärna i bur/box. Sömnig valp lär sig, trött valp biter.`,
+      learnId: 'box-traning',
     })
   }
 
@@ -265,6 +275,7 @@ function Dashboard() {
               <span aria-hidden="true">🗓️</span> Programvecka {trainingWeek}
               <span className={styles.weekBadgeArrow} aria-hidden="true">›</span>
             </Link>
+            <ProgramWeekTimeline ageWeeks={ageWeeks} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <button

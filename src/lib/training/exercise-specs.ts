@@ -101,8 +101,11 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
     exerciseId: 'koppel',
     definition: 'Lyckad rep när hunden kan gå med slakt koppel i några steg och återvända till dig för belöning.',
     ladder: [
+      { id: 'wear_harness', label: 'Bära sele inne', criteria: 'Hunden bär sele/halsband 1–2 min inne utan att rycka av sig. Belöna lugn. Pre-step för valpar som aldrig burit utrustning.' },
+      { id: 'leash_drag', label: 'Släpa koppel inne', criteria: 'Koppel sitter på, du håller inte. Hunden går runt naturligt. Belöna när den närmar sig dig. Bygger neutral association till kopplet.' },
       { id: 'home_2steps', label: 'Inne · 2 steg', criteria: 'Belöna vid din sida efter 1–2 steg.' },
       { id: 'home_5steps', label: 'Inne · 5 steg', criteria: 'Belöna ofta. Vänd om när kopplet sträcks.' },
+      { id: 'first_street', label: 'Första gatan · 2 min', criteria: 'Kort sträcka utanför grinden, hög belöningsfrekvens. Inga möten med andra hundar ännu — bygg miljö-trygghet först.' },
       { id: 'outdoor_low', label: 'Ute · låg störning', criteria: 'Kort sträcka. Hög belöningsfrekvens.' },
       { id: 'outdoor_medium', label: 'Ute · medel störning', criteria: 'Öka svårighet gradvis. Hellre backa än nöta.' },
     ],
