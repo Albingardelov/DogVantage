@@ -741,7 +741,6 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       { id: 'eye_cone', label: 'Eye mot kon', criteria: 'Hunden "låser" blicken (eye) mot ett objekt på kommando. Belöna stillhet + fokus.' },
       { id: 'flank_short', label: 'Kort flank', criteria: 'Hunden rör sig ett halvt varv runt objektet på signal ("fot" / "bort"). Belöna smidig rörelse.' },
       { id: 'stop_on_signal', label: 'Stopp i rörelse', criteria: 'Hunden stannar mitt i flanken på stoppsignal. Kombinerar vallning + impulskontroll.' },
-      { id: 'livestock_intro', label: 'Boskap intro', criteria: 'Hunden introduceras för boskap på lina med lugnt kroppsspråk. Belöna avspänning.' },
     ],
     troubleshooting: [
       'Om hunden går upp i varv/kastar sig: öka avstånd till "bytet" och belöna stillhet.',
@@ -750,9 +749,9 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
     ],
     guide: {
       setup: [
-        'Börja utan boskap — använd en boll, kon eller skateboard som "byte".',
+        'Träna alltid utan boskap här i appen — använd boll, kon eller skateboard som "byte". Live-djur kräver instruktör på plats (vallningsklubb, Svenska Brukshundklubbens vallningskurs).',
         'Ha stoppsignal säkert inlärd INNAN du introducerar rörliga triggers.',
-        'Lina vid all kontakt med boskap tills hunden är pålitlig på stopp.',
+        'Korta pass, ren grundträning av eye/flank/stop — inte boskapskontakt.',
       ],
       steps: [
         'Rör dig runt objektet och belöna hunden för att följa i kontrollerat tempo.',
@@ -767,12 +766,13 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       ],
       commonMistakes: [
         'Träna vallning utan inlärd stoppsignal — instinkten tar över.',
-        'För tidigt kontakt med boskap utan tillräcklig impulskontroll.',
+        'Försöka introducera boskap utan utbildad instruktör — välfärds- och säkerhetsrisk för både hund och djur.',
         'Passen blir för långa — hunden hetsar upp sig.',
       ],
       stopRules: [
         'Hunden ignorerar stoppsignal → avsluta sessionen och träna impulskontroll separat.',
         'Tydlig stress/jakt-beteende → öka avstånd och avsluta.',
+        'För kontakt med riktiga djur: gå via lokal vallningsklubb eller SBK — appen tränar bara grundmekaniken.',
       ],
     },
   }),

@@ -2,22 +2,13 @@ import { embedText } from './embed'
 import { getGeminiTextModel } from './client'
 import { searchBreedChunks } from '@/lib/supabase/breed-chunks'
 import { formatBreedProfileShort, formatCurrentPhase } from './breed-profiles'
+import {
+  detectHealthIssue,
+  detectBehaviorEmergency,
+  VET_RESPONSE,
+  BEHAVIOR_RESPONSE,
+} from './safety-guards'
 import type { Breed, ChunkMatch, TrainingResult, TrainingSourceRef } from '@/types'
-
-// ─── Vet-guard ────────────────────────────────────────────────────────────────
-const VET_KEYWORDS = [
-  'haltar', 'kräks', 'äter inte', 'blöder', 'veterinär',
-  'sjuk', 'ont', 'skada', 'hälta', 'kräkningar', 'diarré',
-  'feber', 'sår', 'svullen',
-]
-
-const VET_RESPONSE: TrainingResult = {
-  content:
-    'Det verkar handla om ett hälsoproblem. DogVantage ger inte medicinska råd — kontakta din veterinär.',
-  source: '',
-  source_url: '',
-  attributionNote: 'Fast svar vid hälsoindikation — inte från dina dokument.',
-}
 
 function chunksToSourceRefs(chunks: ChunkMatch[]): TrainingSourceRef[] {
   const seen = new Set<string>()
@@ -39,11 +30,6 @@ function chunksToSourceRefs(chunks: ChunkMatch[]): TrainingSourceRef[] {
   return out
 }
 
-function isHealthQuery(query: string): boolean {
-  const lower = query.toLowerCase()
-  return VET_KEYWORDS.some((kw) => lower.includes(kw))
-}
-
 // ─── Main RAG query ───────────────────────────────────────────────────────────
 export async function queryRAG(
   query: string,
@@ -53,7 +39,13 @@ export async function queryRAG(
   todayMetrics: string[] = [],
   onboardingContext?: string
 ): Promise<TrainingResult> {
-  if (isHealthQuery(query)) return VET_RESPONSE
+  if (detectHealthIssue(query)) return VET_RESPONSE
+  // Behaviour-emergency check: short-circuit if either the query OR the
+  // owner-supplied profile context (ownerNotes / problemNotes baked into
+  // onboardingContext) describes a case that needs a professional.
+  if (detectBehaviorEmergency(query) || detectBehaviorEmergency(onboardingContext)) {
+    return BEHAVIOR_RESPONSE
+  }
 
   // 1. Embed the query and retrieve breed-specific document chunks (best-effort)
   // If the embedding API is unavailable (rate limit, quota), we fall back

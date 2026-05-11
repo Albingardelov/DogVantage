@@ -48,6 +48,7 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
   const [metrics, setMetrics] = useState<Record<string, DailyExerciseMetrics>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [referral, setReferral] = useState<string | null>(null)
   const [showWeekView, setShowWeekView] = useState(false)
   const [showLogForm, setShowLogForm] = useState(false)
   const [guideExerciseId, setGuideExerciseId] = useState<string | null>(null)
@@ -68,14 +69,25 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
   const fetchData = useCallback(async () => {
     setLoading(true)
     setError(false)
+    setReferral(null)
     try {
       const [planRes, progressRes, metricsRes] = await Promise.all([
         fetch(`/api/training/week?breed=${breed}&week=${trainingWeek}&ageWeeks=${ageWeeks}${goals && goals.length > 0 ? `&goals=${goals.join(',')}` : ''}${dogId ? `&dogId=${dogId}` : ''}${environment ? `&environment=${environment}` : ''}${rewardPreference ? `&rewardPreference=${rewardPreference}` : ''}${takesRewardsOutdoors != null ? `&takesRewardsOutdoors=${takesRewardsOutdoors}` : ''}${behaviorContext ? `&behaviorContext=${encodeURIComponent(behaviorContext)}` : ''}${householdPets && householdPets.length > 0 ? `&householdPets=${householdPets.join(',')}` : ''}`),
         fetch(`/api/training/progress?breed=${breed}&date=${todayDate}&dogId=${encodeURIComponent(dogId)}`),
         fetch(`/api/training/metrics?breed=${breed}&date=${todayDate}&dogId=${encodeURIComponent(dogId)}`),
       ])
-      if (planRes.ok) setWeekPlan(await planRes.json())
-      else setError(true)
+      if (planRes.ok) {
+        setWeekPlan(await planRes.json())
+      } else if (planRes.status === 422) {
+        const body = await planRes.json().catch(() => ({}))
+        if (body?.error === 'behavior_referral' && typeof body.referral === 'string') {
+          setReferral(body.referral)
+        } else {
+          setError(true)
+        }
+      } else {
+        setError(true)
+      }
       if (progressRes.ok) setProgress(await progressRes.json())
       if (metricsRes.ok) setMetrics(await metricsRes.json())
     } catch {
@@ -304,6 +316,13 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
 
         {!loading && error && (
           <p className={styles.errorMsg}>Kunde inte hämta träningsplan. Försök igen.</p>
+        )}
+
+        {!loading && referral && (
+          <div className={styles.referralCard} role="alert">
+            <p className={styles.referralTitle}>Behöver professionell hjälp</p>
+            <p className={styles.referralText}>{referral}</p>
+          </div>
         )}
 
         {!loading && todayPlan?.rest && (

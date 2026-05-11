@@ -170,6 +170,28 @@
   text-align: center;
 }
 
+.referralCard {
+  margin: var(--space-3) var(--space-4);
+  padding: var(--space-4);
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  border-radius: var(--radius-card);
+  color: #78350f;
+}
+
+.referralTitle {
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  margin: 0 0 var(--space-2);
+}
+
+.referralText {
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  margin: 0;
+  white-space: pre-line;
+}
+
 .weekFocus {
   padding: var(--space-3) var(--space-4);
   background: var(--color-bg-alt);

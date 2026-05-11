@@ -9,6 +9,7 @@ import { currentIsoWeek } from '@/lib/training/weekly-focus'
 import { getActiveHeatCycle, getLastEndedHeatCycle, isSkenfasActive } from '@/lib/supabase/heat-cycles'
 import { getHomecomeWeekPlan } from '@/lib/training/homecoming-plan'
 import { createSupabaseServer } from '@/lib/supabase/server'
+import { detectBehaviorEmergency, BEHAVIOR_RESPONSE } from '@/lib/ai/safety-guards'
 import type { Breed, DogSex, CastrationStatus, TrainingGoal, TrainingEnvironment, RewardPreference, HouseholdPet } from '@/types'
 import { householdPetNotes, HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'
 
@@ -103,6 +104,16 @@ export async function GET(req: NextRequest) {
   // Build onboarding context from query params
   const pets = parsePets(p)
   const baseOnboardingContext = buildOnboardingContext(p, pets)
+
+  // Refuse to generate a plan if the owner-supplied context describes a
+  // behaviour emergency (bites, severe aggression, panic). Return a 422 with
+  // a referral payload so the client can show the SBBK/IAABC message.
+  if (detectBehaviorEmergency(baseOnboardingContext)) {
+    return NextResponse.json(
+      { error: 'behavior_referral', referral: BEHAVIOR_RESPONSE.content },
+      { status: 422 }
+    )
+  }
 
   const supabase = await createSupabaseServer()
   const { data: { user } } = await supabase.auth.getUser()

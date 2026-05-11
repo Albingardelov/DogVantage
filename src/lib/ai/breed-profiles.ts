@@ -256,7 +256,7 @@ const italianGreyhound: BreedProfile = {
   trainingCautions: [
     'Extremt sköra ben — inga hopp från höga möbler eller bänkar',
     'Aldrig springa lös i oinringat område — jaktinstinkten tar över',
-    'Svår att rentränа — konsekvens från dag ett är avgörande',
+    'Rentränas långsamt — håll en strikt rutin: ut direkt efter sömn, mat, lek och var 60–90 min för valpar. Belöna varje lyckad utomhustur de första 4 veckorna. Straffa aldrig olyckor inne — städa neutralt och justera intervallen.',
     'Undvik kallt och blött väder utan täcke — termoreglering sämre än de flesta raser',
     'Hård korrigering eller skrik skapar skräck, inte lydnad',
   ],
@@ -284,7 +284,7 @@ const miniatureAmericanShepherd: BreedProfile = {
     'Lojal och nära sin familj — stark anknytning, kan bli överdrivet vaktande',
     'Reserverad mot okända — inte skygg, men iakttagande och försiktig initialt',
     'Stark vallandeininstinkt — kan försöka valla barn, cyklister, katter om instinkten inte kanaliseras',
-    'Tar träning på allvar — tål direkt feedback men mår bäst med positiv förstärkning',
+    'Lär sig snabbt med positiv förstärkning — undvik hård korrigering, det stänger av en arbetsvillig MAS',
   ],
   sensitivity: 'medium',
   suggestedGoals: ['impulse_control', 'sport', 'herding'],
