@@ -227,6 +227,9 @@
   font-size: 0.875rem;
   line-height: 1.4;
   resize: none;
+  min-height: 2.75rem;
+  max-height: 11.25rem;
+  overflow-y: auto;
   outline: none;
   font-family: inherit;
   transition: border-color var(--transition-fast);

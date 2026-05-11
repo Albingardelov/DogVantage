@@ -20,6 +20,7 @@ export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQu
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
   const didAutoSendRef = useRef(false)
 
   useEffect(() => {
@@ -73,8 +74,15 @@ export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQu
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialQuestion, messages.length, loading])
 
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${Math.min(el.scrollHeight, 180)}px`
+  }, [input])
+
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
       e.preventDefault()
       send()
     }
@@ -157,11 +165,12 @@ export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQu
 
       <div className={styles.inputRow}>
         <textarea
+          ref={inputRef}
           className={styles.input}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Skriv en fråga…"
+          placeholder="Skriv en fråga… (Ctrl/Cmd + Enter för att skicka)"
           rows={1}
           disabled={loading}
         />
