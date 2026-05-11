@@ -129,6 +129,7 @@ function Assessment() {
       }
       const startingWeek = computeStartingWeek(ageWeeks, metrics)
       await updateDogProfile({
+        id: profile.id,
         trainingWeek: startingWeek,
         assessment: {
           status: 'completed',

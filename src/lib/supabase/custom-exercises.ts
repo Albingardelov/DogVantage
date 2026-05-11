@@ -4,6 +4,7 @@ import type { ExerciseSpec } from '@/lib/training/exercise-specs'
 export interface CustomExercise {
   id: string
   user_id: string
+  dog_id: string
   exercise_id: string
   label: string
   prompt: string
@@ -12,7 +13,7 @@ export interface CustomExercise {
   created_at: string
 }
 
-export async function getActiveCustomExercises(): Promise<CustomExercise[]> {
+export async function getActiveCustomExercises(dogId: string): Promise<CustomExercise[]> {
   const supabase = await createSupabaseServer()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
@@ -20,7 +21,7 @@ export async function getActiveCustomExercises(): Promise<CustomExercise[]> {
   const { data, error } = await supabase
     .from('custom_exercises')
     .select('*')
-    .eq('user_id', user.id)
+    .eq('dog_id', dogId)
     .eq('active', true)
     .order('created_at', { ascending: true })
 
@@ -28,7 +29,7 @@ export async function getActiveCustomExercises(): Promise<CustomExercise[]> {
   return (data ?? []) as CustomExercise[]
 }
 
-export async function getAllCustomExercises(): Promise<CustomExercise[]> {
+export async function getAllCustomExercises(dogId: string): Promise<CustomExercise[]> {
   const supabase = await createSupabaseServer()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
@@ -36,7 +37,7 @@ export async function getAllCustomExercises(): Promise<CustomExercise[]> {
   const { data, error } = await supabase
     .from('custom_exercises')
     .select('*')
-    .eq('user_id', user.id)
+    .eq('dog_id', dogId)
     .order('created_at', { ascending: true })
 
   if (error) throw new Error(`custom_exercises fetch failed: ${error.message}`)
@@ -45,6 +46,7 @@ export async function getAllCustomExercises(): Promise<CustomExercise[]> {
 
 export async function createCustomExercise(
   userId: string,
+  dogId: string,
   exerciseId: string,
   label: string,
   prompt: string,
@@ -53,7 +55,7 @@ export async function createCustomExercise(
   const supabase = await createSupabaseServer()
   const { data, error } = await supabase
     .from('custom_exercises')
-    .insert({ user_id: userId, exercise_id: exerciseId, label, prompt, spec })
+    .insert({ user_id: userId, dog_id: dogId, exercise_id: exerciseId, label, prompt, spec })
     .select()
     .single()
 

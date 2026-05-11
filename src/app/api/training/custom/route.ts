@@ -46,9 +46,33 @@ Exempel på rätt detaljnivå (guide.steps):
 
 Regler: allt på svenska · konkret och praktiskt, inte vagt · för fysiskt krävande övningar: lägg ålders-/hälsovarning i stopRules`
 
-export async function GET() {
+async function assertDogOwnership(
+  supabase: Awaited<ReturnType<typeof createSupabaseServer>>,
+  dogId: string,
+  userId: string,
+): Promise<boolean> {
+  const { data } = await supabase
+    .from('dog_profiles')
+    .select('id')
+    .eq('id', dogId)
+    .eq('user_id', userId)
+    .single()
+  return Boolean(data)
+}
+
+export async function GET(req: NextRequest) {
   try {
-    const exercises = await getAllCustomExercises()
+    const supabase = await createSupabaseServer()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+
+    const dogId = req.nextUrl.searchParams.get('dogId')
+    if (!dogId) return NextResponse.json({ error: 'dogId required' }, { status: 400 })
+    if (!(await assertDogOwnership(supabase, dogId, user.id))) {
+      return NextResponse.json({ error: 'forbidden' }, { status: 403 })
+    }
+
+    const exercises = await getAllCustomExercises(dogId)
     return NextResponse.json(exercises)
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
@@ -62,13 +86,20 @@ export async function POST(req: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 })
 
-    const body = await req.json() as { prompt?: unknown }
+    const body = await req.json() as { prompt?: unknown; dogId?: unknown }
     const prompt = body.prompt
+    const dogId = body.dogId
     if (typeof prompt !== 'string' || !prompt.trim()) {
       return NextResponse.json({ error: 'prompt required' }, { status: 400 })
     }
     if (prompt.length > 300) {
       return NextResponse.json({ error: 'prompt max 300 chars' }, { status: 400 })
+    }
+    if (typeof dogId !== 'string' || !dogId) {
+      return NextResponse.json({ error: 'dogId required' }, { status: 400 })
+    }
+    if (!(await assertDogOwnership(supabase, dogId, user.id))) {
+      return NextResponse.json({ error: 'forbidden' }, { status: 403 })
     }
 
     const aiResult = await getGeminiTextModel().generateContent({
@@ -100,7 +131,7 @@ export async function POST(req: NextRequest) {
     const exerciseId = `custom_${slugify(validated.label)}_${randomSuffix()}`
     const spec: ExerciseSpec = { ...validated, exerciseId }
 
-    const exercise = await createCustomExercise(user.id, exerciseId, validated.label, prompt.trim(), spec)
+    const exercise = await createCustomExercise(user.id, dogId, exerciseId, validated.label, prompt.trim(), spec)
     return NextResponse.json(exercise, { status: 201 })
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)

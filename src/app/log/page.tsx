@@ -40,7 +40,8 @@ function Log() {
       setProfile(p)
 
       try {
-        const params = new URLSearchParams({ breed: p.breed })
+        if (!p.id) return
+        const params = new URLSearchParams({ dogId: p.id })
         const res = await fetch(`/api/logs?${params}`)
         const data = await res.json()
         if (!alive) return

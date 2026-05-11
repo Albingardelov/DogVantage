@@ -464,7 +464,7 @@ function ProfileView() {
 
         <div className={styles.section}>
           <span className={styles.sectionTitle}>Egna träningspass</span>
-          <CustomExerciseList />
+          <CustomExerciseList dogId={profile.id} />
         </div>
 
         {saved ? (

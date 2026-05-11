@@ -223,7 +223,7 @@ function CalendarView() {
       const behaviorParam = behaviorContext ? `&behaviorContext=${encodeURIComponent(behaviorContext)}` : ''
 
       const [logsRes, planRes] = await Promise.all([
-        fetch(`/api/logs?breed=${profile.breed}`),
+        fetch(`/api/logs?dogId=${encodeURIComponent(profile.id ?? '')}`),
         fetch(`/api/training/week?breed=${profile.breed}&week=${trainingWeek}&ageWeeks=${ageWeeks}${goalsParam}${petsParam}${behaviorParam}`),
       ])
 

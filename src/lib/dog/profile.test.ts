@@ -56,7 +56,7 @@ describe('saveDogProfile', () => {
 describe('updateDogProfile', () => {
   it('calls updateProfile with the fields', async () => {
     mockUpdateProfile.mockResolvedValue(undefined)
-    await updateDogProfile({ trainingWeek: 3 })
-    expect(mockUpdateProfile).toHaveBeenCalledWith({ trainingWeek: 3 })
+    await updateDogProfile({ id: 'dog-123', trainingWeek: 3 })
+    expect(mockUpdateProfile).toHaveBeenCalledWith({ id: 'dog-123', trainingWeek: 3 })
   })
 })

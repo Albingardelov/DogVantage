@@ -1,8 +1,8 @@
 import { createSupabaseServer } from '@/lib/supabase/server'
-import type { Breed, SessionLog, QuickRating, ExerciseSummary } from '@/types'
+import type { SessionLog, QuickRating } from '@/types'
 
 export async function getRecentLogs(
-  breed: Breed,
+  dogId: string,
   weekNumber: number,
   limit = 5
 ): Promise<SessionLog[]> {
@@ -13,8 +13,7 @@ export async function getRecentLogs(
   const { data, error } = await supabase
     .from('session_logs')
     .select('*')
-    .eq('user_id', user.id)
-    .eq('breed', breed)
+    .eq('dog_id', dogId)
     .eq('week_number', weekNumber)
     .order('created_at', { ascending: false })
     .limit(limit)
@@ -23,7 +22,7 @@ export async function getRecentLogs(
   return (data ?? []) as SessionLog[]
 }
 
-export async function getAllLogs(breed: Breed, limit = 30): Promise<SessionLog[]> {
+export async function getAllLogs(dogId: string, limit = 30): Promise<SessionLog[]> {
   const supabase = await createSupabaseServer()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
@@ -31,8 +30,7 @@ export async function getAllLogs(breed: Breed, limit = 30): Promise<SessionLog[]
   const { data, error } = await supabase
     .from('session_logs')
     .select('*')
-    .eq('user_id', user.id)
-    .eq('breed', breed)
+    .eq('dog_id', dogId)
     .order('created_at', { ascending: false })
     .limit(limit)
 

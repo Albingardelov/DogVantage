@@ -51,8 +51,7 @@ export async function GET(req: NextRequest) {
     admin
       .from('session_logs')
       .select('exercises')
-      .eq('user_id', user.id)
-      .eq('breed', breed)
+      .eq('dog_id', dogId)
       .order('created_at', { ascending: false })
       .limit(60),
   ])

@@ -51,8 +51,8 @@ export async function POST(req: NextRequest) {
       : (typeof weekNumber === 'number' ? weekNumber : undefined)
 
     const logStrings =
-      typeof logsWeek === 'number'
-        ? formatLogsForPrompt(await getRecentLogs(breed, logsWeek))
+      typeof logsWeek === 'number' && dogId
+        ? formatLogsForPrompt(await getRecentLogs(dogId, logsWeek))
         : []
 
     let metricsStrings: string[] = []

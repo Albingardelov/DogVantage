@@ -158,11 +158,11 @@ function Dashboard() {
     : (profile?.trainingWeek ?? 1)
 
   const refreshWeekStats = useCallback(async () => {
-    if (!profile?.breed) return
+    if (!profile?.id) return
     try {
       const { start, end } = getWeekRangeMs()
       const params = new URLSearchParams({
-        breed: profile.breed,
+        dogId: profile.id,
         from: new Date(start).toISOString(),
         to: new Date(end).toISOString(),
       })
@@ -184,12 +184,12 @@ function Dashboard() {
       console.error('[dashboard week stats]', e)
       setWeekStats({ count: 0, avg: null })
     }
-  }, [profile?.breed])
+  }, [profile?.id])
 
   const refreshHandlerTip = useCallback(async () => {
-    if (!profile?.breed || !profile?.name) return
+    if (!profile?.id || !profile?.name) return
     try {
-      const params = new URLSearchParams({ breed: profile.breed, limit: '5' })
+      const params = new URLSearchParams({ dogId: profile.id, limit: '5' })
       const res = await fetch(`/api/logs?${params}`)
       if (!res.ok) {
         setHandlerTip(null)
@@ -201,7 +201,7 @@ function Dashboard() {
       console.error('[dashboard handler tip]', e)
       setHandlerTip(null)
     }
-  }, [profile?.breed, profile?.name])
+  }, [profile?.id, profile?.name])
 
   useEffect(() => {
     if (!profile?.breed) {
@@ -441,8 +441,9 @@ function Dashboard() {
             <span>Logga träningspass</span>
           </button>
         ) : (
-          profile && (
+          profile?.id && (
             <SessionLogForm
+              dogId={profile.id}
               breed={profile.breed}
               weekNumber={trainingWeek}
               onSaved={handleLogSaved}

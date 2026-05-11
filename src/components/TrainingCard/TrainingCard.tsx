@@ -83,13 +83,14 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
     } finally {
       setLoading(false)
     }
-  }, [breed, trainingWeek, ageWeeks, todayDate, goals, environment, rewardPreference, takesRewardsOutdoors, behaviorContext, householdPets])
+  }, [breed, trainingWeek, ageWeeks, todayDate, goals, environment, rewardPreference, takesRewardsOutdoors, behaviorContext, householdPets, dogId])
 
   useEffect(() => { fetchData() }, [fetchData])
 
   useEffect(() => {
+    if (!dogId) return
     let alive = true
-    fetch('/api/training/custom')
+    fetch(`/api/training/custom?dogId=${encodeURIComponent(dogId)}`)
       .then((r) => r.ok ? r.json() : [])
       .then((rows: Array<{ exercise_id: string; spec: ExerciseSpec }>) => {
         if (!alive) return
@@ -391,6 +392,7 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
         <div className={styles.logOverlay} role="dialog" aria-modal="true" aria-label="Logga träningspass">
           <div className={styles.logSheet}>
             <SessionLogForm
+              dogId={dogId}
               breed={breed}
               weekNumber={trainingWeek}
               exercises={buildExerciseSummaries(todayExercises, metrics)}
@@ -413,10 +415,11 @@ export default function TrainingCard({ trainingWeek, ageWeeks, breed, dogName, d
 
       {showAddCustom && (
         <AddCustomExerciseModal
+          dogId={dogId}
           onClose={() => setShowAddCustom(false)}
           onCreated={() => {
             setShowAddCustom(false)
-            fetch('/api/training/custom')
+            fetch(`/api/training/custom?dogId=${encodeURIComponent(dogId)}`)
               .then((r) => r.ok ? r.json() : [])
               .then((rows: Array<{ exercise_id: string; spec: ExerciseSpec }>) => {
                 const map: Record<string, ExerciseSpec> = {}

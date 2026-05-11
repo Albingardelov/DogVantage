@@ -77,6 +77,8 @@ export async function saveProfile(profile: DogProfile, userId: string): Promise<
 }
 
 export async function updateProfile(fields: Partial<DogProfile>): Promise<void> {
+  if (!fields.id) throw new Error('updateProfile requires fields.id — refusing to update without dog id')
+
   const updates: Record<string, unknown> = {}
   if (fields.trainingWeek !== undefined) updates.training_week = fields.trainingWeek
   if (fields.onboarding !== undefined) updates.onboarding = fields.onboarding
@@ -91,12 +93,11 @@ export async function updateProfile(fields: Partial<DogProfile>): Promise<void> 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('updateProfile called without authenticated user')
 
-  // If we have an id, update by id (precise); otherwise fall back to user_id (one-dog case)
-  const filter = fields.id
-    ? supabase.from('dog_profiles').update(updates).eq('id', fields.id)
-    : supabase.from('dog_profiles').update(updates).eq('user_id', user.id)
-
-  const { error } = await filter
+  const { error } = await supabase
+    .from('dog_profiles')
+    .update(updates)
+    .eq('id', fields.id)
+    .eq('user_id', user.id)
   if (error) throw new Error(`Failed to update profile: ${error.message}`)
 }
 

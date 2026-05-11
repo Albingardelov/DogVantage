@@ -122,8 +122,8 @@ export async function GET(req: NextRequest) {
   const isoWeek = currentIsoWeek()
   const needsHeatData = dogSex === 'female' && castrationStatus === 'intact'
   const [recentLogs, customRows, focusAreas, activeHeat, lastEnded] = await Promise.all([
-    getRecentLogs(breed, trainingWeek, 3).catch(() => []),
-    getActiveCustomExercises().catch(() => []),
+    getRecentLogs(dogId, trainingWeek, 3).catch(() => []),
+    getActiveCustomExercises(dogId).catch(() => []),
     getWeeklyFocus(dogId, isoWeek).catch(() => []),
     needsHeatData ? getActiveHeatCycle(dogId).catch(() => null) : Promise.resolve(null),
     needsHeatData ? getLastEndedHeatCycle(dogId).catch(() => null) : Promise.resolve(null),

@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import styles from './AddCustomExerciseModal.module.css'
 
-export default function AddCustomExerciseModal({ onClose, onCreated }: {
+export default function AddCustomExerciseModal({ dogId, onClose, onCreated }: {
+  dogId: string
   onClose: () => void
   onCreated: () => void
 }) {
@@ -21,7 +22,7 @@ export default function AddCustomExerciseModal({ onClose, onCreated }: {
       const res = await fetch('/api/training/custom', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: trimmed }),
+        body: JSON.stringify({ prompt: trimmed, dogId }),
       })
       const data = await res.json() as { error?: string }
       if (!res.ok) {

@@ -10,16 +10,17 @@ interface CustomExercise {
   active: boolean
 }
 
-export default function CustomExerciseList() {
+export default function CustomExerciseList({ dogId }: { dogId: string | undefined }) {
   const [exercises, setExercises] = useState<CustomExercise[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/training/custom')
+    if (!dogId) { setLoading(false); return }
+    fetch(`/api/training/custom?dogId=${encodeURIComponent(dogId)}`)
       .then((r) => r.ok ? r.json() : [])
       .then((data: CustomExercise[]) => { setExercises(data); setLoading(false) })
       .catch(() => setLoading(false))
-  }, [])
+  }, [dogId])
 
   async function handleToggle(id: string, active: boolean) {
     setExercises((prev) => prev.map((e) => e.id === id ? { ...e, active } : e))
