@@ -8,7 +8,7 @@ import { getAgeInWeeks } from '@/lib/dog/age'
 import { BREED_PROFILES } from '@/lib/ai/breed-profiles'
 import { HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
-import type { Breed, DogProfile, DogSex, CastrationStatus, HouseholdPet, OnboardingPrefs, RewardPreference, TrainingEnvironment, TrainingGoal } from '@/types'
+import type { Breed, DogProfile, DogSex, CastrationStatus, HouseholdPet, OnboardingPrefs, RewardPreference, TrainingBackground, TrainingEnvironment, TrainingGoal } from '@/types'
 import styles from './DogProfileForm.module.css'
 
 export const BREEDS: { value: Breed; label: string }[] = [
@@ -90,6 +90,7 @@ export default function DogProfileForm({ onSaved }: Props = {}) {
   const [takesRewardsOutdoors, setTakesRewardsOutdoors] = useState(true)
   const [householdPets, setHouseholdPets] = useState<HouseholdPet[]>([])
   const [ownerNotes, setOwnerNotes] = useState('')
+  const [trainingBackground, setTrainingBackground] = useState<TrainingBackground>('some_training')
 
   function togglePet(p: HouseholdPet) {
     setHouseholdPets((prev) =>
@@ -134,6 +135,7 @@ export default function DogProfileForm({ onSaved }: Props = {}) {
       householdPets: householdPets.length > 0 ? householdPets : undefined,
       ownerNotes: ownerNotes.trim() || undefined,
       homecomeDate: homecomeDate || undefined,
+      trainingBackground,
     }
     const profile: DogProfile = {
       name: name.trim(),
@@ -435,6 +437,32 @@ export default function DogProfileForm({ onSaved }: Props = {}) {
                       className={`${styles.breedOption} ${selected ? styles.breedOptionSelected : ''}`}
                     >
                       <span>{HOUSEHOLD_PET_LABELS[p]}</span>
+                      {selected && <span aria-hidden="true">✓</span>}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className={styles.field}>
+              <span className={styles.label}>Är det här din första hund?</span>
+              <div className={styles.breedList} role="radiogroup" aria-label="Träningsbakgrund">
+                {[
+                  { value: 'beginner' as const, label: 'Ja — första hunden' },
+                  { value: 'some_training' as const, label: 'Har tränat lite tidigare' },
+                  { value: 'experienced' as const, label: 'Erfaren — har tränat länge' },
+                ].map((o) => {
+                  const selected = trainingBackground === o.value
+                  return (
+                    <button
+                      key={o.value}
+                      type="button"
+                      role="radio"
+                      aria-checked={selected}
+                      onClick={() => setTrainingBackground(o.value)}
+                      className={`${styles.breedOption} ${selected ? styles.breedOptionSelected : ''}`}
+                    >
+                      <span>{o.label}</span>
                       {selected && <span aria-hidden="true">✓</span>}
                     </button>
                   )

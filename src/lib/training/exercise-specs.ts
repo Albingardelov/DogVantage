@@ -948,6 +948,187 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
     },
   }),
 
+  rastning: spec({
+    exerciseId: 'rastning',
+    definition: 'Lyckad rep = hunden kissar/bajsar utomhus (eller på avsedd plats) inom 2 minuter efter att du tagit ut den. Belöna direkt på plats.',
+    ladder: [
+      { id: 'after_sleep', label: 'Efter sömn', criteria: 'Ut direkt när valpen vaknar — innan den hinner kissa inne. Vänta lugnt, belöna när det händer ute.' },
+      { id: 'after_meal', label: 'Efter mat', criteria: 'Ut 5–15 min efter måltid. Stå still, låt valpen sniffa. Belöna när den lättar sig.' },
+      { id: 'after_play', label: 'Efter lek', criteria: 'Ut direkt efter aktivitet — rörelse triggar tarm/blåsa.' },
+      { id: 'scheduled_60min', label: 'Var 60 min', criteria: 'Schemalagda turer för valpar 8–12 v: var 60 min vaken tid + alltid efter sömn/mat/lek.' },
+      { id: 'scheduled_90min', label: 'Var 90 min', criteria: 'För valpar 12–16 v som klarar längre intervall.' },
+      { id: 'asks_to_go', label: 'Ber själv om att gå ut', criteria: 'Hunden signalerar tydligt (går till dörr, gnäller, tittar) när den behöver ut.' },
+    ],
+    troubleshooting: [
+      'Olyckor inne = för långa intervall eller missade signaler. Korta intervallet, läs hunden bättre.',
+      'Belöna ALDRIG efteråt inne — bara på plats där den lyckas. Annars kopplas belöningen till att gå tillbaka in.',
+      'Straffa aldrig olyckor — torka upp neutralt med enzymatisk rengöring (ta bort doft helt).',
+    ],
+    guide: {
+      setup: [
+        'Bestäm en fast rastningsplats utomhus de första veckorna — samma doft hjälper igångsättning.',
+        'Ha godis i fickan redan när du sätter på kopplet — du måste belöna inom 1 sekund.',
+        'Notera tider: när valpen åt, sov, lekte, kissade — så ser du mönstret.',
+      ],
+      steps: [
+        'Vakna valpen? → bär den ut direkt (inte gå — de kissar i trappan).',
+        'Stå stilla utomhus, säg en mjuk signal ("kissa", "bajs"). Vänta upp till 2 min.',
+        'I sekunden hunden börjar lätta sig: säg "ja!" mjukt. När den är klar — belöna direkt på plats med 2–3 godis.',
+        'Sen 1–2 minuter lek/utforska som extra belöning innan ni går in.',
+      ],
+      logging: [
+        'Lyckad = kissade/bajsade ute inom 2 min utan tjat eller flera kommandon.',
+        'Miss = kom in utan att ha lättat sig, sedan olycka inne inom 30 min.',
+        'Notera tider för att finjustera intervallen.',
+      ],
+      commonMistakes: [
+        'Gå ut, hunden kissar, du går in direkt → "ute" blir kort och tråkigt. Stanna 1–2 min efter belöning.',
+        'Glömma att belöna ute (för att man är trött, kallt, mörkt) → inlärningen avstannar.',
+        'Stänga av rutinen för tidigt — valpar behöver 4–8 veckor med strikt schema innan rentränan sitter.',
+      ],
+      stopRules: [
+        '2+ olyckor inne på samma dag → minska intervallen med 30 min och stå längre ute.',
+        'Hunden kissar lite, sedan börjar leka, sedan kissar igen inne → låt den sniffa runt ute längre innan ni går in.',
+      ],
+    },
+  }),
+
+  bett_inhibition: spec({
+    exerciseId: 'bett_inhibition',
+    definition: 'Lyckad rep = valpen släpper handen/kläderna inom 2 sekunder efter ditt feedback-ljud, ELLER väljer ett godkänt alternativ (leksak, tugg) av sig själv.',
+    ladder: [
+      { id: 'aj_pause', label: '"Aj" + paus', criteria: 'När valpen biter hårt: säg "Aj!" mjukt + frys helt 3 sekunder. Belöna när den släpper.' },
+      { id: 'redirect_toy', label: 'Omdirigera till leksak', criteria: 'Erbjud godkänt tuggalternativ samtidigt som du drar bort handen.' },
+      { id: 'walk_away', label: 'Gå därifrån vid hårt bett', criteria: 'Hårt bett = leken slutar. Res dig, vänd dig bort 30 sek. Kom tillbaka lugnt och starta om mjukare.' },
+      { id: 'self_redirect', label: 'Valpen väljer själv leksak', criteria: 'När valpen är överstimulerad går den frivilligt till sin leksak istället för att bita.' },
+    ],
+    troubleshooting: [
+      '"Aj" funkar inte → valpen är överstimulerad. Time-out: gå ifrån, lugnt, 30 sekunder.',
+      'Värst på kvällarna → trötthet och överstimulering. Inför vilopaus i bur/box innan kvällsbettet börjar.',
+      'Bett mot barn → barn ska aldrig vara primär bettmål. Separera fysiskt och bygg upp lugna interaktioner från valpens vila-läge.',
+    ],
+    guide: {
+      setup: [
+        'Ha alltid 2–3 godkända tuggleksaker tillgängliga (kong, raggsocka med knut, gummi-tugg).',
+        'Bestäm en tydlig regel: vid hårt bett slutar leken — alla i hushållet följer samma regel.',
+        'Identifiera valpens överstimulerings-fönster — ofta sen kväll efter en lång dag.',
+      ],
+      steps: [
+        'Valp biter mjukt (lek-bett): säg "Aj!" om det blir hårdare, fortsätt om det är mjukt.',
+        'Valp biter hårt: säg "Aj!" mjukt + frys helt (ingen rörelse i 3 sek). När den släpper → erbjud leksak.',
+        'Valpen tar leksaken → 30 sek lek med leksaken som belöning för rätt val.',
+        'Valpen biter igen efter 1–2 reps → leken är slut. Res dig, gå ifrån 30 sek. Återvänd lugnt och starta om eller lägg valpen i vila.',
+      ],
+      logging: [
+        'Lyckad = valpen släppte inom 2 sek på "Aj" ELLER valde leksak själv.',
+        'Miss = du behövde gå ifrån/time-out för att stoppa bettet.',
+        'Notera tid på dygnet — mönstret avslöjar när valpen behöver mer vila.',
+      ],
+      commonMistakes: [
+        'Skrika eller dra hårt undan handen → triggar mer lek-bett, valpen tror det är spel.',
+        'Bestraffa fysiskt (knäppa på nosen, hålla munnen stängd) → bygger rädsla, inte bett-hämning.',
+        'Inkonsekvent — vissa i familjen tillåter bett, andra inte. Valpen lär sig inget.',
+        'Försöker träna ut bettet på en redan överstimulerad valp → vila först, träna sedan.',
+      ],
+      stopRules: [
+        '3+ time-outs i rad → valpen är trött. Lägg den i bur/box för en lugn vila.',
+        'Hårda bett mot barn → träna ALDRIG själv, separera fysiskt och kontakta beteendekonsulent.',
+      ],
+    },
+  }),
+
+  box_traning: spec({
+    exerciseId: 'box_traning',
+    definition: 'Lyckad rep = hunden går frivilligt in i sin bur/box och stannar lugnt under den tid du tränar (start: 10 sek, mål: 1 timme tyst vila).',
+    ladder: [
+      { id: 'eat_in_open', label: 'Äter i öppen bur', criteria: 'Ställ matskålen längst in i buren. Hunden går in själv och äter. Dörren öppen hela tiden.' },
+      { id: 'door_closed_30s', label: 'Stängd dörr · 30 sek', criteria: 'Stäng dörren medan hunden äter, öppna innan den är klar. Stegvis längre.' },
+      { id: 'rest_5min', label: 'Vila 5 min', criteria: 'Hunden vilar i buren 5 min med stängd dörr, du i samma rum. Belöna lugn vila vid släpp.' },
+      { id: 'rest_30min', label: 'Vila 30 min', criteria: 'Som ovan men 30 min. Bör vara nedvarvad/tröttkörd när du sätter den i buren.' },
+      { id: 'alone_15min', label: 'Du går ifrån · 15 min', criteria: 'Du lämnar rummet (eller hemmet) 15 min, hunden vilar i buren.' },
+    ],
+    troubleshooting: [
+      'Hunden gnyr/skäller i buren → backa nivån. Du höjde duration för fort eller hunden var inte trött.',
+      'Vägrar gå in → börja om från "äter i öppen bur" med extra god mat (lever, korv). Ta veckor om så behövs.',
+      'Hunden går in men panikar när dörren stängs → öppna direkt, ingen press. Träna värdefulla saker (kong med kyld leverpate) i öppen bur tills den älskar platsen.',
+    ],
+    guide: {
+      setup: [
+        'Bur i passande storlek — hunden ska kunna stå, vända sig och ligga utsträckt. Inte större (för stor = de kissar i ena hörnet).',
+        'Mjuk filt + 1–2 favorittuggleksaker. Aldrig täcke som kan kvävas.',
+        'Placera buren i ett lugnt rum, inte i farstun där det går folk hela tiden.',
+        'Aldrig som straff — buren ska vara en bra plats, inte en "time-out"-cell.',
+      ],
+      steps: [
+        'Dag 1–3: dörr öppen, mata hunden i buren, kasta in godis när den går nära.',
+        'Dag 4–7: stäng dörren medan den äter, öppna innan klar. 5 sek → 30 sek → 1 min.',
+        'Vecka 2: hunden går in på signal ("plats"/"in"). Stängd dörr 5–15 min medan du är i rummet.',
+        'Vecka 3+: bygg upp tid + du går ifrån. Aldrig släppa ut när den skäller — vänta tystnad (även 5 sek räcker) först.',
+      ],
+      logging: [
+        'Lyckad = hunden gick in på signal och var tyst hela den planerade tiden.',
+        'Miss = du behövde släppa ut för att den panik-skällde/gnydde > 2 min.',
+        'Notera duration + om du var i rummet eller borta.',
+      ],
+      commonMistakes: [
+        'Använda buren som straff → hunden hatar den för alltid.',
+        'Lämna en alltför pigg/ostressad hund i buren → den vill ut för att leka, inte vila.',
+        'Släppa ut när den skäller → du lär den att skälla = öppen dörr.',
+        'För stor bur → blandar vila-plats och toa-plats.',
+      ],
+      stopRules: [
+        'Hunden gnyr > 5 min trots att den nyss varit ut och kissat → låt henne ut, kortare duration nästa pass.',
+        'Hunden får panik-attack (hyperventilation, salivar, vägrar mat efter) → STOPP. Detta är möjlig separationsångest. Kontakta beteendekonsulent innan ni fortsätter.',
+      ],
+    },
+  }),
+
+  ensam_traning: spec({
+    exerciseId: 'ensam_traning',
+    definition: 'Lyckad rep = hunden är lugn (ingen skall, gnyl, panik) under hela den tid du är borta. Bygger upp från 30 sek till flera timmar.',
+    ladder: [
+      { id: 'separation_30s', label: '30 sek separation', criteria: 'Gå till nästa rum, stäng dörren, kom tillbaka. Ingen reaktion = lyckad.' },
+      { id: 'separation_5min', label: '5 min separation', criteria: 'Lämna hemmet (gå till källaren/utanför dörren) i 5 min.' },
+      { id: 'errand_30min', label: '30 min kort ärende', criteria: 'Gå till mataffären/posten. Hunden ensam hemma, gärna i bur eller på sin plats.' },
+      { id: 'errand_2h', label: '2 timmar borta', criteria: 'Längre ärende. Förutsätter att 30-min-nivån är solid.' },
+      { id: 'workday_4h', label: 'Halv arbetsdag · 4 h', criteria: 'Maxgräns för vuxen hund. Valp under 6 mån klarar mindre.' },
+    ],
+    troubleshooting: [
+      'Hunden börjar reagera redan vid 30 sek → börja om från sekundnivå (öppna dörren, stäng, öppna).',
+      'Du har gått 5 min flera gånger utan problem, men 30 min blir kaos → kliv inte upp i nivå för fort, bygg gradvis (10 → 15 → 20 min).',
+      'Skäller bara mot grannar eller ljud → inte separationsångest. Trygga miljön (vita-brus, gardiner) istället.',
+    ],
+    guide: {
+      setup: [
+        'Tröttkör hunden fysiskt + mentalt INNAN du tränar ensamhet — en sömnig hund klarar mer.',
+        'Lämna en fryst kong eller långtuggande gott (utan att hunden hinner äta upp på 1 min).',
+        'Filma hunden (telefonkamera, baby-monitor) första gångerna — du behöver se vad som händer när du går.',
+        'Aldrig stort avsked eller stor hälsning. Lämna och kom hem neutralt.',
+      ],
+      steps: [
+        'Sätt på morgonrock + skor (avskedscues) — gå INTE. Sätt dig igen. Upprepa till hunden inte längre reagerar på cues.',
+        'Gå ut genom dörren — kom tillbaka direkt (5 sek). Belöna när hunden är lugn.',
+        'Bygg duration: 30 sek → 1 min → 2 min → 5 min → 15 min → 30 min. Hoppa aldrig över steg.',
+        'Variera tider — så hunden inte räknar minuter. Ibland 5 min, ibland 30, ibland 2 h.',
+      ],
+      logging: [
+        'Lyckad = filmen visar lugn hund hela tiden, ingen skällning > 5 sek, inga förstörda saker.',
+        'Miss = hunden skällde/gnydde >2 min, panikade, eller du kom hem till förstörelse.',
+        'Notera total tid + första reaktionspunkt (när började det gå snett).',
+      ],
+      commonMistakes: [
+        'Stort avsked ("hej då lilla vännen!") → höjer arousal innan du går.',
+        'Stor hälsning hem → bygger förväntan på din återkomst, gör väntan stressande.',
+        'Hoppa direkt till 4 h utan grundträning → hunden lär sig att vara ensam = panik.',
+        'Lämna ouppvärmd hund (ingen lek/promenad) → energi blir frustration.',
+      ],
+      stopRules: [
+        'Hunden förstör (möbler, dörrar, golv) när du varit borta → stoppa nuvarande nivå, backa till 50%.',
+        'Hunden visar tecken på panik (drev/saliv/självskada) → STOPP, detta är separationsångest. Kontakta beteendekonsulent — det här tränas inte bort själv.',
+      ],
+    },
+  }),
+
 } as const
 
 export function getExerciseSpec(exerciseId: string): ExerciseSpec | null {

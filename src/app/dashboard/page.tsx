@@ -51,6 +51,19 @@ interface ContextualTip {
 function getContextualTips(profile: DogProfile, ageWeeks: number): ContextualTip[] {
   const tips: ContextualTip[] = []
   const behavior = profile.assessment?.behaviorProfile as BehaviorProfile | undefined
+  // trainingBackground is captured at onboarding now — fall back to assessment if not set there
+  const trainingBackground = profile.onboarding?.trainingBackground ?? behavior?.trainingBackground
+  const isBeginner = trainingBackground === 'beginner'
+  const isPuppy = ageWeeks > 0 && ageWeeks < 20
+
+  if (isBeginner && isPuppy) {
+    tips.push({
+      id: 'puppy-fundamentals',
+      title: `Valpens grundbehov — börja här med ${profile.name}`,
+      body: 'Rastning, bett-hämning, sömn (18 h/dygn!) och ensam-träning är viktigare än formella övningar de första veckorna. Bygg rutinerna nu — utan dem fungerar inget annat. Lägg till "Rastning", "Bett-inhibition", "Box-träning" och "Ensam-träning" som egna pass.',
+      learnId: 'timing',
+    })
+  }
 
   if (ageWeeks > 0 && ageWeeks < 16) {
     tips.push({
@@ -88,10 +101,7 @@ function getContextualTips(profile: DogProfile, ageWeeks: number): ContextualTip
     })
   }
 
-  if (
-    profile.assessment?.status === 'completed' &&
-    profile.assessment?.behaviorProfile?.trainingBackground === 'beginner'
-  ) {
+  if (isBeginner) {
     tips.push({
       id: 'timing-tip',
       title: 'Det viktigaste en nybörjare kan lära sig',

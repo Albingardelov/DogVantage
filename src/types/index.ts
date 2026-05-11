@@ -61,6 +61,8 @@ export interface OnboardingPrefs {
   ownerNotes?: string
   /** ISO date when the dog comes home — training schedule starts from this date */
   homecomeDate?: string
+  /** Handler's experience level — captured at onboarding so beginner guidance can fire from day one (assessment may refine it later) */
+  trainingBackground?: TrainingBackground
 }
 
 // ─── Behavior profile (collected in assessment step 1) ───────────────────────
