@@ -11,52 +11,72 @@ import {
 import type { Breed, DogSex, CastrationStatus, TrainingGoal, WeekPlan, HouseholdPet } from '@/types'
 
 // Bump this when plan generation logic changes significantly — forces cache invalidation
-export const PLAN_VERSION = 'v5'
+export const PLAN_VERSION = 'v6'
+
+/**
+ * R+ foundation exercises that should be available for every breed and age.
+ * marker = lärs ut innan luring så hunden förstår markörsignalen
+ * Puppy fundamentals (rastning/bett/box/ensam) tas direkt av nybörjarägaren
+ * och AI:n kan inkludera dem för valpar.
+ */
+const FOUNDATION_EXERCISES = ['marker']
+const PUPPY_FUNDAMENTALS = ['rastning', 'bett_inhibition', 'box_traning', 'ensam_traning']
 
 function allowedExerciseIdsForBreed(breed: Breed, ageWeeks?: number): string[] {
   const isPuppy = typeof ageWeeks === 'number' && ageWeeks > 0 && ageWeeks < 16
+  const puppyExtras = isPuppy ? PUPPY_FUNDAMENTALS : []
 
   if (breed === 'braque_francais') {
     return [
+      ...FOUNDATION_EXERCISES,
       'namn', 'inkallning', 'stoppsignal', 'stanna', 'hantering', 'socialisering',
       'stadga', 'orientering', 'kontrollerat_sok', 'impulskontroll',
       'koppel', 'ligg', 'sitt', 'plats', 'fri',
+      ...puppyExtras,
       ...(isPuppy ? [] : ['apportering', 'vatten', 'fot']),
     ]
   }
 
   if (breed === 'labrador') {
     return [
+      ...FOUNDATION_EXERCISES,
       'namn', 'inkallning', 'stoppsignal', 'stanna', 'sitt', 'ligg',
       'koppel', 'hantering', 'socialisering', 'fokus',
       'apportering', 'plats', 'fri', 'impulskontroll',
+      ...puppyExtras,
       ...(isPuppy ? [] : ['vatten', 'fot']),
     ]
   }
 
   if (breed === 'italian_greyhound') {
     return [
+      ...FOUNDATION_EXERCISES,
       'namn', 'inkallning', 'stanna', 'sitt', 'ligg',
       'koppel', 'hantering', 'socialisering',
       'fokus', 'impulskontroll', 'plats', 'fri',
+      ...puppyExtras,
     ]
   }
 
   if (breed === 'miniature_american_shepherd') {
     return [
+      ...FOUNDATION_EXERCISES,
       'namn', 'inkallning', 'stoppsignal', 'stanna', 'sitt', 'ligg',
       'koppel', 'hantering', 'socialisering',
       'fokus', 'impulskontroll', 'stadga', 'orientering',
       'nosework', 'plats', 'fri',
+      ...puppyExtras,
       ...(isPuppy ? [] : ['vallning', 'fot']),
     ]
   }
 
   // Fallback för okända raser
   return [
+    ...FOUNDATION_EXERCISES,
     'namn', 'inkallning', 'sitt', 'ligg', 'stanna',
     'koppel', 'hantering', 'socialisering', 'stoppsignal',
     'fokus', 'apportering', 'vatten', 'fot', 'plats', 'fri', 'impulskontroll',
+    ...puppyExtras,
   ]
 }
 
@@ -169,7 +189,26 @@ export async function generateWeekPlan(
     ? 'Könsmognadsregel (intakt hane, 7–18 mån): ökad hormonstimulans kan ge distraktion och rivalitet. Inkludera impulskontroll minst 3 dagar. Håll pass korta (5–8 min). Öka inte kriterier snabbt — konsolidera befintliga beteenden.'
     : null
 
+  // R+-grundregler: marker måste laddas innan andra övningar bygger på den.
+  // Vecka 1–3 är "foundation phase" där hunden lär sig markörsignalen.
+  const markerRule = trainingWeek <= 3
+    ? `R+-grundregel (programvecka ${trainingWeek}): inkludera "marker" (id: marker) som första övning på MINST 3 av veckans träningsdagar. Mål: ladda markören innan hunden förväntas svara på signaler. Utan laddad markör är all annan markering meningslös.`
+    : null
+
+  // Förstärkningsschema: byt från CRF (kontinuerlig) till variabel under konsolideringsfasen.
+  const scheduleRule = trainingWeek >= 4
+    ? 'Förstärkningsschema: när ett beteende är pålitligt på en kriterienivå (~80% lyckade reps över 3 pass) — börja belöna ungefär 2 av 3 reps istället för varje. Hög motivation utan att hunden tappar engagemanget. Vid stort genombrott (första gången på svår nivå): jackpot — 5 godis i rad. Förklara detta i desc där det är relevant ("varje annan rep" / "jackpot på första lyckad").'
+    : 'Förstärkningsschema (vecka 1–3): belöna VARJE lyckad rep (CRF, continuous reinforcement). Du bygger associationen mellan beteendet och belöningen — variabel förstärkning kommer senare.'
+
+  // Capturing vs. luring: när luring sitter, fasa ut till capturing/handsignal.
+  const capturingRule = trainingWeek >= 3
+    ? 'Capturing vs. luring: för sitt/ligg/plats — inkludera laddertrappstegen "fasa ut locket" och "fånga erbjudet beteende" istället för att fastna i luring. Lure-beroende hund följer maten, inte signalen.'
+    : null
+
   const idRules = [
+    markerRule,
+    scheduleRule,
+    capturingRule,
     breedSpecificRule,
     isPuppy
       ? 'Valpregel: inkludera hantering och socialisering flera dagar. Inga "tunga" distans/störnings-ökningar.'

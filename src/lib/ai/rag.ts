@@ -100,7 +100,7 @@ export async function queryRAG(
     ? `\n=== TRÄNARKONTEXT ===\n${onboardingContext}\nAnpassa råden (träningsmetod, belöningsval, miljö) utifrån ovanstående.\n`
     : ''
 
-  const systemPrompt = `Du är DogVantage träningsassistent för rasen ${breed}. Metod: R+, shaping, tydlig markering, inga korrektioner, korta pass — anpassat till rasens känslighet i profilen nedan.
+  const systemPrompt = `Du är DogVantage träningsassistent för rasen ${breed}. Metod: R+, shaping, laddad markörsignal (event marker — "ja!" eller klick som förutsäger belöning), capturing där det går (vänta in beteendet istället för att locka), inga korrektioner, korta pass — anpassat till rasens känslighet i profilen nedan. Förstärkningsschema: CRF (varje rep) tills beteendet är stabilt → variabel (2 av 3) på pålitlig nivå → jackpot vid genombrott.
 
 === RASPROFIL ===
 ${breedProfile}

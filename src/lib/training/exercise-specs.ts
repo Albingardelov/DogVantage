@@ -52,6 +52,51 @@ function spec(s: ExerciseSpec): ExerciseSpec {
 }
 
 export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
+  marker: spec({
+    exerciseId: 'marker',
+    definition: 'Lyckad rep = inom 0,5 sek efter markörljudet ("ja!" / klick) hör hunden ljudet → tittar på dig / förväntar belöning → får godis. Markören förutsäger belöning, inget annat.',
+    ladder: [
+      { id: 'charge_easy', label: 'Ladda markören · stilla', criteria: 'Hunden står/sitter framför dig. Säg "ja!" → ge godis direkt (1 sek mellan markör och godis). 10 reps per pass, 2–3 pass första dagen. Inget annat krav — vi bygger associationen markör = godis.' },
+      { id: 'charge_distracted', label: 'Ladda · valfri position', criteria: 'Markera när hunden gör vad som helst (sniffar, går, ligger). Hunden ska reagera på markören oavsett vad den gör. Bygger generaliserad förväntan.' },
+      { id: 'mark_behavior_lure', label: 'Markera lockat beteende', criteria: 'Locka enkelt beteende (sitt med godis över nosen). När rumpan träffar marken → markera ("ja!") → belöna. Markören kommer i exakt rätt ögonblick.' },
+      { id: 'mark_offered', label: 'Markera erbjudet beteende', criteria: 'Vänta. När hunden gör något du vill ha (tittar på dig, sätter sig, lugn vila) → markera + belöna. Kallas "capturing" — hunden uppfinner beteendet, du fångar det.' },
+      { id: 'mark_chain', label: 'Markör som brygga i kedjor', criteria: 'Markören används mitt i en kedja för att indikera "rätt, fortsätt". T.ex. inkallning: hunden vänder mot dig 5m bort → markera → hunden kommer hela vägen → primär belöning.' },
+    ],
+    troubleshooting: [
+      'Hunden reagerar inte på markören → laddningen har inte satt sig. Gå tillbaka till charge_easy, 50 reps över 2–3 pass.',
+      'Markörljudet kommer alltid sent → öva utan hund först (säg "ja!" exakt när bollen träffar marken vid kast).',
+      'Hunden hoppar/skäller efter markören istället för att förvänta godis → du har försenat belöningen för många gånger. Snabba upp leveransen, kortare reps.',
+    ],
+    guide: {
+      setup: [
+        'Välj ett markörljud du kan göra konsekvent: ett kort "ja!", "yes", eller en klicker. Samma ljud, samma ton — alltid.',
+        'Ha 20–30 små godisbitar redo (kibble eller mjuk korv) — markörarbete kräver hög frekvens.',
+        'Träna i lugn miljö de första 3–5 passen — bygg associationen ren först.',
+      ],
+      steps: [
+        'Pass 1: 10 reps "ja!" → godis (1 sek mellanrum). Hunden behöver inte göra något — vi laddar markören. 3 sådana pass första dagen.',
+        'Pass 2: testa associationen — vänta tills hunden tittar bort, säg "ja!". Tittar hunden på dig direkt? Då är markören laddad.',
+        'Pass 3+: börja markera lockade beteenden (sitt, ligg) — markör i exakt sekunden beteendet inträffar, godis 1 sek senare.',
+        'När markören sitter (oftast 1 vecka): börja "capturing" — fånga beteenden hunden erbjuder spontant.',
+      ],
+      logging: [
+        'Lyckad = hunden reagerar på markören inom 0,5 sek genom att titta/förvänta godis.',
+        'Miss = ingen reaktion på markören eller markören kom efter belöningen.',
+        'Latens = tid mellan markör och hundens respons (mål: < 0,5 sek).',
+      ],
+      commonMistakes: [
+        'Använda markören som lock — markören är en FÖRUTSÄGELSE, inte en signal att göra något.',
+        'Markera kontinuerligt utan att belöna → markören tappar betydelse. En markör = en belöning, varje gång.',
+        'Inkonsekvent ljud — ibland "ja!", ibland "duktig!", ibland klicker. Välj en, håll dig till den.',
+        'Markörsignalen kommer 1+ sek efter beteendet → du markerar fel beteende. Träna timing utan hund först.',
+      ],
+      stopRules: [
+        'Hunden ignorerar markören → tillbaka till laddningsfasen, 50 reps över 2 pass.',
+        'Du märker att timing är konsekvent fel → träna 10 min utan hund (kasta en boll, markera när den studsar) innan nästa pass.',
+      ],
+    },
+  }),
+
   koppel: spec({
     exerciseId: 'koppel',
     definition: 'Lyckad rep när hunden kan gå med slakt koppel i några steg och återvända till dig för belöning.',
@@ -230,8 +275,9 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
     exerciseId: 'sitt',
     definition: 'Lyckad rep när rumpan är i marken inom 1–3 sek och hunden stannar kvar tills du belönar.',
     ladder: [
-      { id: 'home_lure', label: 'Inne · locka', criteria: 'Locka lugnt till sitt. Belöna när rumpan träffar marken.' },
-      { id: 'home_signal', label: 'Inne · signal', criteria: 'Signal först, locka bara om behövs. Belöna snabbt.' },
+      { id: 'home_lure', label: 'Inne · locka', criteria: 'Locka lugnt till sitt med godis över nosen. Belöna när rumpan träffar marken.' },
+      { id: 'home_fade_lure', label: 'Inne · fasa ut locket', criteria: 'Gör samma handrörelse men UTAN godis i handen — godis kommer från andra handen efter rumpan är ner. Hjälper att inte fastna i locking-beroende.' },
+      { id: 'home_signal', label: 'Inne · signal', criteria: 'Säg "sitt" först, vänta 2 sek. Hjälp med locking bara om hunden inte fattar. Belöna snabbt.' },
       { id: 'home_duration_2s', label: 'Inne · 2 s', criteria: 'Belöna efter ~2 sek sitt (om hunden klarar det lätt).' },
       { id: 'outdoor_low', label: 'Ute · låg störning', criteria: 'Kort duration. Belöna snabbt och ofta.' },
       { id: 'outdoor_medium', label: 'Ute · medel störning', criteria: 'Sänk duration när störning ökar. Endast ett kriterium åt gången.' },
@@ -273,8 +319,9 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
     exerciseId: 'ligg',
     definition: 'Lyckad rep när hunden lägger sig ner (bröst/armbågar i marken) inom 1–3 sek.',
     ladder: [
-      { id: 'home_lure', label: 'Inne · locka', criteria: 'Locka ner från sitt/stå. Belöna när hunden är helt ner.' },
-      { id: 'home_signal', label: 'Inne · signal', criteria: 'Signal först. Hjälp med lockning vid behov, men belöna slutposition.' },
+      { id: 'home_lure', label: 'Inne · locka', criteria: 'Locka ner från sitt/stå med godis. Belöna när hunden är helt ner.' },
+      { id: 'home_fade_lure', label: 'Inne · fasa ut locket', criteria: 'Samma handrörelse men UTAN godis i handen — godis kommer från andra handen när hunden är ner. Bygger respons på handsignalen, inte på maten.' },
+      { id: 'home_signal', label: 'Inne · signal', criteria: 'Säg "ligg" först, vänta 2 sek. Locka bara vid behov, belöna slutposition.' },
       { id: 'home_duration_2s', label: 'Inne · 2 s', criteria: 'Belöna efter ~2 sek i ligg om stabilt.' },
       { id: 'outdoor_low', label: 'Ute · låg störning', criteria: 'Kort pass, belöna snabbt och ofta.' },
     ],
@@ -909,8 +956,9 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
     exerciseId: 'plats',
     definition: 'Lyckad rep när hunden självmant går till sin matta, lägger sig och väntar tills fri-signal ges.',
     ladder: [
-      { id: 'intro_mat', label: 'Intro matta', criteria: 'Hunden utforskar och trampar på mattan. Belöna all kontakt.' },
-      { id: 'go_to_mat', label: 'Gå till matta', criteria: 'Hunden går till mattan och lägger sig på signal "plats".' },
+      { id: 'intro_mat', label: 'Intro matta', criteria: 'Hunden utforskar och trampar på mattan. Belöna all kontakt (capturing — fånga frivilligt beteende, locka inte).' },
+      { id: 'capture_lie_on_mat', label: 'Fånga ligg på matta', criteria: 'Vänta tills hunden lägger sig på mattan av sig själv → jackpot. Inga signaler ännu — hunden lär sig att MATTAN orsakar belöning.' },
+      { id: 'go_to_mat', label: 'Gå till matta', criteria: 'Hunden går till mattan och lägger sig på signal "plats". Lägg på signal när hunden gör beteendet pålitligt själv.' },
       { id: 'duration_5s', label: 'Durationer 5s', criteria: 'Hunden stannar liggandes 5 sekunder med lätta distraktioner.' },
       { id: 'duration_30s', label: 'Durationer 30s', criteria: 'Hunden stannar 30s medan du rör dig runtomkring. Avsluta med "fri".' },
     ],
