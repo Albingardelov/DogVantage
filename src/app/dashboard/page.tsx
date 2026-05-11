@@ -87,9 +87,15 @@ function getContextualTips(profile: DogProfile, ageWeeks: number): ContextualTip
   if (behavior?.leashBehavior === 'pulls_hard_reactive') {
     tips.push({
       id: 'reactive-stress',
-      title: 'Reaktiv hund — se upp för stresssignaler',
-      body: 'Din hunds profil visar reaktivitet i koppel. Lär dig känna igen stresssignaler tidigt — gäspning, slickar sig om nosen, vänder bort — så du kan öka avstånd innan hunden passerar sin tröskel.',
-      learnId: 'over-threshold',
+      title: 'Reaktiv hund — börja här',
+      body: `${profile.name} är reaktiv på koppel. Tre saker att läsa innan ni går ut: Threshold (när hunden slutar tänka), Look At That (träna automatisk uppmärksamhet) och Trigger stacking (varför ${profile.name} verkar bli värre vissa dagar). LAT är nu tillgänglig som övning i veckoschemat.`,
+      learnId: 'lat-method',
+    })
+    tips.push({
+      id: 'trigger-stacking',
+      title: 'Trigger stacking — schemalägg återhämtning',
+      body: 'Cortisol tar dagar att brytas ned. Efter en intensiv trigger-dag → 1–2 lugna dagar med bara sniff-promenader. Aldrig två LAT-pass i rad mot olika triggers.',
+      learnId: 'trigger-stacking',
     })
   }
 

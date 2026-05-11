@@ -365,6 +365,90 @@ const ARTICLES: Article[] = [
       },
     ],
   },
+  {
+    id: 'trigger-stacking',
+    title: 'Trigger stacking — varför hunden plötsligt går i taket',
+    summary: 'En enskild trigger hunden klarar — flera på samma dag blir för mycket. Förstå arousal-ackumuleringen.',
+    readTime: '4 min',
+    sections: [
+      {
+        heading: 'Vad är trigger stacking?',
+        body: 'Stress staplas. Varje trigger (en hund, en cyklist, en bilrumla, en ovanlig person) höjer hundens stresnivå. Mellan triggers sjunker den — men inte tillbaka till noll. Om triggers kommer tätt på varandra **adderas** stressen. Hunden som klarade tre hundmöten på en lugn dag kan inte klara två på en stressig dag.',
+      },
+      {
+        heading: 'Återhämtningstid',
+        body: 'Cortisol (huvudstresshormonet) tar **timmar till dagar** att brytas ned. Efter en svår exponering (rejäl skällning, paniksituation) behöver hunden 2–3 dagar lågstimulans för att verkligen återhämta sig. Inte bara "vila tills imorgon".',
+      },
+      {
+        heading: 'Tecken på trigger-staplad hund',
+        body: 'Reagerar på saker den brukar klara · Skäller på trigger A trots att den nyss passerade utan reaktion · Svårare att inkalla · Sover oroligt · Äter mindre · Vägrar mat den brukar älska · Mer reaktiv flera dagar efter en intensiv händelse — det är stapeln som inte hunnit förlora höjd.',
+      },
+      {
+        heading: 'Schemalägga med stacking i åtanke',
+        body: 'Efter en intensiv träningsdag med många triggers → 1–2 lugna dagar med bara sniff-promenader och vila. Aldrig två LAT-pass i rad på olika triggers. Hund-träffar OCH veterinärbesök på samma dag = recept för regress.',
+      },
+      {
+        heading: 'När du är på stadiet',
+        body: 'Säg ifrån. Vänd om. Lyft upp hunden om det går. Gå hem. Det är inte ett misslyckande — det är att skydda framsteg. En kort träningssession som ger genombrott är slösat om hunden får en kris dagen efter pga. det du gjorde.',
+      },
+    ],
+  },
+  {
+    id: 'lat-method',
+    title: 'Look At That (LAT) — träna automatisk uppmärksamhet',
+    summary: 'LAT vänder triggern till en signal: "se den, kolla in mig". Här är hur du bygger den från grunden.',
+    readTime: '5 min',
+    sections: [
+      {
+        heading: 'Vad LAT gör',
+        body: 'LAT (Look At That) är en motkonditioneringsteknik. Hunden lär sig: trigger → markör → belöning hos mig. Med tillräckligt många reps blir triggern **själv signalen** att vända till föraren. Det är inte att "ignorera" triggern — det är att kolla på den, sedan vända.',
+      },
+      {
+        heading: 'Förutsättningar',
+        body: 'Markörsignal måste vara laddad (se Visselpipa och redskap-guiden). High-value belöning ENBART för LAT (korv/lever — inte vanlig kibble). Du måste kunna identifiera ditt working distance (avståndet där hunden kan ta godis trots triggern syns). Utan dessa tre funkar inte LAT.',
+      },
+      {
+        heading: 'Steg för steg',
+        body: '1) Identifiera trigger och working distance. 2) Stå still, vänta på att hunden tittar på triggern. 3) I sekunden hunden tittar → markera ("ja!"). 4) Belöna mot ditt ben — hunden vänder för att äta. 5) Repetera 5–10 ggr per pass, aldrig fler. 6) Avsluta lugnt och gå därifrån.',
+      },
+      {
+        heading: 'Working distance varierar',
+        body: 'Distansen är inte konstant. En trött hund, en regnig dag, två triggers i rad — allt sänker tröskeln. Ha alltid 50% buffert (om du tror 20 m räcker, börja på 30 m). Backa hellre 5 m i onödan än att gå over threshold en gång.',
+      },
+      {
+        heading: 'När LAT inte räcker',
+        body: 'Vid svår reaktivitet (skäll på 50+ m, attackförsök, bett-historia) → LAT är inte tillräckligt själv. Då behövs BAT eller CAT (se nästa guide) och oftast hjälp av certifierad beteendekonsulent. LAT är ett verktyg, inte en helhetslösning.',
+      },
+    ],
+  },
+  {
+    id: 'bat-cat-intro',
+    title: 'BAT & CAT — när LAT inte räcker till',
+    summary: 'För hundar med stark reaktivitet eller bett-historia räcker LAT sällan ensamt. BAT och CAT är två etablerade metoder du bör känna till.',
+    readTime: '4 min',
+    sections: [
+      {
+        heading: 'Varför inte alltid LAT?',
+        body: 'LAT bygger uppmärksamhet — den vänder hunden mot dig. Det fungerar bra för måttlig reaktivitet. Men för hundar med stark rädsla eller bett-historia är problemet inte uppmärksamhet — det är **känsloläget** runt triggern. Då behövs metoder som låter hunden själv få välja att gå därifrån.',
+      },
+      {
+        heading: 'BAT (Behavior Adjustment Training)',
+        body: 'BAT (utvecklat av Grisha Stewart) handlar om att låta hunden själv besluta avstånd och tempo. Du följer hunden på en lång lina (3–5 m), hunden tittar på triggern, du väntar passivt. När hunden själv vänder bort, går ifrån, eller väljer ett annat alternativ → den belönar sig själv genom att avlägsna sig från triggern. Det bygger ägarskap över beslutet, vilket är kraftfullt för rädda hundar.',
+      },
+      {
+        heading: 'CAT (Constructional Aggression Treatment)',
+        body: 'CAT (utvecklat av Snider/Rosales-Ruiz) är mer strukturerat: triggern presenteras på avstånd hunden klarar, hunden väljer ett önskat beteende (sitter, vänder bort, slappar i kroppen), och **triggern går då bort**. Borttagandet av triggern är belöningen — det är negativ förstärkning men utan aversiv stimulus, eftersom hunden aldrig pressas över threshold.',
+      },
+      {
+        heading: 'Det här är inte gör-själv-metoder',
+        body: 'Både BAT och CAT kräver att du läser hundens stress-signaler skickligt och kan identifiera working distance i realtid. Felgjort förstärker de problemet. För hundar med riktig aggressivitet (bett, attacker, resursförsvar) ska du INTE försöka detta själv — sök certifierad beteendekonsulent (SBBK / IAABC) som behärskar metoden.',
+      },
+      {
+        heading: 'Vad du kan göra själv just nu',
+        body: 'Innan du har professionell hjälp: håll hunden under threshold (avstånd > working distance), kör LAT på säkra avstånd, undvik att stacka triggers, säkerställ vila och bra mat, och dokumentera vad som triggar (typ, närhet, tid på dygnet). Den informationen sparar konsulten tid.',
+      },
+    ],
+  },
 ]
 
 function Learn() {

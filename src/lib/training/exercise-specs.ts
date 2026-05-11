@@ -1180,6 +1180,53 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
     },
   }),
 
+  lat: spec({
+    exerciseId: 'lat',
+    definition: 'Lyckad rep = hunden tittar på triggern (max 1 sekund), vänder sig sedan mot dig av sig själv, och tar belöning lugnt. Allt händer under threshold — ingen skällning, ingen fixering.',
+    ladder: [
+      { id: 'mark_neutral', label: 'Markera neutral titt inne', criteria: 'Hunden tittar på vad som helst (bok, lampa), du markerar och belönar. Bygger associationen: titta → markör → godis. Ingen trigger än.' },
+      { id: 'trigger_far', label: 'Trigger på långt avstånd', criteria: 'Identifiera ditt working distance — det avstånd där hunden ser triggern men kan ta godis. Markera varje gång hunden tittar på triggern, belöna mot dig.' },
+      { id: 'trigger_medium', label: 'Trigger medel avstånd', criteria: 'Minska avstånd 25%. Endast om hunden konsekvent vänder mot dig efter markering på förra nivån.' },
+      { id: 'multiple_triggers', label: 'Flera triggers samma session', criteria: 'Två olika triggers i samma session (cyklist + hund), längre avstånd. Bygger generalisering.' },
+      { id: 'recovery_check', label: 'Återhämtningstest', criteria: 'Efter en trigger-passage: hunden ska kunna utföra ett känt beteende (sitt, fokus) inom 10 sek. Om nej → backa avstånd.' },
+    ],
+    troubleshooting: [
+      'Hunden fixerar och tar inte godis → du är för nära. Backa 5–10 m. Working distance är inte konstant — det varierar med dagsform.',
+      'Hunden vänder mot dig men nappar inte godiset → godiset är inte värt nog. Använd korv, lever, ost — high-value enbart vid trigger-träning.',
+      'Hunden skäller redan när du tagit fram godiset (förväntan-skäll) → byt rutin: ut till trigger-zon, sätt dig 5 min, vänta tills hunden är lugn innan godis.',
+    ],
+    guide: {
+      setup: [
+        'Identifiera DIN hunds working distance i förväg (en lugn promenad utan trigger-pass) — det avståndet där den ser triggern men fortfarande kan engagera sig.',
+        'High-value belöningar (korv, lever, ost) ENBART för LAT — inte vanligt godis.',
+        'Markörsignal (klicker eller "ja!") måste vara laddad och pålitlig innan LAT-träning.',
+        'Träna med fasta triggers (du parkerar nära en hundpark t.ex.) innan rörliga möten.',
+      ],
+      steps: [
+        'Stå på working distance från triggern, vid sidan av en bil eller buske om hunden behöver visuell skydd.',
+        'Vänta. När hunden tittar på triggern → markera DIREKT (inom 0,5 sek).',
+        'Belöna nära ditt ben, så hunden vänder mot dig för att äta. Detta är "automatic check-in" — det vi tränar.',
+        'Upprepa 5–10 reps. Sluta INNAN hunden tröttnar eller börjar fixera. Avsluta passet med en lugn promenad bort från triggern.',
+      ],
+      logging: [
+        'Lyckad = hunden tittade på triggern, du markerade, hunden vände mot dig och tog godis lugnt.',
+        'Miss = hunden fixerade > 2 sek, skällde, eller tog inte godiset.',
+        'Latens = tid från markering till att hunden vänder mot dig (mål < 1 sek).',
+      ],
+      commonMistakes: [
+        'För nära triggern → hunden går over threshold och kan inte tänka. Backa, backa, backa.',
+        'Markera när hunden redan fixerat (> 1 sek titt) → du tränar fixering, inte uppmärksamhet.',
+        'Belöna med hunden riktad mot triggern → motverkar check-in. Belöning ska alltid komma vid ditt ben.',
+        'Köra LAT-pass på lika hög intensitet flera dagar i rad → trigger stacking, hunden blir mer reaktiv. Lägg in lugna dagar.',
+      ],
+      stopRules: [
+        'Hunden tar inte godis trots avstånd → backa 50%, ändra session eller avsluta.',
+        'Skällning under en session → STOPP omedelbart. Gå bort tills hunden tar godis igen.',
+        'Reaktivitet som blir värre över veckor istället för bättre → kontakta certifierad beteendekonsulent (SBBK/IAABC). LAT är ett verktyg, inte en fullständig behandling för svår reaktivitet.',
+      ],
+    },
+  }),
+
 } as const
 
 export function getExerciseSpec(exerciseId: string): ExerciseSpec | null {

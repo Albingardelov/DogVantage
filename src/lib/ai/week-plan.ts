@@ -22,6 +22,7 @@ export const PLAN_VERSION = 'v7'
  */
 const FOUNDATION_EXERCISES = ['marker']
 const PUPPY_FUNDAMENTALS = ['rastning', 'bett_inhibition', 'box_traning', 'ensam_traning']
+const REACTIVE_EXERCISES = ['lat']
 
 function allowedExerciseIdsForBreed(breed: Breed, ageWeeks?: number): string[] {
   const isPuppy = typeof ageWeeks === 'number' && ageWeeks > 0 && ageWeeks < 16
@@ -140,7 +141,14 @@ export async function generateWeekPlan(
     ? ['socialisering', 'impulskontroll', 'fokus', 'plats']
     : []
   const focusIds = weeklyFocus && weeklyFocus.length > 0 ? focusExerciseIds(weeklyFocus) : []
-  const allowedIds = [...new Set([...breedIds, ...goalIds, ...petIds, ...focusIds])]
+  // Reactive dogs always unlock LAT regardless of breed/goal
+  const isReactive = onboardingContext != null && (
+    onboardingContext.includes('Drar hårt eller reagerar') ||
+    onboardingContext.includes('pulls_hard_reactive') ||
+    /reaktiv|skäller på/i.test(onboardingContext)
+  )
+  const reactiveIds = isReactive ? REACTIVE_EXERCISES : []
+  const allowedIds = [...new Set([...breedIds, ...goalIds, ...petIds, ...focusIds, ...reactiveIds])]
 
   const isPuppy = typeof ageWeeks === 'number' && ageWeeks > 0 && ageWeeks < 16
 
@@ -217,10 +225,16 @@ export async function generateWeekPlan(
     ? `Passlängdsregel (ålder ${ageWeeks} v): MAX ${getMaxSessionMinutes(ageWeeks)} min per pass i desc-fältet. Korta micro-sessions för valpar under 12 v.`
     : null
 
+  // Reactive-dog protocol — uses isReactive computed above
+  const reactiveRule = isReactive
+    ? 'Reaktivitetsregel: hunden är reaktiv. (1) Inkludera "lat" (id: lat) på minst 2 träningsdagar — sätt desc med working distance som första anvisning ("LAT på 20 m, korta reps"). (2) Efter en LAT-dag MÅSTE följande dag vara lugn (rest:true ELLER bara sniff/hantering/namn — inga ytterligare trigger-pass). Trigger stacking höjer cortisol i dagar. (3) Inga möte-baserade övningar (socialisering med okända, etc.) två dagar i rad. (4) Skriv aldrig "passera möten" eller liknande tvångsexponering — exponering sker ALLTID under threshold.'
+    : null
+
   const idRules = [
     progressionRule,    // deterministic advance/hold/regress decisions
     developmentalRule,  // fear periods + adolescence
     sessionCap,
+    reactiveRule,
     markerRule,
     scheduleRule,
     capturingRule,
