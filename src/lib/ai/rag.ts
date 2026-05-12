@@ -108,13 +108,16 @@ ${phaseInfo}
 ${documentContext ? `\n=== KÄLLDOKUMENT ===\n${documentContext}\n` : ''}${onboardingSection}${metricsSection}${logsSection}
 Regler: svara på svenska, anpassa till hundens ålder i veckor och ge ett komplett svar (inte avhuggen mening). Sikta på ca 150-250 ord vid normala frågor. Nämn källnamn om KÄLLDOKUMENT finns — annars påstå inte att du citerar ett dokument.`
 
+  const generationConfig = {
+    temperature: 0.4,
+    maxOutputTokens: 1400,
+    thinkingConfig: { thinkingBudget: 0 },
+  }
+
   const result = await getGeminiTextModel().generateContent({
     contents: [{ role: 'user', parts: [{ text: query }] }],
     systemInstruction: systemPrompt,
-    generationConfig: {
-      temperature: 0.4,
-      maxOutputTokens: 1400,
-    },
+    generationConfig,
   })
 
   const raw = result.response.text()?.trim() ?? ''
