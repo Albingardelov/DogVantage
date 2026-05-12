@@ -533,6 +533,15 @@ ${milestones}
 `.trim()
 }
 
+/** Compact phase summary for chat — omits weeklyExercises (the model doesn't need a curriculum to answer a question) */
+export function formatCurrentPhaseShort(weekAge: number): string {
+  const phase = getPhaseForWeek(weekAge)
+  const focus = phase.focus.slice(0, 3).map((f) => `• ${f}`).join('\n')
+  return `Fas: ${phase.label} (v ${phase.weeks.from}–${phase.weeks.to === 9999 ? '∞' : phase.weeks.to}) | Passlängd: ${phase.sessionLength}
+Prioritet just nu:
+${focus}`.trim()
+}
+
 /** Shorter breed summary for chat RAG — omits breed skills and activity guidelines to save tokens */
 export function formatBreedProfileShort(breed: Breed): string {
   const p = getBreedProfile(breed)

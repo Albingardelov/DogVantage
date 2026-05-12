@@ -1,7 +1,7 @@
-import { getGeminiTextModel, jsonGenConfig } from './client'
+import { getGeminiPlanModel, jsonGenConfig } from './client'
 import { embedText } from './embed'
 import { searchBreedChunks } from '@/lib/supabase/breed-chunks'
-import { formatBreedProfile, formatCurrentPhase } from './breed-profiles'
+import { formatBreedProfileShort, formatCurrentPhase } from './breed-profiles'
 import { formatDevelopmentalContext, getMaxSessionMinutes } from '@/lib/training/developmental-context'
 import { GOAL_EXERCISE_IDS, GOAL_LABELS, GOAL_RULES } from '@/lib/training/goal-exercises'
 import {
@@ -123,7 +123,7 @@ export async function generateWeekPlan(
   let chunks: import('@/types').ChunkMatch[] = []
   try {
     const embedding = await embedText(`träning programvecka ${trainingWeek} ${breed}`)
-    chunks = await searchBreedChunks(embedding, breed)
+    chunks = await searchBreedChunks(embedding, breed, 3)
   } catch {
     // Continue without RAG chunks if embedding fails
   }
@@ -268,7 +268,7 @@ export async function generateWeekPlan(
 
   const systemPrompt = `Du är DogVantage träningsassistent för rasen ${breed}. Returnera ett veckoschema som giltig JSON.
 
-${formatBreedProfile(breed)}
+${formatBreedProfileShort(breed)}
 ${ageInfo}${typeof ageWeeks === 'number' && Number.isFinite(ageWeeks) ? formatCurrentPhase(ageWeeks) : ''}${goalContext}${onboardingSection}${performanceSection}${customSection}${documentContext ? `\n=== KÄLLDOKUMENT ===\n${documentContext}\n` : ''}
 Returnera ENBART JSON i detta format (inga förklaringar):
 {"days":[
@@ -291,10 +291,10 @@ Regler:
 - FRI-SIGNAL: varje dag som innehåller sitt, ligg, stanna eller plats MÅSTE också innehålla fri (id: fri) som sista eller näst sista exercise — de tränas alltid ihop
 - Programvecka ${trainingWeek}; anpassa övningar till rasens egenskaper${idRules ? `\n- ${idRules.replace(/\n/g, '\n- ')}` : ''}`
 
-  const result = await getGeminiTextModel().generateContent({
+  const result = await getGeminiPlanModel().generateContent({
     contents: [{ role: 'user', parts: [{ text: `Veckoschema JSON för ${breed}, programvecka ${trainingWeek}` }] }],
     systemInstruction: systemPrompt,
-    generationConfig: jsonGenConfig(0.3, 8192),
+    generationConfig: jsonGenConfig(0.3, 2048),
   })
 
   const raw = result.response.text() ?? '{}'

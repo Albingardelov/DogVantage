@@ -107,6 +107,55 @@ export async function getCachedWeekPlan(
   }
 }
 
+const CHAT_CACHE_VERSION = 'v1'
+
+function normalizeChatQuery(query: string): string {
+  return query.trim().toLowerCase().replace(/\s+/g, ' ').replace(/[?!.,;:]/g, '')
+}
+
+function chatCacheKey(query: string, breed: Breed, ageWeeks?: number): string {
+  const hash = shortHash(`${normalizeChatQuery(query)}|${breed}|${ageBucket(ageWeeks)}`)
+  return `chatcache_${CHAT_CACHE_VERSION}_${hash}`
+}
+
+export async function getCachedChat(
+  query: string,
+  breed: Breed,
+  ageWeeks?: number,
+): Promise<TrainingResult | null> {
+  const { data, error } = await getSupabaseAdmin()
+    .from('training_cache')
+    .select('content')
+    .eq('breed', chatCacheKey(query, breed, ageWeeks))
+    .eq('week_number', 0)
+    .single()
+
+  if (error || !data) return null
+  try {
+    return JSON.parse(data.content) as TrainingResult
+  } catch {
+    return null
+  }
+}
+
+export async function setCachedChat(
+  query: string,
+  breed: Breed,
+  result: TrainingResult,
+  ageWeeks?: number,
+): Promise<void> {
+  const { error } = await getSupabaseAdmin()
+    .from('training_cache')
+    .upsert({
+      breed: chatCacheKey(query, breed, ageWeeks),
+      week_number: 0,
+      content: JSON.stringify(result),
+      source: 'chat',
+    }, { onConflict: 'breed,week_number' })
+
+  if (error) throw new Error(`Chat cache write failed: ${error.message}`)
+}
+
 export async function setCachedWeekPlan(
   breed: Breed,
   weekNumber: number,

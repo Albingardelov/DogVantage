@@ -1,7 +1,7 @@
 import { embedText } from './embed'
 import { getGeminiTextModel } from './client'
 import { searchBreedChunks } from '@/lib/supabase/breed-chunks'
-import { formatBreedProfileShort, formatCurrentPhase } from './breed-profiles'
+import { formatBreedProfileShort, formatCurrentPhaseShort } from './breed-profiles'
 import {
   detectHealthIssue,
   detectBehaviorEmergency,
@@ -61,7 +61,7 @@ export async function queryRAG(
 
   // 2. Build the "ritning" (blueprint) — breed profile + training phase
   const breedProfile = formatBreedProfileShort(breed)
-  const phaseInfo = weekAge != null ? `\n${formatCurrentPhase(weekAge)}` : ''
+  const phaseInfo = weekAge != null ? `\n${formatCurrentPhaseShort(weekAge)}` : ''
 
   // 3. Build the document context from RAG (when available)
   const hasChunks = chunks.length > 0
@@ -106,11 +106,11 @@ export async function queryRAG(
 ${breedProfile}
 ${phaseInfo}
 ${documentContext ? `\n=== KÄLLDOKUMENT ===\n${documentContext}\n` : ''}${onboardingSection}${metricsSection}${logsSection}
-Regler: svara på svenska, anpassa till hundens ålder i veckor och ge ett komplett svar (inte avhuggen mening). Sikta på ca 150-250 ord vid normala frågor. Nämn källnamn om KÄLLDOKUMENT finns — annars påstå inte att du citerar ett dokument.`
+Regler: svara på svenska, anpassa till hundens ålder i veckor. Var koncis — 60–150 ord för enkla frågor, max 250 för komplexa. Använd punktlistor när det passar. Nämn källnamn om KÄLLDOKUMENT finns — annars påstå inte att du citerar ett dokument.`
 
   const generationConfig = {
     temperature: 0.4,
-    maxOutputTokens: 1400,
+    maxOutputTokens: 700,
     thinkingConfig: { thinkingBudget: 0 },
   }
 
