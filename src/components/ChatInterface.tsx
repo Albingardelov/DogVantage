@@ -43,10 +43,11 @@ export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQu
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query, breed, ageWeeks, trainingWeek, dogId, onboardingContext }),
       })
-      const data = await res.json() as TrainingResult & { error?: string }
+      const data = await res.json() as TrainingResult & { error?: string; retryable?: boolean }
       if (!res.ok || !data.content) {
         const msg = data.error ?? `Fel ${res.status} — försök igen.`
-        setMessages((prev) => [...prev, { role: 'model', content: `Något gick fel: ${msg}`, retryQuery: query }])
+        const canRetry = data.retryable !== false
+        setMessages((prev) => [...prev, { role: 'model', content: `Något gick fel: ${msg}`, retryQuery: canRetry ? query : undefined }])
         return
       }
       setMessages((prev) => [
