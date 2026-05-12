@@ -90,7 +90,7 @@ export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQu
   }, [input])
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+    if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
       e.preventDefault()
       send()
     }
@@ -188,7 +188,7 @@ export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQu
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Skriv en fråga… (Ctrl/Cmd + Enter för att skicka)"
+          placeholder="Skriv en fråga…"
           rows={1}
           disabled={loading}
         />
