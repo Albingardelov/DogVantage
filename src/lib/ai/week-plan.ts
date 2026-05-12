@@ -302,6 +302,11 @@ Regler:
     response_format: { type: 'json_object' },
   })
 
+  const usage = completion.usage
+  if (usage) {
+    console.log(`[groq:week-plan] tokens in=${usage.prompt_tokens} out=${usage.completion_tokens} total=${usage.total_tokens} breed=${breed} week=${trainingWeek}`)
+  }
+
   const raw = completion.choices[0]?.message?.content ?? '{}'
   const plan = parseWeekPlan(raw)
   if (!plan) {

@@ -5,6 +5,7 @@ import { queryRAG } from '@/lib/ai/rag'
 import { getRecentLogs, formatLogsForPrompt } from '@/lib/supabase/session-logs'
 import { getMetrics } from '@/lib/supabase/daily-exercise-metrics'
 import { getCachedChat, setCachedChat } from '@/lib/supabase/training-cache'
+import { getTodayChatCount, incrementChatCount, DAILY_CHAT_LIMIT } from '@/lib/supabase/chat-usage'
 import type { Breed } from '@/types'
 
 function todayDateString(): string {
@@ -73,6 +74,18 @@ export async function POST(req: NextRequest) {
       if (cached) return NextResponse.json(cached)
     }
 
+    const dailyCount = await getTodayChatCount(user.id)
+    if (dailyCount >= DAILY_CHAT_LIMIT) {
+      return NextResponse.json(
+        {
+          error: `Du har nått dagsgränsen på ${DAILY_CHAT_LIMIT} chat-frågor. Försök igen imorgon — eller använd träningsplanen som redan är personligt anpassad.`,
+          retryable: false,
+        },
+        { status: 429 },
+      )
+    }
+
+    await incrementChatCount(user.id)
     const result = await queryRAG(query, breed, logStrings, phaseAgeWeeks, metricsStrings, onboardingContext)
 
     if (!isPersonalized) {

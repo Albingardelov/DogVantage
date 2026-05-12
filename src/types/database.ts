@@ -58,6 +58,24 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_usage: {
+        Row: {
+          count: number
+          date: string
+          user_id: string
+        }
+        Insert: {
+          count?: number
+          date: string
+          user_id: string
+        }
+        Update: {
+          count?: number
+          date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       community_submissions: {
         Row: {
           breed: string

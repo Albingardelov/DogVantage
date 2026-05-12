@@ -118,6 +118,11 @@ Regler: svara på svenska, anpassa till hundens ålder i veckor. Var koncis — 
     max_tokens: 700,
   })
 
+  const usage = completion.usage
+  if (usage) {
+    console.log(`[groq:chat] tokens in=${usage.prompt_tokens} out=${usage.completion_tokens} total=${usage.total_tokens} breed=${breed}`)
+  }
+
   const raw = completion.choices[0]?.message?.content?.trim() ?? ''
   const content = raw ||
     'Jag kunde inte generera ett svar på den frågan. Prova att ställa en mer specifik träningsfråga, till exempel: "Hur tränar jag inkallning?" eller "Hur länge bör ett pass vara?"'
