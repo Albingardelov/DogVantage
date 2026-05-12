@@ -1,4 +1,4 @@
-import { getGeminiPlanModel, jsonGenConfig } from './client'
+import { getGroqClient, GROQ_MODEL } from './client'
 import { embedText } from './embed'
 import { searchBreedChunks } from '@/lib/supabase/breed-chunks'
 import { formatBreedProfileShort, formatCurrentPhase } from './breed-profiles'
@@ -291,13 +291,18 @@ Regler:
 - FRI-SIGNAL: varje dag som innehåller sitt, ligg, stanna eller plats MÅSTE också innehålla fri (id: fri) som sista eller näst sista exercise — de tränas alltid ihop
 - Programvecka ${trainingWeek}; anpassa övningar till rasens egenskaper${idRules ? `\n- ${idRules.replace(/\n/g, '\n- ')}` : ''}`
 
-  const result = await getGeminiPlanModel().generateContent({
-    contents: [{ role: 'user', parts: [{ text: `Veckoschema JSON för ${breed}, programvecka ${trainingWeek}` }] }],
-    systemInstruction: systemPrompt,
-    generationConfig: jsonGenConfig(0.3, 2048),
+  const completion = await getGroqClient().chat.completions.create({
+    model: GROQ_MODEL,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: `Veckoschema JSON för ${breed}, programvecka ${trainingWeek}` },
+    ],
+    temperature: 0.3,
+    max_tokens: 2048,
+    response_format: { type: 'json_object' },
   })
 
-  const raw = result.response.text() ?? '{}'
+  const raw = completion.choices[0]?.message?.content ?? '{}'
   const plan = parseWeekPlan(raw)
   if (!plan) {
     console.error('[generateWeekPlan] AI returned unparseable plan:', raw.slice(0, 300))

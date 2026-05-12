@@ -1,5 +1,5 @@
 import { embedText } from './embed'
-import { getGeminiTextModel } from './client'
+import { getGroqClient, GROQ_MODEL } from './client'
 import { searchBreedChunks } from '@/lib/supabase/breed-chunks'
 import { formatBreedProfileShort, formatCurrentPhaseShort } from './breed-profiles'
 import {
@@ -108,19 +108,17 @@ ${phaseInfo}
 ${documentContext ? `\n=== KÄLLDOKUMENT ===\n${documentContext}\n` : ''}${onboardingSection}${metricsSection}${logsSection}
 Regler: svara på svenska, anpassa till hundens ålder i veckor. Var koncis — 60–150 ord för enkla frågor, max 250 för komplexa. Använd punktlistor när det passar. Nämn källnamn om KÄLLDOKUMENT finns — annars påstå inte att du citerar ett dokument.`
 
-  const generationConfig = {
+  const completion = await getGroqClient().chat.completions.create({
+    model: GROQ_MODEL,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: query },
+    ],
     temperature: 0.4,
-    maxOutputTokens: 700,
-    thinkingConfig: { thinkingBudget: 0 },
-  }
-
-  const result = await getGeminiTextModel().generateContent({
-    contents: [{ role: 'user', parts: [{ text: query }] }],
-    systemInstruction: systemPrompt,
-    generationConfig,
+    max_tokens: 700,
   })
 
-  const raw = result.response.text()?.trim() ?? ''
+  const raw = completion.choices[0]?.message?.content?.trim() ?? ''
   const content = raw ||
     'Jag kunde inte generera ett svar på den frågan. Prova att ställa en mer specifik träningsfråga, till exempel: "Hur tränar jag inkallning?" eller "Hur länge bör ett pass vara?"'
 

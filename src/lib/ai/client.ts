@@ -1,12 +1,15 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import Groq from 'groq-sdk'
 
 export const GEMINI_TEXT_MODEL = 'gemini-2.5-flash'
 export const GEMINI_PLAN_MODEL = 'gemini-2.5-flash-lite'
+export const GROQ_MODEL = 'llama-3.3-70b-versatile'
 
 let _genAI: GoogleGenerativeAI | null = null
 let _embedModel: ReturnType<GoogleGenerativeAI['getGenerativeModel']> | null = null
 let _textModel: ReturnType<GoogleGenerativeAI['getGenerativeModel']> | null = null
 let _planModel: ReturnType<GoogleGenerativeAI['getGenerativeModel']> | null = null
+let _groq: Groq | null = null
 
 function requireEnv(name: string, value: string | undefined): string {
   if (value && value.length > 0) return value
@@ -36,6 +39,13 @@ export function getGeminiPlanModel() {
   if (_planModel) return _planModel
   _planModel = getGenAI().getGenerativeModel({ model: GEMINI_PLAN_MODEL })
   return _planModel
+}
+
+export function getGroqClient(): Groq {
+  if (_groq) return _groq
+  const apiKey = requireEnv('GROQ_API_KEY', process.env.GROQ_API_KEY)
+  _groq = new Groq({ apiKey })
+  return _groq
 }
 
 export function jsonGenConfig(temperature: number, maxOutputTokens: number) {
