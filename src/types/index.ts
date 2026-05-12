@@ -158,6 +158,7 @@ export interface ChatMessage {
   content: string
   sources?: TrainingSourceRef[]
   attributionNote?: string
+  retryQuery?: string
 }
 
 export type QuickRating = 'good' | 'mixed' | 'bad'

@@ -65,6 +65,35 @@
   border-bottom-left-radius: 0.25rem;
 }
 
+.bubbleError {
+  background: rgb(254 226 226);
+  color: rgb(127 29 29);
+  border: 1px solid rgb(252 165 165);
+}
+
+.retryBtn {
+  align-self: flex-start;
+  padding: 0.4rem 0.875rem;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-primary);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-size: 0.8125rem;
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.retryBtn:hover:not(:disabled) {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.retryBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .modelColumn {
   max-width: 75%;
   display: flex;

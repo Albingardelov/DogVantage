@@ -27,12 +27,14 @@ export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQu
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
 
-  async function send(text?: string) {
+  async function send(text?: string, opts?: { isRetry?: boolean }) {
     const query = (text ?? input).trim()
     if (!query || loading) return
 
-    setInput('')
-    setMessages((prev) => [...prev, { role: 'user', content: query }])
+    if (!opts?.isRetry) {
+      setInput('')
+      setMessages((prev) => [...prev, { role: 'user', content: query }])
+    }
     setLoading(true)
 
     try {
@@ -44,7 +46,7 @@ export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQu
       const data = await res.json() as TrainingResult & { error?: string }
       if (!res.ok || !data.content) {
         const msg = data.error ?? `Fel ${res.status} — försök igen.`
-        setMessages((prev) => [...prev, { role: 'model', content: `Något gick fel: ${msg}` }])
+        setMessages((prev) => [...prev, { role: 'model', content: `Något gick fel: ${msg}`, retryQuery: query }])
         return
       }
       setMessages((prev) => [
@@ -58,10 +60,16 @@ export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQu
       ])
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Nätverksfel'
-      setMessages((prev) => [...prev, { role: 'model', content: `Kunde inte nå assistenten: ${msg}` }])
+      setMessages((prev) => [...prev, { role: 'model', content: `Kunde inte nå assistenten: ${msg}`, retryQuery: query }])
     } finally {
       setLoading(false)
     }
+  }
+
+  function retry(index: number, query: string) {
+    if (loading) return
+    setMessages((prev) => prev.filter((_, i) => i !== index))
+    send(query, { isRetry: true })
   }
 
   useEffect(() => {
@@ -109,7 +117,17 @@ export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQu
               <div className={`${styles.bubble} ${styles.bubbleUser}`}>{m.content}</div>
             ) : (
               <div className={styles.modelColumn}>
-                <div className={`${styles.bubble} ${styles.bubbleModel}`}>{m.content}</div>
+                <div className={`${styles.bubble} ${styles.bubbleModel} ${m.retryQuery ? styles.bubbleError : ''}`}>{m.content}</div>
+                {m.retryQuery && (
+                  <button
+                    type="button"
+                    className={styles.retryBtn}
+                    onClick={() => retry(i, m.retryQuery!)}
+                    disabled={loading}
+                  >
+                    Försök igen
+                  </button>
+                )}
                 {(m.sources && m.sources.length > 0) || m.attributionNote ? (
                   <aside className={styles.citationBlock} aria-label="Källor och förklaring">
                     {m.sources && m.sources.length > 0 && (
