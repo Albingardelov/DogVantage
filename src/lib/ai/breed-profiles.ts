@@ -12,6 +12,8 @@
  */
 
 import type { Breed, TrainingGoal } from '@/types'
+import { getBreedEntry } from '@/lib/breeds/registry'
+import { getFciGroupProfile } from '@/lib/breeds/fci-groups'
 
 export interface BreedProfile {
   /** Swedish display name */
@@ -348,7 +350,7 @@ const miniatureAmericanShepherd: BreedProfile = {
 // ─────────────────────────────────────────────────────────────────────────────
 // EXPORTED MAP
 // ─────────────────────────────────────────────────────────────────────────────
-export const BREED_PROFILES: Record<Breed, BreedProfile> = {
+export const BREED_PROFILES: Partial<Record<string, BreedProfile>> = {
   braque_francais: braqueFrancais,
   labrador: labrador,
   italian_greyhound: italianGreyhound,
@@ -356,7 +358,15 @@ export const BREED_PROFILES: Record<Breed, BreedProfile> = {
 }
 
 export function getBreedProfile(breed: Breed): BreedProfile {
-  return BREED_PROFILES[breed]
+  return BREED_PROFILES[breed] as BreedProfile
+}
+
+export function resolveBreedProfile(slug: string): BreedProfile {
+  const full = BREED_PROFILES[slug]
+  if (full) return full
+  const entry = getBreedEntry(slug)
+  if (entry) return getFciGroupProfile(entry.fciGroup)
+  return getFciGroupProfile(9)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -543,8 +553,8 @@ ${focus}`.trim()
 }
 
 /** Shorter breed summary for chat RAG — omits breed skills and activity guidelines to save tokens */
-export function formatBreedProfileShort(breed: Breed): string {
-  const p = getBreedProfile(breed)
+export function formatBreedProfileShort(breed: string): string {
+  const p = resolveBreedProfile(breed)
   const topTraits = p.temperament.slice(0, 3).map((t) => `• ${t}`).join('\n')
   const topCautions = p.trainingCautions.slice(0, 2).map((c) => `• ${c}`).join('\n')
   return `Ras: ${p.name} | Känslighet: ${p.sensitivity} | Ändamål: ${p.purpose}
@@ -553,8 +563,8 @@ Varningar: ${topCautions}`.trim()
 }
 
 /** Render the breed profile as a compact text block for use in prompts */
-export function formatBreedProfile(breed: Breed): string {
-  const p = getBreedProfile(breed)
+export function formatBreedProfile(breed: string): string {
+  const p = resolveBreedProfile(breed)
   const skills = p.breedSkills
     .map((s) => `• ${s.name}: ${s.description}`)
     .join('\n')

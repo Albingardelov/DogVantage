@@ -1,4 +1,4 @@
-export type Breed = 'labrador' | 'italian_greyhound' | 'braque_francais' | 'miniature_american_shepherd'
+export type Breed = string
 
 /**
  * 'general' is used for documents that apply to all breeds
