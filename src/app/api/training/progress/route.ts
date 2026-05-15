@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getProgress, upsertProgress } from '@/lib/supabase/daily-progress'
 import { createSupabaseServer } from '@/lib/supabase/server'
+import { isValidBreed } from '@/lib/breeds/registry'
 import type { Breed } from '@/types'
-
-const VALID_BREEDS = ['labrador', 'italian_greyhound', 'braque_francais', 'miniature_american_shepherd']
 
 export async function GET(req: NextRequest) {
   const supabase = await createSupabaseServer()
@@ -14,7 +13,7 @@ export async function GET(req: NextRequest) {
   const date = req.nextUrl.searchParams.get('date')
   const dogId = req.nextUrl.searchParams.get('dogId') ?? ''
 
-  if (!breed || !date || !VALID_BREEDS.includes(breed)) {
+  if (!breed || !date || !isValidBreed(breed)) {
     return NextResponse.json({ error: 'breed and date required' }, { status: 400 })
   }
   if (!dogId) return NextResponse.json({ error: 'dogId required' }, { status: 400 })
@@ -38,7 +37,7 @@ export async function PATCH(req: NextRequest) {
     count: number
   }
 
-  if (!breed || !date || !exerciseId || count === undefined || !VALID_BREEDS.includes(breed)) {
+  if (!breed || !date || !exerciseId || count === undefined || !isValidBreed(breed)) {
     return NextResponse.json({ error: 'breed, date, exerciseId, count required' }, { status: 400 })
   }
   if (!dogId) return NextResponse.json({ error: 'dogId required' }, { status: 400 })

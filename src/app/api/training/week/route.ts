@@ -12,15 +12,12 @@ import { getActiveHeatCycle, getLastEndedHeatCycle, isSkenfasActive } from '@/li
 import { getHomecomeWeekPlan } from '@/lib/training/homecoming-plan'
 import { createSupabaseServer } from '@/lib/supabase/server'
 import { detectBehaviorEmergency, BEHAVIOR_RESPONSE } from '@/lib/ai/safety-guards'
+import { isValidBreed } from '@/lib/breeds/registry'
 import type { Breed, DogSex, CastrationStatus, TrainingGoal, TrainingEnvironment, RewardPreference, HouseholdPet } from '@/types'
 import { householdPetNotes, HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'
 
 const VALID_GOALS: TrainingGoal[] = [
   'everyday_obedience', 'sport', 'hunting', 'herding', 'impulse_control', 'nosework', 'problem_solving',
-]
-
-const VALID_BREEDS: Breed[] = [
-  'labrador', 'italian_greyhound', 'braque_francais', 'miniature_american_shepherd',
 ]
 
 const ENV_LABELS: Record<TrainingEnvironment, string> = {
@@ -99,7 +96,7 @@ export async function GET(req: NextRequest) {
   const dogId = p.get('dogId')
   if (!dogId) return NextResponse.json({ error: 'dogId required' }, { status: 400 })
 
-  if (!breed || isNaN(trainingWeek) || !VALID_BREEDS.includes(breed)) {
+  if (!breed || isNaN(trainingWeek) || !isValidBreed(breed)) {
     return NextResponse.json({ error: 'breed and week required' }, { status: 400 })
   }
 

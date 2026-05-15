@@ -2,14 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getMetrics, upsertMetrics } from '@/lib/supabase/daily-exercise-metrics'
 import { getExerciseSpec, isValidCriteriaLevel } from '@/lib/training/exercise-specs'
 import { createSupabaseServer } from '@/lib/supabase/server'
+import { isValidBreed } from '@/lib/breeds/registry'
 import type { Breed, DailyExerciseMetrics, LatencyBucket } from '@/types'
 
-const VALID_BREEDS = ['labrador', 'italian_greyhound', 'braque_francais', 'miniature_american_shepherd'] as const
 const VALID_LATENCY: LatencyBucket[] = ['lt1s', '1to3s', 'gt3s']
-
-function isValidBreed(breed: unknown): breed is Breed {
-  return typeof breed === 'string' && (VALID_BREEDS as readonly string[]).includes(breed)
-}
 
 function isValidDateString(date: unknown): date is string {
   if (typeof date !== 'string') return false
@@ -43,7 +39,7 @@ function parsePatch(body: unknown): {
   const exerciseId = b.exerciseId
   const patchRaw = b.patch
 
-  if (!isValidBreed(breed) || !isValidDateString(date) || typeof exerciseId !== 'string' || !exerciseId) {
+  if (typeof breed !== 'string' || !isValidBreed(breed) || !isValidDateString(date) || typeof exerciseId !== 'string' || !exerciseId) {
     return { error: 'breed, date, exerciseId required', status: 400 }
   }
   if (!patchRaw || typeof patchRaw !== 'object') return { error: 'patch required', status: 400 }
@@ -99,7 +95,7 @@ export async function GET(req: NextRequest) {
   const breed = req.nextUrl.searchParams.get('breed')
   const date = req.nextUrl.searchParams.get('date')
   const dogId = req.nextUrl.searchParams.get('dogId') ?? ''
-  if (!isValidBreed(breed) || !isValidDateString(date)) {
+  if (!breed || !isValidBreed(breed) || !isValidDateString(date)) {
     return NextResponse.json({ error: 'breed and date required' }, { status: 400 })
   }
   if (!dogId) return NextResponse.json({ error: 'dogId required' }, { status: 400 })

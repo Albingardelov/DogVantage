@@ -2,13 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServer } from '@/lib/supabase/server'
 import { getSupabaseAdmin } from '@/lib/supabase/client'
 import { aggregateSkillProgress, type MetricRow } from '@/lib/training/skill-progress'
+import { isValidBreed } from '@/lib/breeds/registry'
 import type { Breed, ExerciseSummary } from '@/types'
-
-const VALID_BREEDS = ['labrador', 'italian_greyhound', 'braque_francais', 'miniature_american_shepherd'] as const
-
-function isValidBreed(breed: unknown): breed is Breed {
-  return typeof breed === 'string' && (VALID_BREEDS as readonly string[]).includes(breed)
-}
 
 function daysAgo(days: number): string {
   const d = new Date()
@@ -26,7 +21,7 @@ export async function GET(req: NextRequest) {
   const weeksParam = Number(req.nextUrl.searchParams.get('weeks') ?? '4')
   const weeks = Number.isFinite(weeksParam) ? Math.min(12, Math.max(1, Math.round(weeksParam))) : 4
 
-  if (!isValidBreed(breed)) return NextResponse.json({ error: 'breed required' }, { status: 400 })
+  if (!breed || !isValidBreed(breed)) return NextResponse.json({ error: 'breed required' }, { status: 400 })
   if (!dogId) return NextResponse.json({ error: 'dogId required' }, { status: 400 })
 
   const { data: dog } = await supabase

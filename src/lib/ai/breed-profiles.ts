@@ -2452,10 +2452,6 @@ export const BREED_PROFILES: Partial<Record<string, BreedProfile>> = {
   afghan_hound: afghanHound,
 }
 
-export function getBreedProfile(breed: Breed): BreedProfile {
-  return BREED_PROFILES[breed] as BreedProfile
-}
-
 export function resolveBreedProfile(slug: string): BreedProfile {
   const full = BREED_PROFILES[slug]
   if (full) return full
