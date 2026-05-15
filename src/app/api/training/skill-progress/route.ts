@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServer } from '@/lib/supabase/server'
+import { withAuthAndDog } from '@/lib/api/with-auth'
+import { apiError } from '@/lib/api/errors'
 import { getSupabaseAdmin } from '@/lib/supabase/client'
 import { aggregateSkillProgress, type MetricRow } from '@/lib/training/skill-progress'
 import { isValidBreed } from '@/lib/breeds/registry'
@@ -12,72 +13,59 @@ function daysAgo(days: number): string {
 }
 
 export async function GET(req: NextRequest) {
-  const supabase = await createSupabaseServer()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
-
   const breed = req.nextUrl.searchParams.get('breed')
-  const dogId = req.nextUrl.searchParams.get('dogId') ?? ''
   const weeksParam = Number(req.nextUrl.searchParams.get('weeks') ?? '4')
   const weeks = Number.isFinite(weeksParam) ? Math.min(12, Math.max(1, Math.round(weeksParam))) : 4
 
   if (!breed || !isValidBreed(breed)) return NextResponse.json({ error: 'breed required' }, { status: 400 })
-  if (!dogId) return NextResponse.json({ error: 'dogId required' }, { status: 400 })
 
-  const { data: dog } = await supabase
-    .from('dog_profiles')
-    .select('id')
-    .eq('id', dogId)
-    .eq('user_id', user.id)
-    .single()
-  if (!dog) return NextResponse.json({ error: 'forbidden' }, { status: 403 })
+  return withAuthAndDog(req, async ({ dog }) => {
+    const since = daysAgo(weeks * 7 + 7)
+    const admin = getSupabaseAdmin()
 
-  const since = daysAgo(weeks * 7 + 7)
+    const [metricsRes, logsRes] = await Promise.all([
+      admin
+        .from('daily_exercise_metrics')
+        .select('exercise_id, date, success_count, fail_count, criteria_level_id')
+        .eq('dog_id', dog.id)
+        .eq('breed', breed)
+        .gte('date', since),
+      admin
+        .from('session_logs')
+        .select('exercises')
+        .eq('dog_id', dog.id)
+        .order('created_at', { ascending: false })
+        .limit(60),
+    ])
 
-  const admin = getSupabaseAdmin()
-
-  const [metricsRes, logsRes] = await Promise.all([
-    admin
-      .from('daily_exercise_metrics')
-      .select('exercise_id, date, success_count, fail_count, criteria_level_id')
-      .eq('dog_id', dogId)
-      .eq('breed', breed)
-      .gte('date', since),
-    admin
-      .from('session_logs')
-      .select('exercises')
-      .eq('dog_id', dogId)
-      .order('created_at', { ascending: false })
-      .limit(60),
-  ])
-
-  if (metricsRes.error) {
-    return NextResponse.json({ error: metricsRes.error.message }, { status: 500 })
-  }
-
-  const exerciseLabels: Record<string, string> = {}
-  const logs = logsRes.data ?? []
-  for (const row of logs) {
-    const exercises = (row as { exercises: ExerciseSummary[] | null }).exercises ?? []
-    for (const ex of exercises) {
-      if (ex.id && ex.label && !exerciseLabels[ex.id]) exerciseLabels[ex.id] = ex.label
+    if (metricsRes.error) {
+      return apiError(metricsRes.error, 'failed_to_load_skill_progress')
     }
-  }
 
-  const rows: MetricRow[] = (metricsRes.data ?? []).map((r) => ({
-    exercise_id: r.exercise_id,
-    date: r.date,
-    success_count: r.success_count ?? 0,
-    fail_count: r.fail_count ?? 0,
-    criteria_level_id: r.criteria_level_id ?? null,
-  }))
+    const exerciseLabels: Record<string, string> = {}
+    const logs = logsRes.data ?? []
+    for (const row of logs) {
+      const exercises = (row as { exercises: ExerciseSummary[] | null }).exercises ?? []
+      for (const ex of exercises) {
+        if (ex.id && ex.label && !exerciseLabels[ex.id]) exerciseLabels[ex.id] = ex.label
+      }
+    }
 
-  const progress = aggregateSkillProgress(rows, {
-    exerciseLabels,
-    endDate: new Date(),
-    weeks,
-    topN: 5,
+    const rows: MetricRow[] = (metricsRes.data ?? []).map((r) => ({
+      exercise_id: r.exercise_id,
+      date: r.date,
+      success_count: r.success_count ?? 0,
+      fail_count: r.fail_count ?? 0,
+      criteria_level_id: r.criteria_level_id ?? null,
+    }))
+
+    const progress = aggregateSkillProgress(rows, {
+      exerciseLabels,
+      endDate: new Date(),
+      weeks,
+      topN: 5,
+    })
+
+    return NextResponse.json({ exercises: progress })
   })
-
-  return NextResponse.json({ exercises: progress })
 }
