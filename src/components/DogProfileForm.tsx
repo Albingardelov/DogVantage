@@ -9,15 +9,10 @@ import { resolveBreedProfile } from '@/lib/ai/breed-profiles'
 import { HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import { IconCamera, SelectionCheck } from '@/components/icons'
+import BreedPicker from '@/components/BreedPicker'
 import type { Breed, DogProfile, DogSex, CastrationStatus, HouseholdPet, OnboardingPrefs, RewardPreference, TrainingBackground, TrainingEnvironment, TrainingGoal } from '@/types'
 import styles from './DogProfileForm.module.css'
 
-export const BREEDS: { value: Breed; label: string }[] = [
-  { value: 'braque_francais', label: 'Braque Français' },
-  { value: 'labrador', label: 'Labrador Retriever' },
-  { value: 'italian_greyhound', label: 'Italiensk Vinthund' },
-  { value: 'miniature_american_shepherd', label: 'Miniature American Shepherd' },
-]
 
 const ALL_HOUSEHOLD_PETS = Object.keys(HOUSEHOLD_PET_LABELS) as HouseholdPet[]
 
@@ -260,24 +255,10 @@ export default function DogProfileForm({ onSaved }: Props = {}) {
 
             <div className={styles.field}>
               <span className={styles.label}>Ras</span>
-              <div className={styles.breedList} role="radiogroup" aria-label="Ras">
-                {BREEDS.map((b) => {
-                  const selected = breed === b.value
-                  return (
-                    <button
-                      key={b.value}
-                      type="button"
-                      role="radio"
-                      aria-checked={selected}
-                      onClick={() => handleBreedChange(b.value)}
-                      className={`${styles.breedOption} ${selected ? styles.breedOptionSelected : ''}`}
-                    >
-                      <span>{b.label}</span>
-                      {selected && <SelectionCheck />}
-                    </button>
-                  )
-                })}
-              </div>
+              <BreedPicker
+                value={breed}
+                onChange={(slug) => handleBreedChange(slug)}
+              />
             </div>
 
             <div className={styles.field}>
