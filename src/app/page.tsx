@@ -1,25 +1,8 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { LandingFeatureList, LandingHeroDecor } from '@/components/landing/LandingMarketing'
 import { createSupabaseServer } from '@/lib/supabase/server'
 import styles from './page.module.css'
-
-const FEATURES: { icon: string; title: string; desc: string }[] = [
-  {
-    icon: '📅',
-    title: 'Veckovis schema',
-    desc: 'Träning anpassad efter valpdagar och ras',
-  },
-  {
-    icon: '📖',
-    title: 'Direkt från RAS',
-    desc: 'Råd hämtade från rasklubbens officiella dokument',
-  },
-  {
-    icon: '✍️',
-    title: 'Följ din hunds framsteg',
-    desc: 'Logga pass och se hur träningen utvecklas',
-  },
-]
 
 export default async function LandingPage() {
   const supabase = await createSupabaseServer()
@@ -29,10 +12,7 @@ export default async function LandingPage() {
   return (
     <main className={styles.main}>
       <section className={styles.hero}>
-        <div className={styles.decorCircleLg} aria-hidden="true" />
-        <div className={styles.decorCircleSm} aria-hidden="true" />
-
-        <div className={styles.heroPhoto} aria-hidden="true">🐕</div>
+        <LandingHeroDecor />
 
         <h1 className={styles.title}>DogVantage</h1>
         <p className={styles.tagline}>
@@ -40,17 +20,7 @@ export default async function LandingPage() {
         </p>
       </section>
 
-      <ul className={styles.features}>
-        {FEATURES.map((f) => (
-          <li key={f.title} className={styles.featureRow}>
-            <span className={styles.featureIcon} aria-hidden="true">{f.icon}</span>
-            <div className={styles.featureText}>
-              <span className={styles.featureTitle}>{f.title}</span>
-              <span className={styles.featureDesc}>{f.desc}</span>
-            </div>
-          </li>
-        ))}
-      </ul>
+      <LandingFeatureList />
 
       <div className={styles.actions}>
         <Link href="/onboarding" className={styles.btnPrimary}>

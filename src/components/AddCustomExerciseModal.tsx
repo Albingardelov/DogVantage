@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { IconClose } from '@/components/icons'
 import styles from './AddCustomExerciseModal.module.css'
 
 export default function AddCustomExerciseModal({ dogId, onClose, onCreated }: {
@@ -42,7 +43,9 @@ export default function AddCustomExerciseModal({ dogId, onClose, onCreated }: {
       <div className={styles.sheet}>
         <div className={styles.header}>
           <span className={styles.title}>Lägg till eget pass</span>
-          <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Stäng">✕</button>
+          <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Stäng">
+            <IconClose size="md" />
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className={styles.form}>

@@ -34,9 +34,11 @@
 }
 
 .closeBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: none;
   border: none;
-  font-size: 1.1rem;
   cursor: pointer;
   padding: 4px 8px;
   color: var(--text-secondary, #666);

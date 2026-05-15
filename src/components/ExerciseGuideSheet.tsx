@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
 import type { ExerciseSpec } from '@/lib/training/exercise-specs'
 import type { DailyExerciseMetrics } from '@/types'
+import { IconClose } from '@/components/icons'
 import styles from './ExerciseGuideSheet.module.css'
 
 const EXERCISE_ARTICLE: Record<string, { id: string; label: string }> = {
@@ -65,7 +66,7 @@ export default function ExerciseGuideSheet({
             <div className={styles.title}>{exerciseLabel ?? prettyLabel(exerciseId)}</div>
           </div>
           <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Stäng">
-            ✕
+            <IconClose size="md" />
           </button>
         </div>
 

@@ -81,6 +81,9 @@
 }
 
 .addBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   margin-top: var(--space-2);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-input);
@@ -92,6 +95,10 @@
   cursor: pointer;
   text-align: left;
   transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.addIcon {
+  flex-shrink: 0;
 }
 
 .addBtn:hover {

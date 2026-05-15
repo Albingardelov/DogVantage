@@ -8,6 +8,7 @@ import { getAgeInWeeks } from '@/lib/dog/age'
 import { BREED_PROFILES } from '@/lib/ai/breed-profiles'
 import { HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
+import { IconCamera, SelectionCheck } from '@/components/icons'
 import type { Breed, DogProfile, DogSex, CastrationStatus, HouseholdPet, OnboardingPrefs, RewardPreference, TrainingBackground, TrainingEnvironment, TrainingGoal } from '@/types'
 import styles from './DogProfileForm.module.css'
 
@@ -222,7 +223,7 @@ export default function DogProfileForm({ onSaved }: Props = {}) {
                 <img src={photo} alt="Vald hundbild" className={styles.photoPreview} />
               ) : (
                 <>
-                  <CameraIcon />
+                  <IconCamera size="xl" />
                   <span className={styles.photoLabel}>Välj foto</span>
                 </>
               )}
@@ -272,7 +273,7 @@ export default function DogProfileForm({ onSaved }: Props = {}) {
                       className={`${styles.breedOption} ${selected ? styles.breedOptionSelected : ''}`}
                     >
                       <span>{b.label}</span>
-                      {selected && <span aria-hidden="true">✓</span>}
+                      {selected && <SelectionCheck />}
                     </button>
                   )
                 })}
@@ -290,7 +291,7 @@ export default function DogProfileForm({ onSaved }: Props = {}) {
                       className={`${styles.breedOption} ${selected ? styles.breedOptionSelected : ''}`}
                     >
                       <span>{o.label}</span>
-                      {selected && <span aria-hidden="true">✓</span>}
+                      {selected && <SelectionCheck />}
                     </button>
                   )
                 })}
@@ -313,7 +314,7 @@ export default function DogProfileForm({ onSaved }: Props = {}) {
                         className={`${styles.breedOption} ${selected ? styles.breedOptionSelected : ''}`}
                       >
                         <span>{o.label}</span>
-                        {selected && <span aria-hidden="true">✓</span>}
+                        {selected && <SelectionCheck />}
                       </button>
                     )
                   })}
@@ -415,7 +416,7 @@ export default function DogProfileForm({ onSaved }: Props = {}) {
                       className={`${styles.breedOption} ${selected ? styles.breedOptionSelected : ''}`}
                     >
                       <span>{o.label}</span>
-                      {selected && <span aria-hidden="true">✓</span>}
+                      {selected && <SelectionCheck />}
                     </button>
                   )
                 })}
@@ -437,7 +438,7 @@ export default function DogProfileForm({ onSaved }: Props = {}) {
                       className={`${styles.breedOption} ${selected ? styles.breedOptionSelected : ''}`}
                     >
                       <span>{HOUSEHOLD_PET_LABELS[p]}</span>
-                      {selected && <span aria-hidden="true">✓</span>}
+                      {selected && <SelectionCheck />}
                     </button>
                   )
                 })}
@@ -463,7 +464,7 @@ export default function DogProfileForm({ onSaved }: Props = {}) {
                       className={`${styles.breedOption} ${selected ? styles.breedOptionSelected : ''}`}
                     >
                       <span>{o.label}</span>
-                      {selected && <span aria-hidden="true">✓</span>}
+                      {selected && <SelectionCheck />}
                     </button>
                   )
                 })}
@@ -581,7 +582,7 @@ function ChoiceField({
               className={`${styles.breedOption} ${selected ? styles.breedOptionSelected : ''}`}
             >
               <span>{o.label}</span>
-              {selected && <span aria-hidden="true">✓</span>}
+              {selected && <SelectionCheck />}
             </button>
           )
         })}
@@ -626,30 +627,11 @@ export function MultiChoiceField({
               className={`${styles.breedOption} ${selected ? styles.breedOptionSelected : ''}`}
             >
               <span>{o.label}</span>
-              {selected && <span aria-hidden="true">✓</span>}
+              {selected && <SelectionCheck />}
             </button>
           )
         })}
       </div>
     </div>
-  )
-}
-
-function CameraIcon() {
-  return (
-    <svg
-      width="36"
-      height="36"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
-      <circle cx="12" cy="13" r="4" />
-    </svg>
   )
 }

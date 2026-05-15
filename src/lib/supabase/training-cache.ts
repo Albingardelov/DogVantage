@@ -92,12 +92,14 @@ export async function getCachedWeekPlan(
   focusAreas?: string[],
 ): Promise<WeekPlan | null> {
   const { onboardingHash, customHash, focusHash } = resolveHashes(onboardingContext, customIds, focusAreas)
-  const { data, error } = await getSupabaseAdmin()
+  const cacheBreed = weekPlanCacheKey(breed, ageWeeks, goals, dateKey, dogId, onboardingHash, customHash, planVersion, focusHash)
+  let query = getSupabaseAdmin()
     .from('training_cache')
     .select('content')
-    .eq('breed', weekPlanCacheKey(breed, ageWeeks, goals, dateKey, dogId, onboardingHash, customHash, planVersion, focusHash))
+    .eq('breed', cacheBreed)
     .eq('week_number', weekNumber)
-    .single()
+  if (dogId) query = query.eq('dog_id', dogId)
+  const { data, error } = await query.single()
 
   if (error || !data) return null
   try {
@@ -177,6 +179,7 @@ export async function setCachedWeekPlan(
       week_number: weekNumber,
       content: JSON.stringify(plan),
       source: 'week_plan',
+      ...(dogId ? { dog_id: dogId } : {}),
     }, { onConflict: 'breed,week_number' })
 
   if (error) throw new Error(`Week plan cache write failed: ${error.message}`)

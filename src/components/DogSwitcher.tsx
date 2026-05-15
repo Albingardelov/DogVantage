@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useActiveDog } from '@/lib/dog/active-dog-context'
+import { IconCaretDown, IconPlus, SelectionCheck } from '@/components/icons'
 import Avatar from './Avatar'
 import styles from './DogSwitcher.module.css'
 
@@ -37,7 +38,7 @@ export default function DogSwitcher({ onAddDog }: DogSwitcherProps) {
       >
         <Avatar name={activeDog.name} size={28} />
         {activeDog.name}
-        <ChevronDown className={styles.chevron} />
+        <IconCaretDown size="sm" className={styles.chevron} />
       </button>
 
       {open && (
@@ -56,7 +57,7 @@ export default function DogSwitcher({ onAddDog }: DogSwitcherProps) {
                 >
                   <Avatar name={dog.name} size={32} />
                   <span>{dog.name}</span>
-                  {isActive && <span className={styles.check} aria-hidden="true">✓</span>}
+                  {isActive && <SelectionCheck />}
                 </button>
               )
             })}
@@ -65,21 +66,12 @@ export default function DogSwitcher({ onAddDog }: DogSwitcherProps) {
               className={styles.addBtn}
               onClick={() => { setOpen(false); onAddDog() }}
             >
-              + Lägg till hund
+              <IconPlus size="sm" className={styles.addIcon} />
+              Lägg till hund
             </button>
           </div>
         </div>
       )}
     </>
-  )
-}
-
-function ChevronDown({ className }: { className?: string }) {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-      aria-hidden="true" className={className}>
-      <polyline points="6 9 12 15 18 9" />
-    </svg>
   )
 }

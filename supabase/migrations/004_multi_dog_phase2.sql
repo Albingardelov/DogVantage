@@ -1,5 +1,5 @@
 -- Phase 2: add dog_id FK to all per-dog data tables
--- dog_key columns remain during transition; ticket #44 migrates API routes to use dog_id
+-- dog_key removed in 009_drop_dog_key.sql
 
 -- session_logs: backfill via user_id where possible
 ALTER TABLE public.session_logs

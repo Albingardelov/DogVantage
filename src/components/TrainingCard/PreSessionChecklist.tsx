@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react'
 import styles from './PreSessionChecklist.module.css'
 
-function storageKey(dateKey: string): string {
-  return `dv_pre_ready_${dateKey}`
+function storageKey(dogId: string, dateKey: string): string {
+  return `dv_pre_ready_${dogId}_${dateKey}`
 }
 
 function durationHint(ageWeeks: number): string {
@@ -20,26 +20,27 @@ function durationHint(ageWeeks: number): string {
 interface Props {
   ageWeeks: number
   dateKey: string
+  dogId: string
 }
 
-export default function PreSessionChecklist({ ageWeeks, dateKey }: Props) {
+export default function PreSessionChecklist({ ageWeeks, dateKey, dogId }: Props) {
   const [ready, setReady] = useState(false)
   const [dismissed, setDismissed] = useState(false)
 
   useEffect(() => {
     try {
-      setDismissed(typeof window !== 'undefined' && localStorage.getItem(storageKey(dateKey)) === '1')
+      setDismissed(typeof window !== 'undefined' && localStorage.getItem(storageKey(dogId, dateKey)) === '1')
     } catch {
       setDismissed(false)
     }
     setReady(true)
-  }, [dateKey])
+  }, [dateKey, dogId])
 
   if (!ready || dismissed) return null
 
   function acknowledge() {
     try {
-      localStorage.setItem(storageKey(dateKey), '1')
+      localStorage.setItem(storageKey(dogId, dateKey), '1')
     } catch {
       /* ignore */
     }

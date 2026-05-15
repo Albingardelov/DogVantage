@@ -12,6 +12,13 @@ import { useActiveDog } from '@/lib/dog/active-dog-context'
 import { getAgeInWeeks, daysUntilHomecoming } from '@/lib/dog/age'
 import { GOALS, ENVIRONMENTS, REWARDS } from '@/components/DogProfileForm'
 import { HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'
+import {
+  IconCaretLeft,
+  IconCircleFilled,
+  IconCircleOutline,
+  IconWarningCircle,
+  SelectionCheck,
+} from '@/components/icons'
 import type { DogProfile, DogSex, CastrationStatus, TrainingGoal, TrainingEnvironment, RewardPreference, HouseholdPet } from '@/types'
 
 const ALL_HOUSEHOLD_PETS = Object.keys(HOUSEHOLD_PET_LABELS) as HouseholdPet[]
@@ -198,7 +205,7 @@ function ProfileView() {
             onClick={() => router.back()}
             aria-label="Tillbaka"
           >
-            <BackIcon />
+            <IconCaretLeft size="md" />
           </button>
           <span className={styles.headerTitle}>Profil</span>
         </div>
@@ -243,7 +250,7 @@ function ProfileView() {
                     className={`${styles.optionBtn} ${selected ? styles.optionBtnSelected : ''}`}
                   >
                     <span>{o.label}</span>
-                    {selected && <span aria-hidden="true">✓</span>}
+                    {selected && <SelectionCheck />}
                   </button>
                 )
               })}
@@ -298,7 +305,7 @@ function ProfileView() {
                     className={`${styles.optionBtn} ${selected ? styles.optionBtnSelected : ''}`}
                   >
                     <span>{HOUSEHOLD_PET_LABELS[p]}</span>
-                    {selected && <span aria-hidden="true">✓</span>}
+                    {selected && <SelectionCheck />}
                   </button>
                 )
               })}
@@ -320,7 +327,7 @@ function ProfileView() {
                     className={`${styles.optionBtn} ${selected ? styles.optionBtnSelected : ''}`}
                   >
                     <span>{o.label}</span>
-                    {selected && <span aria-hidden="true">✓</span>}
+                    {selected && <SelectionCheck />}
                   </button>
                 )
               })}
@@ -343,7 +350,7 @@ function ProfileView() {
                       className={`${styles.optionBtn} ${selected ? styles.optionBtnSelected : ''}`}
                     >
                       <span>{o.label}</span>
-                      {selected && <span aria-hidden="true">✓</span>}
+                      {selected && <SelectionCheck />}
                     </button>
                   )
                 })}
@@ -361,11 +368,27 @@ function ProfileView() {
                 disabled={heatLoading}
                 aria-pressed={isInHeat}
               >
-                {heatLoading ? 'Uppdaterar…' : isInHeat ? '🔴 Min tik löper just nu — klicka för att avsluta' : '⚪ Min tik löper just nu'}
+                {heatLoading ? (
+                  'Uppdaterar…'
+                ) : (
+                  <span className={styles.heatToggleContent}>
+                    {isInHeat ? (
+                      <IconCircleFilled size="sm" color="var(--color-danger)" className={styles.heatDot} />
+                    ) : (
+                      <IconCircleOutline size="sm" className={styles.heatDot} />
+                    )}
+                    <span>
+                      {isInHeat
+                        ? 'Min tik löper just nu — klicka för att avsluta'
+                        : 'Min tik löper just nu'}
+                    </span>
+                  </span>
+                )}
               </button>
               {skenfasActive && !isInHeat && (
                 <span className={styles.skenfasAlert}>
-                  ⚠️ Skenfas-fönster aktivt (6–9 v efter löpet). Läs mer om träning under skenfas.
+                  <IconWarningCircle size="sm" className={styles.skenfasIcon} />
+                  Skenfas-fönster aktivt (6–9 v efter löpet). Läs mer om träning under skenfas.
                 </span>
               )}
             </div>
@@ -552,7 +575,7 @@ function OptionField({
               className={`${styles.optionBtn} ${selected ? styles.optionBtnSelected : ''}`}
             >
               <span>{o.label}</span>
-              {selected && <span aria-hidden="true">✓</span>}
+              {selected && <SelectionCheck />}
             </button>
           )
         })}
@@ -571,10 +594,3 @@ function breedLabel(breed: string): string {
   return map[breed] ?? breed
 }
 
-function BackIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <polyline points="15 18 9 12 15 6" />
-    </svg>
-  )
-}

@@ -20,11 +20,13 @@
   top: var(--space-4);
   right: var(--space-5);
   z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: none;
   border: none;
   color: var(--color-text-muted);
   cursor: pointer;
-  font-size: var(--text-xl);
   line-height: 1;
   padding: 4px;
 }

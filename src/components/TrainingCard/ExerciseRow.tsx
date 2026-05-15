@@ -1,32 +1,9 @@
 'use client'
 
+import { ExerciseIcon, IconCaretRight, IconCheckCircle, IconSwap, IconWarning } from '@/components/icons'
 import styles from './ExerciseRow.module.css'
 import type { DailyExerciseMetrics, Exercise, LatencyBucket } from '@/types'
 import type { ExerciseSpec } from '@/lib/training/exercise-specs'
-
-const EXERCISE_ICONS: Record<string, string> = {
-  inkallning: '📣',
-  namn: '🏷️',
-  namntraning: '🏷️',
-  sitt: '🐾',
-  ligg: '😴',
-  stanna: '✋',
-  koppel: '🔗',
-  hantering: '🧤',
-  apportering: '🎾',
-  vatten: '💧',
-  socialisering: '👥',
-  stoppsignal: '🛑',
-  fokus: '👁️',
-  stadga: '🧘',
-  orientering: '🧭',
-  kontrollerat_sok: '👃',
-  impulskontroll: '⏳',
-}
-
-function getIcon(id: string): string {
-  return EXERCISE_ICONS[id] ?? '🐾'
-}
 
 interface Props {
   exercise: Exercise
@@ -86,7 +63,7 @@ export default function ExerciseRow({
       className={`${styles.row} ${isComplete ? styles.rowDone : ''} ${sessionNext ? styles.rowSessionNext : ''}`}
     >
       <div className={`${styles.iconBox} ${isComplete ? styles.iconBoxDone : ''}`}>
-        <span aria-hidden="true">{getIcon(exercise.id)}</span>
+        <ExerciseIcon exerciseId={exercise.id} size="md" />
       </div>
 
       <div className={styles.info}>
@@ -103,7 +80,7 @@ export default function ExerciseRow({
             </span>
             <span className={styles.guideCue} aria-hidden="true">
               <span className={styles.guideCueLabel}>Guide</span>
-              <span className={styles.guideCueArrow}>›</span>
+              <IconCaretRight size="sm" className={styles.guideCueArrow} />
             </span>
           </button>
         ) : (
@@ -120,7 +97,7 @@ export default function ExerciseRow({
             onClick={onSwap}
             aria-label={`Byt ut ${exercise.label} mot något ur veckofokus`}
           >
-            <span aria-hidden="true">↻</span> Byt mot fokus
+            <IconSwap size="sm" /> Byt mot fokus
           </button>
         )}
 
@@ -194,7 +171,7 @@ export default function ExerciseRow({
               <div className={`${styles.recommendation} ${showTroubleshooting ? styles.recommendationAlert : ''}`} role={showTroubleshooting ? 'alert' : undefined}>
                 {showTroubleshooting ? (
                   <>
-                    <span className={styles.recommendationIcon} aria-hidden="true">⚠️</span>
+                    <IconWarning size="md" className={styles.recommendationIcon} />
                     <span>{recommendation}</span>
                   </>
                 ) : (
@@ -221,7 +198,9 @@ export default function ExerciseRow({
           </span>
         )}
         {isComplete ? (
-          <div className={styles.checkCircle} aria-hidden="true">✓</div>
+          <div className={styles.checkCircle}>
+            <IconCheckCircle size="lg" className={styles.checkIcon} />
+          </div>
         ) : (
           <div className={styles.dots}>
             {Array.from({ length: exercise.reps }, (_, i) => {

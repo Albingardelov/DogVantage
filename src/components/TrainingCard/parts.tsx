@@ -1,3 +1,4 @@
+import { IconChevronRight, IconRestDay } from '@/components/icons'
 import styles from './TrainingCard.module.css'
 
 export function NextBanner({ label }: { label: string }) {
@@ -30,7 +31,7 @@ export function ReferralCard({ text }: { text: string }) {
 export function RestDay() {
   return (
     <div className={styles.restDay}>
-      <span className={styles.restEmoji} aria-hidden="true">😴</span>
+      <IconRestDay size="xl" className={styles.restIcon} />
       <span className={styles.restTitle}>Vilodag idag</span>
       <span className={styles.restSub}>Vila och återhämtning — bra jobbat i veckan!</span>
     </div>
@@ -38,9 +39,5 @@ export function RestDay() {
 }
 
 export function ChevronRight() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <polyline points="9 18 15 12 9 6" />
-    </svg>
-  )
+  return <IconChevronRight size="sm" />
 }

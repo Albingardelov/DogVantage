@@ -133,7 +133,7 @@ export default function TrainingCard(props: Props) {
         </div>
 
         {!loading && todayExercises.length > 0 && !todayPlan?.rest && (
-          <PreSessionChecklist ageWeeks={ageWeeks} dateKey={todayDate} />
+          <PreSessionChecklist ageWeeks={ageWeeks} dateKey={todayDate} dogId={dogId} />
         )}
 
         {!loading && weekPlan && (

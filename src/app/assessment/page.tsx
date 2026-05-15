@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import ProfileGuard from '@/components/ProfileGuard'
 import BottomNav from '@/components/BottomNav'
 import ExerciseGuideSheet from '@/components/ExerciseGuideSheet'
+import { IconCaretRight, SelectionCheck } from '@/components/icons'
 import { getDogProfile, updateDogProfile } from '@/lib/dog/profile'
 import { getAgeInWeeks } from '@/lib/dog/age'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
@@ -179,7 +180,7 @@ function Assessment() {
                     onClick={() => setBackground(k)}
                     aria-pressed={background === k}
                   >
-                    {background === k && <span className={styles.optionCheck}>✓</span>}
+                    {background === k && <SelectionCheck />}
                     {BACKGROUND_LABELS[k]}
                   </button>
                 ))}
@@ -214,7 +215,7 @@ function Assessment() {
                     }}
                     aria-pressed={hasBeenOut === o.v}
                   >
-                    {hasBeenOut === o.v && <span className={styles.optionCheck}>✓</span>}
+                    {hasBeenOut === o.v && <SelectionCheck />}
                     {o.label}
                   </button>
                 ))}
@@ -236,7 +237,7 @@ function Assessment() {
                       onClick={() => setLeashBehavior(k)}
                       aria-pressed={leashBehavior === k}
                     >
-                      {leashBehavior === k && <span className={styles.optionCheck}>✓</span>}
+                      {leashBehavior === k && <SelectionCheck />}
                       {LEASH_LABELS[k]}
                     </button>
                   ))}
@@ -259,7 +260,7 @@ function Assessment() {
                       onClick={() => setEnvReaction(k)}
                       aria-pressed={envReaction === k}
                     >
-                      {envReaction === k && <span className={styles.optionCheck}>✓</span>}
+                      {envReaction === k && <SelectionCheck />}
                       {ENV_REACTION_LABELS[k]}
                     </button>
                   ))}
@@ -444,7 +445,7 @@ function AssessmentExercise({
           <span className={styles.cardTitleText}>{prettyLabel(exerciseId)}</span>
           <span className={styles.cardTitleCue} aria-hidden="true">
             <span className={styles.cardTitleCueLabel}>Guide</span>
-            <span className={styles.cardTitleCueArrow}>›</span>
+            <IconCaretRight size="sm" className={styles.cardTitleCueArrow} />
           </span>
         </button>
         <div className={styles.cardMeta}>{attempts}/5 · {rate != null ? `${rate}%` : '—'}</div>

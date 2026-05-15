@@ -27,8 +27,8 @@ export async function upsertProgress(
   const { error } = await getSupabaseAdmin()
     .from('daily_progress')
     .upsert(
-      { dog_key: dogId, dog_id: dogId, breed, date, exercise_id: exerciseId, reps_done: repsDone },
-      { onConflict: 'dog_key,breed,date,exercise_id' }
+      { dog_id: dogId, breed, date, exercise_id: exerciseId, reps_done: repsDone },
+      { onConflict: 'dog_id,breed,date,exercise_id' }
     )
 
   if (error) throw new Error(`Progress upsert failed: ${error.message}`)

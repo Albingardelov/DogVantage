@@ -6,6 +6,7 @@ import { saveDogPhoto } from '@/lib/dog/photo'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import DogProfileForm from '@/components/DogProfileForm'
 import type { DogProfile } from '@/types'
+import { IconClose } from '@/components/icons'
 import styles from './AddDogModal.module.css'
 
 interface Props {
@@ -28,7 +29,9 @@ export default function AddDogModal({ onClose }: Props) {
   return (
     <div className={styles.overlay}>
       <div className={styles.fullScreen}>
-        <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Stäng">✕</button>
+        <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Stäng">
+          <IconClose size="md" />
+        </button>
         <DogProfileForm onSaved={handleSaved} />
       </div>
     </div>

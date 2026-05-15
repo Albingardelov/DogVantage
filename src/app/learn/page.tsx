@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import ProfileGuard from '@/components/ProfileGuard'
 import BottomNav from '@/components/BottomNav'
+import { IconCaretRight } from '@/components/icons'
 import styles from './page.module.css'
 
 export default function LearnPage() {
@@ -478,7 +479,10 @@ function Learn() {
                   <h2 className={styles.cardTitle}>{article.title}</h2>
                   <p className={styles.cardSummary}>{article.summary}</p>
                 </div>
-                <span className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`} aria-hidden="true">›</span>
+                <IconCaretRight
+                  size="sm"
+                  className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`}
+                />
               </button>
 
               {isOpen && (

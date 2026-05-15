@@ -5,6 +5,7 @@ import ProfileGuard from '@/components/ProfileGuard'
 import Avatar from '@/components/Avatar'
 import BottomNav from '@/components/BottomNav'
 import { getDogProfile } from '@/lib/dog/profile'
+import { IconCaretRight, RatingIcon } from '@/components/icons'
 import SkillProgressSection from '@/components/SkillProgressSection'
 import type { DogProfile, QuickRating, SessionLog } from '@/types'
 import styles from './page.module.css'
@@ -17,10 +18,10 @@ export default function LogPage() {
   )
 }
 
-const RATING_META: Record<QuickRating, { emoji: string; label: string; tone: string }> = {
-  good: { emoji: '😄', label: 'Bra', tone: 'good' },
-  mixed: { emoji: '😐', label: 'Blandat', tone: 'mixed' },
-  bad: { emoji: '😞', label: 'Svårt', tone: 'bad' },
+const RATING_META: Record<QuickRating, { label: string; tone: string }> = {
+  good: { label: 'Bra', tone: 'good' },
+  mixed: { label: 'Blandat', tone: 'mixed' },
+  bad: { label: 'Svårt', tone: 'bad' },
 }
 
 const DATE_FMT = new Intl.DateTimeFormat('sv-SE', { day: 'numeric', month: 'short' })
@@ -142,7 +143,7 @@ function Log() {
               }}
             >
               <div className={styles.cardTop}>
-                <span className={styles.cardEmoji} aria-hidden="true">{meta.emoji}</span>
+                <RatingIcon rating={log.quick_rating} size="lg" className={styles.cardIcon} />
                 <div className={styles.cardLabel}>
                   <span className={styles.ratingLabel}>{meta.label}</span>
                   <span className={styles.dateLabel}>{date}</span>
@@ -150,9 +151,10 @@ function Log() {
                 <span className={styles.weekLabel}>v.{log.week_number}</span>
                 <div className={styles.cardAction}>
                   <span className={styles.expandHint}>{isExpanded ? 'Dölj' : 'Visa mer'}</span>
-                  <span className={`${styles.chevron} ${isExpanded ? styles.chevronOpen : ''}`} aria-hidden="true">
-                    ›
-                  </span>
+                  <IconCaretRight
+                    size="sm"
+                    className={`${styles.chevron} ${isExpanded ? styles.chevronOpen : ''}`}
+                  />
                 </div>
               </div>
 

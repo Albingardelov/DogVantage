@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import type { Breed, ChatMessage, TrainingResult, TrainingSourceRef } from '@/types'
+import { IconPaw, IconSend } from '@/components/icons'
 import styles from './ChatInterface.module.css'
 
 interface Props {
@@ -112,7 +113,9 @@ export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQu
             className={`${styles.row} ${m.role === 'user' ? styles.rowUser : styles.rowModel}`}
           >
             {m.role === 'model' && (
-              <div className={styles.modelAvatar} aria-hidden="true">🐾</div>
+              <div className={styles.modelAvatar}>
+                <IconPaw size="md" />
+              </div>
             )}
             {m.role === 'user' ? (
               <div className={`${styles.bubble} ${styles.bubbleUser}`}>{m.content}</div>
@@ -156,7 +159,7 @@ export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQu
 
         {loading && (
           <div className={`${styles.row} ${styles.rowModel}`}>
-            <div className={styles.modelAvatar} aria-hidden="true">🐾</div>
+            
             <div className={`${styles.bubble} ${styles.bubbleModel} ${styles.typing}`} aria-label="Skriver…">
               <span /><span /><span />
             </div>
@@ -200,7 +203,7 @@ export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQu
           disabled={!input.trim() || loading}
           aria-label="Skicka"
         >
-          <SendIcon />
+          <IconSend size="md" />
         </button>
       </div>
     </div>
@@ -225,24 +228,5 @@ function SourceRow({ s }: { s: TrainingSourceRef }) {
       )}
       {meta && <span className={styles.sourceMeta}>{meta}</span>}
     </li>
-  )
-}
-
-function SendIcon() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <line x1="22" y1="2" x2="11" y2="13" />
-      <polygon points="22 2 15 22 11 13 2 9 22 2" />
-    </svg>
   )
 }

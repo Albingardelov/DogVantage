@@ -17,6 +17,14 @@ import ProgramWeekTimeline from '@/components/ProgramWeekTimeline/ProgramWeekTim
 import { buildBehaviorContext } from '@/lib/dog/behavior'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import { getHandlerFeedbackTip, type HandlerFeedbackTip } from '@/lib/training/handler-feedback'
+import {
+  IconCalendar,
+  IconCaretRight,
+  IconClose,
+  IconFlask,
+  IconPaw,
+  IconPencil,
+} from '@/components/icons'
 import type { DogProfile, BehaviorProfile, SessionLog } from '@/types'
 import styles from './page.module.css'
 
@@ -278,8 +286,9 @@ function Dashboard() {
             <span className={styles.greeting}>{getGreeting()}</span>
             <DogSwitcher onAddDog={() => setShowAddDog(true)} />
             <Link href="/calendar" className={styles.weekBadge}>
-              <span aria-hidden="true">🗓️</span> Programvecka {trainingWeek}
-              <span className={styles.weekBadgeArrow} aria-hidden="true">›</span>
+              <IconCalendar size="sm" className={styles.weekBadgeIcon} />
+              Programvecka {trainingWeek}
+              <IconCaretRight size="sm" className={styles.weekBadgeArrow} />
             </Link>
             <ProgramWeekTimeline ageWeeks={ageWeeks} />
           </div>
@@ -351,7 +360,7 @@ function Dashboard() {
                 href={`/learn?article=${handlerTip.learnArticleId}`}
                 className={styles.tipLink}
               >
-                Läs guiden ›
+                Läs guiden <IconCaretRight size="sm" className={styles.tipLinkIcon} />
               </Link>
             </div>
             <button
@@ -360,7 +369,7 @@ function Dashboard() {
               onClick={() => dismissTip(handlerTip.id)}
               aria-label="Stäng tips"
             >
-              ×
+              <IconClose size="sm" />
             </button>
           </div>
         )}
@@ -372,7 +381,7 @@ function Dashboard() {
               <p className={styles.tipBody}>{tip.body}</p>
               {tip.learnId && (
                 <Link href={`/learn?article=${tip.learnId}`} className={styles.tipLink}>
-                  Läs guiden ›
+                  Läs guiden <IconCaretRight size="sm" className={styles.tipLinkIcon} />
                 </Link>
               )}
             </div>
@@ -382,7 +391,7 @@ function Dashboard() {
               onClick={() => dismissTip(tip.id)}
               aria-label="Stäng tips"
             >
-              ×
+              <IconClose size="sm" />
             </button>
           </div>
         ))}
@@ -395,13 +404,15 @@ function Dashboard() {
             onClick={() => (window.location.href = '/assessment')}
             type="button"
           >
-            <span aria-hidden="true">🧪</span>
+            <IconFlask size="md" className={styles.logCtaIcon} />
             <span>Gör snabb screening (10–12 min)</span>
           </button>
         )}
         {profile && beforeHomecoming ? (
           <div className={styles.countdownCard}>
-            <div className={styles.countdownIcon} aria-hidden="true">🐾</div>
+            <div className={styles.countdownIcon}>
+              <IconPaw size="xl" />
+            </div>
             <p className={styles.countdownTitle}>
               {dogName} kommer hem om {daysUntilHome} {daysUntilHome === 1 ? 'dag' : 'dagar'}
             </p>
@@ -464,7 +475,7 @@ function Dashboard() {
             onClick={() => setShowLogForm(true)}
             type="button"
           >
-            <span aria-hidden="true">✍️</span>
+            <IconPencil size="md" className={styles.logCtaIcon} />
             <span>Logga träningspass</span>
           </button>
         ) : (

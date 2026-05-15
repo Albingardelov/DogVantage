@@ -159,8 +159,7 @@ export type Database = {
           created_at: string
           criteria_level_id: string | null
           date: string
-          dog_id: string | null
-          dog_key: string
+          dog_id: string
           exercise_id: string
           fail_count: number
           latency_bucket: string | null
@@ -173,8 +172,7 @@ export type Database = {
           created_at?: string
           criteria_level_id?: string | null
           date: string
-          dog_id?: string | null
-          dog_key?: string
+          dog_id: string
           exercise_id: string
           fail_count?: number
           latency_bucket?: string | null
@@ -187,8 +185,7 @@ export type Database = {
           created_at?: string
           criteria_level_id?: string | null
           date?: string
-          dog_id?: string | null
-          dog_key?: string
+          dog_id?: string
           exercise_id?: string
           fail_count?: number
           latency_bucket?: string | null
@@ -211,8 +208,7 @@ export type Database = {
           breed: string
           created_at: string | null
           date: string
-          dog_id: string | null
-          dog_key: string
+          dog_id: string
           exercise_id: string
           id: string
           reps_done: number
@@ -221,8 +217,7 @@ export type Database = {
           breed: string
           created_at?: string | null
           date: string
-          dog_id?: string | null
-          dog_key?: string
+          dog_id: string
           exercise_id: string
           id?: string
           reps_done?: number
@@ -231,8 +226,7 @@ export type Database = {
           breed?: string
           created_at?: string | null
           date?: string
-          dog_id?: string | null
-          dog_key?: string
+          dog_id?: string
           exercise_id?: string
           id?: string
           reps_done?: number

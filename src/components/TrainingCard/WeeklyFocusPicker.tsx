@@ -7,6 +7,7 @@ import {
   MAX_WEEKLY_FOCUS,
   type WeeklyFocusArea,
 } from '@/lib/training/weekly-focus'
+import { IconCaretRight, IconTarget } from '@/components/icons'
 import styles from './WeeklyFocusPicker.module.css'
 
 interface Props {
@@ -99,14 +100,15 @@ export default function WeeklyFocusPicker({ dogId, onLoaded, onChange }: Props) 
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
       >
-        <span className={styles.summaryIcon} aria-hidden="true">🎯</span>
+        <IconTarget size="md" className={styles.summaryIcon} />
         <span className={styles.summaryText}>
           <span className={styles.summaryLabel}>Veckofokus</span>
           <span className={styles.summaryValue}>{summary}</span>
         </span>
-        <span className={`${styles.chevron} ${open ? styles.chevronOpen : ''}`} aria-hidden="true">
-          ›
-        </span>
+        <IconCaretRight
+          size="sm"
+          className={`${styles.chevron} ${open ? styles.chevronOpen : ''}`}
+        />
       </button>
 
       {open && (

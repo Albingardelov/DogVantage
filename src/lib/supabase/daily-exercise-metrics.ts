@@ -46,7 +46,6 @@ export async function upsertMetrics(
     .from('daily_exercise_metrics')
     .upsert(
       {
-        dog_key: dogId,
         dog_id: dogId,
         breed,
         date,
@@ -57,7 +56,7 @@ export async function upsertMetrics(
         criteria_level_id: patch.criteria_level_id ?? null,
         notes: patch.notes ?? null,
       },
-      { onConflict: 'dog_key,breed,date,exercise_id' }
+      { onConflict: 'dog_id,breed,date,exercise_id' }
     )
 
   if (error) throw new Error(`Metrics upsert failed: ${error.message}`)

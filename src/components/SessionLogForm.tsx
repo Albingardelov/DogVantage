@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { IconCheckCircle, RatingIcon } from '@/components/icons'
 import type { Breed, QuickRating, ExerciseSummary } from '@/types'
 import styles from './SessionLogForm.module.css'
 
@@ -13,10 +14,10 @@ interface Props {
   onCancel?: () => void
 }
 
-const RATINGS: { value: QuickRating; label: string; emoji: string }[] = [
-  { value: 'good', label: 'Bra', emoji: '😄' },
-  { value: 'mixed', label: 'Blandat', emoji: '😐' },
-  { value: 'bad', label: 'Svårt', emoji: '😞' },
+const RATINGS: { value: QuickRating; label: string }[] = [
+  { value: 'good', label: 'Bra' },
+  { value: 'mixed', label: 'Blandat' },
+  { value: 'bad', label: 'Svårt' },
 ]
 
 type NextSessionIntent = 'same' | 'easier' | 'harder'
@@ -81,7 +82,7 @@ export default function SessionLogForm({ dogId, breed, weekNumber, exercises, on
   if (saved) {
     return (
       <div className={styles.savedCard} role="status">
-        <div className={styles.savedEmoji} aria-hidden="true">✅</div>
+        <IconCheckCircle size="hero" className={styles.savedIcon} />
         <p className={styles.savedText}>Pass sparat!</p>
       </div>
     )
@@ -127,7 +128,7 @@ export default function SessionLogForm({ dogId, breed, weekNumber, exercises, on
                 className={`${styles.ratingBtn} ${selected ? styles.ratingBtnSelected : ''}`}
                 onClick={() => setRating(r.value)}
               >
-                <span className={styles.emoji} aria-hidden="true">{r.emoji}</span>
+                <RatingIcon rating={r.value} size="xl" className={styles.ratingIcon} />
                 <span className={styles.ratingLabel}>{r.label}</span>
               </button>
             )

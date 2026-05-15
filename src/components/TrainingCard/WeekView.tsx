@@ -1,5 +1,6 @@
 'use client'
 
+import { IconCaretLeft, IconRestDay } from '@/components/icons'
 import styles from './WeekView.module.css'
 import type { WeekPlan } from '@/types'
 
@@ -18,7 +19,7 @@ export default function WeekView({ plan, onClose }: Props) {
       <div className={styles.sheet}>
         <div className={styles.header}>
           <button type="button" className={styles.backBtn} onClick={onClose} aria-label="Stäng">
-            <BackArrow />
+            <IconCaretLeft size="md" />
           </button>
           <span className={styles.title}>Veckans schema</span>
         </div>
@@ -40,7 +41,10 @@ export default function WeekView({ plan, onClose }: Props) {
                 </div>
 
                 {day.rest ? (
-                  <p className={styles.restText}>😴 Vila och återhämtning</p>
+                  <p className={styles.restText}>
+                    <IconRestDay size="md" className={styles.restIcon} />
+                    Vila och återhämtning
+                  </p>
                 ) : (
                   <ul className={styles.exerciseList}>
                     {(day.exercises ?? []).map((ex) => (
@@ -57,13 +61,5 @@ export default function WeekView({ plan, onClose }: Props) {
         </div>
       </div>
     </div>
-  )
-}
-
-function BackArrow() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <polyline points="15 18 9 12 15 6" />
-    </svg>
   )
 }
