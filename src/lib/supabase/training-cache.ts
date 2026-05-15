@@ -1,5 +1,7 @@
 import { getSupabaseAdmin } from './client'
 import type { TrainingResult, Breed, WeekPlan } from '@/types'
+import { getLifeStage } from '@/lib/dog/age'
+import { TrainingResultSchema, WeekPlanSchema } from '@/types/api/schemas'
 
 export async function getCachedTraining(
   breed: Breed,
@@ -34,9 +36,7 @@ export async function setCachedTraining(
 }
 
 function ageBucket(ageWeeks?: number): string {
-  if (!ageWeeks || ageWeeks < 16) return 'puppy'
-  if (ageWeeks < 52) return 'junior'
-  return 'adult'
+  return getLifeStage(ageWeeks)
 }
 
 function goalsBucket(goals?: string[]): string {
@@ -102,11 +102,17 @@ export async function getCachedWeekPlan(
   const { data, error } = await query.single()
 
   if (error || !data) return null
+  let json: unknown
   try {
-    return JSON.parse(data.content) as WeekPlan
+    json = JSON.parse(data.content)
   } catch {
     return null
   }
+  const parsed = WeekPlanSchema.safeParse(json)
+  if (!parsed.success) {
+    return null
+  }
+  return parsed.data
 }
 
 const CHAT_CACHE_VERSION = 'v1'
@@ -133,11 +139,17 @@ export async function getCachedChat(
     .single()
 
   if (error || !data) return null
+  let json: unknown
   try {
-    return JSON.parse(data.content) as TrainingResult
+    json = JSON.parse(data.content)
   } catch {
     return null
   }
+  const parsed = TrainingResultSchema.safeParse(json)
+  if (!parsed.success) {
+    return null
+  }
+  return parsed.data
 }
 
 export async function setCachedChat(
@@ -183,4 +195,21 @@ export async function setCachedWeekPlan(
     }, { onConflict: 'breed,week_number' })
 
   if (error) throw new Error(`Week plan cache write failed: ${error.message}`)
+}
+
+export async function touchCacheEntry(
+  query: string,
+  breed: Breed,
+  ageWeeks?: number,
+): Promise<void> {
+  await ((getSupabaseAdmin().from('training_cache') as unknown as {
+    update: (values: Record<string, unknown>) => {
+      eq: (column: string, value: string | number) => {
+        eq: (column: string, value: string | number) => Promise<unknown>
+      }
+    }
+  })
+    .update({ last_accessed_at: new Date().toISOString() })
+    .eq('breed', chatCacheKey(query, breed, ageWeeks))
+    .eq('week_number', 0))
 }

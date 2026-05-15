@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { aiErrorResponse } from '@/lib/ai/errors'
-import { createSupabaseServer } from '@/lib/supabase/server'
+import { withAuth } from '@/lib/api/with-auth'
+import { apiError } from '@/lib/api/errors'
 import { queryRAG } from '@/lib/ai/rag'
 import { getRecentLogs, formatLogsForPrompt } from '@/lib/supabase/session-logs'
 import { getMetrics } from '@/lib/supabase/daily-exercise-metrics'
-import { getCachedChat, setCachedChat } from '@/lib/supabase/training-cache'
-import { getTodayChatCount, incrementChatCount, DAILY_CHAT_LIMIT } from '@/lib/supabase/chat-usage'
+import { getCachedChat, setCachedChat, touchCacheEntry } from '@/lib/supabase/training-cache'
+import { incrementChatCount, DAILY_CHAT_LIMIT } from '@/lib/supabase/chat-usage'
 import type { Breed } from '@/types'
 
 function todayDateString(): string {
@@ -30,76 +31,76 @@ function formatMetricsForPrompt(metrics: Record<string, import('@/types').DailyE
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = await createSupabaseServer()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
-
-    const { query, breed, weekNumber, ageWeeks, trainingWeek, dogId, onboardingContext } = await req.json() as {
-      query: string
-      breed: Breed
-      weekNumber?: number
-      ageWeeks?: number
-      trainingWeek?: number
-      dogId?: string
-      onboardingContext?: string
-    }
-
-    if (!query || !breed) {
-      return NextResponse.json({ error: 'query and breed required' }, { status: 400 })
-    }
-
-    const logsWeek = typeof trainingWeek === 'number'
-      ? trainingWeek
-      : (typeof weekNumber === 'number' ? weekNumber : undefined)
-
-    const logStrings =
-      typeof logsWeek === 'number' && dogId
-        ? formatLogsForPrompt(await getRecentLogs(dogId, logsWeek))
-        : []
-
-    let metricsStrings: string[] = []
-    try {
-      const metrics = await getMetrics(breed, todayDateString(), dogId ?? '')
-      metricsStrings = formatMetricsForPrompt(metrics)
-    } catch {
-      // best-effort
-    }
-
-    const phaseAgeWeeks = typeof ageWeeks === 'number' ? ageWeeks : (typeof weekNumber === 'number' ? weekNumber : undefined)
-
-    const isPersonalized =
-      logStrings.length > 0 || metricsStrings.length > 0 || !!onboardingContext
-    if (!isPersonalized) {
-      const cached = await getCachedChat(query, breed, phaseAgeWeeks)
-      if (cached) return NextResponse.json(cached)
-    }
-
-    const dailyCount = await getTodayChatCount(user.id)
-    if (dailyCount >= DAILY_CHAT_LIMIT) {
-      return NextResponse.json(
-        {
-          error: `Du har nått dagsgränsen på ${DAILY_CHAT_LIMIT} chat-frågor. Försök igen imorgon — eller använd träningsplanen som redan är personligt anpassad.`,
-          retryable: false,
-        },
-        { status: 429 },
-      )
-    }
-
-    await incrementChatCount(user.id)
-    const result = await queryRAG(query, breed, logStrings, phaseAgeWeeks, metricsStrings, onboardingContext)
-
-    if (!isPersonalized) {
-      try {
-        await setCachedChat(query, breed, result, phaseAgeWeeks)
-      } catch (err) {
-        console.error('[/api/chat] cache write failed', err)
+    return withAuth(async ({ user }) => {
+      const { query, breed, weekNumber, ageWeeks, trainingWeek, dogId, onboardingContext } = await req.json() as {
+        query: string
+        breed: Breed
+        weekNumber?: number
+        ageWeeks?: number
+        trainingWeek?: number
+        dogId?: string
+        onboardingContext?: string
       }
-    }
 
-    return NextResponse.json(result)
+      if (!query || !breed) {
+        return NextResponse.json({ error: 'query and breed required' }, { status: 400 })
+      }
+
+      const logsWeek = typeof trainingWeek === 'number'
+        ? trainingWeek
+        : (typeof weekNumber === 'number' ? weekNumber : undefined)
+      const phaseAgeWeeks = typeof ageWeeks === 'number' ? ageWeeks : (typeof weekNumber === 'number' ? weekNumber : undefined)
+      const shouldFetchLogs = typeof logsWeek === 'number' && Boolean(dogId)
+      const shouldFetchMetrics = Boolean(dogId)
+
+      const [logStrings, metricsStrings, cached] = await Promise.all([
+        shouldFetchLogs
+          ? getRecentLogs(dogId!, logsWeek!).then((logs) => formatLogsForPrompt(logs))
+          : Promise.resolve([]),
+        shouldFetchMetrics
+          ? getMetrics(breed, todayDateString(), dogId ?? '')
+            .then((metrics) => formatMetricsForPrompt(metrics))
+            .catch(() => [])
+          : Promise.resolve([]),
+        getCachedChat(query, breed, phaseAgeWeeks).catch(() => null),
+      ])
+
+      const isPersonalized =
+        logStrings.length > 0 || metricsStrings.length > 0 || !!onboardingContext
+      if (!isPersonalized) {
+        if (cached) {
+          // LRU touch can run in the background.
+          void touchCacheEntry(query, breed, phaseAgeWeeks).catch(() => {})
+          return NextResponse.json(cached)
+        }
+      }
+
+      const newDailyCount = await incrementChatCount(user.id)
+      if (newDailyCount > DAILY_CHAT_LIMIT) {
+        return NextResponse.json(
+          {
+            error: `Du har nått dagsgränsen på ${DAILY_CHAT_LIMIT} chat-frågor. Försök igen imorgon — eller använd träningsplanen som redan är personligt anpassad.`,
+            retryable: false,
+          },
+          { status: 429 },
+        )
+      }
+
+      const result = await queryRAG(query, breed, logStrings, phaseAgeWeeks, metricsStrings, onboardingContext)
+
+      if (!isPersonalized) {
+        try {
+          await setCachedChat(query, breed, result, phaseAgeWeeks)
+        } catch (err) {
+          console.error('[/api/chat] cache write failed', err)
+        }
+      }
+
+      return NextResponse.json(result)
+    })
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     console.error('[/api/chat]', message)
-    return aiErrorResponse(message) ?? NextResponse.json({ error: message }, { status: 500 })
+    return aiErrorResponse(message) ?? apiError(err)
   }
 }

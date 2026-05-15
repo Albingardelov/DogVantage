@@ -11,38 +11,17 @@ export async function searchBreedChunks(
   breed: Breed,
   matchCount = 6
 ): Promise<ChunkMatch[]> {
-  const supabase = getSupabaseAdmin()
   // pgvector accepts number[] at runtime but generated types say string — cast at the boundary
   const embeddingArg = queryEmbedding as unknown as string
 
-  // Fetch breed-specific chunks
-  const { data: breedData, error: breedError } = await supabase.rpc('match_breed_chunks', {
-    query_embedding: embeddingArg,
+  // Generated DB types can lag behind latest migration; use a narrow cast at this boundary.
+  const { data, error } = await (getSupabaseAdmin() as unknown as {
+    rpc: (name: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>
+  }).rpc('match_breed_and_general_chunks', {
     match_breed: breed,
-    match_count: matchCount,
-  })
-  if (breedError) throw new Error(`Chunk search failed: ${breedError.message}`)
-
-  // Fetch general training chunks (not breed-specific)
-  const { data: generalData } = await supabase.rpc('match_breed_chunks', {
     query_embedding: embeddingArg,
-    match_breed: 'general',
     match_count: matchCount,
   })
-
-  const combined: ChunkMatch[] = [
-    ...((breedData as ChunkMatch[]) ?? []),
-    ...((generalData as ChunkMatch[]) ?? []),
-  ]
-
-  // De-duplicate by id and sort by similarity (highest first), keep top matchCount
-  const seen = new Set<string>()
-  return combined
-    .filter((c) => {
-      if (seen.has(c.id)) return false
-      seen.add(c.id)
-      return true
-    })
-    .sort((a, b) => b.similarity - a.similarity)
-    .slice(0, matchCount)
+  if (error) throw new Error(`Chunk search failed: ${error.message}`)
+  return ((data as ChunkMatch[] | null) ?? []).slice(0, matchCount)
 }
