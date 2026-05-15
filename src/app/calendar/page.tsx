@@ -221,10 +221,11 @@ function CalendarView() {
 
       const pets = profile.onboarding?.householdPets
       const petsParam = pets && pets.length > 0 ? `&householdPets=${pets.join(',')}` : ''
+      const dogIdParam = profile.id ? `&dogId=${encodeURIComponent(profile.id)}` : ''
 
       const [logsRes, planRes] = await Promise.all([
         fetch(`/api/logs?dogId=${encodeURIComponent(profile.id ?? '')}`),
-        fetch(`/api/training/week?breed=${profile.breed}&week=${trainingWeek}&ageWeeks=${ageWeeks}${goalsParam}${petsParam}`),
+        fetch(`/api/training/week?breed=${profile.breed}&week=${trainingWeek}&ageWeeks=${ageWeeks}${goalsParam}${petsParam}${dogIdParam}`),
       ])
 
       if (logsRes.ok) {
@@ -239,6 +240,9 @@ function CalendarView() {
 
       if (planRes.ok) {
         setWeekPlan(await planRes.json())
+      } else {
+        setWeekPlan(null)
+        console.error('[calendar week-plan]', planRes.status, await planRes.text())
       }
     } finally {
       setLoading(false)
