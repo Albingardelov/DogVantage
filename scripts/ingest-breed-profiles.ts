@@ -18,7 +18,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import { createClient } from '@supabase/supabase-js'
 import { BREED_PROFILES } from '../src/lib/ai/breed-profiles'
 
-const BATCH_DELAY_MS = 1200
+const BATCH_DELAY_MS = 1200 // ~50 RPM, Gemini free tier limit
 const DRY_RUN = process.argv.includes('--dry-run')
 const ONLY_BREED = process.argv.includes('--breed')
   ? process.argv[process.argv.indexOf('--breed') + 1]
@@ -30,6 +30,7 @@ function requireEnv(name: string): string {
   return v
 }
 
+const MAX_RETRIES = 5
 const genAI = new GoogleGenerativeAI(requireEnv('GOOGLE_AI_API_KEY'))
 const embedModel = genAI.getGenerativeModel({ model: 'gemini-embedding-001' })
 const supabase = createClient(requireEnv('SUPABASE_URL'), requireEnv('SUPABASE_SERVICE_ROLE_KEY'))
@@ -37,6 +38,25 @@ const supabase = createClient(requireEnv('SUPABASE_URL'), requireEnv('SUPABASE_S
 async function embedText(text: string): Promise<number[]> {
   const result = await embedModel.embedContent(text)
   return result.embedding.values
+}
+
+async function embedWithRetry(text: string): Promise<number[]> {
+  let lastError: unknown
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      const result = await embedModel.embedContent(text)
+      return result.embedding.values
+    } catch (err) {
+      lastError = err
+      const isRateLimit =
+        String(err).includes('429') || String(err).includes('Too Many Requests')
+      if (!isRateLimit) throw err
+      const waitMs = Math.pow(2, attempt) * 5000  // 5s, 10s, 20s, 40s, 80s
+      console.warn(`\n  ⏳ Rate limited — retrying in ${waitMs / 1000}s (attempt ${attempt + 1}/${MAX_RETRIES})`)
+      await sleep(waitMs)
+    }
+  }
+  throw lastError
 }
 
 function chunksFromProfile(slug: string): { content: string; section: string }[] {
@@ -70,7 +90,7 @@ function chunksFromProfile(slug: string): { content: string; section: string }[]
   return chunks
 }
 
-async function sleep(ms: number) {
+async function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms))
 }
 
@@ -84,10 +104,11 @@ async function ingestBreed(slug: string) {
 
   if (!DRY_RUN) {
     // Delete existing profile chunks so re-runs are safe
-    await supabase.from('breed_chunks')
+    const { error: delError } = await supabase.from('breed_chunks')
       .delete()
       .eq('breed', slug)
       .like('source', `breed-profile:${slug}:%`)
+    if (delError) throw new Error(`Delete failed for ${slug}: ${delError.message}`)
   }
 
   for (const { content, section } of chunks) {
@@ -96,7 +117,7 @@ async function ingestBreed(slug: string) {
       continue
     }
 
-    const embedding = await embedText(content)
+    const embedding = await embedWithRetry(content)
     const { error } = await supabase.from('breed_chunks').insert({
       breed: slug,
       source: `breed-profile:${slug}:${section}`,
