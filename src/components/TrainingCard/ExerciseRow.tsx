@@ -4,6 +4,7 @@ import { ExerciseIcon, IconCaretRight, IconCheckCircle, IconSwap, IconWarning } 
 import styles from './ExerciseRow.module.css'
 import type { DailyExerciseMetrics, Exercise, LatencyBucket } from '@/types'
 import type { ExerciseSpec } from '@/lib/training/exercise-specs'
+import { isPuppy as isPuppyAge } from '@/lib/dog/age'
 
 interface Props {
   exercise: Exercise
@@ -49,7 +50,7 @@ export default function ExerciseRow({
   const successCount = metrics?.success_count ?? 0
   const failCount = metrics?.fail_count ?? 0
   const attempts = successCount + failCount
-  const isPuppy = typeof ageWeeks === 'number' && ageWeeks > 0 && ageWeeks < 16
+  const isPuppy = isPuppyAge(ageWeeks)
   const allowedLevels = spec
     ? (isPuppy ? spec.ladder.slice(0, Math.min(2, spec.ladder.length)) : spec.ladder)
     : null

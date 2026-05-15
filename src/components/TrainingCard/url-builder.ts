@@ -9,7 +9,6 @@ export interface WeekPlanUrlParams {
   environment?: TrainingEnvironment
   rewardPreference?: RewardPreference
   takesRewardsOutdoors?: boolean
-  behaviorContext?: string
   householdPets?: HouseholdPet[]
 }
 
@@ -28,7 +27,6 @@ export function buildWeekPlanUrl(p: WeekPlanUrlParams): string {
   if (p.environment) params.set('environment', p.environment)
   if (p.rewardPreference) params.set('rewardPreference', p.rewardPreference)
   if (p.takesRewardsOutdoors != null) params.set('takesRewardsOutdoors', String(p.takesRewardsOutdoors))
-  if (p.behaviorContext) params.set('behaviorContext', p.behaviorContext)
   if (p.householdPets && p.householdPets.length > 0) params.set('householdPets', p.householdPets.join(','))
   return `/api/training/week?${params.toString()}`
 }

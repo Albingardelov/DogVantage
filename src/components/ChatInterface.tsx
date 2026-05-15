@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import type { Breed, ChatMessage, TrainingResult, TrainingSourceRef } from '@/types'
+import type { Breed, ChatMessage, TrainingSourceRef } from '@/types'
 import { IconPaw, IconSend } from '@/components/icons'
+import { apiFetch, ApiError } from '@/lib/api/fetch'
+import { TrainingResultSchema } from '@/types/api/schemas'
 import styles from './ChatInterface.module.css'
 
 interface Props {
@@ -39,18 +41,11 @@ export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQu
     setLoading(true)
 
     try {
-      const res = await fetch('/api/chat', {
+      const data = await apiFetch('/api/chat', TrainingResultSchema, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query, breed, ageWeeks, trainingWeek, dogId, onboardingContext }),
       })
-      const data = await res.json() as TrainingResult & { error?: string; retryable?: boolean }
-      if (!res.ok || !data.content) {
-        const msg = data.error ?? `Fel ${res.status} — försök igen.`
-        const canRetry = data.retryable !== false
-        setMessages((prev) => [...prev, { role: 'model', content: `Något gick fel: ${msg}`, retryQuery: canRetry ? query : undefined }])
-        return
-      }
       setMessages((prev) => [
         ...prev,
         {
@@ -61,6 +56,13 @@ export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQu
         },
       ])
     } catch (err) {
+      if (err instanceof ApiError) {
+        setMessages((prev) => [
+          ...prev,
+          { role: 'model', content: `Något gick fel: ${err.message}`, retryQuery: err.retryable ? query : undefined },
+        ])
+        return
+      }
       const msg = err instanceof Error ? err.message : 'Nätverksfel'
       setMessages((prev) => [...prev, { role: 'model', content: `Kunde inte nå assistenten: ${msg}`, retryQuery: query }])
     } finally {

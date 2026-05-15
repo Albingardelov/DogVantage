@@ -8,6 +8,8 @@ import { getDogProfile } from '@/lib/dog/profile'
 import { IconCaretRight, RatingIcon } from '@/components/icons'
 import SkillProgressSection from '@/components/SkillProgressSection'
 import type { DogProfile, QuickRating, SessionLog } from '@/types'
+import { apiFetch } from '@/lib/api/fetch'
+import { SessionLogArraySchema } from '@/types/api/schemas'
 import styles from './page.module.css'
 
 export default function LogPage() {
@@ -43,14 +45,9 @@ function Log() {
       try {
         if (!p.id) return
         const params = new URLSearchParams({ dogId: p.id })
-        const res = await fetch(`/api/logs?${params}`)
-        const data = await res.json()
         if (!alive) return
-        if (!res.ok) {
-          setError(data.error ?? `Fel ${res.status}`)
-        } else {
-          setLogs(data as SessionLog[])
-        }
+        const data = await apiFetch(`/api/logs?${params}`, SessionLogArraySchema)
+        setLogs(data)
       } catch (err) {
         if (alive) setError(err instanceof Error ? err.message : 'Nätverksfel')
       } finally {

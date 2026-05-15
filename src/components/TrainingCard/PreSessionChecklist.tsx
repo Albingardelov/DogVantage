@@ -2,16 +2,18 @@
 
 import { useEffect, useState } from 'react'
 import styles from './PreSessionChecklist.module.css'
+import { getLifeStage, isPuppy } from '@/lib/dog/age'
 
 function storageKey(dogId: string, dateKey: string): string {
   return `dv_pre_ready_${dogId}_${dateKey}`
 }
 
 function durationHint(ageWeeks: number): string {
-  if (ageWeeks > 0 && ageWeeks < 16) {
+  if (isPuppy(ageWeeks)) {
     return 'Håll passet kort — ungefär 3–8 minuter räcker ofta för valpar.'
   }
-  if (ageWeeks >= 16 && ageWeeks < 52) {
+  const stage = getLifeStage(ageWeeks)
+  if (stage === 'junior' || stage === 'adolescent') {
     return 'Planera gärna 8–12 minuter fokuserad träning; korta pass ofta slår långa.'
   }
   return 'Planera gärna 10–15 minuter; bryt gärna upp i kortare block om hunden tappar fokus.'

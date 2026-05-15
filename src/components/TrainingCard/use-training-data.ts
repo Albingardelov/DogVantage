@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { DailyExerciseMetrics, WeekPlan } from '@/types'
 import { buildWeekPlanUrl, type WeekPlanUrlParams } from './url-builder'
+import { apiFetch } from '@/lib/api/fetch'
+import {
+  MetricsMapSchema,
+  ProgressMapSchema,
+  WeekPlanSchema,
+} from '@/types/api/schemas'
 
 interface TrainingDataState {
   weekPlan: WeekPlan | null
@@ -29,7 +35,7 @@ interface Params extends WeekPlanUrlParams {
 export function useTrainingData(params: Params): UseTrainingDataResult {
   const {
     breed, trainingWeek, ageWeeks, dogId, goals, environment, rewardPreference,
-    takesRewardsOutdoors, behaviorContext, householdPets, todayDate,
+    takesRewardsOutdoors, householdPets, todayDate,
   } = params
 
   const [weekPlan, setWeekPlan] = useState<WeekPlan | null>(null)
@@ -46,16 +52,25 @@ export function useTrainingData(params: Params): UseTrainingDataResult {
     try {
       const planUrl = buildWeekPlanUrl({
         breed, trainingWeek, ageWeeks, dogId, goals, environment,
-        rewardPreference, takesRewardsOutdoors, behaviorContext, householdPets,
+        rewardPreference, takesRewardsOutdoors, householdPets,
       })
       const [planRes, progressRes, metricsRes] = await Promise.all([
         fetch(planUrl),
-        fetch(`/api/training/progress?breed=${breed}&date=${todayDate}&dogId=${encodeURIComponent(dogId)}`),
-        fetch(`/api/training/metrics?breed=${breed}&date=${todayDate}&dogId=${encodeURIComponent(dogId)}`),
+        apiFetch(
+          `/api/training/progress?breed=${breed}&date=${todayDate}&dogId=${encodeURIComponent(dogId)}`,
+          ProgressMapSchema,
+        ),
+        apiFetch(
+          `/api/training/metrics?breed=${breed}&date=${todayDate}&dogId=${encodeURIComponent(dogId)}`,
+          MetricsMapSchema,
+        ),
       ])
 
       if (planRes.ok) {
-        setWeekPlan(await planRes.json())
+        const body = await planRes.json()
+        const parsed = WeekPlanSchema.safeParse(body)
+        if (!parsed.success) throw new Error('Fel format i veckoplanen från servern')
+        setWeekPlan(parsed.data)
       } else if (planRes.status === 422) {
         const body = await planRes.json().catch(() => ({}))
         if (body?.error === 'behavior_referral' && typeof body.referral === 'string') {
@@ -66,14 +81,14 @@ export function useTrainingData(params: Params): UseTrainingDataResult {
       } else {
         setError(true)
       }
-      if (progressRes.ok) setProgress(await progressRes.json())
-      if (metricsRes.ok) setMetrics(await metricsRes.json())
+      setProgress(progressRes)
+      setMetrics(metricsRes)
     } catch {
       setError(true)
     } finally {
       setLoading(false)
     }
-  }, [breed, trainingWeek, ageWeeks, todayDate, goals, environment, rewardPreference, takesRewardsOutdoors, behaviorContext, householdPets, dogId])
+  }, [breed, trainingWeek, ageWeeks, todayDate, goals, environment, rewardPreference, takesRewardsOutdoors, householdPets, dogId])
 
   useEffect(() => { refresh() }, [refresh])
 

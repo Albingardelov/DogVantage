@@ -1,4 +1,5 @@
 import type { LatencyBucket } from '@/types'
+import { isPuppy as isPuppyAge } from '@/lib/dog/age'
 
 export interface SessionGuard {
   consecutiveFails: number
@@ -25,7 +26,7 @@ export function buildRecommendation(
   guard: SessionGuard,
 ): Recommendation | null {
   const attempts = successCount + failCount
-  const isPuppy = ageWeeks > 0 && ageWeeks < 16
+  const isPuppy = isPuppyAge(ageWeeks)
 
   if (guard.consecutiveFails >= 2 || guard.consecutiveSlow >= 2) {
     return {

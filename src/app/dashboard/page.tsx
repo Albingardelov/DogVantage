@@ -12,11 +12,12 @@ import LearningChecklistCard from '@/components/LearningChecklistCard'
 import DogSwitcher from '@/components/DogSwitcher'
 import AddDogModal from '@/components/AddDogModal'
 import { useActiveDog } from '@/lib/dog/active-dog-context'
-import { getAgeInWeeks, daysUntilHomecoming, trainingWeekFromHomecoming } from '@/lib/dog/age'
+import { getAgeInWeeks, daysUntilHomecoming, isPuppy, trainingWeekFromHomecoming } from '@/lib/dog/age'
 import ProgramWeekTimeline from '@/components/ProgramWeekTimeline/ProgramWeekTimeline'
-import { buildBehaviorContext } from '@/lib/dog/behavior'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import { getHandlerFeedbackTip, type HandlerFeedbackTip } from '@/lib/training/handler-feedback'
+import { apiFetch } from '@/lib/api/fetch'
+import { SessionLogArraySchema } from '@/types/api/schemas'
 import {
   IconCalendar,
   IconCaretRight,
@@ -63,9 +64,9 @@ function getContextualTips(profile: DogProfile, ageWeeks: number): ContextualTip
   // trainingBackground is captured at onboarding now — fall back to assessment if not set there
   const trainingBackground = profile.onboarding?.trainingBackground ?? behavior?.trainingBackground
   const isBeginner = trainingBackground === 'beginner'
-  const isPuppy = ageWeeks > 0 && ageWeeks < 20
+  const puppy = isPuppy(ageWeeks)
 
-  if (isBeginner && isPuppy) {
+  if (isBeginner && puppy) {
     tips.push({
       id: 'puppy-fundamentals',
       title: `Valpens grundbehov — börja här med ${profile.name}`,
@@ -74,7 +75,7 @@ function getContextualTips(profile: DogProfile, ageWeeks: number): ContextualTip
     })
   }
 
-  if (isPuppy && ageWeeks < 16) {
+  if (puppy) {
     tips.push({
       id: 'puppy-sleep',
       title: 'Valpen behöver 18 timmar sömn per dygn',
@@ -83,7 +84,7 @@ function getContextualTips(profile: DogProfile, ageWeeks: number): ContextualTip
     })
   }
 
-  if (ageWeeks > 0 && ageWeeks < 16) {
+  if (puppy) {
     tips.push({
       id: 'socialization-window',
       title: 'Socialisationsfönstret stänger snart',
@@ -200,13 +201,7 @@ function Dashboard() {
         from: new Date(start).toISOString(),
         to: new Date(end).toISOString(),
       })
-      const res = await fetch(`/api/logs?${params}`)
-      const data = await res.json()
-      if (!res.ok) {
-        setWeekStats({ count: 0, avg: null })
-        return
-      }
-      const weekLogs = data as SessionLog[]
+      const weekLogs = await apiFetch(`/api/logs?${params}`, SessionLogArraySchema)
       const count = weekLogs.length
       if (count === 0) {
         setWeekStats({ count: 0, avg: null })
@@ -224,12 +219,7 @@ function Dashboard() {
     if (!profile?.id || !profile?.name) return
     try {
       const params = new URLSearchParams({ dogId: profile.id, limit: '5' })
-      const res = await fetch(`/api/logs?${params}`)
-      if (!res.ok) {
-        setHandlerTip(null)
-        return
-      }
-      const logs = (await res.json()) as SessionLog[]
+      const logs = await apiFetch(`/api/logs?${params}`, SessionLogArraySchema)
       setHandlerTip(getHandlerFeedbackTip(logs, profile.name))
     } catch (e) {
       console.error('[dashboard handler tip]', e)
@@ -441,7 +431,6 @@ function Dashboard() {
             environment={profile.onboarding?.environment}
             rewardPreference={profile.onboarding?.rewardPreference}
             takesRewardsOutdoors={profile.onboarding?.takesRewardsOutdoors}
-            behaviorContext={buildBehaviorContext(profile)}
             householdPets={profile.onboarding?.householdPets}
           />
         ) : null}

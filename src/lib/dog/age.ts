@@ -5,6 +5,25 @@ export function getAgeInWeeks(birthdate: string): number {
   return Math.floor(days / 7)
 }
 
+export type LifeStage = 'puppy' | 'junior' | 'adolescent' | 'adult'
+
+const STAGE_BOUNDARIES = {
+  puppy: 16,
+  junior: 26,
+  adolescent: 52,
+} as const
+
+export function getLifeStage(ageWeeks: number | undefined): LifeStage {
+  if (typeof ageWeeks !== 'number' || ageWeeks <= 0) return 'adult'
+  if (ageWeeks < STAGE_BOUNDARIES.puppy) return 'puppy'
+  if (ageWeeks < STAGE_BOUNDARIES.junior) return 'junior'
+  if (ageWeeks < STAGE_BOUNDARIES.adolescent) return 'adolescent'
+  return 'adult'
+}
+
+export const isPuppy = (ageWeeks?: number): boolean => getLifeStage(ageWeeks) === 'puppy'
+export const isJunior = (ageWeeks?: number): boolean => getLifeStage(ageWeeks) === 'junior'
+
 /** Days until the dog comes home. Negative = already home. */
 export function daysUntilHomecoming(homecomeDate: string): number {
   const home = new Date(homecomeDate)

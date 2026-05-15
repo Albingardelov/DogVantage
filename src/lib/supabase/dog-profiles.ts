@@ -64,7 +64,7 @@ export async function saveProfile(profile: DogProfile, userId: string): Promise<
       .eq('id', profile.id)
       .select('id')
       .single()
-    if (error) throw new Error(`Failed to save profile: ${error.message}`)
+    if (error) throw new Error('Failed to save profile')
     return { ...profile, id: data.id }
   }
 
@@ -73,7 +73,7 @@ export async function saveProfile(profile: DogProfile, userId: string): Promise<
     .insert(row)
     .select('id')
     .single()
-  if (error) throw new Error(`Failed to save profile: ${error.message}`)
+  if (error) throw new Error('Failed to save profile')
   return { ...profile, id: data.id }
 }
 
@@ -106,7 +106,7 @@ export async function updateProfile(fields: Partial<DogProfile>): Promise<void> 
     .update(updates)
     .eq('id', fields.id)
     .eq('user_id', user.id)
-  if (error) throw new Error(`Failed to update profile: ${error.message}`)
+  if (error) throw new Error('Failed to update profile')
 }
 
 export async function getAllProfiles(): Promise<DogProfile[]> {

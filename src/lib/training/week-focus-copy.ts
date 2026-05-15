@@ -1,5 +1,6 @@
 import { resolveBreedProfile } from '@/lib/ai/breed-profiles'
 import { GOAL_LABELS, GOAL_RULES } from '@/lib/training/goal-exercises'
+import { getLifeStage, isPuppy } from '@/lib/dog/age'
 import type { Breed, TrainingGoal } from '@/types'
 
 export interface WeekFocusCopy {
@@ -14,10 +15,11 @@ export interface WeekFocusCopy {
 }
 
 function phasePhrase(ageWeeks: number): string {
-  if (ageWeeks < 16) {
+  if (isPuppy(ageWeeks)) {
     return `valpen är ${ageWeeks} veckor — korta pass och små steg i svårighet`
   }
-  if (ageWeeks < 52) {
+  const stage = getLifeStage(ageWeeks)
+  if (stage === 'junior' || stage === 'adolescent') {
     return `hunden är ${ageWeeks} veckor (ungdom) — var beredd på stubbor och planera om när det behövs`
   }
   const months = Math.round(ageWeeks / 4.33)
