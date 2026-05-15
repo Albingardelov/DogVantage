@@ -1,4 +1,4 @@
-import { BREED_PROFILES } from '@/lib/ai/breed-profiles'
+import { resolveBreedProfile } from '@/lib/ai/breed-profiles'
 import { GOAL_LABELS, GOAL_RULES } from '@/lib/training/goal-exercises'
 import type { Breed, TrainingGoal } from '@/types'
 
@@ -24,8 +24,8 @@ function phasePhrase(ageWeeks: number): string {
   return `hunden är ca ${months} månader — progression kan gå snabbare om flyt och motivation finns`
 }
 
-function defaultSubGoals(breed: Breed): string[] {
-  const skills = BREED_PROFILES[breed].breedSkills.slice(0, 2)
+function defaultSubGoals(breed: string): string[] {
+  const skills = resolveBreedProfile(breed).breedSkills.slice(0, 2)
   return skills.map((s) => `${s.name}: ${s.description}`)
 }
 
@@ -33,13 +33,13 @@ function defaultSubGoals(breed: Breed): string[] {
  * Copy för "Veckans fokus" på träningskortet — kopplar programvecka, ras, ålder och mål.
  */
 export function buildWeekFocusCopy(params: {
-  breed: Breed
+  breed: string
   ageWeeks: number
   trainingWeek: number
   goals?: TrainingGoal[]
 }): WeekFocusCopy {
   const { breed, ageWeeks, trainingWeek, goals } = params
-  const breedName = BREED_PROFILES[breed].name
+  const breedName = resolveBreedProfile(breed).name
 
   const goalPart =
     goals && goals.length > 0

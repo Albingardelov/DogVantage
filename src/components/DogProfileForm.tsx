@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { saveDogProfile } from '@/lib/dog/profile'
 import { saveDogPhoto } from '@/lib/dog/photo'
 import { getAgeInWeeks } from '@/lib/dog/age'
-import { BREED_PROFILES } from '@/lib/ai/breed-profiles'
+import { resolveBreedProfile } from '@/lib/ai/breed-profiles'
 import { HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import { IconCamera, SelectionCheck } from '@/components/icons'
@@ -31,15 +31,15 @@ export const GOALS: { value: TrainingGoal; label: string }[] = [
   { value: 'problem_solving', label: 'Lösa problem (t.ex. koppel/inkallning)' },
 ]
 
-function getGoalsForBreed(breed: Breed | ''): { value: TrainingGoal; label: string }[] {
+function getGoalsForBreed(breed: string): { value: TrainingGoal; label: string }[] {
   if (!breed) return GOALS
-  const profile = BREED_PROFILES[breed]
+  const profile = resolveBreedProfile(breed)
   return GOALS.filter((g) => !profile.hiddenGoals.includes(g.value))
 }
 
-function getDefaultGoalsForBreed(breed: Breed | ''): TrainingGoal[] {
+function getDefaultGoalsForBreed(breed: string): TrainingGoal[] {
   if (!breed) return ['everyday_obedience']
-  return BREED_PROFILES[breed].suggestedGoals
+  return resolveBreedProfile(breed).suggestedGoals
 }
 
 export const ENVIRONMENTS: { value: TrainingEnvironment; label: string }[] = [
