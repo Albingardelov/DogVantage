@@ -7,7 +7,11 @@
     "build": "next build",
     "start": "next start",
     "test": "vitest run --passWithNoTests",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "ingest:skk": "npx tsx scripts/ingest-skk-rasstandarder.ts",
+    "ingest:skk:cleanup": "npx tsx scripts/cleanup-skk-ingest.ts",
+    "ingest:skk:remap": "npx tsx scripts/remap-skk-fci-breeds.ts",
+    "ingest:skk:generate-breeds": "npx tsx scripts/generate-skk-supplemental-breeds.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

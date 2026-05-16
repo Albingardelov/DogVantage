@@ -1,3 +1,5 @@
+import { SKK_SUPPLEMENTAL_BREEDS } from './supplemental.generated'
+
 export interface BreedEntry {
   slug: string
   nameSv: string
@@ -6,12 +8,18 @@ export interface BreedEntry {
   fciNumber: number
 }
 
+export interface BreedOption {
+  slug: string
+  nameSv: string
+  nameEn: string
+}
+
 export const BREED_REGISTRY: BreedEntry[] = [
   // ── Grupp 1: Vall- och bokapshundar ─────────────────────────────────────
   { slug: 'australian_shepherd',        nameSv: 'Australisk vallhund',          nameEn: 'Australian Shepherd',              fciGroup: 1, fciNumber: 351 },
   { slug: 'australian_kelpie',          nameSv: 'Australisk kelpie',             nameEn: 'Australian Kelpie',                fciGroup: 1, fciNumber: 293 },
-  { slug: 'belgian_malinois',           nameSv: 'Belgisk vallhund Malinois',     nameEn: 'Belgian Shepherd Malinois',        fciGroup: 1, fciNumber: 257 },
-  { slug: 'belgian_tervuren',           nameSv: 'Belgisk vallhund Tervuren',     nameEn: 'Belgian Shepherd Tervuren',        fciGroup: 1, fciNumber: 257 },
+  { slug: 'belgian_malinois',           nameSv: 'Belgisk vallhund Malinois',     nameEn: 'Belgian Shepherd Malinois',        fciGroup: 1, fciNumber: 15 },
+  { slug: 'belgian_tervuren',           nameSv: 'Belgisk vallhund Tervuren',     nameEn: 'Belgian Shepherd Tervuren',        fciGroup: 1, fciNumber: 15 },
   { slug: 'berger_australien',          nameSv: 'Berger Australien',             nameEn: 'Berger Australien',                fciGroup: 1, fciNumber: 337 },
   { slug: 'border_collie',              nameSv: 'Border Collie',                 nameEn: 'Border Collie',                    fciGroup: 1, fciNumber: 297 },
   { slug: 'bouvier_des_flandres',       nameSv: 'Bouvier des Flandres',          nameEn: 'Bouvier des Flandres',             fciGroup: 1, fciNumber: 191 },
@@ -29,7 +37,7 @@ export const BREED_REGISTRY: BreedEntry[] = [
   { slug: 'bullmastiff',                nameSv: 'Bullmastiff',                   nameEn: 'Bullmastiff',                      fciGroup: 2, fciNumber: 157 },
   { slug: 'cane_corso',                 nameSv: 'Cane Corso Italiano',           nameEn: 'Cane Corso',                       fciGroup: 2, fciNumber: 343 },
   { slug: 'dobermann',                  nameSv: 'Dobermann',                     nameEn: 'Dobermann',                        fciGroup: 2, fciNumber: 143 },
-  { slug: 'great_dane',                 nameSv: 'Dansk-svensk gårdshund',        nameEn: 'Great Dane',                       fciGroup: 2, fciNumber: 235 },
+  { slug: 'great_dane',                 nameSv: 'Grand danois',                  nameEn: 'Great Dane',                       fciGroup: 2, fciNumber: 235 },
   { slug: 'greater_swiss_mountain_dog', nameSv: 'Stor schweizisk sennenhund',    nameEn: 'Greater Swiss Mountain Dog',       fciGroup: 2, fciNumber: 58 },
   { slug: 'mastiff',                    nameSv: 'Mastiff',                       nameEn: 'Mastiff',                          fciGroup: 2, fciNumber: 264 },
   { slug: 'miniature_pinscher',         nameSv: 'Dvärg-pinscher',               nameEn: 'Miniature Pinscher',               fciGroup: 2, fciNumber: 185 },
@@ -73,7 +81,7 @@ export const BREED_REGISTRY: BreedEntry[] = [
   { slug: 'beagle',                     nameSv: 'Beagle',                        nameEn: 'Beagle',                           fciGroup: 6, fciNumber: 161 },
   { slug: 'bloodhound',                 nameSv: 'Blodhund',                      nameEn: 'Bloodhound',                       fciGroup: 6, fciNumber: 84 },
   { slug: 'dalmatian',                  nameSv: 'Dalmatiner',                    nameEn: 'Dalmatian',                        fciGroup: 6, fciNumber: 153 },
-  { slug: 'hamiltons_stovare',          nameSv: 'Hamiltonsstövare',             nameEn: "Hamilton's Hound",                 fciGroup: 6, fciNumber: 41 },
+  { slug: 'hamiltons_stovare',          nameSv: 'Hamiltonsstövare',             nameEn: "Hamilton's Hound",                 fciGroup: 6, fciNumber: 132 },
   { slug: 'rhodesian_ridgeback',        nameSv: 'Rhodesian ridgeback',           nameEn: 'Rhodesian Ridgeback',              fciGroup: 6, fciNumber: 146 },
   { slug: 'schillerstovare',            nameSv: 'Schillerstövare',              nameEn: "Schiller's Hound",                 fciGroup: 6, fciNumber: 131 },
   { slug: 'smalandsstovare',            nameSv: 'Smålandsstövare',              nameEn: "Smalands Hound",                   fciGroup: 6, fciNumber: 129 },
@@ -95,7 +103,7 @@ export const BREED_REGISTRY: BreedEntry[] = [
   { slug: 'clumber_spaniel',            nameSv: 'Clumberspaniel',               nameEn: 'Clumber Spaniel',                  fciGroup: 8, fciNumber: 109 },
   { slug: 'cocker_spaniel',             nameSv: 'Cocker spaniel',               nameEn: 'English Cocker Spaniel',           fciGroup: 8, fciNumber: 5 },
   { slug: 'curly_coated_retriever',     nameSv: 'Krullig retriever',            nameEn: 'Curly Coated Retriever',           fciGroup: 8, fciNumber: 110 },
-  { slug: 'flat_coated_retriever',      nameSv: 'Flatcoated retriever',         nameEn: 'Flat Coated Retriever',            fciGroup: 8, fciNumber: 116 },
+  { slug: 'flat_coated_retriever',      nameSv: 'Flatcoated retriever',         nameEn: 'Flat Coated Retriever',            fciGroup: 8, fciNumber: 121 },
   { slug: 'golden_retriever',           nameSv: 'Golden Retriever',             nameEn: 'Golden Retriever',                 fciGroup: 8, fciNumber: 111 },
   { slug: 'labrador',                   nameSv: 'Labrador Retriever',           nameEn: 'Labrador Retriever',               fciGroup: 8, fciNumber: 122 },
   { slug: 'nova_scotia_retriever',      nameSv: 'Nova Scotia duck tolling retriever', nameEn: 'Nova Scotia Duck Tolling Retriever', fciGroup: 8, fciNumber: 312 },
@@ -124,8 +132,19 @@ export const BREED_REGISTRY: BreedEntry[] = [
   { slug: 'whippet',                    nameSv: 'Whippet',                       nameEn: 'Whippet',                          fciGroup: 10, fciNumber: 162 },
 ]
 
+export const ALL_BREED_OPTIONS: BreedOption[] = [
+  ...BREED_REGISTRY.map((entry) => ({
+    slug: entry.slug,
+    nameSv: entry.nameSv,
+    nameEn: entry.nameEn,
+  })),
+  ...SKK_SUPPLEMENTAL_BREEDS,
+]
+
+const ALL_BREED_SLUGS = new Set(ALL_BREED_OPTIONS.map((entry) => entry.slug))
+
 export function isValidBreed(slug: string): boolean {
-  return BREED_REGISTRY.some((b) => b.slug === slug)
+  return ALL_BREED_SLUGS.has(slug)
 }
 
 export function getBreedEntry(slug: string): BreedEntry | undefined {

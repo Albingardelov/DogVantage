@@ -12,6 +12,7 @@ import { useActiveDog } from '@/lib/dog/active-dog-context'
 import { getAgeInWeeks, daysUntilHomecoming } from '@/lib/dog/age'
 import { GOALS, ENVIRONMENTS, REWARDS } from '@/components/DogProfileForm'
 import { HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'
+import { ALL_BREED_OPTIONS } from '@/lib/breeds/registry'
 import {
   IconCaretLeft,
   IconCircleFilled,
@@ -685,12 +686,7 @@ function OptionField({
 }
 
 function breedLabel(breed: string): string {
-  const map: Record<string, string> = {
-    braque_francais: 'Braque Français',
-    labrador: 'Labrador Retriever',
-    italian_greyhound: 'Italiensk Vinthund',
-    miniature_american_shepherd: 'Miniature American Shepherd',
-  }
-  return map[breed] ?? breed
+  const match = ALL_BREED_OPTIONS.find((entry) => entry.slug === breed)
+  return match?.nameSv ?? breed
 }
 

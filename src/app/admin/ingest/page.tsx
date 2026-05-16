@@ -2,14 +2,12 @@
 
 import { useState } from 'react'
 import type { Breed } from '@/types'
+import { ALL_BREED_OPTIONS } from '@/lib/breeds/registry'
 import styles from './page.module.css'
 
-const BREEDS: { value: Breed; label: string }[] = [
-  { value: 'labrador', label: 'Labrador retriever' },
-  { value: 'italian_greyhound', label: 'Italiensk vinthund' },
-  { value: 'braque_francais', label: 'Braque français' },
-  { value: 'miniature_american_shepherd', label: 'Miniature American Shepherd' },
-]
+const BREEDS: { value: Breed; label: string }[] = [...ALL_BREED_OPTIONS]
+  .map((entry) => ({ value: entry.slug as Breed, label: entry.nameSv }))
+  .sort((a, b) => a.label.localeCompare(b.label, 'sv'))
 
 export default function AdminIngestPage() {
   const [adminKey, setAdminKey] = useState('')

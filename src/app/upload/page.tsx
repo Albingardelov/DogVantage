@@ -3,13 +3,12 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import type { Breed } from '@/types'
+import { ALL_BREED_OPTIONS } from '@/lib/breeds/registry'
 import styles from './page.module.css'
 
-const BREEDS: { value: Breed; label: string }[] = [
-  { value: 'labrador', label: 'Labrador retriever' },
-  { value: 'italian_greyhound', label: 'Italiensk vinthund' },
-  { value: 'braque_francais', label: 'Braque français' },
-]
+const BREEDS: { value: Breed; label: string }[] = [...ALL_BREED_OPTIONS]
+  .map((entry) => ({ value: entry.slug as Breed, label: entry.nameSv }))
+  .sort((a, b) => a.label.localeCompare(b.label, 'sv'))
 
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null)
