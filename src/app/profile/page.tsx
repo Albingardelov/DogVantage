@@ -57,7 +57,7 @@ function ProfileView() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [photoKey, setPhotoKey] = useState(0)
-  const [billingActionLoading, setBillingActionLoading] = useState<'basic' | 'pro' | null>(null)
+  const [billingActionLoading, setBillingActionLoading] = useState<'basic' | 'pro_month' | 'pro_year' | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { state: billing, isLoading: billingLoading } = useSubscription()
 
@@ -185,13 +185,14 @@ function ProfileView() {
     }
   }
 
-  async function handleUpgrade(tier: 'basic' | 'pro') {
-    setBillingActionLoading(tier)
+  async function handleUpgrade(tier: 'basic' | 'pro', interval: 'month' | 'year' = 'month') {
+    const actionKey = tier === 'basic' ? 'basic' : interval === 'year' ? 'pro_year' : 'pro_month'
+    setBillingActionLoading(actionKey)
     try {
       const res = await fetch('/api/billing/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tier }),
+        body: JSON.stringify({ tier, interval }),
       })
       const payload = await res.json() as { url?: string; error?: string }
       if (!res.ok || !payload.url) {
@@ -535,10 +536,18 @@ function ProfileView() {
                   <button
                     type="button"
                     className={styles.saveBtn}
-                    onClick={() => handleUpgrade('pro')}
+                    onClick={() => handleUpgrade('pro', 'month')}
                     disabled={billingActionLoading !== null}
                   >
-                    {billingActionLoading === 'pro' ? 'Öppnar checkout…' : 'Uppgradera till Pro (79 kr/mån)'}
+                    {billingActionLoading === 'pro_month' ? 'Öppnar checkout…' : 'Uppgradera till Pro (79 kr/mån)'}
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.saveBtn}
+                    onClick={() => handleUpgrade('pro', 'year')}
+                    disabled={billingActionLoading !== null}
+                  >
+                    {billingActionLoading === 'pro_year' ? 'Öppnar checkout…' : 'Uppgradera till Pro Årsplan (599 kr/år, spara 37%)'}
                   </button>
                   <ManageSubscription />
                 </>
@@ -558,7 +567,15 @@ function ProfileView() {
                     onClick={() => handleUpgrade('pro')}
                     disabled={billingActionLoading !== null}
                   >
-                    {billingActionLoading === 'pro' ? 'Öppnar checkout…' : 'Starta Pro (79 kr/mån)'}
+                    {billingActionLoading === 'pro_month' ? 'Öppnar checkout…' : 'Starta Pro (79 kr/mån)'}
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.saveBtn}
+                    onClick={() => handleUpgrade('pro', 'year')}
+                    disabled={billingActionLoading !== null}
+                  >
+                    {billingActionLoading === 'pro_year' ? 'Öppnar checkout…' : 'Starta Pro Årsplan (599 kr/år, spara 37%)'}
                   </button>
                 </>
               )}

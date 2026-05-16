@@ -5,10 +5,16 @@ import { getStripe, STRIPE_PRICE_IDS } from '@/lib/stripe/client'
 import { apiError } from '@/lib/api/errors'
 
 type Tier = 'basic' | 'pro'
+type BillingInterval = 'month' | 'year'
 
 function parseTier(value: unknown): Tier | null {
   if (value === 'basic' || value === 'pro') return value
   return null
+}
+
+function parseInterval(value: unknown): BillingInterval {
+  if (value === 'year') return 'year'
+  return 'month'
 }
 
 function getAppUrl(req: NextRequest): string {
@@ -21,11 +27,16 @@ export async function POST(req: NextRequest) {
     return withAuth(req, async ({ user }) => {
       const body = await req.json().catch(() => ({}))
       const tier = parseTier((body as { tier?: unknown }).tier)
+      const interval = parseInterval((body as { interval?: unknown }).interval)
       if (!tier) {
         return NextResponse.json({ error: 'invalid tier' }, { status: 400 })
       }
 
-      const priceId = STRIPE_PRICE_IDS[tier]
+      const priceId = tier === 'basic'
+        ? STRIPE_PRICE_IDS.basic
+        : interval === 'year'
+          ? STRIPE_PRICE_IDS.proAnnual
+          : STRIPE_PRICE_IDS.proMonthly
       if (!priceId) {
         return NextResponse.json({ error: 'price not configured' }, { status: 500 })
       }
@@ -87,9 +98,9 @@ export async function POST(req: NextRequest) {
         payment_method_types: ['card', 'klarna'],
         success_url: `${baseUrl}/dashboard?upgraded=1&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${baseUrl}/profile?canceled=1`,
-        metadata: { user_id: user.id, tier },
+        metadata: { user_id: user.id, tier, interval },
         subscription_data: {
-          metadata: { user_id: user.id, tier },
+          metadata: { user_id: user.id, tier, interval },
         },
       })
 
