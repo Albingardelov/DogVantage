@@ -21,6 +21,7 @@ import { useTodayExercises } from './use-today-exercises'
 import { buildRecommendation, type SessionGuard } from './recommendation'
 import { buildExerciseSummaries, emptyMetrics } from './exercise-helpers'
 import { NextBanner, LoadingIndicator, ReferralCard, RestDay, ChevronRight } from './parts'
+import DayProgressBar from './DayProgressBar'
 
 function todayDateString(): string {
   return new Date().toISOString().split('T')[0]
@@ -65,8 +66,21 @@ export default function TrainingCard(props: Props) {
   const {
     todayPlan, todayExercisesWithIndex, todayExercises, displayedExercises,
     nextExerciseId, nextExercise, swapCandidates, setSwaps,
-    completedCount, progressPct,
+    completedCount,
   } = useTodayExercises({ weekPlan, progress, focusAreas, simpleFocus })
+
+  const repsPlanned = useMemo(
+    () => todayExercises.reduce((sum, exercise) => sum + exercise.reps, 0),
+    [todayExercises],
+  )
+  const repsDone = useMemo(
+    () =>
+      todayExercises.reduce((sum, exercise) => {
+        const done = Math.min(progress[exercise.id] ?? 0, exercise.reps)
+        return sum + done
+      }, 0),
+    [todayExercises, progress],
+  )
 
   function handleRepClick(exerciseId: string, currentDone: number, maxReps: number) {
     if (currentDone >= maxReps) return
@@ -154,10 +168,12 @@ export default function TrainingCard(props: Props) {
           />
         )}
 
-        {!loading && todayExercises.length > 0 && (
-          <div className={styles.progressBar} role="progressbar" aria-valuenow={progressPct} aria-valuemin={0} aria-valuemax={100}>
-            <div className={styles.progressFill} style={{ '--pct': `${progressPct}%` } as React.CSSProperties} />
-          </div>
+        {!loading && (
+          <DayProgressBar
+            repsDone={repsDone}
+            repsPlanned={repsPlanned}
+            isRestDay={Boolean(todayPlan?.rest)}
+          />
         )}
 
         {!loading && nextExercise && !todayPlan?.rest && !(simpleFocus && todayExercises.length > 2) && (
