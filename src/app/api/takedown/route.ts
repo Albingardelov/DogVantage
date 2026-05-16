@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase/client'
 import type { Breed } from '@/types'
+import { enforceApiRateLimit } from '@/lib/api/rate-limit'
 
 export async function POST(req: NextRequest) {
+  const limited = await enforceApiRateLimit(req, {
+    scope: 'public',
+    limit: 20,
+    windowSeconds: 60,
+  })
+  if (limited) return limited
+
   const { breed, source, reason, contact } = await req.json() as {
     breed: Breed
     source: string
