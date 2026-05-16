@@ -24,6 +24,9 @@ import type { DogProfile, DogSex, CastrationStatus, TrainingGoal, TrainingEnviro
 const ALL_HOUSEHOLD_PETS = Object.keys(HOUSEHOLD_PET_LABELS) as HouseholdPet[]
 import styles from './page.module.css'
 import CustomExerciseList from '@/components/CustomExerciseList'
+import { FeatureGate } from '@/components/billing/FeatureGate'
+import { useSubscription } from '@/lib/billing/subscription-context'
+import { ManageSubscription } from '@/components/billing/ManageSubscription'
 
 export default function ProfilePage() {
   return (
@@ -54,7 +57,9 @@ function ProfileView() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [photoKey, setPhotoKey] = useState(0)
+  const [billingActionLoading, setBillingActionLoading] = useState<'basic' | 'pro' | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { state: billing, isLoading: billingLoading } = useSubscription()
 
   // Initialize edit state from the active dog (context) — re-runs when dog switches
   useEffect(() => {
@@ -177,6 +182,28 @@ function ProfileView() {
       refreshDogs()
     } catch (e) {
       console.error('[profile save]', e)
+    }
+  }
+
+  async function handleUpgrade(tier: 'basic' | 'pro') {
+    setBillingActionLoading(tier)
+    try {
+      const res = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tier }),
+      })
+      const payload = await res.json() as { url?: string; error?: string }
+      if (!res.ok || !payload.url) {
+        alert(payload.error ?? 'Kunde inte starta checkout just nu')
+        return
+      }
+      window.location.href = payload.url
+    } catch (err) {
+      console.error('[profile billing checkout]', err)
+      alert('Kunde inte starta checkout just nu')
+    } finally {
+      setBillingActionLoading(null)
     }
   }
 
@@ -486,8 +513,64 @@ function ProfileView() {
         </div>
 
         <div className={styles.section}>
+          <span className={styles.sectionTitle}>Prenumeration</span>
+          {billingLoading ? (
+            <span className={styles.helper}>Laddar prenumerationsstatus…</span>
+          ) : (
+            <>
+              <span className={styles.helper}>
+                {billing.tier === 'pro'
+                  ? billing.isOnTrial
+                    ? `Pro-trial aktiv (${billing.trialDaysLeft} dagar kvar).`
+                    : 'Du har Pro.'
+                  : billing.tier === 'basic'
+                    ? 'Du har Basic.'
+                    : 'Du har Free.'}
+              </span>
+
+              {billing.tier === 'pro' ? (
+                <ManageSubscription />
+              ) : billing.tier === 'basic' ? (
+                <>
+                  <button
+                    type="button"
+                    className={styles.saveBtn}
+                    onClick={() => handleUpgrade('pro')}
+                    disabled={billingActionLoading !== null}
+                  >
+                    {billingActionLoading === 'pro' ? 'Öppnar checkout…' : 'Uppgradera till Pro (79 kr/mån)'}
+                  </button>
+                  <ManageSubscription />
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    className={styles.saveBtn}
+                    onClick={() => handleUpgrade('basic')}
+                    disabled={billingActionLoading !== null}
+                  >
+                    {billingActionLoading === 'basic' ? 'Öppnar checkout…' : 'Starta Basic (39 kr/mån)'}
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.saveBtn}
+                    onClick={() => handleUpgrade('pro')}
+                    disabled={billingActionLoading !== null}
+                  >
+                    {billingActionLoading === 'pro' ? 'Öppnar checkout…' : 'Starta Pro (79 kr/mån)'}
+                  </button>
+                </>
+              )}
+            </>
+          )}
+        </div>
+
+        <div className={styles.section}>
           <span className={styles.sectionTitle}>Egna träningspass</span>
-          <CustomExerciseList dogId={profile.id} />
+          <FeatureGate feature="custom_exercises">
+            <CustomExerciseList dogId={profile.id} />
+          </FeatureGate>
         </div>
 
         {saved ? (

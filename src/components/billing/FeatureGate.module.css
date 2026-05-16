@@ -1,0 +1,29 @@
+.gate {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+}
+
+.gate h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.gate p {
+  margin: 0;
+  color: #475467;
+  line-height: 1.45;
+}
+
+.cta {
+  justify-self: start;
+  background: #2d6a4f;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-weight: 600;
+}

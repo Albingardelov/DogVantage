@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAuth, withAuthAndDog } from '@/lib/api/with-auth'
 import { apiError } from '@/lib/api/errors'
+import { getSubscriptionState, hasFeature } from '@/lib/billing/subscription'
 import {
   getAllCustomExercises,
   createCustomExercise,
@@ -49,7 +50,11 @@ Regler: allt på svenska · konkret och praktiskt, inte vagt · för fysiskt kr�
 
 export async function GET(req: NextRequest) {
   try {
-    return withAuthAndDog(req, async ({ dog }) => {
+    return withAuthAndDog(req, async ({ user, dog }) => {
+      const subscription = await getSubscriptionState(user.id)
+      if (!hasFeature(subscription, 'custom_exercises')) {
+        return NextResponse.json({ error: 'payment_required', feature: 'custom_exercises' }, { status: 402 })
+      }
       const exercises = await getAllCustomExercises(dog.id)
       return NextResponse.json(exercises)
     })
@@ -61,6 +66,10 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     return withAuthAndDog(req, async ({ user, dog }) => {
+      const subscription = await getSubscriptionState(user.id)
+      if (!hasFeature(subscription, 'custom_exercises')) {
+        return NextResponse.json({ error: 'payment_required', feature: 'custom_exercises' }, { status: 402 })
+      }
       const body = await req.json() as { prompt?: unknown }
       const prompt = body.prompt
       if (typeof prompt !== 'string' || !prompt.trim()) {
@@ -110,7 +119,11 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
-    return withAuth(req, async () => {
+    return withAuth(req, async ({ user }) => {
+      const subscription = await getSubscriptionState(user.id)
+      if (!hasFeature(subscription, 'custom_exercises')) {
+        return NextResponse.json({ error: 'payment_required', feature: 'custom_exercises' }, { status: 402 })
+      }
       const body = await req.json() as { id?: unknown; active?: unknown }
       if (typeof body.id !== 'string' || typeof body.active !== 'boolean') {
         return NextResponse.json({ error: 'id and active required' }, { status: 400 })
@@ -125,7 +138,11 @@ export async function PATCH(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    return withAuth(req, async () => {
+    return withAuth(req, async ({ user }) => {
+      const subscription = await getSubscriptionState(user.id)
+      if (!hasFeature(subscription, 'custom_exercises')) {
+        return NextResponse.json({ error: 'payment_required', feature: 'custom_exercises' }, { status: 402 })
+      }
       const body = await req.json() as { id?: unknown }
       if (typeof body.id !== 'string') {
         return NextResponse.json({ error: 'id required' }, { status: 400 })

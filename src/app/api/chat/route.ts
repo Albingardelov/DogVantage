@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { aiErrorResponse } from '@/lib/ai/errors'
 import { withAuth } from '@/lib/api/with-auth'
 import { apiError } from '@/lib/api/errors'
+import { getSubscriptionState, hasFeature } from '@/lib/billing/subscription'
 import { queryRAG } from '@/lib/ai/rag'
 import { getRecentLogs, formatLogsForPrompt } from '@/lib/supabase/session-logs'
 import { getMetrics } from '@/lib/supabase/daily-exercise-metrics'
@@ -44,6 +45,13 @@ export async function POST(req: NextRequest) {
 
       if (!query || !breed) {
         return NextResponse.json({ error: 'query and breed required' }, { status: 400 })
+      }
+      const subscription = await getSubscriptionState(user.id)
+      if (!hasFeature(subscription, 'ai_chat')) {
+        return NextResponse.json(
+          { error: 'payment_required', feature: 'ai_chat' },
+          { status: 402 },
+        )
       }
 
       const logsWeek = typeof trainingWeek === 'number'
