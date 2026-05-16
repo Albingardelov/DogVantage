@@ -167,6 +167,11 @@ export default function DogProfileForm({ onSaved }: Props = {}) {
 
       await saveDogProfile(profile, userId)
       if (photo) await saveDogPhoto(photo)
+      try {
+        await fetch('/api/billing/ensure-trial', { method: 'POST' })
+      } catch (trialError) {
+        console.error('[onboarding ensure-trial]', trialError)
+      }
       router.replace('/dashboard')
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e)
