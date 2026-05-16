@@ -1,0 +1,111 @@
+{
+  "common": {
+    "loading": "Wird geladen...",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "close": "Schließen",
+    "back": "Zurück",
+    "continue": "Weiter",
+    "learnMore": "Mehr erfahren",
+    "unknownError": "Unbekannter Fehler",
+    "paymentRequired": "Zahlung erforderlich"
+  },
+  "nav": {
+    "dashboard": "Start",
+    "calendar": "Kalender",
+    "learn": "Lernen",
+    "chat": "Chat",
+    "profile": "Profil",
+    "logOut": "Abmelden"
+  },
+  "billing": {
+    "title": "Abonnement",
+    "free": "Free",
+    "basic": "Basic",
+    "pro": "Pro",
+    "manageSubscription": "Abonnement verwalten",
+    "openPortal": "Portal öffnen",
+    "openingPortal": "Portal wird geöffnet...",
+    "portalError": "Das Portal konnte derzeit nicht geöffnet werden",
+    "trialActive": "Pro-Testphase aktiv ({{days}} Tage verbleibend).",
+    "trialDaysLeft_one": "{{count}} Tag in der Pro-Testphase verbleibend",
+    "trialDaysLeft_other": "{{count}} Tage in der Pro-Testphase verbleibend",
+    "choosePlan": "Plan wählen",
+    "upgradeToPro": "Auf Pro upgraden",
+    "startBasic": "Basic starten",
+    "startPro": "Pro starten",
+    "checkoutOpening": "Checkout wird geöffnet...",
+    "checkoutStartError": "Checkout konnte derzeit nicht gestartet werden",
+    "priceBasicMonthly": "39 SEK/Monat",
+    "priceProMonthly": "79 SEK/Monat",
+    "proIncludes": "Enthält AI-Chat, mehrere Hunde, eigene AI-Übungen und Spezialprogramme für reaktive Hunde.",
+    "paywallTitle": "DogVantage starten",
+    "paywallSubtitle": "Wähle einen Plan, um mit Wochenplan, Protokollierung und persönlichem Training fortzufahren.",
+    "features": {
+      "weeklyPlan": "Wochenplan",
+      "logsAndCalendar": "Protokolle und Kalender",
+      "learnLibrary": "Lern-Bibliothek",
+      "aiChat": "AI-Chat",
+      "multipleDogs": "Mehrere Hunde",
+      "customExercises": "Eigene AI-Übungen"
+    },
+    "featureGateTitle": "Upgrade auf Pro, um {{feature}} freizuschalten",
+    "featureLabels": {
+      "ai_chat": "den AI-Chat",
+      "multiple_dogs": "mehrere Hunde",
+      "custom_exercises": "eigene Übungen"
+    }
+  },
+  "dashboard": {
+    "greeting": {
+      "night": "Gute Nacht!",
+      "morning": "Guten Morgen!",
+      "day": "Guten Tag!",
+      "evening": "Guten Abend!"
+    },
+    "programWeek": "Programmwoche {{week}}",
+    "logSession": "Trainingseinheit protokollieren",
+    "loggedSessions": "Protokollierte Einheiten",
+    "thisWeek": "diese Woche",
+    "averageScore": "Durchschnittswert",
+    "focusAndObedience": "Fokus und Gehorsam",
+    "quickScreening": "Schnell-Screening starten (10-12 Min)"
+  },
+  "profile": {
+    "title": "Profil",
+    "saveChanges": "Änderungen speichern",
+    "saved": "Gespeichert!",
+    "trainingGoals": "Trainingsziele",
+    "trainingSettings": "Trainingseinstellungen",
+    "programWeek": "Programmwoche",
+    "aboutDog": "Über den Hund",
+    "dataProtection": "Datenschutz",
+    "privacyPolicy": "Datenschutzerklärung",
+    "deleteAccount": "Mein Konto löschen",
+    "deleteConfirmTitle": "Alle deine Daten werden dauerhaft gelöscht.",
+    "deleteConfirmBody": "Trainingsprotokolle, Hundeprofil und eigene Übungen werden entfernt. Dies kann nicht rückgängig gemacht werden.",
+    "deleteConfirmAction": "Ja, mein Konto löschen"
+  },
+  "chat": {
+    "title": "AI-Chat",
+    "placeholder": "Schreibe deine Frage...",
+    "send": "Senden",
+    "emptyState": "Stelle eine Frage zu Training, Alltag oder Verhalten."
+  },
+  "calendar": {
+    "title": "Kalender",
+    "restDay": "Ruhe",
+    "weekPlan": "Wochenplan"
+  },
+  "learn": {
+    "title": "Lernen",
+    "readGuide": "Leitfaden lesen"
+  },
+  "apiErrors": {
+    "unauthorized": "Nicht angemeldet",
+    "forbidden": "Zugriff verweigert",
+    "notFound": "Nicht gefunden",
+    "rateLimited": "Zu viele Anfragen, bitte versuche es in Kürze erneut",
+    "serverError": "Auf dem Server ist ein Fehler aufgetreten"
+  }
+}

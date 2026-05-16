@@ -1,0 +1,111 @@
+{
+  "common": {
+    "loading": "Laddar...",
+    "save": "Spara",
+    "cancel": "Avbryt",
+    "close": "Stäng",
+    "back": "Tillbaka",
+    "continue": "Fortsätt",
+    "learnMore": "Läs mer",
+    "unknownError": "Okänt fel",
+    "paymentRequired": "Betalning krävs"
+  },
+  "nav": {
+    "dashboard": "Hem",
+    "calendar": "Kalender",
+    "learn": "Lär",
+    "chat": "Chat",
+    "profile": "Profil",
+    "logOut": "Logga ut"
+  },
+  "billing": {
+    "title": "Prenumeration",
+    "free": "Free",
+    "basic": "Basic",
+    "pro": "Pro",
+    "manageSubscription": "Hantera prenumeration",
+    "openPortal": "Öppna portal",
+    "openingPortal": "Öppnar portal...",
+    "portalError": "Kunde inte öppna portalen just nu",
+    "trialActive": "Pro-trial aktiv ({{days}} dagar kvar).",
+    "trialDaysLeft_one": "{{count}} dag kvar av Pro-trial",
+    "trialDaysLeft_other": "{{count}} dagar kvar av Pro-trial",
+    "choosePlan": "Välj plan",
+    "upgradeToPro": "Uppgradera till Pro",
+    "startBasic": "Starta Basic",
+    "startPro": "Starta Pro",
+    "checkoutOpening": "Öppnar checkout...",
+    "checkoutStartError": "Kunde inte starta checkout just nu",
+    "priceBasicMonthly": "39 kr/mån",
+    "priceProMonthly": "79 kr/mån",
+    "proIncludes": "Inkluderar AI-chat, flera hundar, egna AI-genererade övningar och specialprogram för reaktiva hundar.",
+    "paywallTitle": "Starta DogVantage",
+    "paywallSubtitle": "Välj en plan för att fortsätta med veckoplan, loggning och personlig träning.",
+    "features": {
+      "weeklyPlan": "Veckoplan",
+      "logsAndCalendar": "Logg och kalender",
+      "learnLibrary": "Lär-bibliotek",
+      "aiChat": "AI-chat",
+      "multipleDogs": "Flera hundar",
+      "customExercises": "Egna AI-övningar"
+    },
+    "featureGateTitle": "Uppgradera till Pro för att låsa upp {{feature}}",
+    "featureLabels": {
+      "ai_chat": "AI-chatten",
+      "multiple_dogs": "flera hundar",
+      "custom_exercises": "egna övningar"
+    }
+  },
+  "dashboard": {
+    "greeting": {
+      "night": "God natt!",
+      "morning": "God morgon!",
+      "day": "God dag!",
+      "evening": "God kväll!"
+    },
+    "programWeek": "Programvecka {{week}}",
+    "logSession": "Logga träningspass",
+    "loggedSessions": "Pass loggade",
+    "thisWeek": "denna vecka",
+    "averageScore": "Snittbetyg",
+    "focusAndObedience": "fokus och lydnad",
+    "quickScreening": "Gör snabb screening (10-12 min)"
+  },
+  "profile": {
+    "title": "Profil",
+    "saveChanges": "Spara ändringar",
+    "saved": "Sparat!",
+    "trainingGoals": "Träningsmål",
+    "trainingSettings": "Träningsinställningar",
+    "programWeek": "Programvecka",
+    "aboutDog": "Om hunden",
+    "dataProtection": "Dataskydd",
+    "privacyPolicy": "Integritetspolicy",
+    "deleteAccount": "Radera mitt konto",
+    "deleteConfirmTitle": "All din data raderas permanent.",
+    "deleteConfirmBody": "Träningsloggar, hundprofil och egna övningar tas bort. Det går inte att ångra.",
+    "deleteConfirmAction": "Ja, radera mitt konto"
+  },
+  "chat": {
+    "title": "AI-chat",
+    "placeholder": "Skriv din fråga...",
+    "send": "Skicka",
+    "emptyState": "Ställ en fråga om träning, vardag eller beteende."
+  },
+  "calendar": {
+    "title": "Kalender",
+    "restDay": "Vila",
+    "weekPlan": "Veckoplan"
+  },
+  "learn": {
+    "title": "Lär",
+    "readGuide": "Läs guiden"
+  },
+  "apiErrors": {
+    "unauthorized": "Inte inloggad",
+    "forbidden": "Ingen åtkomst",
+    "notFound": "Hittades inte",
+    "rateLimited": "För många förfrågningar, försök igen snart",
+    "serverError": "Något gick fel på servern"
+  }
+}
