@@ -14,15 +14,16 @@ export default async function LandingPage() {
       <section className={styles.hero}>
         <LandingHeroDecor />
 
-        <h1 className={styles.title}>DogVantage</h1>
+        <h1 className={styles.title}>Träning byggd för din hunds ras — inte för "hund" i allmänhet</h1>
         <p className={styles.tagline}>
-          Träningsplan anpassad för din hund — baserad på rasklubbens egna dokument.
+          DogVantage skapar ett veckoschema utifrån svenska rasstandarder och anpassar det efter hur din hund faktiskt utvecklas.
         </p>
       </section>
 
       <LandingFeatureList />
 
       <div className={styles.actions}>
+        <p className={styles.ctaLead}>Kom igång gratis i 14 dagar — ingen betalning krävs.</p>
         <Link href="/onboarding" className={styles.btnPrimary}>
           Kom igång
         </Link>
