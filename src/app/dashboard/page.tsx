@@ -11,12 +11,14 @@ import BottomNav from '@/components/BottomNav'
 import LearningChecklistCard from '@/components/LearningChecklistCard'
 import DogSwitcher from '@/components/DogSwitcher'
 import AddDogModal from '@/components/AddDogModal'
+import StreakBadge from '@/components/StreakBadge'
 import { useActiveDog } from '@/lib/dog/active-dog-context'
 import { useSubscription } from '@/lib/billing/subscription-context'
 import { getAgeInWeeks, daysUntilHomecoming, isPuppy, trainingWeekFromHomecoming } from '@/lib/dog/age'
 import ProgramWeekTimeline from '@/components/ProgramWeekTimeline/ProgramWeekTimeline'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import { getHandlerFeedbackTip, type HandlerFeedbackTip } from '@/lib/training/handler-feedback'
+import { computeStreak } from '@/lib/training/streak'
 import { apiFetch } from '@/lib/api/fetch'
 import { SessionLogArraySchema } from '@/types/api/schemas'
 import {
@@ -184,6 +186,7 @@ function Dashboard() {
   const [weekStats, setWeekStats] = useState<{ count: number; avg: number | null } | null>(null)
   const [handlerTip, setHandlerTip] = useState<HandlerFeedbackTip | null>(null)
   const [heatState, setHeatState] = useState<{ isInHeat: boolean; skenfasActive: boolean } | null>(null)
+  const [streak, setStreak] = useState<number | null>(null)
 
   const ageWeeks = profile ? Math.max(1, getAgeInWeeks(profile.birthdate)) : 0
   const homecomeDate = profile?.onboarding?.homecomeDate
@@ -229,16 +232,31 @@ function Dashboard() {
     }
   }, [profile?.id, profile?.name])
 
+  const refreshStreak = useCallback(async () => {
+    if (!profile?.id) return
+    try {
+      const params = new URLSearchParams({ dogId: profile.id, limit: '500' })
+      const logs = await apiFetch(`/api/logs?${params}`, SessionLogArraySchema)
+      setStreak(computeStreak(logs))
+    } catch (e) {
+      console.error('[dashboard streak]', e)
+      setStreak(0)
+    }
+  }, [profile?.id])
+
   useEffect(() => {
     if (!profile?.breed) {
       setWeekStats(null)
       setHandlerTip(null)
       setHeatState(null)
+      setStreak(null)
       return
     }
     setWeekStats(null)
+    setStreak(null)
     refreshWeekStats()
     refreshHandlerTip()
+    refreshStreak()
     if (profile.id && profile.sex === 'female' && profile.castrationStatus === 'intact') {
       fetch(`/api/training/heat?dogId=${encodeURIComponent(profile.id)}`)
         .then((r) => r.ok ? r.json() : null)
@@ -247,7 +265,7 @@ function Dashboard() {
     } else {
       setHeatState(null)
     }
-  }, [profile?.breed, profile?.id, profile?.sex, profile?.castrationStatus, refreshWeekStats, refreshHandlerTip])
+  }, [profile?.breed, profile?.id, profile?.sex, profile?.castrationStatus, refreshWeekStats, refreshHandlerTip, refreshStreak])
 
   function handleLogSaved() {
     setShowLogForm(false)
@@ -285,6 +303,7 @@ function Dashboard() {
               Programvecka {trainingWeek}
               <IconCaretRight size="sm" className={styles.weekBadgeArrow} />
             </Link>
+            <StreakBadge streak={streak} />
             <ProgramWeekTimeline ageWeeks={ageWeeks} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>

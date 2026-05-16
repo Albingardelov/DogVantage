@@ -1,0 +1,18 @@
+.badge {
+  margin-top: var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  align-self: flex-start;
+  background: rgb(245 158 11 / 0.18);
+  border: 1px solid rgb(255 255 255 / 0.35);
+  color: #fff7ed;
+  border-radius: var(--radius-full);
+  padding: 0.25rem 0.7rem;
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+}
+
+.icon {
+  color: #fbbf24;
+}
