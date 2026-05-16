@@ -16,7 +16,7 @@ export default async function LandingPage() {
 
         <h1 className={styles.title}>Träning byggd för din hunds ras — inte för "hund" i allmänhet</h1>
         <p className={styles.tagline}>
-          DogVantage skapar ett veckoschema utifrån svenska rasstandarder och anpassar det efter hur din hund faktiskt utvecklas.
+          DogVantage skapar ett veckoschema utifrån rasprofiler och svenska rasstandarder där källdokument finns, och anpassar det efter hur din hund faktiskt utvecklas.
         </p>
       </section>
 

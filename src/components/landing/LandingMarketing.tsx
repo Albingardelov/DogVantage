@@ -6,8 +6,8 @@ import styles from '@/app/page.module.css'
 const FEATURES: { id: LandingFeatureId; title: string; desc: string }[] = [
   {
     id: 'swedish-standards',
-    title: 'Byggd på svenska rasstandarder',
-    desc: 'Varje träningsplan utgår från RAS-dokument och rasspecifika krav från SKK och rasklubbarna. Din labrador tränas som en labrador — apportering, vattenarbete, stadga — inte med generiska tips som passar alla hundar lika dåligt.',
+    title: 'Rasspecifik grund med tydliga källor',
+    desc: 'Träningsplanen utgår från rasprofilen för din hund. När RAS-dokument och rasklubbskällor finns för rasen används de som underlag och vägs in i råden.',
   },
   {
     id: 'adaptive-ai',
