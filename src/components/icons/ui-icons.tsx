@@ -185,12 +185,12 @@ export function NavIcon({
   return <DvIcon icon={NAV_ICONS[tab]} size={size} weight="regular" className={className} />
 }
 
-export type LandingFeatureId = 'schedule' | 'breed-docs' | 'progress'
+export type LandingFeatureId = 'swedish-standards' | 'adaptive-ai' | 'safety'
 
 const FEATURE_ICONS: Record<LandingFeatureId, Icon> = {
-  schedule: CalendarBlank,
-  'breed-docs': BookOpen,
-  progress: PencilSimple,
+  'swedish-standards': BookOpen,
+  'adaptive-ai': Target,
+  safety: WarningCircle,
 }
 
 export function LandingFeatureIcon({

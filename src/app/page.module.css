@@ -57,9 +57,11 @@
 }
 
 .title {
-  font-size: var(--text-3xl);
+  font-size: clamp(1.5rem, 4.8vw, 2rem);
   font-weight: var(--font-bold);
   letter-spacing: -0.5px;
+  line-height: 1.2;
+  text-wrap: balance;
   position: relative;
   z-index: 1;
 }
@@ -78,7 +80,7 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: var(--space-6);
   padding: 1.75rem 1.5rem;
   flex: 1;
 }
@@ -116,7 +118,7 @@
 .featureDesc {
   font-size: var(--text-sm);
   color: var(--color-text-muted);
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .actions {
@@ -124,6 +126,14 @@
   flex-direction: column;
   gap: var(--space-2);
   padding: 0 1.5rem 2.5rem;
+}
+
+.ctaLead {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  text-align: center;
+  font-weight: var(--font-semibold);
 }
 
 .btnPrimary {

@@ -5,19 +5,19 @@ import styles from '@/app/page.module.css'
 
 const FEATURES: { id: LandingFeatureId; title: string; desc: string }[] = [
   {
-    id: 'schedule',
-    title: 'Veckovis schema',
-    desc: 'Träning anpassad efter valpdagar och ras',
+    id: 'swedish-standards',
+    title: 'Byggd på svenska rasstandarder',
+    desc: 'Varje träningsplan utgår från RAS-dokument och rasspecifika krav från SKK och rasklubbarna. Din labrador tränas som en labrador — apportering, vattenarbete, stadga — inte med generiska tips som passar alla hundar lika dåligt.',
   },
   {
-    id: 'breed-docs',
-    title: 'Direkt från RAS',
-    desc: 'Råd hämtade från rasklubbens officiella dokument',
+    id: 'adaptive-ai',
+    title: 'En plan som lär sig din hund',
+    desc: 'Logga dina träningspass så anpassas nästa veckas schema efter vad som faktiskt fungerar. Svårighetsgrad, övningsval och tempo justeras automatiskt — du följer inte en förinspelad kurs, du får en plan som utvecklas med er.',
   },
   {
-    id: 'progress',
-    title: 'Följ din hunds framsteg',
-    desc: 'Logga pass och se hur träningen utvecklas',
+    id: 'safety',
+    title: 'Tränar med omtanke',
+    desc: 'Appen känner igen tecken på hälsoproblem och beteendekriser och hänvisar dig vidare till veterinär eller utbildad beteendekonsult när det behövs. Reaktiva hundar tränas under tröskeln med LAT-metodik — aldrig tvångsexponering.',
   },
 ]
 
