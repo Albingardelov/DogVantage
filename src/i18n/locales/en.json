@@ -1,0 +1,111 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "back": "Back",
+    "continue": "Continue",
+    "learnMore": "Learn more",
+    "unknownError": "Unknown error",
+    "paymentRequired": "Payment required"
+  },
+  "nav": {
+    "dashboard": "Home",
+    "calendar": "Calendar",
+    "learn": "Learn",
+    "chat": "Chat",
+    "profile": "Profile",
+    "logOut": "Log out"
+  },
+  "billing": {
+    "title": "Subscription",
+    "free": "Free",
+    "basic": "Basic",
+    "pro": "Pro",
+    "manageSubscription": "Manage subscription",
+    "openPortal": "Open portal",
+    "openingPortal": "Opening portal...",
+    "portalError": "Could not open the portal right now",
+    "trialActive": "Pro trial active ({{days}} days left).",
+    "trialDaysLeft_one": "{{count}} day left in Pro trial",
+    "trialDaysLeft_other": "{{count}} days left in Pro trial",
+    "choosePlan": "Choose plan",
+    "upgradeToPro": "Upgrade to Pro",
+    "startBasic": "Start Basic",
+    "startPro": "Start Pro",
+    "checkoutOpening": "Opening checkout...",
+    "checkoutStartError": "Could not start checkout right now",
+    "priceBasicMonthly": "SEK 39/month",
+    "priceProMonthly": "SEK 79/month",
+    "proIncludes": "Includes AI chat, multiple dogs, custom AI exercises, and special programs for reactive dogs.",
+    "paywallTitle": "Start DogVantage",
+    "paywallSubtitle": "Choose a plan to continue with weekly plans, logging, and personal training.",
+    "features": {
+      "weeklyPlan": "Weekly plan",
+      "logsAndCalendar": "Logs and calendar",
+      "learnLibrary": "Learn library",
+      "aiChat": "AI chat",
+      "multipleDogs": "Multiple dogs",
+      "customExercises": "Custom AI exercises"
+    },
+    "featureGateTitle": "Upgrade to Pro to unlock {{feature}}",
+    "featureLabels": {
+      "ai_chat": "AI chat",
+      "multiple_dogs": "multiple dogs",
+      "custom_exercises": "custom exercises"
+    }
+  },
+  "dashboard": {
+    "greeting": {
+      "night": "Good night!",
+      "morning": "Good morning!",
+      "day": "Good day!",
+      "evening": "Good evening!"
+    },
+    "programWeek": "Program week {{week}}",
+    "logSession": "Log training session",
+    "loggedSessions": "Logged sessions",
+    "thisWeek": "this week",
+    "averageScore": "Average score",
+    "focusAndObedience": "focus and obedience",
+    "quickScreening": "Run quick screening (10-12 min)"
+  },
+  "profile": {
+    "title": "Profile",
+    "saveChanges": "Save changes",
+    "saved": "Saved!",
+    "trainingGoals": "Training goals",
+    "trainingSettings": "Training settings",
+    "programWeek": "Program week",
+    "aboutDog": "About the dog",
+    "dataProtection": "Data protection",
+    "privacyPolicy": "Privacy policy",
+    "deleteAccount": "Delete my account",
+    "deleteConfirmTitle": "All your data will be permanently deleted.",
+    "deleteConfirmBody": "Training logs, dog profile, and custom exercises will be removed. This cannot be undone.",
+    "deleteConfirmAction": "Yes, delete my account"
+  },
+  "chat": {
+    "title": "AI chat",
+    "placeholder": "Type your question...",
+    "send": "Send",
+    "emptyState": "Ask a question about training, daily routines, or behavior."
+  },
+  "calendar": {
+    "title": "Calendar",
+    "restDay": "Rest",
+    "weekPlan": "Weekly plan"
+  },
+  "learn": {
+    "title": "Learn",
+    "readGuide": "Read guide"
+  },
+  "apiErrors": {
+    "unauthorized": "Not authenticated",
+    "forbidden": "Access denied",
+    "notFound": "Not found",
+    "rateLimited": "Too many requests, try again soon",
+    "serverError": "Something went wrong on the server"
+  }
+}
