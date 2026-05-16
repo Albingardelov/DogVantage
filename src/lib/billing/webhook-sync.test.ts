@@ -12,7 +12,8 @@ vi.mock('@/lib/supabase/client', () => ({
 vi.mock('@/lib/stripe/client', () => ({
   STRIPE_PRICE_IDS: {
     basic: 'price_basic',
-    pro: 'price_pro',
+    proMonthly: 'price_pro',
+    proAnnual: 'price_pro_year',
   },
 }))
 
@@ -58,6 +59,7 @@ describe('webhook sync helpers', () => {
 
   it('maps price ids to tiers', () => {
     expect(tierFromPriceId('price_pro')).toBe('pro')
+    expect(tierFromPriceId('price_pro_year')).toBe('pro')
     expect(tierFromPriceId('price_basic')).toBe('basic')
     expect(tierFromPriceId('unknown')).toBe('free')
   })

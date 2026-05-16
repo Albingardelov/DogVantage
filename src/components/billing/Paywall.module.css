@@ -40,6 +40,12 @@
   font-weight: 700;
 }
 
+.priceAlt {
+  margin: -6px 0 0;
+  font-size: 13px;
+  color: #667085;
+}
+
 .card ul {
   margin: 0;
   padding-left: 18px;
@@ -55,4 +61,10 @@
   font-weight: 700;
   background: #2d6a4f;
   color: #fff;
+}
+
+.card .secondaryBtn {
+  background: #fff;
+  color: #2d6a4f;
+  border: 1px solid #2d6a4f;
 }

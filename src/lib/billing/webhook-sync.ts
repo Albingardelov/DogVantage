@@ -4,7 +4,7 @@ import { STRIPE_PRICE_IDS } from '@/lib/stripe/client'
 import type { SubscriptionStatus, Tier } from './subscription'
 
 export function tierFromPriceId(priceId: string | undefined): Tier {
-  if (priceId === STRIPE_PRICE_IDS.pro) return 'pro'
+  if (priceId === STRIPE_PRICE_IDS.proMonthly || priceId === STRIPE_PRICE_IDS.proAnnual) return 'pro'
   if (priceId === STRIPE_PRICE_IDS.basic) return 'basic'
   return 'free'
 }
