@@ -2,8 +2,8 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { BREED_REGISTRY } from '@/lib/breeds/registry'
-import type { BreedEntry } from '@/lib/breeds/registry'
+import { ALL_BREED_OPTIONS } from '@/lib/breeds/registry'
+import type { BreedOption } from '@/lib/breeds/registry'
 import styles from './BreedPicker.module.css'
 
 interface Props {
@@ -17,16 +17,16 @@ export default function BreedPicker({ value, onChange, placeholder = 'SÃ¶k rasâ€
   const [open, setOpen] = useState(false)
   const wrapperRef = useRef<HTMLDivElement>(null)
 
-  const selectedEntry = BREED_REGISTRY.find((b) => b.slug === value)
+  const selectedEntry = ALL_BREED_OPTIONS.find((b) => b.slug === value)
 
-  const matches: BreedEntry[] = query.length < 1
+  const matches: BreedOption[] = query.length < 1
     ? []
-    : BREED_REGISTRY.filter((b) =>
+    : ALL_BREED_OPTIONS.filter((b) =>
         b.nameSv.toLowerCase().includes(query.toLowerCase()) ||
         b.nameEn.toLowerCase().includes(query.toLowerCase())
       ).slice(0, 8)
 
-  function handleSelect(entry: BreedEntry) {
+  function handleSelect(entry: BreedOption) {
     onChange(entry.slug)
     setQuery('')
     setOpen(false)
