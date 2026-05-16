@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import type { SupabaseClient, User } from '@supabase/supabase-js'
 import { createSupabaseServer } from '@/lib/supabase/server'
 import type { Database } from '@/types/database'
+import { enforceApiRateLimit } from './rate-limit'
 
 type DogRow = { id: string; breed: string; user_id: string }
 
@@ -18,6 +19,8 @@ export async function withAuthAndDog(
   const supabase = await createSupabaseServer()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  const limited = await enforceApiRateLimit(req, { userId: user.id })
+  if (limited) return limited
 
   const body = await safeJsonBody(req)
   const dogId = req.nextUrl.searchParams.get('dogId')
@@ -47,10 +50,13 @@ async function safeJsonBody(req: NextRequest): Promise<Record<string, unknown> |
 }
 
 export async function withAuth(
+  req: NextRequest,
   handler: (ctx: { user: User; supabase: SupabaseClient<Database> }) => Promise<NextResponse>,
 ): Promise<NextResponse> {
   const supabase = await createSupabaseServer()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  const limited = await enforceApiRateLimit(req, { userId: user.id })
+  if (limited) return limited
   return handler({ user, supabase })
 }

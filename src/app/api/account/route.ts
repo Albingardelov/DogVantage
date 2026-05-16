@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { withAuth } from '@/lib/api/with-auth'
 import { getSupabaseAdmin } from '@/lib/supabase/client'
 
-export async function DELETE() {
-  return withAuth(async ({ user }) => {
+export async function DELETE(req: NextRequest) {
+  return withAuth(req, async ({ user }) => {
     const admin = getSupabaseAdmin()
     const { data: dogs } = await admin
       .from('dog_profiles')

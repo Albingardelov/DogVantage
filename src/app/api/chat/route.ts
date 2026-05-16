@@ -31,7 +31,7 @@ function formatMetricsForPrompt(metrics: Record<string, import('@/types').DailyE
 
 export async function POST(req: NextRequest) {
   try {
-    return withAuth(async ({ user }) => {
+    return withAuth(req, async ({ user }) => {
       const { query, breed, weekNumber, ageWeeks, trainingWeek, dogId, onboardingContext } = await req.json() as {
         query: string
         breed: Breed

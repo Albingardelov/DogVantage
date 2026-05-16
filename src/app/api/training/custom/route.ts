@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
-    return withAuth(async () => {
+    return withAuth(req, async () => {
       const body = await req.json() as { id?: unknown; active?: unknown }
       if (typeof body.id !== 'string' || typeof body.active !== 'boolean') {
         return NextResponse.json({ error: 'id and active required' }, { status: 400 })
@@ -125,7 +125,7 @@ export async function PATCH(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    return withAuth(async () => {
+    return withAuth(req, async () => {
       const body = await req.json() as { id?: unknown }
       if (typeof body.id !== 'string') {
         return NextResponse.json({ error: 'id required' }, { status: 400 })
