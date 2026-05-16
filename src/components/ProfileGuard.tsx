@@ -1,9 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import { ActiveDogProvider, useActiveDog } from '@/lib/dog/active-dog-context'
+import { useSubscription } from '@/lib/billing/subscription-context'
+import { TrialBanner } from '@/components/billing/TrialBanner'
 import styles from './ProfileGuard.module.css'
 
 export default function ProfileGuard({ children }: { children: React.ReactNode }) {
@@ -34,7 +36,10 @@ export default function ProfileGuard({ children }: { children: React.ReactNode }
 
 function ProfileGuardInner({ children }: { children: React.ReactNode }) {
   const router = useRouter()
+  const pathname = usePathname()
   const { activeDog, isLoading } = useActiveDog()
+  const { state, isLoading: billingLoading } = useSubscription()
+  const basicGated = pathname === '/dashboard' || pathname === '/log' || pathname === '/calendar' || pathname === '/learn' || pathname === '/chat'
 
   useEffect(() => {
     if (!isLoading && !activeDog) {
@@ -42,7 +47,13 @@ function ProfileGuardInner({ children }: { children: React.ReactNode }) {
     }
   }, [isLoading, activeDog, router])
 
-  if (isLoading) {
+  useEffect(() => {
+    if (!billingLoading && basicGated && !state.isActive) {
+      router.replace('/paywall')
+    }
+  }, [billingLoading, basicGated, state.isActive, router])
+
+  if (isLoading || billingLoading || (basicGated && !state.isActive)) {
     return (
       <div className={styles.loader} aria-label="Laddar…">
         <span className={styles.spinner} />
@@ -52,5 +63,12 @@ function ProfileGuardInner({ children }: { children: React.ReactNode }) {
 
   if (!activeDog) return null
 
-  return <>{children}</>
+  return (
+    <>
+      {state.isOnTrial && state.trialDaysLeft <= 7 && state.trialDaysLeft > 0 && (
+        <TrialBanner daysLeft={state.trialDaysLeft} />
+      )}
+      {children}
+    </>
+  )
 }

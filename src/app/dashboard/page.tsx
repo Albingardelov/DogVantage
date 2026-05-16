@@ -12,6 +12,7 @@ import LearningChecklistCard from '@/components/LearningChecklistCard'
 import DogSwitcher from '@/components/DogSwitcher'
 import AddDogModal from '@/components/AddDogModal'
 import { useActiveDog } from '@/lib/dog/active-dog-context'
+import { useSubscription } from '@/lib/billing/subscription-context'
 import { getAgeInWeeks, daysUntilHomecoming, isPuppy, trainingWeekFromHomecoming } from '@/lib/dog/age'
 import ProgramWeekTimeline from '@/components/ProgramWeekTimeline/ProgramWeekTimeline'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
@@ -172,6 +173,7 @@ function getAgeAlert(ageWeeks: number): AgeAlert | null {
 function Dashboard() {
   const router = useRouter()
   const { activeDog: profile } = useActiveDog()
+  const { state: subscription } = useSubscription()
   const [showLogForm, setShowLogForm] = useState(false)
   const [showAddDog, setShowAddDog] = useState(false)
   const [dismissedTips, setDismissedTips] = useState<string[]>(() => {
@@ -274,7 +276,10 @@ function Dashboard() {
         <div className={styles.headerContent}>
           <div className={styles.headerText}>
             <span className={styles.greeting}>{getGreeting()}</span>
-            <DogSwitcher onAddDog={() => setShowAddDog(true)} />
+            <DogSwitcher onAddDog={() => {
+              if (subscription.tier === 'pro' && subscription.isActive) setShowAddDog(true)
+              else router.push('/profile?section=billing')
+            }} />
             <Link href="/calendar" className={styles.weekBadge}>
               <IconCalendar size="sm" className={styles.weekBadgeIcon} />
               Programvecka {trainingWeek}

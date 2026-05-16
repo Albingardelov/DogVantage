@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { DM_Sans } from 'next/font/google'
 import './globals.css'
+import AppProviders from '@/components/AppProviders'
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -28,7 +29,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="sv" className={dmSans.variable}>
-      <body>{children}</body>
+      <body>
+        <AppProviders>{children}</AppProviders>
+      </body>
     </html>
   )
 }

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import ProfileGuard from '@/components/ProfileGuard'
 import ChatInterface from '@/components/ChatInterface'
+import { FeatureGate } from '@/components/billing/FeatureGate'
 import Avatar from '@/components/Avatar'
 import BottomNav from '@/components/BottomNav'
 import { getDogProfile } from '@/lib/dog/profile'
@@ -78,14 +79,16 @@ function Chat() {
       </header>
 
       {profile && (
-        <ChatInterface
-          breed={profile.breed}
-          ageWeeks={ageWeeks}
-          trainingWeek={trainingWeek}
-          initialQuestion={initialQuestion}
-          dogId={profile.id}
-          onboardingContext={buildOnboardingContext(profile)}
-        />
+        <FeatureGate feature="ai_chat">
+          <ChatInterface
+            breed={profile.breed}
+            ageWeeks={ageWeeks}
+            trainingWeek={trainingWeek}
+            initialQuestion={initialQuestion}
+            dogId={profile.id}
+            onboardingContext={buildOnboardingContext(profile)}
+          />
+        </FeatureGate>
       )}
 
       <BottomNav active="chat" />
