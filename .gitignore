@@ -45,7 +45,3 @@ yarn-error.log*
 next-env.d.ts
 node_modules
 
-# local docs notes/plans
-docs/
-AGENTS.md
-CLAUDE.md
