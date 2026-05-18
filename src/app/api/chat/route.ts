@@ -8,6 +8,7 @@ import { getRecentLogs, formatLogsForPrompt } from '@/lib/supabase/session-logs'
 import { getMetrics } from '@/lib/supabase/daily-exercise-metrics'
 import { getCachedChat, setCachedChat, touchCacheEntry } from '@/lib/supabase/training-cache'
 import { incrementChatCount, DAILY_CHAT_LIMIT } from '@/lib/supabase/chat-usage'
+import { detectSecretExposure } from '@/lib/ai/safety-guards'
 import type { Breed } from '@/types'
 
 function todayDateString(): string {
@@ -45,6 +46,15 @@ export async function POST(req: NextRequest) {
 
       if (!query || !breed) {
         return NextResponse.json({ error: 'query and breed required' }, { status: 400 })
+      }
+      if (detectSecretExposure(query) || detectSecretExposure(onboardingContext)) {
+        return NextResponse.json(
+          {
+            error: 'Känslig information upptäckt i texten (t.ex. API-nyckel/token). Ta bort hemligheter och försök igen.',
+            retryable: false,
+          },
+          { status: 400 },
+        )
       }
       const subscription = await getSubscriptionState(user.id)
       if (!hasFeature(subscription, 'ai_chat')) {
