@@ -37,6 +37,10 @@ export async function POST(req: NextRequest) {
 
     if (error) {
       console.error('Community submission log failed:', error.message)
+      return NextResponse.json(
+        { error: 'Kunde inte ta emot dokumentet just nu. Försök igen om en stund.' },
+        { status: 503 },
+      )
     }
 
     return NextResponse.json({ received: true })

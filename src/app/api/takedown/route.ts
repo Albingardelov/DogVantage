@@ -31,8 +31,11 @@ export async function POST(req: NextRequest) {
   })
 
   if (error) {
-    // Table may not exist yet — still acknowledge receipt
     console.error('Takedown log failed:', error.message)
+    return NextResponse.json(
+      { error: 'Kunde inte registrera begäran just nu. Försök igen om en stund.' },
+      { status: 503 },
+    )
   }
 
   return NextResponse.json({ received: true })

@@ -75,6 +75,22 @@ export function detectBehaviorEmergency(text: string | null | undefined): boolea
   return BEHAVIOR_REFERRAL_KEYWORDS.some((kw) => lower.includes(kw))
 }
 
+// ─── Secret exposure guard ───────────────────────────────────────────────────
+// Blocks accidental pasting of API keys or other high-entropy credentials
+// into chat prompts that are sent to third-party AI providers.
+const SECRET_PATTERNS: RegExp[] = [
+  /\bsk-[a-z0-9]{20,}\b/i, // OpenAI/Groq style
+  /\bAIza[0-9A-Za-z\-_]{20,}\b/, // Google API keys
+  /\b(?:ghp|github_pat)_[A-Za-z0-9_]{20,}\b/, // GitHub tokens
+  /\beyJ[a-zA-Z0-9_-]{10,}\.[a-zA-Z0-9_-]{10,}\.[a-zA-Z0-9_-]{10,}\b/, // JWT
+  /\b(?:access|api|service|secret|token)[-_ ]?key\s*[:=]\s*[A-Za-z0-9_\-]{12,}\b/i, // labeled key/value
+]
+
+export function detectSecretExposure(text: string | null | undefined): boolean {
+  if (!text) return false
+  return SECRET_PATTERNS.some((pattern) => pattern.test(text))
+}
+
 /**
  * Inline banner copy when the rest of the experience still runs but the user
  * should see a referral note (e.g. on the dashboard / assessment summary).

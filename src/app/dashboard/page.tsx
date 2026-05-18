@@ -83,7 +83,7 @@ function getContextualTips(profile: DogProfile, ageWeeks: number): ContextualTip
       id: 'puppy-sleep',
       title: 'Valpen behöver 18 timmar sömn per dygn',
       body: `${profile.name} ska sova ca 18 h/dygn. För lite vila → överstimulering, bett-attacker, oförmåga att lära sig. Lägg in 1–2 h vila mellan varje aktivitet, gärna i bur/box. Sömnig valp lär sig, trött valp biter.`,
-      learnId: 'box-traning',
+      learnId: 'puppy-sleep',
     })
   }
 
@@ -92,7 +92,7 @@ function getContextualTips(profile: DogProfile, ageWeeks: number): ContextualTip
       id: 'socialization-window',
       title: 'Socialisationsfönstret stänger snart',
       body: `${profile.name} är under 16 veckor. Det här är den viktigaste perioden för positiv exponering — nya ljud, ytor, människor och miljöer. Varje positiv upplevelse nu bygger framtida trygghet.`,
-      learnId: 'stress-signals',
+      learnId: 'socialization-window',
     })
   }
 

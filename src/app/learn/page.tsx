@@ -25,6 +25,62 @@ interface Article {
 
 const ARTICLES: Article[] = [
   {
+    id: 'puppy-sleep',
+    title: 'Valpsömn — varför 18 timmar är normalt',
+    summary: 'Sömnbrist ser ofta ut som "trots". Så här bygger du en vardag med tillräcklig återhämtning.',
+    readTime: '4 min',
+    sections: [
+      {
+        heading: 'Varför valpar behöver så mycket sömn',
+        body: 'Valpars nervsystem är under snabb utveckling. Sömn behövs för minneskonsolidering, återhämtning och känsloreglering. En valp som sover för lite blir inte "tuffare" — den blir oftare övertrött, bitsk och sämre på att ta in träning.',
+      },
+      {
+        heading: 'Tecken på att valpen är övertrött',
+        body: 'Plötsliga bett-attacker, zoomies sent på dagen, svårt att ta belöning, låg impulskontroll, "kan inget" den kunde i går. Det är vanliga sömnbristsignaler, inte olydnad. Lösningen är oftast mer planerad vila, inte hårdare krav.',
+      },
+      {
+        heading: 'Praktiskt dygnsupplägg',
+        body: 'Tänk rytm: aktivitet följt av vila. För många valpar fungerar 45–90 min vaken tid och sedan 1–2 timmar lugn vila. Efter mat, lek eller social exponering: lägg in en viloperiod direkt innan nästa uppgift.',
+      },
+      {
+        heading: 'Så hjälper du valpen att komma till ro',
+        body: 'Skapa en konsekvent viloplats (bur/box eller bädd), dämpa ljus och ljud, och undvik intensiv lek precis före vila. Ge gärna ett lugnt tugg eller slickmatta i början av vilan. Målet är att platsen signalerar trygg nedvarvning, inte isolering eller straff.',
+      },
+      {
+        heading: 'Om kvällarna spårar ur',
+        body: 'Kvälls-kaos beror ofta på ackumulerad trötthet. Flytta sista intensiva aktivitet tidigare, korta passen efter middag, och lägg in en tydlig kvällsrutin med låg stimulans. Ofta ser du förbättring inom några dagar när sömnkontot fylls på.',
+      },
+    ],
+  },
+  {
+    id: 'socialization-window',
+    title: 'Socialiseringsfönstret 8–16 veckor',
+    summary: 'Målet är trygg exponering, inte maximal mängd intryck. Kvalitet slår kvantitet.',
+    readTime: '5 min',
+    sections: [
+      {
+        heading: 'Vad fönstret betyder i praktiken',
+        body: 'Under tidig valpperiod formas hundens förväntningar på världen extra starkt. Positiva, kontrollerade upplevelser av människor, miljöer och ljud ökar chansen för en trygg vuxen hund. Negativa upplevelser i samma period kan sätta djupa spår.',
+      },
+      {
+        heading: 'Målet är neutral till positiv känsla',
+        body: 'Socialisering betyder inte att valpen måste hälsa på allt och alla. Ett lugnt observerande på tryggt avstånd är ofta bättre än att pressas nära. Om valpen kan ta godis, nosa och återhämta sig snabbt ligger du rätt i svårighetsnivå.',
+      },
+      {
+        heading: 'Bygg en enkel veckoplan',
+        body: 'Välj 3–5 nya men lätta exponeringar per vecka: olika underlag, ett nytt ljud, en lugn plats, en trygg person. Håll passen korta och avsluta när valpen fortfarande är lugn. En bra upplevelse räcker — du behöver inte "trötta ut" valpen.',
+      },
+      {
+        heading: 'Röda flaggor att backa på',
+        body: 'Vägrar godis, stel kropp, undvikandebeteende, upprepat skällande eller att valpen "stänger av". Backa direkt i avstånd och intensitet. Pressad exponering lär valpen att världen är farlig, medan doserad exponering bygger mod.',
+      },
+      {
+        heading: 'Koppla socialisering till vila',
+        body: 'Nya intryck kostar energi. Lägg alltid in återhämtning efter socialiseringspass — gärna 1–2 timmar lugn vila. Det minskar trigger-stacking och hjälper valpen bearbeta det den upplevt i stället för att gå upp i stress.',
+      },
+    ],
+  },
+  {
     id: 'stress-signals',
     title: 'Stresssignaler — läs av din hund',
     summary: 'Hundar pratar hela tiden. Lär dig se de subtila tecknen innan problemen uppstår.',

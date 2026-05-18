@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { detectHealthIssue, detectBehaviorEmergency } from './safety-guards'
+import { detectHealthIssue, detectBehaviorEmergency, detectSecretExposure } from './safety-guards'
 
 describe('detectHealthIssue', () => {
   it('flags vet keywords', () => {
@@ -57,5 +57,28 @@ describe('detectBehaviorEmergency', () => {
 
   it('is case-insensitive', () => {
     expect(detectBehaviorEmergency('HUNDEN BITER')).toBe(true)
+  })
+})
+
+describe('detectSecretExposure', () => {
+  it('flags common API key formats', () => {
+    expect(detectSecretExposure('Min nyckel är sk-1234567890abcdefghijklmnop')).toBe(true)
+    expect(detectSecretExposure('AIzaSyA1234567890abcdefghijklmnop')).toBe(true)
+  })
+
+  it('flags jwt-like tokens and labeled secrets', () => {
+    expect(detectSecretExposure('token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.abc1234567890.DEF1234567890')).toBe(true)
+    expect(detectSecretExposure('api_key: abcdefghijklmnopqrstuvwx')).toBe(true)
+  })
+
+  it('does not flag normal training text', () => {
+    expect(detectSecretExposure('Hur tränar jag inkallning i stadsmiljö?')).toBe(false)
+    expect(detectSecretExposure('Valpen behöver mer vila mellan passen')).toBe(false)
+  })
+
+  it('handles empty values safely', () => {
+    expect(detectSecretExposure(null)).toBe(false)
+    expect(detectSecretExposure(undefined)).toBe(false)
+    expect(detectSecretExposure('')).toBe(false)
   })
 })

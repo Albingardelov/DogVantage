@@ -1,13 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import ProfileGuard from '@/components/ProfileGuard'
 import ChatInterface from '@/components/ChatInterface'
 import { FeatureGate } from '@/components/billing/FeatureGate'
 import Avatar from '@/components/Avatar'
 import BottomNav from '@/components/BottomNav'
-import { getDogProfile } from '@/lib/dog/profile'
+import { useActiveDog } from '@/lib/dog/active-dog-context'
 import { getAgeInWeeks } from '@/lib/dog/age'
 import { buildBehaviorContext } from '@/lib/dog/behavior'
 import type { DogProfile, TrainingEnvironment, RewardPreference } from '@/types'
@@ -51,18 +50,9 @@ export default function ChatPage() {
 }
 
 function Chat() {
-  const [profile, setProfile] = useState<DogProfile | null>(null)
+  const { activeDog: profile } = useActiveDog()
   const searchParams = useSearchParams()
   const initialQuestion = searchParams.get('question') ?? undefined
-
-  useEffect(() => {
-    let alive = true
-    ;(async () => {
-      const p = await getDogProfile()
-      if (alive) setProfile(p)
-    })().catch((e) => console.error('[chat getDogProfile]', e))
-    return () => { alive = false }
-  }, [])
 
   const ageWeeks = profile ? Math.max(1, getAgeInWeeks(profile.birthdate)) : 0
   const trainingWeek = profile?.trainingWeek ?? 1
