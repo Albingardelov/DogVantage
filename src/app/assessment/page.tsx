@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import ProfileGuard from '@/components/ProfileGuard'
 import BottomNav from '@/components/BottomNav'
 import ExerciseGuideSheet from '@/components/ExerciseGuideSheet'
 import { IconCaretRight, SelectionCheck } from '@/components/icons'
-import { getDogProfile, updateDogProfile } from '@/lib/dog/profile'
+import { updateDogProfile } from '@/lib/dog/profile'
+import { useActiveDog } from '@/lib/dog/active-dog-context'
 import { getAgeInWeeks } from '@/lib/dog/age'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
 import { computeStartingWeek } from '@/lib/training/assessment-week'
@@ -20,7 +21,6 @@ import {
 } from '@/lib/dog/behavior'
 import type {
   DailyExerciseMetrics,
-  DogProfile,
   LatencyBucket,
   BehaviorProfile,
   TriggerType,
@@ -52,7 +52,7 @@ export default function AssessmentPage() {
 
 function Assessment() {
   const router = useRouter()
-  const [profile, setProfile] = useState<DogProfile | null>(null)
+  const { activeDog: profile } = useActiveDog()
   const [step, setStep] = useState<0 | 1>(0)
 
   // Step 0 — behavior profile
@@ -70,15 +70,6 @@ function Assessment() {
   const [metrics, setMetrics] = useState<Record<ExerciseId, DailyExerciseMetrics>>({})
   const [saving, setSaving] = useState(false)
   const [guideExerciseId, setGuideExerciseId] = useState<string | null>(null)
-
-  useEffect(() => {
-    let alive = true
-    ;(async () => {
-      const p = await getDogProfile()
-      if (alive && p) setProfile(p)
-    })().catch((e) => console.error('[assessment getDogProfile]', e))
-    return () => { alive = false }
-  }, [])
 
   const ageWeeks = profile ? Math.max(1, getAgeInWeeks(profile.birthdate)) : 0
 
