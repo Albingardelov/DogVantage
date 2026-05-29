@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation'
 import ProfileGuard from '@/components/ProfileGuard'
 import BottomNav from '@/components/BottomNav'
 import ExerciseGuideSheet from '@/components/ExerciseGuideSheet'
-import { getDogProfile } from '@/lib/dog/profile'
+import { useActiveDog } from '@/lib/dog/active-dog-context'
 import { getAgeInWeeks } from '@/lib/dog/age'
-import type { DayPlan, DogProfile, Exercise, QuickRating, SessionLog, WeekPlan } from '@/types'
+import type { DayPlan, Exercise, QuickRating, SessionLog, WeekPlan } from '@/types'
 import { IconCaretLeft, IconClose } from '@/components/icons'
 import styles from './page.module.css'
 
@@ -191,7 +191,7 @@ function AgendaDay({
 
 function CalendarView() {
   const router = useRouter()
-  const [profile, setProfile] = useState<DogProfile | null>(null)
+  const { activeDog: profile } = useActiveDog()
   const [logs, setLogs] = useState<Record<string, SessionLog>>({})
   const [weekPlan, setWeekPlan] = useState<WeekPlan | null>(null)
   const [loading, setLoading] = useState(true)
@@ -200,15 +200,6 @@ function CalendarView() {
   const todayRef = useRef<HTMLDivElement>(null)
 
   const todayStr = new Date().toISOString().slice(0, 10)
-
-  useEffect(() => {
-    let alive = true
-    ;(async () => {
-      const p = await getDogProfile()
-      if (alive && p) setProfile(p)
-    })().catch((e) => console.error('[calendar getDogProfile]', e))
-    return () => { alive = false }
-  }, [])
 
   const fetchData = useCallback(async () => {
     if (!profile) return

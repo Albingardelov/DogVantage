@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react'
 import ProfileGuard from '@/components/ProfileGuard'
 import Avatar from '@/components/Avatar'
 import BottomNav from '@/components/BottomNav'
-import { getDogProfile } from '@/lib/dog/profile'
+import { useActiveDog } from '@/lib/dog/active-dog-context'
 import { IconCaretRight, RatingIcon } from '@/components/icons'
 import SkillProgressSection from '@/components/SkillProgressSection'
-import type { DogProfile, QuickRating, SessionLog } from '@/types'
+import type { QuickRating, SessionLog } from '@/types'
 import { apiFetch } from '@/lib/api/fetch'
 import { SessionLogArraySchema } from '@/types/api/schemas'
 import styles from './page.module.css'
@@ -29,39 +29,31 @@ const RATING_META: Record<QuickRating, { label: string; tone: string }> = {
 const DATE_FMT = new Intl.DateTimeFormat('sv-SE', { day: 'numeric', month: 'short' })
 
 function Log() {
-  const [profile, setProfile] = useState<DogProfile | null>(null)
+  const { activeDog: profile, isLoading: dogLoading } = useActiveDog()
   const [logs, setLogs] = useState<SessionLog[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   useEffect(() => {
-    let alive = true
-    ;(async () => {
-      const p = await getDogProfile()
-      if (!alive || !p) return
-      setProfile(p)
-
-      try {
-        if (!p.id) return
-        const params = new URLSearchParams({ dogId: p.id })
-        if (!alive) return
-        const data = await apiFetch(`/api/logs?${params}`, SessionLogArraySchema)
-        setLogs(data)
-      } catch (err) {
-        if (alive) setError(err instanceof Error ? err.message : 'Nätverksfel')
-      } finally {
-        if (alive) setLoading(false)
-      }
-    })().catch((e) => {
-      if (alive) setError(e instanceof Error ? e.message : 'Nätverksfel')
-      if (alive) setLoading(false)
-    })
-
-    return () => {
-      alive = false
+    if (dogLoading) return
+    if (!profile?.id) {
+      setLoading(false)
+      return
     }
-  }, [])
+
+    let alive = true
+    setLoading(true)
+    setError('')
+
+    const params = new URLSearchParams({ dogId: profile.id })
+    apiFetch(`/api/logs?${params}`, SessionLogArraySchema)
+      .then((data) => { if (alive) setLogs(data) })
+      .catch((err) => { if (alive) setError(err instanceof Error ? err.message : 'Nätverksfel') })
+      .finally(() => { if (alive) setLoading(false) })
+
+    return () => { alive = false }
+  }, [profile?.id, dogLoading])
 
   const dogName = profile?.name ?? 'Din hund'
   const focusBars = buildFocusBars(logs)
