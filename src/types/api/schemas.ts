@@ -19,7 +19,7 @@ export const ExerciseSchema = z.object({
   id: z.string(),
   label: z.string(),
   desc: z.string(),
-  reps: z.number(),
+  reps: z.number().default(3),
 })
 
 export const DayPlanSchema = z.object({
