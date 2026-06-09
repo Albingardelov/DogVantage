@@ -13,10 +13,14 @@ import {
   Check,
   CheckCircle,
   Circle,
+  Confetti,
   Dog,
+  Fire,
   Flask,
   House,
+  Lightning,
   ListBullets,
+  Medal,
   MoonStars,
   Notebook,
   PaperPlaneTilt,
@@ -203,4 +207,28 @@ export function LandingFeatureIcon({
   className?: string
 }) {
   return <DvIcon icon={FEATURE_ICONS[id]} size={size} weight="duotone" className={className} />
+}
+
+export function IconArrowsClockwise({ size = 'sm', className }: { size?: IconSize; className?: string }) {
+  return <DvIcon icon={ArrowsClockwise} size={size} className={className} />
+}
+
+export function IconFire({ size = 'sm', className }: { size?: IconSize; className?: string }) {
+  return <DvIcon icon={Fire} size={size} weight="fill" className={className} />
+}
+
+export function IconMedal({ size = 'sm', className }: { size?: IconSize; className?: string }) {
+  return <DvIcon icon={Medal} size={size} weight="fill" className={className} />
+}
+
+export function IconConfetti({ size = 'sm', className }: { size?: IconSize; className?: string }) {
+  return <DvIcon icon={Confetti} size={size} weight="fill" className={className} />
+}
+
+export function IconLightning({ size = 'sm', className }: { size?: IconSize; className?: string }) {
+  return <DvIcon icon={Lightning} size={size} weight="fill" className={className} />
+}
+
+export function IconX({ size = 'sm', className }: { size?: IconSize; className?: string }) {
+  return <DvIcon icon={X} size={size} weight="bold" className={className} />
 }
