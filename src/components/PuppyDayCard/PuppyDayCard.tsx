@@ -15,10 +15,11 @@ import { buildExerciseSummaries, emptyMetrics } from '../TrainingCard/exercise-h
 import { usePuppyDay } from './use-puppy-day'
 import SessionLogForm from '@/components/SessionLogForm'
 import type { Breed, DailyExerciseMetrics, HouseholdPet, RewardPreference, TrainingEnvironment, TrainingGoal } from '@/types'
-import { IconChevronRight } from '@/components/icons'
+import { DvIcon, IconChevronRight } from '@/components/icons'
+import { SmileyMeh } from '@phosphor-icons/react'
 
 const ZONE_LABELS = { green: 'Grön dag', yellow: 'Gul dag', red: 'Röd dag' } as const
-const ZONE_COLORS = { green: '#22c55e', yellow: '#eab308', red: '#ef4444' } as const
+const ZONE_COLORS = { green: 'var(--color-primary)', yellow: 'var(--color-accent)', red: 'var(--color-error)' } as const
 
 interface Props {
   trainingWeek: number
@@ -129,6 +130,9 @@ export default function PuppyDayCard(props: Props) {
 
         {zone === 'yellow' && (
           <p className={styles.yellowFrame}>
+            <span style={{ color: '#c8742f', display: 'inline-flex' }}>
+              <DvIcon icon={SmileyMeh} size="sm" weight="fill" />
+            </span>
             Kort och enkelt idag — en enkel vinst är allt ni behöver.
           </p>
         )}
