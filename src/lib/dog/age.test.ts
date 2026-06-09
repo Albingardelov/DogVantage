@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getAgeInWeeks, getLifeStage, isPuppy } from './age'
+import { getAgeInWeeks, getLifeStage, isPuppy, isPuppyMode } from './age'
 
 describe('getAgeInWeeks', () => {
   it('returns 0 for a dog born today', () => {
@@ -55,5 +55,21 @@ describe('isPuppy', () => {
   it('is true for puppy stage and false otherwise', () => {
     expect(isPuppy(10)).toBe(true)
     expect(isPuppy(16)).toBe(false)
+  })
+})
+
+describe('isPuppyMode', () => {
+  it('is true for puppies and juniors (< 26 weeks)', () => {
+    expect(isPuppyMode(8)).toBe(true)
+    expect(isPuppyMode(15)).toBe(true)
+    expect(isPuppyMode(25)).toBe(true)
+  })
+  it('is false at 26 weeks and above', () => {
+    expect(isPuppyMode(26)).toBe(false)
+    expect(isPuppyMode(52)).toBe(false)
+  })
+  it('is false for 0 or undefined', () => {
+    expect(isPuppyMode(0)).toBe(false)
+    expect(isPuppyMode(undefined)).toBe(false)
   })
 })
