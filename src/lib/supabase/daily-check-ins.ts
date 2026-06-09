@@ -2,13 +2,14 @@ import { getSupabaseAdmin } from './client'
 import type { PuppyZone } from '@/lib/training/puppy-zone'
 
 export async function getCheckIn(dogId: string, date: string): Promise<PuppyZone | null> {
-  const { data } = await getSupabaseAdmin()
+  const { data, error } = await getSupabaseAdmin()
     .from('daily_check_ins')
     .select('zone')
     .eq('dog_id', dogId)
     .eq('date', date)
-    .single()
-  return (data?.zone as PuppyZone) ?? null
+    .maybeSingle()
+  if (error || !data) return null
+  return data.zone as PuppyZone
 }
 
 export async function saveCheckIn(dogId: string, date: string, zone: PuppyZone): Promise<void> {
