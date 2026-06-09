@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import ProfileGuard from '@/components/ProfileGuard'
 import TrainingCard from '@/components/TrainingCard/TrainingCard'
+import PuppyDayCard from '@/components/PuppyDayCard/PuppyDayCard'
 import SessionLogForm from '@/components/SessionLogForm'
 import Avatar from '@/components/Avatar'
 import BottomNav from '@/components/BottomNav'
@@ -14,7 +15,7 @@ import AddDogModal from '@/components/AddDogModal'
 import StreakBadge from '@/components/StreakBadge'
 import { useActiveDog } from '@/lib/dog/active-dog-context'
 import { useSubscription } from '@/lib/billing/subscription-context'
-import { getAgeInWeeks, daysUntilHomecoming, isPuppy, trainingWeekFromHomecoming } from '@/lib/dog/age'
+import { getAgeInWeeks, daysUntilHomecoming, isPuppy, isPuppyMode, trainingWeekFromHomecoming } from '@/lib/dog/age'
 import ProgramWeekTimeline from '@/components/ProgramWeekTimeline/ProgramWeekTimeline'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import { getHandlerFeedbackTip, type HandlerFeedbackTip } from '@/lib/training/handler-feedback'
@@ -445,18 +446,33 @@ function Dashboard() {
             </div>
           </div>
         ) : profile ? (
-          <TrainingCard
-            trainingWeek={trainingWeek}
-            ageWeeks={ageWeeks}
-            breed={profile.breed}
-            dogName={dogName}
-            dogId={profile.id ?? ''}
-            goals={profile.onboarding?.goals}
-            environment={profile.onboarding?.environment}
-            rewardPreference={profile.onboarding?.rewardPreference}
-            takesRewardsOutdoors={profile.onboarding?.takesRewardsOutdoors}
-            householdPets={profile.onboarding?.householdPets}
-          />
+          isPuppyMode(ageWeeks) ? (
+            <PuppyDayCard
+              trainingWeek={trainingWeek}
+              ageWeeks={ageWeeks}
+              breed={profile.breed}
+              dogName={dogName}
+              dogId={profile.id ?? ''}
+              goals={profile.onboarding?.goals}
+              environment={profile.onboarding?.environment}
+              rewardPreference={profile.onboarding?.rewardPreference}
+              takesRewardsOutdoors={profile.onboarding?.takesRewardsOutdoors}
+              householdPets={profile.onboarding?.householdPets}
+            />
+          ) : (
+            <TrainingCard
+              trainingWeek={trainingWeek}
+              ageWeeks={ageWeeks}
+              breed={profile.breed}
+              dogName={dogName}
+              dogId={profile.id ?? ''}
+              goals={profile.onboarding?.goals}
+              environment={profile.onboarding?.environment}
+              rewardPreference={profile.onboarding?.rewardPreference}
+              takesRewardsOutdoors={profile.onboarding?.takesRewardsOutdoors}
+              householdPets={profile.onboarding?.householdPets}
+            />
+          )
         ) : null}
 
         {profile && (
