@@ -1,6 +1,19 @@
 'use client'
 
-import { ExerciseIcon, IconCaretRight, IconCheckCircle, IconSwap, IconWarning } from '@/components/icons'
+import { useState } from 'react'
+import {
+  ExerciseIcon,
+  IconArrowsClockwise,
+  IconCaretRight,
+  IconCheck,
+  IconFire,
+  IconLightning,
+  IconMedal,
+  IconSwap,
+  IconTarget,
+  IconWarning,
+  IconX,
+} from '@/components/icons'
 import styles from './ExerciseRow.module.css'
 import type { DailyExerciseMetrics, Exercise, LatencyBucket } from '@/types'
 import type { ExerciseSpec } from '@/lib/training/exercise-specs'
@@ -8,7 +21,7 @@ import { isPuppy as isPuppyAge } from '@/lib/dog/age'
 
 interface Props {
   exercise: Exercise
-  done: number        // reps completed so far
+  done: number
   onRepClick: () => void
   onOpenGuide?: () => void
   spec: ExerciseSpec | null
@@ -17,7 +30,7 @@ interface Props {
   showTroubleshooting: boolean
   onMetricsPatch: (patch: Partial<DailyExerciseMetrics>) => void
   ageWeeks?: number
-  /** Primär “nästa övning” i dagens pass (visuell ram, ej samma som rep-prickarnas nästa) */
+  /** Primär "nästa övning" i dagens pass (visuell ram, ej samma som rep-prickarnas nästa) */
   sessionNext?: boolean
   /** Ankare för scroll när nästa övning byts (t.ex. `training-session-next`) */
   rootId?: string
@@ -31,6 +44,76 @@ const LATENCY_OPTIONS: { id: LatencyBucket; label: string }[] = [
   { id: 'gt3s', label: '>3s' },
 ]
 
+const BURST_PALETTE = ['#52b788', '#f4a261', '#fbbf24', '#ffffff']
+
+function Burst({ show }: { show: boolean }) {
+  if (!show) return null
+  const bits = Array.from({ length: 14 }, (_, i) => {
+    const ang = (i / 14) * Math.PI * 2
+    const dist = 46 + (i % 3) * 16
+    return {
+      x: Math.cos(ang) * dist,
+      y: Math.sin(ang) * dist,
+      c: BURST_PALETTE[i % BURST_PALETTE.length],
+      d: (i % 5) * 30,
+    }
+  })
+  return (
+    <div className={styles.burst}>
+      {bits.map((b, i) => (
+        <span
+          key={i}
+          className={styles.burstBit}
+          style={{
+            background: b.c,
+            animationDelay: `${b.d}ms`,
+            ['--bx' as string]: `${b.x}px`,
+            ['--by' as string]: `${b.y}px`,
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
+function Ring({ reps, successCount, failCount }: { reps: number; successCount: number; failCount: number }) {
+  const size = 152
+  const stroke = 13
+  const r = (size - stroke) / 2
+  const C = 2 * Math.PI * r
+  const N = reps
+  const seg = C / N - 6
+  return (
+    <svg width={size} height={size} style={{ display: 'block' }}>
+      <g transform={`rotate(-90 ${size / 2} ${size / 2})`}>
+        {Array.from({ length: N }, (_, i) => {
+          const col =
+            i < successCount
+              ? '#52b788'
+              : i < successCount + failCount
+                ? '#f4a261'
+                : 'rgba(255,255,255,0.16)'
+          return (
+            <circle
+              key={i}
+              cx={size / 2}
+              cy={size / 2}
+              r={r}
+              fill="none"
+              stroke={col}
+              strokeWidth={stroke}
+              strokeLinecap="round"
+              strokeDasharray={`${seg} ${C - seg}`}
+              strokeDashoffset={-i * (C / N)}
+              style={{ transition: 'stroke 280ms ease' }}
+            />
+          )
+        })}
+      </g>
+    </svg>
+  )
+}
+
 export default function ExerciseRow({
   exercise,
   done,
@@ -42,185 +125,213 @@ export default function ExerciseRow({
   showTroubleshooting,
   onMetricsPatch,
   ageWeeks,
-  sessionNext,
+  sessionNext: _sessionNext,
   rootId,
   onSwap,
 }: Props) {
+  const [combo, setCombo] = useState(0)
+  const [floats, setFloats] = useState<{ id: number; kind: 'success' | 'miss' }[]>([])
+
   const isComplete = done >= exercise.reps
   const successCount = metrics?.success_count ?? 0
   const failCount = metrics?.fail_count ?? 0
   const attempts = successCount + failCount
+  const successRate = attempts > 0 ? Math.round((successCount / attempts) * 100) : null
+  const latencyBucket = metrics?.latency_bucket ?? null
+
   const isPuppy = isPuppyAge(ageWeeks)
   const allowedLevels = spec
-    ? (isPuppy ? spec.ladder.slice(0, Math.min(2, spec.ladder.length)) : spec.ladder)
+    ? isPuppy
+      ? spec.ladder.slice(0, Math.min(2, spec.ladder.length))
+      : spec.ladder
     : null
   const criteriaLevelId = metrics?.criteria_level_id ?? (allowedLevels?.[0]?.id ?? null)
-  const latencyBucket = metrics?.latency_bucket ?? null
-  const successRate = attempts > 0 ? successCount / attempts : null
+  const currentLevelLabel =
+    allowedLevels?.find((l) => l.id === criteriaLevelId)?.label ?? allowedLevels?.[0]?.label ?? null
+
+  function spawnFloat(kind: 'success' | 'miss') {
+    const id = Date.now() + Math.random()
+    setFloats((f) => [...f, { id, kind }])
+    setTimeout(() => setFloats((f) => f.filter((x) => x.id !== id)), 850)
+  }
+
+  function handleSuccess() {
+    if (isComplete) return
+    setCombo((c) => c + 1)
+    spawnFloat('success')
+    onMetricsPatch({ success_count: successCount + 1 })
+    onRepClick()
+  }
+
+  function handleMiss() {
+    if (isComplete) return
+    setCombo(0)
+    spawnFloat('miss')
+    onMetricsPatch({ fail_count: failCount + 1 })
+    onRepClick()
+  }
+
+  function handleUndo() {
+    setCombo(0)
+    setFloats([])
+  }
+
+  function cycleCriteria() {
+    if (!allowedLevels || allowedLevels.length === 0) return
+    const idx = allowedLevels.findIndex((l) => l.id === criteriaLevelId)
+    const next = allowedLevels[(idx + 1) % allowedLevels.length]
+    onMetricsPatch({ criteria_level_id: next.id })
+  }
 
   return (
-    <div
-      id={rootId}
-      className={`${styles.row} ${isComplete ? styles.rowDone : ''} ${sessionNext ? styles.rowSessionNext : ''}`}
-    >
-      <div className={`${styles.iconBox} ${isComplete ? styles.iconBoxDone : ''}`}>
-        <ExerciseIcon exerciseId={exercise.id} size="md" />
-      </div>
+    <div id={rootId} className={styles.card}>
+      <Burst show={isComplete} />
 
-      <div className={styles.info}>
-        {onOpenGuide ? (
+      {/* Head */}
+      <div className={styles.head}>
+        <div className={styles.headLeft}>
+          <div className={styles.nameRow}>
+            <ExerciseIcon exerciseId={exercise.id} size="md" />
+            <span className={styles.exerciseName}>{exercise.label}</span>
+          </div>
+          {allowedLevels && currentLevelLabel && (
+            <button
+              type="button"
+              className={styles.criteriaChip}
+              onClick={cycleCriteria}
+              aria-label="Byt kriterienivå"
+            >
+              <IconTarget size="sm" />
+              <span>{currentLevelLabel}</span>
+              <IconArrowsClockwise size="sm" />
+            </button>
+          )}
+        </div>
+        {onOpenGuide && (
           <button
             type="button"
-            className={styles.labelBtn}
+            className={styles.guideChip}
             onClick={onOpenGuide}
             aria-label={`Öppna guide: ${exercise.label}`}
-            title="Steg-för-steg, tips och vanliga misstag"
           >
-            <span className={`${styles.labelText} ${isComplete ? styles.labelTextDone : ''}`}>
-              {exercise.label}
-            </span>
-            <span className={styles.guideCue} aria-hidden="true">
-              <span className={styles.guideCueLabel}>Guide</span>
-              <IconCaretRight size="sm" className={styles.guideCueArrow} />
-            </span>
+            Guide <IconCaretRight size="sm" />
           </button>
-        ) : (
-          <span className={`${styles.label} ${isComplete ? styles.labelDone : ''}`}>{exercise.label}</span>
-        )}
-        {exercise.desc && (
-          <span className={styles.desc}>{exercise.desc}</span>
-        )}
-
-        {onSwap && !isComplete && (
-          <button
-            type="button"
-            className={styles.swapBtn}
-            onClick={onSwap}
-            aria-label={`Byt ut ${exercise.label} mot något ur veckofokus`}
-          >
-            <IconSwap size="sm" /> Byt mot fokus
-          </button>
-        )}
-
-        {(spec || recommendation) && (
-          <div className={styles.metaPanel}>
-            {spec && (
-              <div className={styles.metaRow}>
-                <span className={styles.metaLabel}>Kriterium</span>
-                <select
-                  className={styles.select}
-                  value={criteriaLevelId ?? ''}
-                  onChange={(e) => onMetricsPatch({ criteria_level_id: e.target.value || null })}
-                  aria-label="Välj kriterienivå"
-                >
-                  {(allowedLevels ?? spec.ladder).map((l) => (
-                    <option key={l.id} value={l.id}>
-                      {l.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            <div className={styles.metaRow}>
-              <span className={styles.metaLabel}>Utfall</span>
-              <div className={styles.pillGroup} role="group" aria-label="Registrera utfall">
-                <button
-                  type="button"
-                  className={styles.pillBtn}
-                  disabled={isComplete}
-                  onClick={() => { onMetricsPatch({ success_count: successCount + 1 }); onRepClick() }}
-                >
-                  Lyckad
-                </button>
-                <button
-                  type="button"
-                  className={styles.pillBtn}
-                  disabled={isComplete}
-                  onClick={() => { onMetricsPatch({ fail_count: failCount + 1 }); onRepClick() }}
-                >
-                  Miss
-                </button>
-              </div>
-
-              <span className={styles.metaLabel}>
-                {attempts > 0 ? `${Math.round((successRate ?? 0) * 100)}%` : '—'}
-              </span>
-            </div>
-
-            <div className={styles.metaRow}>
-              <span className={styles.metaLabel}>Latens</span>
-              <div className={styles.pillGroup} role="group" aria-label="Välj latens">
-                {LATENCY_OPTIONS.map((o) => {
-                  const selected = latencyBucket === o.id
-                  return (
-                    <button
-                      key={o.id}
-                      type="button"
-                      className={`${styles.pillBtn} ${selected ? styles.pillBtnSelected : ''}`}
-                      onClick={() => onMetricsPatch({ latency_bucket: o.id })}
-                      aria-pressed={selected}
-                    >
-                      {o.label}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {recommendation && (
-              <div className={`${styles.recommendation} ${showTroubleshooting ? styles.recommendationAlert : ''}`} role={showTroubleshooting ? 'alert' : undefined}>
-                {showTroubleshooting ? (
-                  <>
-                    <IconWarning size="md" className={styles.recommendationIcon} />
-                    <span>{recommendation}</span>
-                  </>
-                ) : (
-                  <><span className={styles.recommendationStrong}>Nästa steg:</span> {recommendation}</>
-                )}
-              </div>
-            )}
-
-            {spec && showTroubleshooting && (
-              <ul className={styles.troubleshoot} aria-label="Felsökning">
-                {spec.troubleshooting.slice(0, 3).map((t) => (
-                  <li key={t}>{t}</li>
-                ))}
-              </ul>
-            )}
-          </div>
         )}
       </div>
 
-      <div className={styles.counter} aria-label={`${done} av ${exercise.reps} gjorda`}>
-        {!isComplete && (
-          <span className={styles.repLabel} title={spec?.definition ?? 'En lyckad rep'}>
-            {done}/{exercise.reps} rep{spec?.definition ? ' · ?' : ''}
+      {/* Ring */}
+      <div className={styles.ringWrap}>
+        <div className={styles.ringContainer}>
+          <Ring reps={exercise.reps} successCount={successCount} failCount={failCount} />
+          <div className={styles.ringCenter}>
+            {isComplete ? (
+              <div className={styles.ringComplete}>
+                <IconMedal size="xl" />
+                <span className={styles.ringCompleteText}>Klart!</span>
+              </div>
+            ) : (
+              <>
+                <span className={styles.ringCountBig}>
+                  {done}
+                  <span className={styles.ringCountSmall}>/{exercise.reps}</span>
+                </span>
+                <span className={styles.ringRate}>
+                  {successRate !== null ? `${successRate}% lyckade` : 'reps'}
+                </span>
+              </>
+            )}
+          </div>
+          {floats.map((f) => (
+            <span
+              key={f.id}
+              className={`${styles.floatLabel} ${f.kind === 'success' ? styles.floatSuccess : styles.floatMiss}`}
+            >
+              {f.kind === 'success' ? '+1' : 'miss'}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Combo */}
+      <div className={styles.comboRow}>
+        {combo >= 2 && !isComplete && (
+          <span className={styles.comboPill}>
+            <IconFire size="sm" />
+            {combo} i rad!
           </span>
         )}
-        {isComplete ? (
-          <div className={styles.checkCircle}>
-            <IconCheckCircle size="lg" className={styles.checkIcon} />
-          </div>
-        ) : (
-          <div className={styles.dots}>
-            {Array.from({ length: exercise.reps }, (_, i) => {
-              const filled = i < done
-              const isNext = i === done
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  className={`${styles.dot} ${filled ? styles.dotFilled : ''} ${isNext ? styles.dotNext : ''}`}
-                  onClick={onRepClick}
-                  aria-label={`Markera rep ${i + 1}: ${spec?.definition ?? 'En lyckad rep enligt övningens kriterium'}`}
-                  title={spec?.definition}
-                />
-              )
-            })}
-          </div>
-        )}
       </div>
+
+      {/* Recommendation */}
+      {recommendation && (
+        <div
+          className={`${styles.recommendation} ${showTroubleshooting ? styles.recommendationAlert : ''}`}
+          role={showTroubleshooting ? 'alert' : undefined}
+        >
+          {showTroubleshooting && <IconWarning size="sm" />}
+          <span>{recommendation}</span>
+        </div>
+      )}
+
+      {/* Incomplete actions */}
+      {!isComplete ? (
+        <>
+          <div className={styles.actionRow}>
+            <button type="button" className={styles.btnSuccess} onClick={handleSuccess}>
+              <IconCheck size="md" /> Lyckad
+            </button>
+            <button type="button" className={styles.btnMiss} onClick={handleMiss}>
+              <IconX size="sm" /> Miss
+            </button>
+          </div>
+          <div className={styles.latencyRow}>
+            {LATENCY_OPTIONS.map((o) => (
+              <button
+                key={o.id}
+                type="button"
+                className={`${styles.latencyBtn} ${latencyBucket === o.id ? styles.latencyBtnSelected : ''}`}
+                onClick={() => onMetricsPatch({ latency_bucket: o.id })}
+                aria-pressed={latencyBucket === o.id}
+              >
+                <IconLightning size="sm" />
+                {o.label}
+              </button>
+            ))}
+          </div>
+          <p className={styles.latencyHint}>Svarstid efter signal</p>
+          {onSwap && (
+            <button type="button" className={styles.swapBtn} onClick={onSwap}>
+              <IconSwap size="sm" /> Byt mot fokus
+            </button>
+          )}
+        </>
+      ) : (
+        /* Complete actions */
+        <div className={styles.completeArea}>
+          <div className={styles.statsRow}>
+            <div className={styles.statBox}>
+              <div className={styles.statValue}>{successRate ?? 0}%</div>
+              <div className={styles.statLabel}>lyckade</div>
+            </div>
+            <div className={styles.statBox}>
+              <div className={styles.statValue}>{successCount}/{done}</div>
+              <div className={styles.statLabel}>reps satt</div>
+            </div>
+          </div>
+          <button
+            type="button"
+            className={styles.ctaBtn}
+            onClick={() => {
+              document.getElementById('training-session-next')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+            }}
+          >
+            Nästa övning <IconCaretRight size="sm" />
+          </button>
+          <button type="button" className={styles.undoBtn} onClick={handleUndo}>
+            Ångra registrering
+          </button>
+        </div>
+      )}
     </div>
   )
 }
