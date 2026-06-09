@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { IconCheckCircle, RatingIcon } from '@/components/icons'
-import type { Breed, QuickRating, ExerciseSummary } from '@/types'
+import { IconCheckCircle, IconConfetti, IconMedal, RatingIcon } from '@/components/icons'
+import type { Breed, ExerciseSummary, QuickRating } from '@/types'
 import styles from './SessionLogForm.module.css'
 
 interface Props {
@@ -14,19 +14,92 @@ interface Props {
   onCancel?: () => void
 }
 
-const RATINGS: { value: QuickRating; label: string }[] = [
-  { value: 'good', label: 'Bra' },
-  { value: 'mixed', label: 'Blandat' },
-  { value: 'bad', label: 'Svårt' },
+const RATINGS: { value: QuickRating; label: string; selectedClass: string }[] = [
+  { value: 'good',  label: 'Bra',     selectedClass: styles.ratingBtnGood },
+  { value: 'mixed', label: 'Blandat', selectedClass: styles.ratingBtnMixed },
+  { value: 'bad',   label: 'Svårt',   selectedClass: styles.ratingBtnBad },
 ]
 
 type NextSessionIntent = 'same' | 'easier' | 'harder'
-
-const NEXT_SESSION_OPTIONS: { value: NextSessionIntent; label: string }[] = [
-  { value: 'same', label: 'Behåll nivå' },
+const NEXT_OPTIONS: { value: NextSessionIntent; label: string }[] = [
+  { value: 'same',   label: 'Behåll nivå' },
   { value: 'easier', label: 'Lättare' },
   { value: 'harder', label: 'Kan höja' },
 ]
+
+const BURST_PALETTE = ['#52b788', '#f4a261', '#fbbf24', '#ffffff']
+
+function SavedBurst() {
+  const bits = Array.from({ length: 14 }, (_, i) => {
+    const ang = (i / 14) * Math.PI * 2
+    const dist = 46 + (i % 3) * 16
+    return {
+      x: Math.cos(ang) * dist,
+      y: Math.sin(ang) * dist,
+      c: BURST_PALETTE[i % BURST_PALETTE.length],
+      d: (i % 5) * 30,
+    }
+  })
+  return (
+    <div className={styles.savedBurst}>
+      {bits.map((b, i) => (
+        <span
+          key={i}
+          className={styles.savedBurstBit}
+          style={{
+            background: b.c,
+            animationDelay: `${b.d}ms`,
+            ['--bx' as string]: `${b.x}px`,
+            ['--by' as string]: `${b.y}px`,
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
+function Stepper({
+  label,
+  hint,
+  value,
+  onChange,
+}: {
+  label: string
+  hint?: string
+  value: number
+  onChange: (v: number) => void
+}) {
+  return (
+    <div className={styles.stepper}>
+      <div className={styles.stepperHead}>
+        <div>
+          <span className={styles.stepperLabel}>{label}</span>
+          {hint && <span className={styles.stepperHint}>{hint}</span>}
+        </div>
+        <span className={styles.stepperValue}>{value}/5</span>
+      </div>
+      <div className={styles.stepperSegments}>
+        {[1, 2, 3, 4, 5].map((n) => (
+          <button
+            key={n}
+            type="button"
+            className={`${styles.stepperSeg} ${n <= value ? styles.stepperSegFilled : ''}`}
+            onClick={() => onChange(n)}
+            aria-label={`${label} ${n} av 5`}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function computeHeroStats(exercises?: ExerciseSummary[]) {
+  if (!exercises || exercises.length === 0) return { rate: null, count: 0, reps: 0 }
+  const totalSuccess = exercises.reduce((s, e) => s + e.success_count, 0)
+  const totalAttempts = exercises.reduce((s, e) => s + e.success_count + e.fail_count, 0)
+  const rate = totalAttempts > 0 ? Math.round((totalSuccess / totalAttempts) * 100) : null
+  return { rate, count: exercises.length, reps: totalAttempts }
+}
 
 export default function SessionLogForm({ dogId, breed, weekNumber, exercises, onSaved, onCancel }: Props) {
   const [rating, setRating] = useState<QuickRating | null>(null)
@@ -39,6 +112,8 @@ export default function SessionLogForm({ dogId, breed, weekNumber, exercises, on
   const [nextSession, setNextSession] = useState<NextSessionIntent | null>(null)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+
+  const { rate, count, reps } = computeHeroStats(exercises)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -73,7 +148,7 @@ export default function SessionLogForm({ dogId, breed, weekNumber, exercises, on
         }),
       })
       setSaved(true)
-      setTimeout(() => onSaved(), 1000)
+      setTimeout(() => onSaved(), 1200)
     } finally {
       setSaving(false)
     }
@@ -81,41 +156,41 @@ export default function SessionLogForm({ dogId, breed, weekNumber, exercises, on
 
   if (saved) {
     return (
-      <div className={styles.savedCard} role="status">
-        <IconCheckCircle size="hero" className={styles.savedIcon} />
-        <p className={styles.savedText}>Pass sparat!</p>
+      <div className={styles.savedScreen} role="status">
+        <SavedBurst />
+        <div className={styles.savedMedalWrap}>
+          <IconMedal size="hero" />
+        </div>
+        <p className={styles.savedTitle}>Pass sparat!</p>
       </div>
     )
   }
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
-      <h3 className={styles.heading}>Logga träningspass</h3>
-
-      {exercises && exercises.length > 0 && (
-        <div className={styles.section}>
-          <span className={styles.sectionLabel}>Tränade övningar</span>
-          <ul className={styles.exerciseList}>
-            {exercises.map((ex) => {
-              const attempts = ex.success_count + ex.fail_count
-              const rate = attempts > 0 ? Math.round((ex.success_count / attempts) * 100) : null
-              return (
-                <li key={ex.id} className={styles.exerciseItem}>
-                  <span className={styles.exerciseName}>{ex.label}</span>
-                  {attempts > 0 && (
-                    <span className={styles.exerciseStats}>
-                      {ex.success_count}/{attempts} lyckade{rate !== null ? ` (${rate}%)` : ''}
-                    </span>
-                  )}
-                </li>
-              )
-            })}
-          </ul>
+      {/* Hero summary */}
+      <div className={styles.hero}>
+        <div className={styles.heroHead}>
+          <IconConfetti size="sm" />
+          Pass klart — bra jobbat!
         </div>
-      )}
+        <div className={styles.heroStats}>
+          {[
+            [rate !== null ? `${rate}%` : '—', 'lyckade'],
+            [String(count), 'övningar'],
+            [String(reps), 'reps'],
+          ].map(([v, l]) => (
+            <div key={l} className={styles.heroStat}>
+              <div className={styles.heroStatValue}>{v}</div>
+              <div className={styles.heroStatLabel}>{l}</div>
+            </div>
+          ))}
+        </div>
+      </div>
 
+      {/* Rating */}
       <div className={styles.section}>
-        <span className={styles.sectionLabel}>Hur gick det?</span>
+        <span className={styles.sectionLabel}>Hur kändes passet?</span>
         <div className={styles.ratingRow} role="radiogroup" aria-label="Hur gick passet?">
           {RATINGS.map((r) => {
             const selected = rating === r.value
@@ -125,49 +200,37 @@ export default function SessionLogForm({ dogId, breed, weekNumber, exercises, on
                 type="button"
                 role="radio"
                 aria-checked={selected}
-                className={`${styles.ratingBtn} ${selected ? styles.ratingBtnSelected : ''}`}
+                className={`${styles.ratingBtn} ${selected ? r.selectedClass : ''}`}
                 onClick={() => setRating(r.value)}
               >
-                <RatingIcon rating={r.value} size="xl" className={styles.ratingIcon} />
-                <span className={styles.ratingLabel}>{r.label}</span>
+                <RatingIcon rating={r.value} size="xl" />
+                <span>{r.label}</span>
               </button>
             )
           })}
         </div>
       </div>
 
+      {/* Dog performance */}
       <div className={styles.section}>
         <span className={styles.sectionLabel}>Hundens prestation</span>
-        <SliderField label="Fokus" value={focus} onChange={setFocus} />
-        <SliderField label="Lydnad" value={obedience} onChange={setObedience} />
+        <Stepper label="Fokus" value={focus} onChange={setFocus} />
+        <Stepper label="Lydnad" value={obedience} onChange={setObedience} />
       </div>
 
+      {/* Handler performance */}
       <div className={styles.section}>
         <span className={styles.sectionLabel}>Din insats som förare</span>
-        <SliderField
-          label="Timing"
-          hint="Belönade du i rätt ögonblick?"
-          value={handlerTiming}
-          onChange={setHandlerTiming}
-        />
-        <SliderField
-          label="Konsekvens"
-          hint="Höll du samma krav under hela passet?"
-          value={handlerConsistency}
-          onChange={setHandlerConsistency}
-        />
-        <SliderField
-          label="Läsa hunden"
-          hint="Märkte du när hunden var på väg att misslyckas?"
-          value={handlerReading}
-          onChange={setHandlerReading}
-        />
+        <Stepper label="Timing" hint="Belönade du i rätt ögonblick?" value={handlerTiming} onChange={setHandlerTiming} />
+        <Stepper label="Konsekvens" hint="Höll du samma krav hela passet?" value={handlerConsistency} onChange={setHandlerConsistency} />
+        <Stepper label="Läsa hunden" hint="Märkte du när det började bli svårt?" value={handlerReading} onChange={setHandlerReading} />
       </div>
 
+      {/* Next session */}
       <div className={styles.section}>
-        <span className={styles.sectionLabel}>Efter passet — nästa gång (valfritt)</span>
+        <span className={styles.sectionLabel}>Nästa pass (valfritt)</span>
         <div className={styles.nextRow} role="radiogroup" aria-label="Plan för nästa pass">
-          {NEXT_SESSION_OPTIONS.map((opt) => {
+          {NEXT_OPTIONS.map((opt) => {
             const selected = nextSession === opt.value
             return (
               <button
@@ -185,6 +248,7 @@ export default function SessionLogForm({ dogId, breed, weekNumber, exercises, on
         </div>
       </div>
 
+      {/* Notes */}
       <textarea
         className={styles.notes}
         placeholder="Anteckningar (valfritt)"
@@ -193,58 +257,15 @@ export default function SessionLogForm({ dogId, breed, weekNumber, exercises, on
         rows={2}
       />
 
-      <div className={styles.actions}>
-        {onCancel && (
-          <button
-            type="button"
-            onClick={onCancel}
-            className={styles.cancelBtn}
-            disabled={saving}
-          >
-            Avbryt
-          </button>
-        )}
-        <button
-          type="submit"
-          className={styles.submitBtn}
-          disabled={!rating || saving}
-        >
-          {saving ? 'Sparar…' : 'Spara pass'}
+      {/* Actions */}
+      {onCancel && (
+        <button type="button" onClick={onCancel} className={styles.cancelBtn} disabled={saving}>
+          Avbryt
         </button>
-      </div>
+      )}
+      <button type="submit" className={styles.submitBtn} disabled={saving || !rating}>
+        <IconCheckCircle size="md" /> Spara pass
+      </button>
     </form>
-  )
-}
-
-function SliderField({
-  label,
-  hint,
-  value,
-  onChange,
-}: {
-  label: string
-  hint?: string
-  value: number
-  onChange: (v: number) => void
-}) {
-  return (
-    <div className={styles.sliderField}>
-      <div className={styles.sliderHeader}>
-        <div className={styles.sliderLabelGroup}>
-          <span className={styles.sliderLabel}>{label}</span>
-          {hint && <span className={styles.sliderHint}>{hint}</span>}
-        </div>
-        <span className={styles.sliderValue}>{value}/5</span>
-      </div>
-      <input
-        type="range"
-        min={1}
-        max={5}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className={styles.slider}
-        aria-label={label}
-      />
-    </div>
   )
 }
