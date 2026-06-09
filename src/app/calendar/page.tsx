@@ -223,6 +223,7 @@ function CalendarView() {
     if (!profile) return
     setLoading(true)
     try {
+      setCheckIns({})
       const ageWeeks = Math.max(1, getAgeInWeeks(profile.birthdate))
       const trainingWeek = profile.trainingWeek ?? 1
       const goals = profile.onboarding?.goals

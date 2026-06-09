@@ -7,7 +7,6 @@ import { apiFetch } from '@/lib/api/fetch'
 import { MetricsMapSchema, ProgressMapSchema, WeekPlanSchema } from '@/types/api/schemas'
 import {
   buildYellowExercise,
-  getRecoveryTips,
   selectYellowExercise,
   type PuppyZone,
 } from '@/lib/training/puppy-zone'
@@ -32,7 +31,6 @@ export interface UsePuppyDayResult {
   exercises: Exercise[]
   progress: Record<string, number>
   metrics: Record<string, DailyExerciseMetrics>
-  recoveryTips: string[]
   loading: boolean
   error: boolean
   saveZone: (zone: PuppyZone) => Promise<void>
@@ -126,7 +124,6 @@ export function usePuppyDay({
     exercises,
     progress,
     metrics,
-    recoveryTips: zone === 'red' ? getRecoveryTips() : [],
     loading: loadingZone || loadingExercises,
     error,
     saveZone,

@@ -13,4 +13,9 @@ create policy "owner_only" on daily_check_ins
     dog_id in (
       select id from dog_profiles where user_id = auth.uid()
     )
+  )
+  with check (
+    dog_id in (
+      select id from dog_profiles where user_id = auth.uid()
+    )
   );
