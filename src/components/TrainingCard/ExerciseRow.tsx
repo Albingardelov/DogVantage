@@ -310,7 +310,7 @@ export default function ExerciseRow({
         <div className={styles.completeArea}>
           <div className={styles.statsRow}>
             <div className={styles.statBox}>
-              <div className={styles.statValue}>{successRate ?? 0}%</div>
+              <div className={styles.statValue}>{successRate !== null ? `${successRate}%` : '—'}</div>
               <div className={styles.statLabel}>lyckade</div>
             </div>
             <div className={styles.statBox}>
@@ -328,7 +328,7 @@ export default function ExerciseRow({
             Nästa övning <IconCaretRight size="sm" />
           </button>
           <button type="button" className={styles.undoBtn} onClick={handleUndo}>
-            Ångra registrering
+            Starta om kombo
           </button>
         </div>
       )}
