@@ -6,7 +6,8 @@ import ProfileGuard from '@/components/ProfileGuard'
 import BottomNav from '@/components/BottomNav'
 import ExerciseGuideSheet from '@/components/ExerciseGuideSheet'
 import { useActiveDog } from '@/lib/dog/active-dog-context'
-import { getAgeInWeeks } from '@/lib/dog/age'
+import { getAgeInWeeks, isPuppyMode } from '@/lib/dog/age'
+import type { PuppyZone } from '@/lib/training/puppy-zone'
 import type { DayPlan, Exercise, QuickRating, SessionLog, WeekPlan } from '@/types'
 import { IconCaretLeft, IconClose } from '@/components/icons'
 import styles from './page.module.css'
@@ -98,12 +99,14 @@ function AgendaDay({
   todayStr,
   dayPlan,
   log,
+  zone,
   onClick,
 }: {
   dateStr: string
   todayStr: string
   dayPlan: DayPlan | null
   log: SessionLog | null
+  zone?: PuppyZone
   onClick?: () => void
 }) {
   const d = new Date(dateStr + 'T12:00:00')
@@ -135,6 +138,20 @@ function AgendaDay({
       <div className={styles.trainingDayHeader}>
         <div className={styles.trainingDayMeta}>
           {isToday && <span className={styles.todayPip} aria-hidden="true" />}
+            {zone && (
+              <span
+                aria-label={`Zon: ${zone}`}
+                style={{
+                  display: 'inline-block',
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  background: zone === 'green' ? '#22c55e' : zone === 'yellow' ? '#eab308' : '#ef4444',
+                  marginRight: 4,
+                  flexShrink: 0,
+                }}
+              />
+            )}
           <span className={`${styles.trainingDayName} ${isToday ? styles.trainingDayNameToday : ''}`}>
             {dayName}
           </span>
@@ -194,6 +211,7 @@ function CalendarView() {
   const { activeDog: profile } = useActiveDog()
   const [logs, setLogs] = useState<Record<string, SessionLog>>({})
   const [weekPlan, setWeekPlan] = useState<WeekPlan | null>(null)
+  const [checkIns, setCheckIns] = useState<Record<string, PuppyZone>>({})
   const [loading, setLoading] = useState(true)
   const [sheetDay, setSheetDay] = useState<{ plan: DayPlan; label: string; dateStr: string } | null>(null)
   const [guideExercise, setGuideExercise] = useState<Exercise | null>(null)
@@ -214,9 +232,16 @@ function CalendarView() {
       const petsParam = pets && pets.length > 0 ? `&householdPets=${pets.join(',')}` : ''
       const dogIdParam = profile.id ? `&dogId=${encodeURIComponent(profile.id)}` : ''
 
-      const [logsRes, planRes] = await Promise.all([
+      const puppyMode = isPuppyMode(ageWeeks)
+      const visibleStart = addDays(getMondayOf(todayStr), -14)
+      const visibleEnd   = addDays(getMondayOf(todayStr), 34)
+
+      const [logsRes, planRes, checkInRes] = await Promise.all([
         fetch(`/api/logs?dogId=${encodeURIComponent(profile.id ?? '')}`),
         fetch(`/api/training/week?breed=${profile.breed}&week=${trainingWeek}&ageWeeks=${ageWeeks}${goalsParam}${petsParam}${dogIdParam}`),
+        puppyMode && profile.id
+          ? fetch(`/api/training/checkin?dogId=${encodeURIComponent(profile.id)}&from=${visibleStart}&to=${visibleEnd}`)
+          : Promise.resolve(null),
       ])
 
       if (logsRes.ok) {
@@ -234,6 +259,11 @@ function CalendarView() {
       } else {
         setWeekPlan(null)
         console.error('[calendar week-plan]', planRes.status, await planRes.text())
+      }
+
+      if (checkInRes?.ok) {
+        const body = await checkInRes.json().catch(() => null)
+        if (body?.zones) setCheckIns(body.zones as Record<string, PuppyZone>)
       }
     } finally {
       setLoading(false)
@@ -305,6 +335,7 @@ function CalendarView() {
                         todayStr={todayStr}
                         dayPlan={dayPlan}
                         log={logs[dateStr] ?? null}
+                        zone={checkIns[dateStr]}
                         onClick={dayPlan && !dayPlan.rest && dayPlan.exercises?.length ? () => {
                           const d = new Date(dateStr + 'T12:00:00')
                           const label = `${WEEKDAY_NAMES[d.getDay()]} ${d.getDate()} ${MONTH_NAMES_SHORT[d.getMonth()]}`
