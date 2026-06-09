@@ -153,6 +153,32 @@ export type Database = {
           },
         ]
       }
+      daily_check_ins: {
+        Row: {
+          dog_id: string
+          date: string
+          zone: string
+        }
+        Insert: {
+          dog_id: string
+          date: string
+          zone: string
+        }
+        Update: {
+          dog_id?: string
+          date?: string
+          zone?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_check_ins_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dog_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daily_exercise_metrics: {
         Row: {
           breed: string
