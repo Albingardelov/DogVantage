@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import ExerciseRow from '../TrainingCard/ExerciseRow'
 import DayProgressBar from '../TrainingCard/DayProgressBar'
 import PreSessionChecklist from '../TrainingCard/PreSessionChecklist'
+import ExerciseGuideSheet from '@/components/ExerciseGuideSheet'
 import ZoneCheckIn from './ZoneCheckIn'
 import RecoveryCard from './RecoveryCard'
 import styles from './PuppyDayCard.module.css'
@@ -41,6 +42,7 @@ export default function PuppyDayCard(props: Props) {
   const router = useRouter()
   const todayDate = useMemo(todayStr, [])
   const [showLogForm, setShowLogForm] = useState(false)
+  const [guideExerciseId, setGuideExerciseId] = useState<string | null>(null)
   const [sessionGuard, setSessionGuard] = useState<Record<string, { consecutiveFails: number; consecutiveSlow: number }>>({})
 
   const { zone, exercises, progress, metrics, loading, error, saveZone, setProgress, setMetrics } =
@@ -152,7 +154,7 @@ export default function PuppyDayCard(props: Props) {
                   exercise={ex}
                   done={progress[ex.id] ?? 0}
                   onRepClick={() => handleRepClick(ex.id, progress[ex.id] ?? 0, ex.reps)}
-                  onOpenGuide={undefined}
+                  onOpenGuide={() => setGuideExerciseId(ex.id)}
                   spec={spec}
                   metrics={m}
                   recommendation={rec?.message ?? null}
@@ -173,6 +175,16 @@ export default function PuppyDayCard(props: Props) {
           </button>
         </div>
       </section>
+
+      {guideExerciseId && (
+        <ExerciseGuideSheet
+          exerciseId={guideExerciseId}
+          exerciseLabel={exercises.find((e) => e.id === guideExerciseId)?.label}
+          metrics={metrics[guideExerciseId] ?? null}
+          onClose={() => setGuideExerciseId(null)}
+          customSpecs={{}}
+        />
+      )}
 
       {showLogForm && (
         <div
