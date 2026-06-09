@@ -23,6 +23,8 @@ export function getLifeStage(ageWeeks: number | undefined): LifeStage {
 
 export const isPuppy = (ageWeeks?: number): boolean => getLifeStage(ageWeeks) === 'puppy'
 export const isJunior = (ageWeeks?: number): boolean => getLifeStage(ageWeeks) === 'junior'
+export const isPuppyMode = (ageWeeks?: number): boolean =>
+  typeof ageWeeks === 'number' && ageWeeks > 0 && ageWeeks < 26
 
 /** Days until the dog comes home. Negative = already home. */
 export function daysUntilHomecoming(homecomeDate: string): number {
