@@ -152,7 +152,7 @@ export default function PuppyDayCard(props: Props) {
                   exercise={ex}
                   done={progress[ex.id] ?? 0}
                   onRepClick={() => handleRepClick(ex.id, progress[ex.id] ?? 0, ex.reps)}
-                  onOpenGuide={() => {}}
+                  onOpenGuide={undefined}
                   spec={spec}
                   metrics={m}
                   recommendation={rec?.message ?? null}
@@ -175,7 +175,12 @@ export default function PuppyDayCard(props: Props) {
       </section>
 
       {showLogForm && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 50, display: 'flex', alignItems: 'flex-end' }}>
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Logga träningspass"
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 50, display: 'flex', alignItems: 'flex-end' }}
+        >
           <div style={{ background: '#fff', borderRadius: '16px 16px 0 0', padding: 24, width: '100%' }}>
             <SessionLogForm
               dogId={dogId}

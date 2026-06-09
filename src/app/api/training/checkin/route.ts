@@ -29,6 +29,9 @@ export async function POST(req: NextRequest) {
     if (!date || !zone || !VALID_ZONES.includes(zone as PuppyZone)) {
       return NextResponse.json({ error: 'date and valid zone required' }, { status: 400 })
     }
+    if (Number.isNaN(Date.parse(date))) {
+      return NextResponse.json({ error: 'invalid date format' }, { status: 400 })
+    }
     await saveCheckIn(dog.id, date, zone as PuppyZone)
     return NextResponse.json({ ok: true })
   })

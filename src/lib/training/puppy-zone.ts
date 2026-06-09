@@ -14,8 +14,8 @@ const CALM_EXERCISE_LABELS: Record<CalmExerciseId, string> = {
   namn: 'Namn',
 }
 
-// Picks the calm exercise the dog has most recently performed well.
-// Falls back to 'nosework' when no calm exercise has a positive success rate.
+// Returns the first calm exercise in priority order that has more successes than failures.
+// Falls back to 'nosework' when none qualify.
 export function selectYellowExercise(
   metrics: Record<string, { success_count: number; fail_count: number }>,
 ): CalmExerciseId {
