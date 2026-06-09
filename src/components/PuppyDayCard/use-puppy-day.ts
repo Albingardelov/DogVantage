@@ -79,7 +79,12 @@ export function usePuppyDay({
           if (parsed.success) {
             const todayName = SWEDISH_DAYS[new Date().getDay()]
             const todayPlan = parsed.data.days.find((d) => d.day === todayName)
-            setExercises(todayPlan?.exercises ?? [])
+            // If today is a rest day or has no exercises, find any training day's exercises.
+            // The owner chose green — give them something to train regardless of the plan's rest schedule.
+            const exercises = todayPlan?.rest || !todayPlan?.exercises?.length
+              ? (parsed.data.days.find((d) => !d.rest && d.exercises?.length)?.exercises ?? [])
+              : (todayPlan.exercises ?? [])
+            setExercises(exercises)
           } else {
             setError(true)
           }
