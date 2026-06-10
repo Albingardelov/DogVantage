@@ -8,6 +8,7 @@ import type {
 } from '@/types/dog'
 import type { WeeklyFocusArea } from '@/lib/training/weekly-focus'
 import type { WeekPlanContext } from './rules'
+import type { ExerciseProgressionDecision } from '@/lib/training/progression-rules'
 
 export interface WeekPlanInput {
   breed: Breed
@@ -25,6 +26,8 @@ export interface WeekPlanInput {
   isInHeat?: boolean
   skenfasActive?: boolean
   progressionRule?: string | null
+  progressionDecisions?: ExerciseProgressionDecision[]
+  isReactive?: boolean
 }
 
 export function buildWeekContext(input: WeekPlanInput): WeekPlanContext {
@@ -60,7 +63,9 @@ export function buildWeekContext(input: WeekPlanInput): WeekPlanContext {
     isInHeat: Boolean(input.isInHeat),
     skenfasActive: Boolean(input.skenfasActive),
     progressionRule: input.progressionRule ?? null,
-    isReactive: detectReactive(input.onboardingContext),
+    isReactive: typeof input.isReactive === 'boolean'
+      ? input.isReactive
+      : detectReactive(input.onboardingContext),
     hasCats,
     hasOutdoorCats,
     hasSmallAnimals,

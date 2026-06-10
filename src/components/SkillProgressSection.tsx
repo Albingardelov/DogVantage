@@ -1,13 +1,11 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import type { Breed } from '@/types'
 import type { SkillEnvironment, SkillProgress } from '@/lib/training/skill-progress'
 import { MAX_WEEKLY_PRIORITY_EXERCISES } from '@/lib/training/weekly-focus'
 import styles from './SkillProgressSection.module.css'
 
 interface Props {
-  breed: Breed
   dogId: string
   weeks?: number
   title?: string
@@ -32,7 +30,6 @@ const ENVIRONMENT_LABELS: Record<SkillEnvironment, string> = {
 }
 
 export default function SkillProgressSection({
-  breed,
   dogId,
   weeks = 4,
   title = `Färdigheter senaste ${weeks} veckorna`,
@@ -59,7 +56,7 @@ export default function SkillProgressSection({
     setError(null)
     ;(async () => {
       try {
-        const params = new URLSearchParams({ breed, dogId, weeks: String(weeks) })
+        const params = new URLSearchParams({ dogId, weeks: String(weeks) })
         const res = await fetch(`/api/training/skill-progress?${params}`)
         const body = (await res.json()) as Response | { error: string }
         if (!alive) return
@@ -79,7 +76,7 @@ export default function SkillProgressSection({
       }
     })()
     return () => { alive = false }
-  }, [breed, dogId, weeks])
+  }, [dogId, weeks])
 
   useEffect(() => {
     function onPointerDown(event: MouseEvent) {

@@ -14,7 +14,7 @@ import {
 } from '@/types'
 import { isGoal } from '@/types/dog'
 import { isValidBreed } from '@/lib/breeds/registry'
-import { buildBehaviorContextFromDb } from '@/lib/dog/build-behavior-context'
+import { getBehaviorContextPayloadFromDb } from '@/lib/dog/build-behavior-context'
 import { householdPetNotes, HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'
 import { detectBehaviorEmergency, BEHAVIOR_RESPONSE } from '@/lib/ai/safety-guards'
 import { getRecentLogs, formatLogsForPrompt } from '@/lib/supabase/session-logs'
@@ -76,15 +76,25 @@ export async function buildWeekContextFromRequest(
   supabase: SupabaseClient<Database>,
 ): Promise<WeekOrchestratorContext> {
   const p = req.nextUrl.searchParams
-  const breed = p.get('breed') as Breed | null
+  const breed = dog.breed as Breed
+  const requestedBreed = p.get('breed')
   const weekStr = p.get('week')
   const trainingWeek = weekStr ? Number(weekStr) : NaN
   const ageWeeksStr = p.get('ageWeeks')
-  const ageWeeks = ageWeeksStr != null ? Number(ageWeeksStr) : undefined
+  const parsedAgeWeeks = ageWeeksStr != null ? Number(ageWeeksStr) : undefined
+  const ageWeeks = typeof parsedAgeWeeks === 'number' && Number.isFinite(parsedAgeWeeks)
+    ? parsedAgeWeeks
+    : undefined
   const goalsStr = p.get('goals')
   const goals = goalsStr ? goalsStr.split(',').filter((g): g is TrainingGoal => isGoal(g)) : undefined
-  if (!breed || Number.isNaN(trainingWeek) || !isValidBreed(breed)) {
-    throw new Error('breed and week required')
+  if (Number.isNaN(trainingWeek)) {
+    throw new Error('week required')
+  }
+  if (!isValidBreed(breed)) {
+    throw new Error('invalid dog breed profile')
+  }
+  if (requestedBreed && requestedBreed !== breed) {
+    console.warn(`[GET /api/training/week] ignored mismatched breed query="${requestedBreed}" for dog=${dog.id}`)
   }
 
   const pets = parsePets(p)
@@ -95,7 +105,16 @@ export async function buildWeekContextFromRequest(
     .single()
   const dogSex = (dogProfile as { sex: string | null } | null)?.sex as DogSex | undefined ?? undefined
   const castrationStatus = (dogProfile as { castration_status: string | null } | null)?.castration_status as CastrationStatus | undefined ?? undefined
-  const serverBehaviorContext = await buildBehaviorContextFromDb(supabase, dog.id)
+  const behaviorPayload = await getBehaviorContextPayloadFromDb(supabase, dog.id)
+  const serverBehaviorContext = behaviorPayload.context
+  const behaviorProfile = behaviorPayload.behaviorProfile
+  const isReactiveProfile = Boolean(
+    behaviorProfile && (
+      behaviorProfile.leashBehavior === 'pulls_hard_reactive' ||
+      behaviorProfile.newEnvironmentReaction === 'avoidant' ||
+      behaviorProfile.triggers.length > 0
+    ),
+  )
   const baseOnboardingContext = buildOnboardingContext(p, pets, serverBehaviorContext)
   if (detectBehaviorEmergency(baseOnboardingContext)) {
     throw new BehaviorEmergencyError(BEHAVIOR_RESPONSE.content)
@@ -201,6 +220,8 @@ export async function buildWeekContextFromRequest(
       isInHeat,
       skenfasActive,
       progressionRule,
+      progressionDecisions,
+      isReactive: isReactiveProfile,
     },
     breed,
     trainingWeek,
@@ -220,6 +241,18 @@ export async function buildWeekContextFromRequest(
 export async function getOrGenerateWeekPlan(ctx: WeekOrchestratorContext): Promise<WeekPlan> {
   if (ctx.isHomecomeWeek) return getHomecomeWeekPlan(ctx.hasCats)
 
+  const baseTelemetry = {
+    dogId: ctx.dogId,
+    breed: ctx.breed,
+    trainingWeek: ctx.trainingWeek,
+    ageWeeks: ctx.ageWeeks ?? null,
+    planVersion: PLAN_VERSION,
+    hasFocusAreas: ctx.focusAreas.length > 0,
+    hasPriorities: ctx.priorityExercises.length > 0,
+    hasProgressionRule: Boolean(ctx.input.progressionRule),
+    cacheScope: ctx.cacheKey ?? null,
+  }
+
   let cached: WeekPlan | null = null
   try {
     cached = await getCachedWeekPlan(
@@ -234,13 +267,32 @@ export async function getOrGenerateWeekPlan(ctx: WeekOrchestratorContext): Promi
       PLAN_VERSION,
       ctx.focusAreas,
       ctx.priorityExercises,
+      ctx.input.progressionRule,
     )
   } catch (e) {
     console.error('[GET /api/training/week] cache read failed:', e)
   }
-  if (cached) return cached
+  if (cached) {
+    console.log(
+      '[telemetry:week-plan-api]',
+      JSON.stringify({
+        ...baseTelemetry,
+        source: 'cache',
+        cacheHit: true,
+      }),
+    )
+    return cached
+  }
 
   const plan = await generateWeekPlan(ctx.input)
+  console.log(
+    '[telemetry:week-plan-api]',
+    JSON.stringify({
+      ...baseTelemetry,
+      source: 'generated',
+      cacheHit: false,
+    }),
+  )
   await setCachedWeekPlan(
     ctx.breed,
     ctx.trainingWeek,
@@ -254,8 +306,18 @@ export async function getOrGenerateWeekPlan(ctx: WeekOrchestratorContext): Promi
     PLAN_VERSION,
     ctx.focusAreas,
     ctx.priorityExercises,
+    ctx.input.progressionRule,
   ).catch((e) => {
     console.error('[GET /api/training/week] cache write failed:', e)
+    console.log(
+      '[telemetry:week-plan-api]',
+      JSON.stringify({
+        ...baseTelemetry,
+        source: 'generated',
+        cacheHit: false,
+        cacheWriteFailed: true,
+      }),
+    )
   })
   return plan
 }

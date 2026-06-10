@@ -1,22 +1,19 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import type { Breed, ChatMessage, TrainingSourceRef } from '@/types'
+import type { ChatMessage, TrainingSourceRef } from '@/types'
 import { IconPaw, IconSend } from '@/components/icons'
 import { apiFetch, ApiError } from '@/lib/api/fetch'
 import { TrainingResultSchema } from '@/types/api/schemas'
 import styles from './ChatInterface.module.css'
 
 interface Props {
-  breed: Breed
-  ageWeeks: number
   trainingWeek: number
   initialQuestion?: string
-  dogId?: string
-  onboardingContext?: string
+  dogId: string
 }
 
-export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQuestion, dogId, onboardingContext }: Props) {
+export default function ChatInterface({ trainingWeek, initialQuestion, dogId }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: 'model', content: 'Hej! Jag är din träningsassistent. För bäst hjälp: skriv övning + hur det gick idag, så får du en konkret plan för nästa reps.' },
   ])
@@ -44,7 +41,7 @@ export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQu
       const data = await apiFetch('/api/chat', TrainingResultSchema, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, breed, ageWeeks, trainingWeek, dogId, onboardingContext }),
+        body: JSON.stringify({ query, dogId }),
       })
       setMessages((prev) => [
         ...prev,

@@ -98,7 +98,7 @@ function Log() {
         )}
 
         {profile && profile.id && logs.length > 0 && (
-          <SkillProgressSection breed={profile.breed} dogId={profile.id} />
+          <SkillProgressSection dogId={profile.id} />
         )}
 
         {!loading && !error && logs.length === 0 && (

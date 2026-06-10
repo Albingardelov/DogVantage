@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { withAuthAndDog } from '@/lib/api/with-auth'
 import { apiError } from '@/lib/api/errors'
 import type { Json } from '@/types/database'
-import type { Breed, QuickRating, ExerciseSummary } from '@/types'
+import type { QuickRating, ExerciseSummary } from '@/types'
 
 export async function POST(req: NextRequest) {
   return withAuthAndDog(req, async ({ user, dog, supabase }) => {
     const body = await req.json() as {
-      breed: Breed
+      breed?: string
       week_number: number
       quick_rating: QuickRating
       focus: number
@@ -21,9 +21,12 @@ export async function POST(req: NextRequest) {
 
     const { breed, week_number, quick_rating, focus, obedience,
       handler_timing, handler_consistency, handler_reading, notes, exercises } = body
-    if (!breed || typeof week_number !== 'number' || !quick_rating ||
+    if (typeof week_number !== 'number' || !quick_rating ||
       typeof focus !== 'number' || typeof obedience !== 'number') {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
+    if (breed && breed !== dog.breed) {
+      console.warn(`[POST /api/logs] ignored mismatched breed body="${breed}" for dog=${dog.id}`)
     }
 
     const { data, error } = await supabase
@@ -31,7 +34,7 @@ export async function POST(req: NextRequest) {
       .insert({
         user_id: user.id,
         dog_id: dog.id,
-        breed,
+        breed: dog.breed,
         week_number,
         quick_rating,
         focus,

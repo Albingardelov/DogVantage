@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getMetrics, upsertMetrics } from '@/lib/supabase/daily-exercise-metrics'
 import { getExerciseSpec, isValidCriteriaLevel } from '@/lib/training/exercise-specs'
 import { withAuthAndDog } from '@/lib/api/with-auth'
-import { isValidBreed } from '@/lib/breeds/registry'
-import type { Breed, DailyExerciseMetrics, LatencyBucket } from '@/types'
+import type { DailyExerciseMetrics, LatencyBucket } from '@/types'
 
 const VALID_LATENCY: LatencyBucket[] = ['lt1s', '1to3s', 'gt3s']
 
@@ -24,7 +23,6 @@ function parseLatencyBucket(v: unknown): LatencyBucket | null {
 }
 
 function parsePatch(body: unknown): {
-  breed: Breed
   date: string
   exerciseId: string
   patch: Partial<DailyExerciseMetrics>
@@ -32,13 +30,12 @@ function parsePatch(body: unknown): {
   if (!body || typeof body !== 'object') return { error: 'Invalid JSON body', status: 400 }
   const b = body as Record<string, unknown>
 
-  const breed = b.breed
   const date = b.date
   const exerciseId = b.exerciseId
   const patchRaw = b.patch
 
-  if (typeof breed !== 'string' || !isValidBreed(breed) || !isValidDateString(date) || typeof exerciseId !== 'string' || !exerciseId) {
-    return { error: 'breed, date, exerciseId required', status: 400 }
+  if (!isValidDateString(date) || typeof exerciseId !== 'string' || !exerciseId) {
+    return { error: 'date, exerciseId required', status: 400 }
   }
   if (!patchRaw || typeof patchRaw !== 'object') return { error: 'patch required', status: 400 }
 
@@ -82,17 +79,20 @@ function parsePatch(body: unknown): {
 
   if (Object.keys(patch).length === 0) return { error: 'patch must include at least one field', status: 400 }
 
-  return { breed, date, exerciseId, patch }
+  return { date, exerciseId, patch }
 }
 
 export async function GET(req: NextRequest) {
-  const breed = req.nextUrl.searchParams.get('breed')
+  const requestedBreed = req.nextUrl.searchParams.get('breed')
   const date = req.nextUrl.searchParams.get('date')
-  if (!breed || !isValidBreed(breed) || !isValidDateString(date)) {
-    return NextResponse.json({ error: 'breed and date required' }, { status: 400 })
+  if (!isValidDateString(date)) {
+    return NextResponse.json({ error: 'date required' }, { status: 400 })
   }
   return withAuthAndDog(req, async ({ dog }) => {
-    const metrics = await getMetrics(breed, date, dog.id)
+    if (requestedBreed && requestedBreed !== dog.breed) {
+      console.warn(`[GET /api/training/metrics] ignored mismatched breed query="${requestedBreed}" for dog=${dog.id}`)
+    }
+    const metrics = await getMetrics(dog.breed, date, dog.id)
     return NextResponse.json(metrics)
   })
 }
@@ -101,7 +101,7 @@ export async function PATCH(req: NextRequest) {
   return withAuthAndDog(req, async ({ dog }) => {
     const parsed = parsePatch(await req.json())
     if ('error' in parsed) return NextResponse.json({ error: parsed.error }, { status: parsed.status })
-    await upsertMetrics(parsed.breed, parsed.date, dog.id, parsed.exerciseId, parsed.patch)
+    await upsertMetrics(dog.breed, parsed.date, dog.id, parsed.exerciseId, parsed.patch)
     return NextResponse.json({ ok: true })
   })
 }

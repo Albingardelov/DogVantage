@@ -239,7 +239,7 @@ function CalendarView() {
 
       const [logsRes, planRes, checkInRes] = await Promise.all([
         fetch(`/api/logs?dogId=${encodeURIComponent(profile.id ?? '')}`),
-        fetch(`/api/training/week?breed=${profile.breed}&week=${trainingWeek}&ageWeeks=${ageWeeks}${goalsParam}${petsParam}${dogIdParam}`),
+        fetch(`/api/training/week?week=${trainingWeek}&ageWeeks=${ageWeeks}${goalsParam}${petsParam}${dogIdParam}`),
         puppyMode && profile.id
           ? fetch(`/api/training/checkin?dogId=${encodeURIComponent(profile.id)}&from=${visibleStart}&to=${visibleEnd}`)
           : Promise.resolve(null),

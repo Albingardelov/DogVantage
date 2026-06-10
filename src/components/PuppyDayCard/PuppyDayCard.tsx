@@ -39,7 +39,7 @@ function todayStr() {
 }
 
 export default function PuppyDayCard(props: Props) {
-  const { ageWeeks, breed, dogName, dogId, trainingWeek } = props
+  const { ageWeeks, dogName, dogId, trainingWeek } = props
   const router = useRouter()
   const todayDate = useMemo(todayStr, [])
   const [showLogForm, setShowLogForm] = useState(false)
@@ -64,7 +64,7 @@ export default function PuppyDayCard(props: Props) {
     fetch('/api/training/progress', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ breed, date: todayDate, dogId, exerciseId, count: newDone }),
+      body: JSON.stringify({ date: todayDate, dogId, exerciseId, count: newDone }),
     }).catch(console.error)
   }
 
@@ -84,7 +84,7 @@ export default function PuppyDayCard(props: Props) {
     fetch('/api/training/metrics', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ breed, date: todayDate, dogId, exerciseId, patch }),
+      body: JSON.stringify({ date: todayDate, dogId, exerciseId, patch }),
     }).catch(console.error)
   }
 
@@ -200,7 +200,6 @@ export default function PuppyDayCard(props: Props) {
           <div style={{ background: '#fff', borderRadius: '16px 16px 0 0', padding: 24, width: '100%' }}>
             <SessionLogForm
               dogId={dogId}
-              breed={breed}
               weekNumber={trainingWeek}
               exercises={buildExerciseSummaries(exercises, metrics)}
               onSaved={() => setShowLogForm(false)}

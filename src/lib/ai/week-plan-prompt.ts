@@ -2,11 +2,9 @@ import { formatCurrentPhase, formatBreedProfileShort } from './breed-profiles'
 import { GOAL_EXERCISE_IDS, GOAL_LABELS } from '@/lib/training/goal-exercises'
 import { focusExerciseIds } from '@/lib/training/weekly-focus'
 import { isPuppy as isPuppyAge } from '@/lib/dog/age'
+import { allowedExerciseIdsForBreed } from '@/lib/training/allowed-exercises'
 import { composeRules, ALL_RULES } from '@/lib/training/rules'
 import { buildWeekContext, type WeekPlanInput } from '@/lib/training/week-context'
-
-const FOUNDATION_EXERCISES = ['marker']
-const PUPPY_FUNDAMENTALS = ['rastning', 'bett_inhibition', 'box_traning', 'ensam_traning']
 const REACTIVE_EXERCISES = ['lat']
 
 export function buildWeekPromptParts(input: WeekPlanInput & { documentContext?: string }) {
@@ -63,32 +61,4 @@ Regler:
 - Programvecka ${input.trainingWeek}; anpassa övningar till rasens egenskaper${idRules ? `\n- ${idRules.replace(/\n/g, '\n- ')}` : ''}`
 
   return { systemPrompt, isPuppy }
-}
-
-function allowedExerciseIdsForBreed(breed: string, ageWeeks?: number): string[] {
-  const isPuppy = isPuppyAge(ageWeeks)
-  const puppyExtras = isPuppy ? PUPPY_FUNDAMENTALS : []
-
-  if (breed === 'braque_francais') return [
-    ...FOUNDATION_EXERCISES, 'namn', 'inkallning', 'stoppsignal', 'stanna', 'hantering', 'socialisering',
-    'stadga', 'orientering', 'kontrollerat_sok', 'impulskontroll', 'koppel', 'ligg', 'sitt', 'plats', 'fri',
-    ...puppyExtras, ...(isPuppy ? [] : ['apportering', 'vatten', 'fot']),
-  ]
-  if (breed === 'labrador') return [
-    ...FOUNDATION_EXERCISES, 'namn', 'inkallning', 'stoppsignal', 'stanna', 'sitt', 'ligg', 'koppel', 'hantering',
-    'socialisering', 'fokus', 'apportering', 'plats', 'fri', 'impulskontroll', ...puppyExtras, ...(isPuppy ? [] : ['vatten', 'fot']),
-  ]
-  if (breed === 'italian_greyhound') return [
-    ...FOUNDATION_EXERCISES, 'namn', 'inkallning', 'stanna', 'sitt', 'ligg', 'koppel', 'hantering',
-    'socialisering', 'fokus', 'impulskontroll', 'plats', 'fri', ...puppyExtras,
-  ]
-  if (breed === 'miniature_american_shepherd') return [
-    ...FOUNDATION_EXERCISES, 'namn', 'inkallning', 'stoppsignal', 'stanna', 'sitt', 'ligg', 'koppel', 'hantering',
-    'socialisering', 'fokus', 'impulskontroll', 'stadga', 'orientering', 'nosework', 'plats', 'fri',
-    ...puppyExtras, ...(isPuppy ? [] : ['vallning', 'fot']),
-  ]
-  return [
-    ...FOUNDATION_EXERCISES, 'namn', 'inkallning', 'sitt', 'ligg', 'stanna', 'koppel', 'hantering', 'socialisering',
-    'stoppsignal', 'fokus', 'apportering', 'vatten', 'fot', 'plats', 'fri', 'impulskontroll', ...puppyExtras,
-  ]
 }

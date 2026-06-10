@@ -7,8 +7,7 @@ import {
   type ProgressionMetricRow,
   type ProgressionSessionRow,
 } from '@/lib/training/progression-rules'
-import { isValidBreed } from '@/lib/breeds/registry'
-import type { Breed, ExerciseSummary, LatencyBucket } from '@/types'
+import type { ExerciseSummary, LatencyBucket } from '@/types'
 
 function daysAgo(days: number): string {
   const d = new Date()
@@ -17,12 +16,11 @@ function daysAgo(days: number): string {
 }
 
 export async function GET(req: NextRequest) {
-  const breed = req.nextUrl.searchParams.get('breed')
-  if (!breed || !isValidBreed(breed)) {
-    return NextResponse.json({ error: 'breed required' }, { status: 400 })
-  }
-
   return withAuthAndDog(req, async ({ dog }) => {
+    const requestedBreed = req.nextUrl.searchParams.get('breed')
+    if (requestedBreed && requestedBreed !== dog.breed) {
+      console.warn(`[GET /api/training/progression] ignored mismatched breed query="${requestedBreed}" for dog=${dog.id}`)
+    }
     const since = daysAgo(14)
     const admin = getSupabaseAdmin()
 
@@ -31,13 +29,13 @@ export async function GET(req: NextRequest) {
         .from('daily_exercise_metrics')
         .select('exercise_id, date, success_count, fail_count, latency_bucket, criteria_level_id')
         .eq('dog_id', dog.id)
-        .eq('breed', breed as Breed)
+        .eq('breed', dog.breed)
         .gte('date', since),
       admin
         .from('session_logs')
         .select('created_at, exercises')
         .eq('dog_id', dog.id)
-        .eq('breed', breed as Breed)
+        .eq('breed', dog.breed)
         .gte('created_at', `${daysAgo(7)}T00:00:00Z`)
         .order('created_at', { ascending: false })
         .limit(80),
