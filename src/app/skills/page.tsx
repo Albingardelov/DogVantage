@@ -20,16 +20,17 @@ export default function SkillsPage() {
 
 function SkillsView() {
   const { activeDog: profile } = useActiveDog()
+  const dogId = profile?.id ?? null
   const dogName = profile?.name ?? 'Din hund'
   const [priorityExerciseIds, setPriorityExerciseIds] = useState<string[]>([])
   const [focusWeek, setFocusWeek] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!profile?.id) return
+    if (!dogId) return
     let alive = true
     ;(async () => {
       try {
-        const res = await fetch(`/api/training/focus?dogId=${encodeURIComponent(profile.id)}`)
+        const res = await fetch(`/api/training/focus?dogId=${encodeURIComponent(dogId)}`)
         if (!res.ok) return
         const body = (await res.json()) as { isoWeek?: string; exerciseIds?: string[] }
         if (!alive) return
@@ -40,10 +41,10 @@ function SkillsView() {
       }
     })()
     return () => { alive = false }
-  }, [profile?.id])
+  }, [dogId])
 
   async function togglePriority(exerciseId: string) {
-    if (!profile?.id) return
+    if (!dogId) return
     const isSelected = priorityExerciseIds.includes(exerciseId)
     if (!isSelected && priorityExerciseIds.length >= MAX_WEEKLY_PRIORITY_EXERCISES) return
     const next = isSelected
@@ -54,7 +55,7 @@ function SkillsView() {
       const res = await fetch('/api/training/focus', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dogId: profile.id, exerciseIds: next }),
+        body: JSON.stringify({ dogId, exerciseIds: next }),
       })
       if (!res.ok) return
       const body = (await res.json()) as { isoWeek?: string; exerciseIds?: string[] }
@@ -66,14 +67,14 @@ function SkillsView() {
   }
 
   async function setPriorities(exerciseIds: string[]) {
-    if (!profile?.id) return
+    if (!dogId) return
     const next = exerciseIds.slice(0, MAX_WEEKLY_PRIORITY_EXERCISES)
     setPriorityExerciseIds(next)
     try {
       const res = await fetch('/api/training/focus', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dogId: profile.id, exerciseIds: next }),
+        body: JSON.stringify({ dogId, exerciseIds: next }),
       })
       if (!res.ok) return
       const body = (await res.json()) as { isoWeek?: string; exerciseIds?: string[] }
@@ -103,10 +104,10 @@ function SkillsView() {
         {focusWeek && (
           <p className={styles.weekHint}>Prioriteringar gäller för {focusWeek}</p>
         )}
-        {profile?.id && (
+        {dogId && (
           <SkillProgressSection
             breed={profile.breed}
-            dogId={profile.id}
+            dogId={dogId}
             weeks={8}
             title="Övningsöversikt senaste 8 veckorna"
             showSearch
