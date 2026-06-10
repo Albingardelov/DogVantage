@@ -10,6 +10,76 @@ import {
 } from './safety-guards'
 import type { Breed, ChunkMatch, TrainingResult, TrainingSourceRef } from '@/types'
 
+const MIN_DOCUMENT_SIMILARITY = 0.72
+
+const FOUNDATIONAL_OBEDIENCE_TERMS = [
+  'sitt',
+  'ligg',
+  'stanna',
+  'plats',
+  'inkallning',
+  'kom',
+  'kom hit',
+  'gående i koppel',
+  'gå fint',
+  'vardagslydnad',
+  'lydnad',
+  'sit',
+  'down',
+  'stay',
+  'recall',
+  'heel',
+  'loose leash',
+] as const
+
+const FOUNDATIONAL_OBEDIENCE_SOURCES = new Set<string>([
+  'avsab-humane-dog-training-2021.pdf',
+  'avsab-puppy-socialization-2024.pdf',
+  'rspca-basic-commands.pdf',
+  'rspca-recall.pdf',
+  'akc-star-puppy-6-weeks.pdf',
+])
+
+function isFoundationalObedienceQuery(query: string): boolean {
+  const normalized = query.toLowerCase()
+  return FOUNDATIONAL_OBEDIENCE_TERMS.some((term) => normalized.includes(term))
+}
+
+function priorityScoreForChunk(chunk: ChunkMatch): number {
+  if (FOUNDATIONAL_OBEDIENCE_SOURCES.has(chunk.source)) return 3
+
+  const url = (chunk.source_url ?? '').toLowerCase()
+  if (url.includes('avsab.org') || url.includes('rspca.org.uk') || url.includes('images.akc.org/pdf/star_puppy/')) {
+    return 3
+  }
+
+  return 0
+}
+
+function rankChunksForQuery(chunks: ChunkMatch[], query: string): ChunkMatch[] {
+  if (!isFoundationalObedienceQuery(query)) {
+    return chunks
+  }
+
+  // For obedience questions, favor curated beginner-obedience sources while
+  // keeping semantic similarity as the dominant ranking factor.
+  return [...chunks].sort((a, b) => {
+    const weightedA = a.similarity + priorityScoreForChunk(a) * 0.1
+    const weightedB = b.similarity + priorityScoreForChunk(b) * 0.1
+    return weightedB - weightedA
+  })
+}
+
+function hasReliableSimilarity(chunk: ChunkMatch): boolean {
+  return Number.isFinite(chunk.similarity) && chunk.similarity >= MIN_DOCUMENT_SIMILARITY
+}
+
+function isHowToQuery(query: string): boolean {
+  const normalized = query.toLowerCase()
+  const cues = ['hur', 'steg', 'plan', 'träna', 'övning', 'hjälp', 'fixa']
+  return cues.some((cue) => normalized.includes(cue))
+}
+
 function chunksToSourceRefs(chunks: ChunkMatch[]): TrainingSourceRef[] {
   const seen = new Set<string>()
   const out: TrainingSourceRef[] = []
@@ -47,16 +117,31 @@ export async function queryRAG(
     return BEHAVIOR_RESPONSE
   }
 
-  // 1. Embed the query and retrieve breed-specific document chunks (best-effort)
-  // If the embedding API is unavailable (rate limit, quota), we fall back
-  // gracefully to breed-profile-only answers — which are already very good.
+  // 1. Embed the query and retrieve breed-specific document chunks.
+  // We only return training guidance when the query has reliable document support.
   const matchCount = query.length > 80 ? 6 : 3
+  const obedienceQuery = isFoundationalObedienceQuery(query)
+  const retrievalCount = obedienceQuery ? Math.max(matchCount * 4, 12) : matchCount
   let chunks: ChunkMatch[] = []
   try {
     const embedding = await embedText(query)
-    chunks = await searchBreedChunks(embedding, breed, matchCount)
+    const retrieved = await searchBreedChunks(embedding, breed, retrievalCount)
+    const ranked = rankChunksForQuery(retrieved, query)
+    chunks = ranked.filter(hasReliableSimilarity).slice(0, matchCount)
   } catch {
-    // Embedding failed — continue with breed profile only
+    // If we cannot retrieve evidence, we do not generate unsupported guidance.
+  }
+
+  if (chunks.length === 0) {
+    return {
+      content:
+        'Jag hittar inget tillräckligt relevant källdokument för just den här frågan ännu. Jag vill inte gissa. Lägg gärna till eller välj en guide som täcker momentet (t.ex. sitt/stanna/inkallning), så kan jag ge dokumentbaserade steg direkt.',
+      source: '',
+      source_url: '',
+      sources: undefined,
+      attributionNote:
+        'Inget material från uppladdade dokument hade tillräcklig träff för frågan, så svaret stoppades för att undvika råd utan dokumentstöd.',
+    }
   }
 
   // 2. Build the "ritning" (blueprint) — breed profile + training phase
@@ -99,6 +184,13 @@ export async function queryRAG(
   const onboardingSection = onboardingContext
     ? `\n=== TRÄNARKONTEXT ===\n${onboardingContext}\nAnpassa råden (träningsmetod, belöningsval, miljö) utifrån ovanstående.\n`
     : ''
+  const howToQuery = isHowToQuery(query)
+  const responseFormat = howToQuery
+    ? 'Svarsmall för momentfrågor: 1) Mål 2) Setup nu 3) Nästa 3–5 reps (numrerat) 4) När höja/sänka kriteriet 5) Stoppsignal 6) Vad som ska loggas i appen 7) En kort följdfråga till föraren.'
+    : 'Använd punktlistor när det passar.'
+  const lengthRule = howToQuery
+    ? 'Var koncis men praktisk — 120–280 ord.'
+    : 'Var koncis — 60–150 ord för enkla frågor, max 250 för komplexa.'
 
   const systemPrompt = `Du är DogVantage träningsassistent för rasen ${breed}. Metod: R+, shaping, laddad markörsignal (event marker — "ja!" eller klick som förutsäger belöning), capturing där det går (vänta in beteendet istället för att locka), inga korrektioner, korta pass — anpassat till rasens känslighet i profilen nedan. Förstärkningsschema: CRF (varje rep) tills beteendet är stabilt → variabel (2 av 3) på pålitlig nivå → jackpot vid genombrott.
 
@@ -106,7 +198,7 @@ export async function queryRAG(
 ${breedProfile}
 ${phaseInfo}
 ${documentContext ? `\n=== KÄLLDOKUMENT ===\n${documentContext}\n` : ''}${onboardingSection}${metricsSection}${logsSection}
-Regler: svara på svenska, anpassa till hundens ålder i veckor. Var koncis — 60–150 ord för enkla frågor, max 250 för komplexa. Använd punktlistor när det passar. Nämn källnamn om KÄLLDOKUMENT finns — annars påstå inte att du citerar ett dokument.`
+Regler: svara på svenska, anpassa till hundens ålder i veckor. ${lengthRule} ${responseFormat} Nämn källnamn om KÄLLDOKUMENT finns — annars påstå inte att du citerar ett dokument.`
 
   const completion = await getGroqClient().chat.completions.create({
     model: GROQ_MODEL,

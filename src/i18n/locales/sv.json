@@ -13,8 +13,8 @@
   "nav": {
     "dashboard": "Hem",
     "calendar": "Kalender",
-    "learn": "Lär",
-    "chat": "Chat",
+    "learn": "Guider",
+    "chat": "Chatt",
     "profile": "Profil",
     "logOut": "Logga ut"
   },
@@ -43,8 +43,8 @@
     "paywallSubtitle": "Välj en plan för att fortsätta med veckoplan, loggning och personlig träning.",
     "features": {
       "weeklyPlan": "Veckoplan",
-      "logsAndCalendar": "Logg och kalender",
-      "learnLibrary": "Lär-bibliotek",
+      "logsAndCalendar": "Historik och kalender",
+      "learnLibrary": "Guidebibliotek",
       "aiChat": "AI-chat",
       "multipleDogs": "Flera hundar",
       "customExercises": "Egna AI-övningar"
@@ -64,8 +64,8 @@
       "evening": "God kväll!"
     },
     "programWeek": "Programvecka {{week}}",
-    "logSession": "Logga träningspass",
-    "loggedSessions": "Pass loggade",
+    "logSession": "Logga pass manuellt",
+    "loggedSessions": "Pass i historik",
     "thisWeek": "denna vecka",
     "averageScore": "Snittbetyg",
     "focusAndObedience": "fokus och lydnad",
@@ -98,7 +98,7 @@
     "weekPlan": "Veckoplan"
   },
   "learn": {
-    "title": "Lär",
+    "title": "Guider",
     "readGuide": "Läs guiden"
   },
   "apiErrors": {

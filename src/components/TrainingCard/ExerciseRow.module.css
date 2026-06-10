@@ -32,6 +32,13 @@
   color: #fff;
 }
 
+.definitionText {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.9);
+}
+
 /* Criteria chip */
 .criteriaChip {
   margin-top: 8px;
@@ -50,6 +57,13 @@
 }
 
 .criteriaChip:active { transform: scale(0.97); }
+
+.criteriaText {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.9);
+}
 
 /* Guide chip */
 .guideChip {

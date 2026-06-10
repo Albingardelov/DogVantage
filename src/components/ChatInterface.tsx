@@ -18,7 +18,7 @@ interface Props {
 
 export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQuestion, dogId, onboardingContext }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'model', content: 'Hej! Jag är din träningsassistent. Vad undrar du om träningen?' },
+    { role: 'model', content: 'Hej! Jag är din träningsassistent. För bäst hjälp: skriv övning + hur det gick idag, så får du en konkret plan för nästa reps.' },
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -101,9 +101,9 @@ export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQu
   }
 
   const quickPrompts = [
-    `Vad ska vi träna i programvecka ${trainingWeek}?`,
-    'Hur länge bör ett pass vara?',
-    'Apportering — när börja?',
+    `Ge mig en plan för nästa 5 reps i programvecka ${trainingWeek}.`,
+    'Hur långt pass ska vi köra idag?',
+    'Vi fastnar på sitt — hur backar jag kriteriet?',
   ]
 
   return (
@@ -171,7 +171,7 @@ export default function ChatInterface({ breed, ageWeeks, trainingWeek, initialQu
         <div ref={bottomRef} />
       </div>
 
-      {messages.length < 3 && (
+      {messages.length < 6 && (
         <div className={styles.quickRow}>
           {quickPrompts.map((q) => (
             <button

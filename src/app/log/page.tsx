@@ -64,9 +64,9 @@ function Log() {
         <div className={styles.headerTop}>
           <Avatar name={dogName} size={36} bordered={false} />
           <div className={styles.headerText}>
-            <h1 className={styles.title}>{dogName}s logg</h1>
+            <h1 className={styles.title}>{dogName}s historik</h1>
             <span className={styles.subtitle}>
-              {loading ? 'Laddar…' : `${logs.length} pass loggade`}
+              {loading ? 'Laddar…' : `${logs.length} pass i historik`}
             </span>
             {!loading && logs.length > 0 && (
               <span className={styles.listHint}>
@@ -102,7 +102,7 @@ function Log() {
         )}
 
         {!loading && !error && logs.length === 0 && (
-          <p className={styles.empty}>Inga pass loggade ännu — börja logga från Hem-fliken.</p>
+          <p className={styles.empty}>Inga pass loggade ännu — starta dagens pass på Hem så fylls historiken här.</p>
         )}
 
         {logs.map((log) => {

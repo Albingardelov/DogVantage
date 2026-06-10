@@ -309,7 +309,7 @@ function CalendarView() {
       <header className={styles.header}>
         <div className={styles.decorCircle} aria-hidden="true" />
         <div className={styles.headerContent}>
-          <button type="button" className={styles.backBtn} onClick={() => router.back()} aria-label="Tillbaka">
+          <button type="button" className={styles.backBtn} onClick={() => router.push('/dashboard')} aria-label="Tillbaka">
             <IconCaretLeft size="md" />
           </button>
           <span className={styles.headerTitle}>Träningsschema</span>
@@ -323,7 +323,7 @@ function CalendarView() {
           weeks.map((week) => (
             <div key={`${week.year}-${week.isoWeek}`} className={styles.weekSection}>
               <div className={styles.weekHeader}>
-                <span className={styles.weekLabel}>Vecka {week.isoWeek}</span>
+                <span className={styles.weekLabel}>Kalendervecka {week.isoWeek}</span>
               </div>
               <div className={styles.weekDays}>
                 {week.dates.map((dateStr) => {
@@ -361,7 +361,7 @@ function CalendarView() {
           onClose={() => setSheetDay(null)}
           onExerciseClick={(ex) => setGuideExercise(ex)}
           onLogClick={sheetDay.dateStr <= todayStr && !logs[sheetDay.dateStr]
-            ? () => router.push('/log')
+            ? () => router.push('/dashboard?log=1')
             : undefined}
         />
       )}

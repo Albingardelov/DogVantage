@@ -146,8 +146,9 @@ export default function ExerciseRow({
       : spec.ladder
     : null
   const criteriaLevelId = metrics?.criteria_level_id ?? (allowedLevels?.[0]?.id ?? null)
-  const currentLevelLabel =
-    allowedLevels?.find((l) => l.id === criteriaLevelId)?.label ?? allowedLevels?.[0]?.label ?? null
+  const activeLevel = allowedLevels?.find((l) => l.id === criteriaLevelId) ?? allowedLevels?.[0] ?? null
+  const currentLevelLabel = activeLevel?.label ?? null
+  const currentLevelCriteria = activeLevel?.criteria ?? null
 
   function spawnFloat(kind: 'success' | 'miss') {
     const id = Date.now() + Math.random()
@@ -194,6 +195,9 @@ export default function ExerciseRow({
             <ExerciseIcon exerciseId={exercise.id} size="md" />
             <span className={styles.exerciseName}>{exercise.label}</span>
           </div>
+          {spec?.definition && (
+            <p className={styles.definitionText}>{spec.definition}</p>
+          )}
           {allowedLevels && currentLevelLabel && (
             <button
               type="button"
@@ -205,6 +209,11 @@ export default function ExerciseRow({
               <span>{currentLevelLabel}</span>
               <IconArrowsClockwise size="sm" />
             </button>
+          )}
+          {currentLevelCriteria && (
+            <p className={styles.criteriaText}>
+              <strong>Dagens kriterium:</strong> {currentLevelCriteria}
+            </p>
           )}
         </div>
         {onOpenGuide && (
