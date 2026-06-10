@@ -20,6 +20,7 @@ function baseContext(overrides: Partial<WeekPlanContext> = {}): WeekPlanContext 
     customExercises: [],
     householdPets: [],
     weeklyFocus: [],
+    priorityExercises: [],
     dogSex: undefined,
     castrationStatus: undefined,
     isInHeat: false,

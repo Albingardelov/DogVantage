@@ -231,6 +231,11 @@
   background: rgb(245 158 11 / 0.2);
 }
 
+.progressionHold {
+  color: #1d4ed8;
+  background: rgb(59 130 246 / 0.16);
+}
+
 .progressionItemTitle {
   margin: 0;
   font-size: var(--text-sm);

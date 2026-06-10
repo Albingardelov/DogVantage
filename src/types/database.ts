@@ -496,18 +496,21 @@ export type Database = {
           dog_id: string
           focus_areas: Json
           iso_week: string
+          priority_exercise_ids: Json
           updated_at: string
         }
         Insert: {
           dog_id: string
           focus_areas?: Json
           iso_week: string
+          priority_exercise_ids?: Json
           updated_at?: string
         }
         Update: {
           dog_id?: string
           focus_areas?: Json
           iso_week?: string
+          priority_exercise_ids?: Json
           updated_at?: string
         }
         Relationships: [

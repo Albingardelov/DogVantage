@@ -15,7 +15,7 @@ import AddDogModal from '@/components/AddDogModal'
 import StreakBadge from '@/components/StreakBadge'
 import { useActiveDog } from '@/lib/dog/active-dog-context'
 import { useSubscription } from '@/lib/billing/subscription-context'
-import { getAgeInWeeks, daysUntilHomecoming, isPuppy, isPuppyMode, trainingWeekFromHomecoming } from '@/lib/dog/age'
+import { getAgeInWeeks, daysUntilHomecoming, isPuppy, isPuppyMode } from '@/lib/dog/age'
 import ProgramWeekTimeline, { getPhaseInfo } from '@/components/ProgramWeekTimeline/ProgramWeekTimeline'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import { getHandlerFeedbackTip, type HandlerFeedbackTip } from '@/lib/training/handler-feedback'
@@ -221,10 +221,7 @@ function Dashboard() {
   const homecomeDate = profile?.onboarding?.homecomeDate
   const daysUntilHome = homecomeDate ? daysUntilHomecoming(homecomeDate) : null
   const beforeHomecoming = daysUntilHome !== null && daysUntilHome > 0
-  // Auto-derive training week from homecoming date when set; fall back to stored value
-  const trainingWeek = homecomeDate && daysUntilHome !== null && daysUntilHome <= 0
-    ? trainingWeekFromHomecoming(homecomeDate)
-    : (profile?.trainingWeek ?? 1)
+  const trainingWeek = profile?.trainingWeek ?? 1
 
   const refreshWeekStats = useCallback(async () => {
     if (!profile?.id) return
@@ -345,8 +342,6 @@ function Dashboard() {
     ? getContextualTips(profile, ageWeeks).filter((t) => !dismissedTips.includes(t.id))
     : []
   const showHandlerTip = handlerTip && !dismissedTips.includes(handlerTip.id)
-  const actionableProgression = progressionHints.filter((h) => h.decision !== 'hold')
-
   return (
     <main className={styles.main}>
       <header className={styles.header}>
@@ -563,14 +558,26 @@ function Dashboard() {
           ) : null}
         </div>
 
-        {actionableProgression.length > 0 && (
+        {progressionHints.length > 0 && (
           <div className={styles.progressionCard}>
             <p className={styles.progressionTitle}>Nästa steg i progressionen</p>
             <div className={styles.progressionList}>
-              {actionableProgression.slice(0, 3).map((hint) => (
+              {progressionHints.slice(0, 4).map((hint) => (
                 <div key={`${hint.exerciseId}-${hint.criteriaLevelId ?? 'none'}`} className={styles.progressionItem}>
-                  <span className={`${styles.progressionBadge} ${hint.decision === 'advance' ? styles.progressionUp : styles.progressionDown}`}>
-                    {hint.decision === 'advance' ? 'Höj ett steg' : 'Sänk ett steg'}
+                  <span
+                    className={`${styles.progressionBadge} ${
+                      hint.decision === 'advance'
+                        ? styles.progressionUp
+                        : hint.decision === 'regress'
+                          ? styles.progressionDown
+                          : styles.progressionHold
+                    }`}
+                  >
+                    {hint.decision === 'advance'
+                      ? 'Höj ett steg'
+                      : hint.decision === 'regress'
+                        ? 'Sänk ett steg'
+                        : 'Håll nivån'}
                   </span>
                   <p className={styles.progressionItemTitle}>{hint.label}</p>
                   <p className={styles.progressionReason}>{hint.reason}</p>

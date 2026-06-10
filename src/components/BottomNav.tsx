@@ -11,7 +11,7 @@ interface BottomNavProps {
 const ITEMS: { id: BottomNavTab; label: string; href: string }[] = [
   { id: 'dashboard', label: 'Hem', href: '/dashboard' },
   { id: 'chat', label: 'Chatt', href: '/chat' },
-  { id: 'log', label: 'Historik', href: '/log' },
+  { id: 'skills', label: 'Färdigheter', href: '/skills' },
   { id: 'learn', label: 'Guider', href: '/learn' },
 ]
 

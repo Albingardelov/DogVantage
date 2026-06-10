@@ -211,7 +211,7 @@ function Log() {
         })}
       </div>
 
-      <BottomNav active="log" />
+      <BottomNav active="skills" />
     </main>
   )
 }

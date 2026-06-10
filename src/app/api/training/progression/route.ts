@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { withAuthAndDog } from '@/lib/api/with-auth'
 import { apiError } from '@/lib/api/errors'
 import { getSupabaseAdmin } from '@/lib/supabase/client'
-import { computeProgressionDecisions, type ProgressionMetricRow } from '@/lib/training/progression-rules'
+import {
+  computeProgressionDecisions,
+  type ProgressionMetricRow,
+  type ProgressionSessionRow,
+} from '@/lib/training/progression-rules'
 import { isValidBreed } from '@/lib/breeds/registry'
 import type { Breed, ExerciseSummary, LatencyBucket } from '@/types'
 
@@ -31,14 +35,19 @@ export async function GET(req: NextRequest) {
         .gte('date', since),
       admin
         .from('session_logs')
-        .select('exercises')
+        .select('created_at, exercises')
         .eq('dog_id', dog.id)
+        .eq('breed', breed as Breed)
+        .gte('created_at', `${daysAgo(7)}T00:00:00Z`)
         .order('created_at', { ascending: false })
         .limit(80),
     ])
 
     if (metricsRes.error) {
       return apiError(metricsRes.error, 'failed_to_load_progression')
+    }
+    if (logsRes.error) {
+      return apiError(logsRes.error, 'failed_to_load_progression_logs')
     }
 
     const labels: Record<string, string> = {}
@@ -59,8 +68,19 @@ export async function GET(req: NextRequest) {
       criteria_level_id: r.criteria_level_id ?? null,
     }))
 
-    const decisions = computeProgressionDecisions(rows, { windowDays: 7, now: new Date() })
-      .slice(0, 4)
+    const sessionRows: ProgressionSessionRow[] = logs.flatMap((row) => {
+      const createdAt = (row as { created_at?: string | null }).created_at
+      if (!createdAt) return []
+      const date = createdAt.slice(0, 10)
+      const exercises = (row as { exercises: ExerciseSummary[] | null }).exercises ?? []
+      return exercises.map((exercise) => ({
+        exercise_id: exercise.id,
+        criteria_level_id: exercise.criteria_level_id ?? null,
+        date,
+      }))
+    })
+
+    const decisions = computeProgressionDecisions(rows, { windowDays: 7, now: new Date(), sessionRows })
       .map((d) => ({
         exerciseId: d.exercise_id,
         label: labels[d.exercise_id] ?? d.exercise_id,

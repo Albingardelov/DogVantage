@@ -19,6 +19,7 @@ export interface WeekPlanContext {
   customExercises: { exercise_id: string; label: string }[]
   householdPets: HouseholdPet[]
   weeklyFocus: WeeklyFocusArea[]
+  priorityExercises: string[]
   dogSex: DogSex | undefined
   castrationStatus: CastrationStatus | undefined
   isInHeat: boolean

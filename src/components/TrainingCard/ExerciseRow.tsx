@@ -36,6 +36,11 @@ interface Props {
   rootId?: string
   /** Visas bara om callbacken är satt — byt ut till annan övning ur veckofokus */
   onSwap?: () => void
+  reasonBadges?: Array<{
+    label: string
+    tone: 'priority' | 'focus' | 'weak'
+    detail?: string
+  }>
 }
 
 const LATENCY_OPTIONS: { id: LatencyBucket; label: string }[] = [
@@ -128,6 +133,7 @@ export default function ExerciseRow({
   sessionNext: _sessionNext,
   rootId,
   onSwap,
+  reasonBadges = [],
 }: Props) {
   const [combo, setCombo] = useState(0)
   const [floats, setFloats] = useState<{ id: number; kind: 'success' | 'miss' }[]>([])
@@ -195,6 +201,25 @@ export default function ExerciseRow({
             <ExerciseIcon exerciseId={exercise.id} size="md" />
             <span className={styles.exerciseName}>{exercise.label}</span>
           </div>
+          {reasonBadges.length > 0 && (
+            <div className={styles.reasonRow}>
+              {reasonBadges.map((badge) => (
+                <span
+                  key={`${exercise.id}-${badge.label}`}
+                  className={`${styles.reasonBadge} ${
+                    badge.tone === 'priority'
+                      ? styles.reasonPriority
+                      : badge.tone === 'focus'
+                        ? styles.reasonFocus
+                        : styles.reasonWeak
+                  }`}
+                  title={badge.detail}
+                >
+                  {badge.label}
+                </span>
+              ))}
+            </div>
+          )}
           {spec?.definition && (
             <p className={styles.definitionText}>{spec.definition}</p>
           )}

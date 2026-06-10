@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAuthAndDog } from '@/lib/api/with-auth'
-import { getWeeklyFocus, setWeeklyFocus } from '@/lib/supabase/weekly-focus'
-import { currentIsoWeek, sanitizeFocusAreas } from '@/lib/training/weekly-focus'
+import { getWeeklyFocusPreferences, setWeeklyFocusPreferences } from '@/lib/supabase/weekly-focus'
+import { currentIsoWeek, sanitizeFocusAreas, sanitizePriorityExerciseIds } from '@/lib/training/weekly-focus'
 
 function resolveIsoWeek(value: string | null): string {
   if (value && /^\d{4}-W\d{2}$/.test(value)) return value
@@ -11,17 +11,25 @@ function resolveIsoWeek(value: string | null): string {
 export async function GET(req: NextRequest) {
   return withAuthAndDog(req, async ({ dog }) => {
     const isoWeek = resolveIsoWeek(req.nextUrl.searchParams.get('week'))
-    const areas = await getWeeklyFocus(dog.id, isoWeek)
-    return NextResponse.json({ isoWeek, areas })
+    const prefs = await getWeeklyFocusPreferences(dog.id, isoWeek)
+    return NextResponse.json({
+      isoWeek,
+      areas: prefs.areas,
+      exerciseIds: prefs.priorityExerciseIds,
+    })
   })
 }
 
 export async function PUT(req: NextRequest) {
   return withAuthAndDog(req, async ({ dog }) => {
-    const body = (await req.json()) as { week?: string; areas?: unknown }
+    const body = (await req.json()) as { week?: string; areas?: unknown; exerciseIds?: unknown }
     const isoWeek = resolveIsoWeek(body.week ?? null)
-    const areas = sanitizeFocusAreas(body.areas)
-    await setWeeklyFocus(dog.id, isoWeek, areas)
-    return NextResponse.json({ isoWeek, areas })
+    const existing = await getWeeklyFocusPreferences(dog.id, isoWeek)
+    const areas = body.areas === undefined ? existing.areas : sanitizeFocusAreas(body.areas)
+    const exerciseIds = body.exerciseIds === undefined
+      ? existing.priorityExerciseIds
+      : sanitizePriorityExerciseIds(body.exerciseIds)
+    await setWeeklyFocusPreferences(dog.id, isoWeek, areas, exerciseIds)
+    return NextResponse.json({ isoWeek, areas, exerciseIds })
   })
 }

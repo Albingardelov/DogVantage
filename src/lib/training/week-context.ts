@@ -19,6 +19,7 @@ export interface WeekPlanInput {
   customExercises?: Array<{ exercise_id: string; label: string }>
   householdPets?: HouseholdPet[]
   weeklyFocus?: WeeklyFocusArea[]
+  priorityExercises?: string[]
   dogSex?: DogSex
   castrationStatus?: CastrationStatus
   isInHeat?: boolean
@@ -53,6 +54,7 @@ export function buildWeekContext(input: WeekPlanInput): WeekPlanContext {
     customExercises: input.customExercises ?? [],
     householdPets,
     weeklyFocus: input.weeklyFocus ?? [],
+    priorityExercises: input.priorityExercises ?? [],
     dogSex: input.dogSex,
     castrationStatus: input.castrationStatus,
     isInHeat: Boolean(input.isInHeat),

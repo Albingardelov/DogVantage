@@ -70,6 +70,50 @@
   color: var(--color-text);
 }
 
+.badgeLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.badgeLegendItem {
+  font-size: 0.625rem;
+  font-weight: var(--font-semibold);
+  border-radius: var(--radius-full);
+  padding: 0.1rem 0.45rem;
+  border: 1px solid transparent;
+  color: #fff;
+  cursor: pointer;
+}
+
+.badgePriority {
+  background: rgb(234 179 8 / 0.9);
+  border-color: rgb(202 138 4 / 0.9);
+}
+
+.badgeFocus {
+  background: rgb(14 165 233 / 0.9);
+  border-color: rgb(2 132 199 / 0.9);
+}
+
+.badgeWeak {
+  background: rgb(239 68 68 / 0.88);
+  border-color: rgb(220 38 38 / 0.9);
+}
+
+.legendHelp {
+  margin: 0;
+  padding: 0.35rem var(--space-4) 0.5rem;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
 .exercises {
   display: flex;
   flex-direction: column;

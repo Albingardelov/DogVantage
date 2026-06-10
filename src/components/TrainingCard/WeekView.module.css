@@ -136,3 +136,33 @@
   font-size: var(--text-xs);
   color: var(--color-text-muted);
 }
+
+.reasonRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.2rem;
+}
+
+.reasonBadge {
+  font-size: 0.625rem;
+  color: #fff;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  padding: 0.1rem 0.4rem;
+}
+
+.reasonPriority {
+  background: rgb(234 179 8 / 0.9);
+  border-color: rgb(202 138 4 / 0.9);
+}
+
+.reasonFocus {
+  background: rgb(14 165 233 / 0.9);
+  border-color: rgb(2 132 199 / 0.9);
+}
+
+.reasonWeak {
+  background: rgb(239 68 68 / 0.88);
+  border-color: rgb(220 38 38 / 0.9);
+}

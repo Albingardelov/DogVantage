@@ -10,6 +10,7 @@ import {
   type RewardPreference,
   type TrainingGoal,
   type WeekPlan,
+  type ExerciseSummary,
 } from '@/types'
 import { isGoal } from '@/types/dog'
 import { isValidBreed } from '@/lib/breeds/registry'
@@ -19,7 +20,7 @@ import { detectBehaviorEmergency, BEHAVIOR_RESPONSE } from '@/lib/ai/safety-guar
 import { getRecentLogs, formatLogsForPrompt } from '@/lib/supabase/session-logs'
 import { getActiveCustomExercises } from '@/lib/supabase/custom-exercises'
 import { currentIsoWeek, type WeeklyFocusArea } from '@/lib/training/weekly-focus'
-import { getWeeklyFocus } from '@/lib/supabase/weekly-focus'
+import { getWeeklyFocusPreferences } from '@/lib/supabase/weekly-focus'
 import { getActiveHeatCycle, getLastEndedHeatCycle, isSkenfasActive } from '@/lib/supabase/heat-cycles'
 import { getSupabaseAdmin } from '@/lib/supabase/client'
 import { computeProgressionDecisions, formatProgressionRule, type ProgressionMetricRow } from '@/lib/training/progression-rules'
@@ -64,6 +65,7 @@ export interface WeekOrchestratorContext {
   onboardingContext?: string
   customIds: string[]
   focusAreas: WeeklyFocusArea[]
+  priorityExercises: string[]
   isHomecomeWeek: boolean
   hasCats: boolean
 }
@@ -107,10 +109,12 @@ export async function buildWeekContextFromRequest(
     return d.toISOString().slice(0, 10)
   })()
 
-  const [recentLogs, customRows, focusAreas, activeHeat, lastEnded, recentMetrics] = await Promise.all([
+  const sevenDaysAgoIso = `${sevenDaysAgo}T00:00:00Z`
+
+  const [recentLogs, customRows, weeklyPrefs, activeHeat, lastEnded, recentMetrics, recentSessions] = await Promise.all([
     getRecentLogs(dog.id, trainingWeek, 3).catch(() => []),
     getActiveCustomExercises(dog.id).catch(() => []),
-    getWeeklyFocus(dog.id, isoWeek).catch(() => []),
+    getWeeklyFocusPreferences(dog.id, isoWeek).catch(() => ({ areas: [], priorityExerciseIds: [] })),
     needsHeatData ? getActiveHeatCycle(dog.id).catch(() => null) : Promise.resolve(null),
     needsHeatData ? getLastEndedHeatCycle(dog.id).catch(() => null) : Promise.resolve(null),
     (async (): Promise<ProgressionMetricRow[]> => {
@@ -121,6 +125,20 @@ export async function buildWeekContextFromRequest(
           .eq('dog_id', dog.id)
           .gte('date', sevenDaysAgo)
         return (data ?? []) as ProgressionMetricRow[]
+      } catch {
+        return []
+      }
+    })(),
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from('session_logs')
+          .select('created_at, exercises')
+          .eq('dog_id', dog.id)
+          .gte('created_at', sevenDaysAgoIso)
+          .order('created_at', { ascending: false })
+          .limit(80)
+        return data ?? []
       } catch {
         return []
       }
@@ -143,12 +161,25 @@ export async function buildWeekContextFromRequest(
     exercise_id: r.exercise_id,
     label: r.label,
   }))
-  const progressionDecisions = computeProgressionDecisions(recentMetrics)
+  const sessionRows = recentSessions.flatMap((session) => {
+    const createdAt = (session as { created_at?: string | null }).created_at
+    if (!createdAt) return []
+    const date = createdAt.slice(0, 10)
+    const exercises = ((session as { exercises?: ExerciseSummary[] | null }).exercises ?? [])
+    return exercises.map((exercise) => ({
+      exercise_id: exercise.id,
+      criteria_level_id: exercise.criteria_level_id ?? null,
+      date,
+    }))
+  })
+  const progressionDecisions = computeProgressionDecisions(recentMetrics, { sessionRows })
   const progressionRule = formatProgressionRule(
     progressionDecisions,
     Object.fromEntries(customExercises.map((e: { exercise_id: string; label: string }) => [e.exercise_id, e.label])),
   )
-  const cacheKey = performanceSummary || focusAreas.length > 0 ? isoWeekKey() : undefined
+  const focusAreas = weeklyPrefs.areas
+  const priorityExercises = weeklyPrefs.priorityExerciseIds
+  const cacheKey = performanceSummary || focusAreas.length > 0 || priorityExercises.length > 0 ? isoWeekKey() : undefined
   const customIds = customExercises.map((e: { exercise_id: string; label: string }) => e.exercise_id)
   const isHomecomeWeek = trainingWeek === 1 && typeof ageWeeks === 'number' && ageWeeks < 14
   const hasCats = pets.some((pet) => pet === 'cats_indoor' || pet === 'cats_outdoor')
@@ -164,6 +195,7 @@ export async function buildWeekContextFromRequest(
       customExercises,
       householdPets: pets,
       weeklyFocus: focusAreas,
+      priorityExercises,
       dogSex,
       castrationStatus,
       isInHeat,
@@ -179,6 +211,7 @@ export async function buildWeekContextFromRequest(
     onboardingContext,
     customIds,
     focusAreas,
+    priorityExercises,
     isHomecomeWeek,
     hasCats,
   }
@@ -200,6 +233,7 @@ export async function getOrGenerateWeekPlan(ctx: WeekOrchestratorContext): Promi
       ctx.customIds,
       PLAN_VERSION,
       ctx.focusAreas,
+      ctx.priorityExercises,
     )
   } catch (e) {
     console.error('[GET /api/training/week] cache read failed:', e)
@@ -219,6 +253,7 @@ export async function getOrGenerateWeekPlan(ctx: WeekOrchestratorContext): Promi
     ctx.customIds,
     PLAN_VERSION,
     ctx.focusAreas,
+    ctx.priorityExercises,
   ).catch((e) => {
     console.error('[GET /api/training/week] cache write failed:', e)
   })
