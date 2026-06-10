@@ -72,6 +72,55 @@ const DOCS: DocSpec[] = [
     sourceUrl: 'https://www.torontohumanesociety.com',
     docVersion: '2023',
   },
+  // AVSAB humane dog training position statement (evidence base for R+)
+  {
+    file: 'docs/training-guides/avsab-humane-dog-training-2021.pdf',
+    breed: 'general',
+    sourceUrl: 'https://avsab.org/wp-content/uploads/2021/08/AVSAB-Humane-Dog-Training-Position-Statement-2021.pdf',
+    docVersion: '2021',
+  },
+  // AVSAB puppy socialization position statement
+  {
+    file: 'docs/training-guides/avsab-puppy-socialization-2024.pdf',
+    breed: 'general',
+    sourceUrl: 'https://avsab.org/wp-content/uploads/2024/12/Puppy-Socialization-Position-Statement-FINAL.pdf',
+    docVersion: '2024',
+  },
+  // AVSAB position statement on use of punishment in behavior modification
+  {
+    file: 'docs/training-guides/avsab-punishment-2021.pdf',
+    breed: 'general',
+    sourceUrl: 'https://avsab.org/resources/position-statements/',
+    docVersion: '2021',
+  },
+  // AVSAB position statement on dominance theory in dog training
+  {
+    file: 'docs/training-guides/avsab-dominance-2009.pdf',
+    breed: 'general',
+    sourceUrl: 'https://avsab.org/resources/position-statements/',
+    docVersion: '2009',
+  },
+  // RSPCA foundational obedience guide (sit, down, stay)
+  {
+    file: 'docs/training-guides/rspca-basic-commands.pdf',
+    breed: 'general',
+    sourceUrl: 'https://www.rspca.org.uk/documents/1494939/7712578/How%20to%20teach%20your%20dog%20basic%20commands%20(268%20KB)/17ed86f5-dc2b-b943-b3a6-923e23998a6b?version=2.0',
+    docVersion: 'RSPCA 2.0',
+  },
+  // RSPCA recall guide
+  {
+    file: 'docs/training-guides/rspca-recall.pdf',
+    breed: 'general',
+    sourceUrl: 'https://www.rspca.org.uk/documents/1494939/7712578/How%20to%20teach%20your%20dog%20recall%20(165%20KB)/23409bf2-4273-1434-72c5-de4f97c2d21c?download=true&version=2.0',
+    docVersion: 'RSPCA 2.0',
+  },
+  // AKC STAR puppy curriculum (structured basic exercises)
+  {
+    file: 'docs/training-guides/akc-star-puppy-6-weeks.pdf',
+    breed: 'general',
+    sourceUrl: 'https://images.akc.org/pdf/star_puppy/6_Weeks_Class.pdf',
+    docVersion: 'AKC STAR',
+  },
   // Note: dog-training-101.pdf (18 MB ≈ 9000 chunks) is intentionally excluded
   // — too large for the free embedding tier. Add if you upgrade the API plan.
   // Braque Français — FCI standard (French)
