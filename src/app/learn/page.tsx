@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import ProfileGuard from '@/components/ProfileGuard'
 import BottomNav from '@/components/BottomNav'
@@ -13,7 +13,9 @@ const TAB_KEYS = Object.keys(TAB_LABELS) as TabKey[]
 export default function LearnPage() {
   return (
     <ProfileGuard>
-      <Learn />
+      <Suspense>
+        <Learn />
+      </Suspense>
     </ProfileGuard>
   )
 }
