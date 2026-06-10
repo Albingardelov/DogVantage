@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import ExerciseRow from './ExerciseRow'
 import WeekView from './WeekView'
@@ -10,7 +10,7 @@ import styles from './TrainingCard.module.css'
 import type { Breed, TrainingGoal, TrainingEnvironment, RewardPreference, Exercise, DailyExerciseMetrics, HouseholdPet } from '@/types'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
 import { buildWeekFocusCopy } from '@/lib/training/week-focus-copy'
-import { FOCUS_EXERCISE_LABELS, type WeeklyFocusArea } from '@/lib/training/weekly-focus'
+import { FOCUS_EXERCISE_LABELS, focusExerciseIds, type WeeklyFocusArea } from '@/lib/training/weekly-focus'
 import WeekFocusPanel from './WeekFocusPanel'
 import WeeklyFocusPicker from './WeeklyFocusPicker'
 import PreSessionChecklist from './PreSessionChecklist'
@@ -57,6 +57,11 @@ export default function TrainingCard(props: Props) {
   const [showAddCustom, setShowAddCustom] = useState(false)
   const [simpleFocus, setSimpleFocus] = useState(false)
   const [focusAreas, setFocusAreas] = useState<WeeklyFocusArea[]>([])
+  const [priorityExerciseIds, setPriorityExerciseIds] = useState<string[]>([])
+  const [regressExerciseIds, setRegressExerciseIds] = useState<string[]>([])
+  const [regressReasonByExercise, setRegressReasonByExercise] = useState<Record<string, string>>({})
+  const [legendOpen, setLegendOpen] = useState<'priority' | 'focus' | 'weak' | null>(null)
+  const legendRef = useRef<HTMLDivElement | null>(null)
 
   const weekFocusCopy = useMemo(
     () => buildWeekFocusCopy({ breed, ageWeeks, trainingWeek, goals }),
@@ -81,6 +86,78 @@ export default function TrainingCard(props: Props) {
       }, 0),
     [todayExercises, progress],
   )
+
+  const focusExerciseSet = useMemo(() => new Set(focusExerciseIds(focusAreas)), [focusAreas])
+  const priorityExerciseSet = useMemo(() => new Set(priorityExerciseIds), [priorityExerciseIds])
+  const regressExerciseSet = useMemo(() => new Set(regressExerciseIds), [regressExerciseIds])
+
+  const reasonBadgesForExercise = useCallback((exerciseId: string) => {
+    const badges: Array<{ label: string; tone: 'priority' | 'focus' | 'weak'; detail?: string }> = []
+    if (priorityExerciseSet.has(exerciseId)) {
+      badges.push({
+        label: 'Prioriterad',
+        tone: 'priority',
+        detail: 'Du har prioriterat denna övning för aktuell vecka.',
+      })
+    }
+    if (focusExerciseSet.has(exerciseId)) {
+      badges.push({
+        label: 'Veckofokus',
+        tone: 'focus',
+        detail: 'Denna övning matchar ditt valda veckofokus.',
+      })
+    }
+    if (regressExerciseSet.has(exerciseId)) {
+      badges.push({
+        label: 'Svag färdighet',
+        tone: 'weak',
+        detail: regressReasonByExercise[exerciseId] ?? 'Systemet ser låg träffsäkerhet och håller/sänker nivån.',
+      })
+    }
+    return badges
+  }, [focusExerciseSet, priorityExerciseSet, regressExerciseSet, regressReasonByExercise])
+
+  const refreshPlanningSignals = useCallback(async () => {
+    if (!dogId || !breed) return
+    try {
+      const [focusRes, progressionRes] = await Promise.all([
+        fetch(`/api/training/focus?dogId=${encodeURIComponent(dogId)}`),
+        fetch(`/api/training/progression?dogId=${encodeURIComponent(dogId)}&breed=${breed}`),
+      ])
+      if (focusRes.ok) {
+        const focusBody = await focusRes.json() as { areas?: WeeklyFocusArea[]; exerciseIds?: string[] }
+        setFocusAreas(focusBody.areas ?? [])
+        setPriorityExerciseIds(focusBody.exerciseIds ?? [])
+      }
+      if (progressionRes.ok) {
+        const progressionBody = await progressionRes.json() as { decisions?: Array<{ exerciseId: string; decision: 'advance' | 'hold' | 'regress'; reason: string }> }
+        const regressRows = (progressionBody.decisions ?? []).filter((d) => d.decision === 'regress')
+        const regressIds = regressRows.map((d) => d.exerciseId)
+        const reasonMap = Object.fromEntries(
+          regressRows.map((d) => [d.exerciseId, d.reason]),
+        )
+        setRegressExerciseIds(regressIds)
+        setRegressReasonByExercise(reasonMap)
+      }
+    } catch (e) {
+      console.error('[training signals]', e)
+    }
+  }, [dogId, breed])
+
+  useEffect(() => {
+    refreshPlanningSignals()
+  }, [refreshPlanningSignals])
+
+  useEffect(() => {
+    function onPointerDown(event: MouseEvent) {
+      if (!legendRef.current) return
+      if (!legendRef.current.contains(event.target as Node)) {
+        setLegendOpen(null)
+      }
+    }
+    document.addEventListener('mousedown', onPointerDown)
+    return () => document.removeEventListener('mousedown', onPointerDown)
+  }, [])
 
   function handleRepClick(exerciseId: string, currentDone: number, maxReps: number) {
     if (currentDone >= maxReps) return
@@ -163,8 +240,8 @@ export default function TrainingCard(props: Props) {
         {dogId && (
           <WeeklyFocusPicker
             dogId={dogId}
-            onLoaded={(areas) => setFocusAreas(areas)}
-            onChange={(areas) => { setFocusAreas(areas); refresh() }}
+            onLoaded={(areas) => { setFocusAreas(areas); refreshPlanningSignals() }}
+            onChange={(areas) => { setFocusAreas(areas); refresh(); refreshPlanningSignals() }}
           />
         )}
 
@@ -178,6 +255,43 @@ export default function TrainingCard(props: Props) {
 
         {!loading && nextExercise && !todayPlan?.rest && !(simpleFocus && todayExercises.length > 2) && (
           <NextBanner label={nextExercise.label} />
+        )}
+
+        {!loading && todayExercises.length > 0 && !todayPlan?.rest && (
+          <div ref={legendRef}>
+            <div className={styles.badgeLegend}>
+              <button
+                type="button"
+                className={`${styles.badgeLegendItem} ${styles.badgePriority}`}
+                onClick={() => setLegendOpen((prev) => prev === 'priority' ? null : 'priority')}
+              >
+                Prioriterad
+              </button>
+              <button
+                type="button"
+                className={`${styles.badgeLegendItem} ${styles.badgeFocus}`}
+                onClick={() => setLegendOpen((prev) => prev === 'focus' ? null : 'focus')}
+              >
+                Veckofokus
+              </button>
+              <button
+                type="button"
+                className={`${styles.badgeLegendItem} ${styles.badgeWeak}`}
+                onClick={() => setLegendOpen((prev) => prev === 'weak' ? null : 'weak')}
+              >
+                Svag färdighet
+              </button>
+            </div>
+            {legendOpen && (
+              <p className={styles.legendHelp}>
+                {legendOpen === 'priority'
+                  ? 'Prioriterad: du har valt att övningen ska få extra plats i veckoplanen.'
+                  : legendOpen === 'focus'
+                    ? 'Veckofokus: övningen kommer från ditt aktiva fokusområde för veckan.'
+                    : 'Svag färdighet: aktuell data visar låg träffsäkerhet, så nivån hålls eller sänks.'}
+              </p>
+            )}
+          </div>
         )}
 
         {loading && <LoadingIndicator />}
@@ -210,6 +324,7 @@ export default function TrainingCard(props: Props) {
                   sessionNext={nextExerciseId === ex.id}
                   rootId={nextExerciseId === ex.id ? 'training-session-next' : undefined}
                   onSwap={swapCandidates.length > 0 ? () => handleSwap(originalIdx) : undefined}
+                  reasonBadges={reasonBadgesForExercise(ex.id)}
                 />
               )
             })}
@@ -233,7 +348,13 @@ export default function TrainingCard(props: Props) {
         )}
       </section>
 
-      {showWeekView && weekPlan && <WeekView plan={weekPlan} onClose={() => setShowWeekView(false)} />}
+      {showWeekView && weekPlan && (
+        <WeekView
+          plan={weekPlan}
+          onClose={() => setShowWeekView(false)}
+          getReasonBadges={reasonBadgesForExercise}
+        />
+      )}
 
       {showLogForm && (
         <div className={styles.logOverlay} role="dialog" aria-modal="true" aria-label="Logga träningspass">

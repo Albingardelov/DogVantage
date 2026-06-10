@@ -4,6 +4,7 @@ import { apiError } from '@/lib/api/errors'
 import { getSupabaseAdmin } from '@/lib/supabase/client'
 import { aggregateSkillProgress, type MetricRow } from '@/lib/training/skill-progress'
 import { isValidBreed } from '@/lib/breeds/registry'
+import { getExerciseSpec } from '@/lib/training/exercise-specs'
 import type { Breed, ExerciseSummary } from '@/types'
 
 function daysAgo(days: number): string {
@@ -41,8 +42,12 @@ export async function GET(req: NextRequest) {
     if (metricsRes.error) {
       return apiError(metricsRes.error, 'failed_to_load_skill_progress')
     }
+    if (logsRes.error) {
+      return apiError(logsRes.error, 'failed_to_load_skill_progress_logs')
+    }
 
     const exerciseLabels: Record<string, string> = {}
+    const criteriaLabels: Record<string, string> = {}
     const logs = logsRes.data ?? []
     for (const row of logs) {
       const exercises = (row as { exercises: ExerciseSummary[] | null }).exercises ?? []
@@ -58,12 +63,19 @@ export async function GET(req: NextRequest) {
       fail_count: r.fail_count ?? 0,
       criteria_level_id: r.criteria_level_id ?? null,
     }))
+    for (const row of rows) {
+      const spec = getExerciseSpec(row.exercise_id)
+      if (!spec) continue
+      for (const level of spec.ladder) {
+        if (!criteriaLabels[level.id]) criteriaLabels[level.id] = level.label
+      }
+    }
 
     const progress = aggregateSkillProgress(rows, {
       exerciseLabels,
+      criteriaLabels,
       endDate: new Date(),
       weeks,
-      topN: 5,
     })
 
     return NextResponse.json({ exercises: progress })

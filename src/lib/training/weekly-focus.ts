@@ -60,6 +60,12 @@ export const FOCUS_EXERCISE_LABELS: Record<string, string> = {
 }
 
 export const MAX_WEEKLY_FOCUS = 2
+export const MAX_WEEKLY_PRIORITY_EXERCISES = 3
+
+export interface WeeklyPlanningPreferences {
+  areas: WeeklyFocusArea[]
+  priorityExerciseIds: string[]
+}
 
 export function isValidFocusArea(value: unknown): value is WeeklyFocusArea {
   return typeof value === 'string' && (WEEKLY_FOCUS_AREAS as readonly string[]).includes(value)
@@ -92,6 +98,28 @@ export function focusPromptRule(areas: WeeklyFocusArea[]): string | null {
   const labels = areas.map((a) => WEEKLY_FOCUS_LABELS[a]).join(', ')
   const ids = focusExerciseIds(areas)
   return `Veckofokus från ägaren: ${labels}. Inkludera minst en övning med id ur denna lista varje träningsdag: ${ids.join(', ')}. Vikta planen mot dessa men följ fortfarande rasregler och valpregler.`
+}
+
+export function sanitizePriorityExerciseIds(input: unknown): string[] {
+  if (!Array.isArray(input)) return []
+  const out: string[] = []
+  const seen = new Set<string>()
+  for (const v of input) {
+    if (typeof v !== 'string') continue
+    const id = v.trim().toLowerCase()
+    if (!id) continue
+    if (!/^[a-z0-9_]+$/.test(id)) continue
+    if (seen.has(id)) continue
+    out.push(id)
+    seen.add(id)
+    if (out.length >= MAX_WEEKLY_PRIORITY_EXERCISES) break
+  }
+  return out
+}
+
+export function priorityPromptRule(priorityExerciseIds: string[]): string | null {
+  if (priorityExerciseIds.length === 0) return null
+  return `Ägaren har prioriterat följande övningar denna vecka: ${priorityExerciseIds.join(', ')}. Inkludera minst en av dessa på varje träningsdag, men följ alltid säkerhetsregler samt progression (hold/regress/advance).`
 }
 
 /** ISO-week key like "2026-W19" — same week boundary used by the planner cache. */

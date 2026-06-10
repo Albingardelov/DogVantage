@@ -26,6 +26,12 @@ export interface ProgressionMetricRow {
   criteria_level_id: string | null
 }
 
+export interface ProgressionSessionRow {
+  exercise_id: string
+  criteria_level_id: string | null
+  date: string
+}
+
 export type ProgressionDecision = 'advance' | 'hold' | 'regress'
 
 export interface ExerciseProgressionDecision {
@@ -38,6 +44,7 @@ export interface ExerciseProgressionDecision {
 }
 
 const MIN_ATTEMPTS = 10
+const MIN_SESSIONS = 2
 const ADVANCE_THRESHOLD = 0.80
 const REGRESS_THRESHOLD = 0.60
 
@@ -57,7 +64,7 @@ function latencyWeight(bucket: LatencyBucket | null): number {
  */
 export function computeProgressionDecisions(
   rows: ProgressionMetricRow[],
-  options: { windowDays?: number; now?: Date } = {},
+  options: { windowDays?: number; now?: Date; sessionRows?: ProgressionSessionRow[] } = {},
 ): ExerciseProgressionDecision[] {
   const windowDays = options.windowDays ?? 7
   const now = options.now ?? new Date()
@@ -65,27 +72,29 @@ export function computeProgressionDecisions(
   cutoff.setUTCDate(cutoff.getUTCDate() - windowDays)
   const cutoffStr = cutoff.toISOString().slice(0, 10)
 
-  // Group by exercise_id; track the latest criteria_level_id within the
-  // window so the decision refers to the rung the dog is actually working on.
+  const sessionRows = options.sessionRows ?? []
+
   type Accum = {
     success: number
     fail: number
     latencyScore: number
     latencyCount: number
-    latestDate: string
-    latestCriteriaId: string | null
+    sessionDays: Set<string>
   }
-  const byExercise: Record<string, Accum> = {}
+  const byExerciseCriteria: Record<string, Accum> = {}
+
+  const makeKey = (exerciseId: string, criteriaLevelId: string | null): string =>
+    `${exerciseId}::${criteriaLevelId ?? ''}`
 
   for (const row of rows) {
     if (row.date < cutoffStr) continue
-    const acc = byExercise[row.exercise_id] ??= {
+    const key = makeKey(row.exercise_id, row.criteria_level_id)
+    const acc = byExerciseCriteria[key] ??= {
       success: 0,
       fail: 0,
       latencyScore: 0,
       latencyCount: 0,
-      latestDate: '',
-      latestCriteriaId: null,
+      sessionDays: new Set<string>(),
     }
     acc.success += row.success_count
     acc.fail += row.fail_count
@@ -93,16 +102,28 @@ export function computeProgressionDecisions(
       acc.latencyScore += latencyWeight(row.latency_bucket)
       acc.latencyCount += 1
     }
-    if (row.criteria_level_id && row.date >= acc.latestDate) {
-      acc.latestDate = row.date
-      acc.latestCriteriaId = row.criteria_level_id
+  }
+
+  for (const row of sessionRows) {
+    if (row.date < cutoffStr) continue
+    const key = makeKey(row.exercise_id, row.criteria_level_id)
+    const acc = byExerciseCriteria[key] ??= {
+      success: 0,
+      fail: 0,
+      latencyScore: 0,
+      latencyCount: 0,
+      sessionDays: new Set<string>(),
     }
+    acc.sessionDays.add(row.date)
   }
 
   const decisions: ExerciseProgressionDecision[] = []
-  for (const [exerciseId, acc] of Object.entries(byExercise)) {
+  for (const [key, acc] of Object.entries(byExerciseCriteria)) {
+    const [exerciseId, criteriaRaw = ''] = key.split('::')
+    const criteriaLevelId = criteriaRaw.length > 0 ? criteriaRaw : null
     const attempts = acc.success + acc.fail
     if (attempts === 0) continue
+    const sessionCount = acc.sessionDays.size
 
     const rawRate = acc.success / attempts
     const latencyAdjust = acc.latencyCount > 0 ? acc.latencyScore / acc.latencyCount : 0
@@ -110,7 +131,10 @@ export function computeProgressionDecisions(
 
     let decision: ProgressionDecision
     let reason: string
-    if (attempts < MIN_ATTEMPTS) {
+    if (sessionCount < MIN_SESSIONS) {
+      decision = 'hold'
+      reason = `${sessionCount} pass på nivån — kör minst ${MIN_SESSIONS} pass innan nivåbeslut`
+    } else if (attempts < MIN_ATTEMPTS) {
       decision = 'hold'
       reason = `${attempts} reps på fönstret — för få datapunkter, håll nuvarande nivå`
     } else if (adjustedRate >= ADVANCE_THRESHOLD) {
@@ -126,7 +150,7 @@ export function computeProgressionDecisions(
 
     decisions.push({
       exercise_id: exerciseId,
-      criteria_level_id: acc.latestCriteriaId,
+      criteria_level_id: criteriaLevelId,
       decision,
       attempts,
       success_rate: rawRate,

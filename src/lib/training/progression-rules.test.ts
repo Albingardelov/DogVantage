@@ -21,13 +21,27 @@ function row(opts: {
   }
 }
 
+function sessionRow(opts: { id: string; date: string; rung?: string | null }) {
+  return {
+    exercise_id: opts.id,
+    date: opts.date,
+    criteria_level_id: opts.rung ?? null,
+  }
+}
+
 describe('computeProgressionDecisions', () => {
   it('advances when success rate >= 80% over enough reps', () => {
     const rows = [
       row({ id: 'sitt', date: '2026-05-10', s: 8, f: 1, rung: 'home_signal' }),
       row({ id: 'sitt', date: '2026-05-09', s: 7, f: 1, rung: 'home_signal' }),
     ]
-    const decisions = computeProgressionDecisions(rows, { now: today })
+    const decisions = computeProgressionDecisions(rows, {
+      now: today,
+      sessionRows: [
+        sessionRow({ id: 'sitt', date: '2026-05-10', rung: 'home_signal' }),
+        sessionRow({ id: 'sitt', date: '2026-05-09', rung: 'home_signal' }),
+      ],
+    })
     expect(decisions).toHaveLength(1)
     expect(decisions[0].decision).toBe('advance')
     expect(decisions[0].criteria_level_id).toBe('home_signal')
@@ -38,7 +52,13 @@ describe('computeProgressionDecisions', () => {
       row({ id: 'koppel', date: '2026-05-10', s: 3, f: 7 }),
       row({ id: 'koppel', date: '2026-05-09', s: 2, f: 8 }),
     ]
-    const decisions = computeProgressionDecisions(rows, { now: today })
+    const decisions = computeProgressionDecisions(rows, {
+      now: today,
+      sessionRows: [
+        sessionRow({ id: 'koppel', date: '2026-05-10' }),
+        sessionRow({ id: 'koppel', date: '2026-05-09' }),
+      ],
+    })
     expect(decisions[0].decision).toBe('regress')
   })
 
@@ -47,7 +67,13 @@ describe('computeProgressionDecisions', () => {
       row({ id: 'ligg', date: '2026-05-10', s: 7, f: 3 }),
       row({ id: 'ligg', date: '2026-05-09', s: 7, f: 3 }),
     ]
-    const decisions = computeProgressionDecisions(rows, { now: today })
+    const decisions = computeProgressionDecisions(rows, {
+      now: today,
+      sessionRows: [
+        sessionRow({ id: 'ligg', date: '2026-05-10' }),
+        sessionRow({ id: 'ligg', date: '2026-05-09' }),
+      ],
+    })
     expect(decisions[0].decision).toBe('hold')
   })
 
@@ -55,7 +81,10 @@ describe('computeProgressionDecisions', () => {
     const rows = [
       row({ id: 'plats', date: '2026-05-10', s: 4, f: 0 }),
     ]
-    const decisions = computeProgressionDecisions(rows, { now: today })
+    const decisions = computeProgressionDecisions(rows, {
+      now: today,
+      sessionRows: [sessionRow({ id: 'plats', date: '2026-05-10' }), sessionRow({ id: 'plats', date: '2026-05-09' })],
+    })
     expect(decisions[0].decision).toBe('hold')
     expect(decisions[0].reason).toContain('för få')
   })
@@ -74,7 +103,13 @@ describe('computeProgressionDecisions', () => {
       row({ id: 'inkallning', date: '2026-05-10', s: 8, f: 2, latency: 'lt1s' }),
       row({ id: 'inkallning', date: '2026-05-09', s: 7, f: 3, latency: 'lt1s' }),
     ]
-    const decisions = computeProgressionDecisions(rows, { now: today })
+    const decisions = computeProgressionDecisions(rows, {
+      now: today,
+      sessionRows: [
+        sessionRow({ id: 'inkallning', date: '2026-05-10' }),
+        sessionRow({ id: 'inkallning', date: '2026-05-09' }),
+      ],
+    })
     // 15/20 = 75% raw, +0.05 latency = 80% → advance
     expect(decisions[0].decision).toBe('advance')
   })
@@ -88,7 +123,23 @@ describe('computeProgressionDecisions', () => {
       row({ id: 'e_regress', date: '2026-05-10', s: 2, f: 8 }),
       row({ id: 'f_regress', date: '2026-05-09', s: 2, f: 8 }),
     ]
-    const decisions = computeProgressionDecisions(rows, { now: today })
+    const decisions = computeProgressionDecisions(rows, {
+      now: today,
+      sessionRows: [
+        sessionRow({ id: 'a_hold', date: '2026-05-10' }),
+        sessionRow({ id: 'a_hold', date: '2026-05-09' }),
+        sessionRow({ id: 'b_hold', date: '2026-05-10' }),
+        sessionRow({ id: 'b_hold', date: '2026-05-09' }),
+        sessionRow({ id: 'c_advance', date: '2026-05-10' }),
+        sessionRow({ id: 'c_advance', date: '2026-05-09' }),
+        sessionRow({ id: 'd_advance', date: '2026-05-10' }),
+        sessionRow({ id: 'd_advance', date: '2026-05-09' }),
+        sessionRow({ id: 'e_regress', date: '2026-05-10' }),
+        sessionRow({ id: 'e_regress', date: '2026-05-09' }),
+        sessionRow({ id: 'f_regress', date: '2026-05-10' }),
+        sessionRow({ id: 'f_regress', date: '2026-05-09' }),
+      ],
+    })
     expect(decisions.map((d) => d.decision)).toEqual(['regress', 'regress', 'advance', 'advance', 'hold', 'hold'])
   })
 
@@ -97,8 +148,27 @@ describe('computeProgressionDecisions', () => {
       row({ id: 'sitt', date: '2026-05-08', s: 5, f: 0, rung: 'home_lure' }),
       row({ id: 'sitt', date: '2026-05-10', s: 5, f: 0, rung: 'home_signal' }), // most recent
     ]
-    const decisions = computeProgressionDecisions(rows, { now: today })
-    expect(decisions[0].criteria_level_id).toBe('home_signal')
+    const decisions = computeProgressionDecisions(rows, {
+      now: today,
+      sessionRows: [
+        sessionRow({ id: 'sitt', date: '2026-05-08', rung: 'home_lure' }),
+        sessionRow({ id: 'sitt', date: '2026-05-10', rung: 'home_signal' }),
+      ],
+    })
+    expect(decisions.map((d) => d.criteria_level_id).sort()).toEqual(['home_lure', 'home_signal'])
+  })
+
+  it('holds when only one session exists on the current rung', () => {
+    const rows = [
+      row({ id: 'fot', date: '2026-05-10', s: 9, f: 1, rung: 'outdoor_low' }),
+      row({ id: 'fot', date: '2026-05-10', s: 9, f: 1, rung: 'outdoor_low' }),
+    ]
+    const decisions = computeProgressionDecisions(rows, {
+      now: today,
+      sessionRows: [sessionRow({ id: 'fot', date: '2026-05-10', rung: 'outdoor_low' })],
+    })
+    expect(decisions[0].decision).toBe('hold')
+    expect(decisions[0].reason).toContain('minst 2 pass')
   })
 })
 

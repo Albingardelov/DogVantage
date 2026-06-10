@@ -173,13 +173,14 @@ export function RatingIcon({
   return <DvIcon icon={RATING_ICONS[rating]} size={size} weight="duotone" className={className} />
 }
 
-export type BottomNavTab = 'dashboard' | 'chat' | 'log' | 'learn'
+export type BottomNavTab = 'dashboard' | 'chat' | 'log' | 'learn' | 'skills'
 
 const NAV_ICONS: Record<BottomNavTab, Icon> = {
   dashboard: House,
   chat: ChatCircle,
   learn: BookOpen,
   log: ListBullets,
+  skills: Medal,
 }
 
 export function NavIcon({

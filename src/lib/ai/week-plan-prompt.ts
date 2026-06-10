@@ -16,8 +16,9 @@ export function buildWeekPromptParts(input: WeekPlanInput & { documentContext?: 
   const goalIds = ctx.goals.length > 0 ? ctx.goals.flatMap((g) => GOAL_EXERCISE_IDS[g] ?? []) : []
   const petIds = ctx.householdPets.length > 0 ? ['socialisering', 'impulskontroll', 'fokus', 'plats'] : []
   const focusIds = ctx.weeklyFocus.length > 0 ? focusExerciseIds(ctx.weeklyFocus) : []
+  const priorityIds = ctx.priorityExercises.length > 0 ? ctx.priorityExercises : []
   const reactiveIds = ctx.isReactive ? REACTIVE_EXERCISES : []
-  const allowedIds = [...new Set([...breedIds, ...goalIds, ...petIds, ...focusIds, ...reactiveIds])]
+  const allowedIds = [...new Set([...breedIds, ...goalIds, ...petIds, ...focusIds, ...priorityIds, ...reactiveIds])]
 
   const goalContext = ctx.goals.length > 0
     ? `\nÄgarens mål: ${ctx.goals.map((g) => GOAL_LABELS[g]).join(', ')}. Anpassa övningsvalet efter dessa mål.\n`

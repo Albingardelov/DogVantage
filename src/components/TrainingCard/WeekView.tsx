@@ -9,9 +9,14 @@ const SWEDISH_DAYS = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fred
 interface Props {
   plan: WeekPlan
   onClose: () => void
+  getReasonBadges?: (exerciseId: string) => Array<{
+    label: string
+    tone: 'priority' | 'focus' | 'weak'
+    detail?: string
+  }>
 }
 
-export default function WeekView({ plan, onClose }: Props) {
+export default function WeekView({ plan, onClose, getReasonBadges }: Props) {
   const todayName = SWEDISH_DAYS[new Date().getDay()]
 
   return (
@@ -51,6 +56,25 @@ export default function WeekView({ plan, onClose }: Props) {
                       <li key={ex.id} className={styles.exerciseItem}>
                         <span className={styles.exerciseName}>{ex.label}</span>
                         <span className={styles.exerciseMeta}>{ex.reps}× · {ex.desc}</span>
+                        {getReasonBadges && (
+                          <div className={styles.reasonRow}>
+                            {getReasonBadges(ex.id).map((badge) => (
+                              <span
+                                key={`${day.day}-${ex.id}-${badge.label}`}
+                                className={`${styles.reasonBadge} ${
+                                  badge.tone === 'priority'
+                                    ? styles.reasonPriority
+                                    : badge.tone === 'focus'
+                                      ? styles.reasonFocus
+                                      : styles.reasonWeak
+                                }`}
+                                title={badge.detail}
+                              >
+                                {badge.label}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </li>
                     ))}
                   </ul>

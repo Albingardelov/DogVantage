@@ -11,10 +11,12 @@ import { sessionCapRule } from './session-cap'
 import { goalRule } from './goal'
 import { progressionRule } from './progression'
 import { puppyRule } from './puppy'
+import { priorityRule } from './priority'
 import type { RuleBuilder, WeekPlanContext } from './types'
 
 export const ALL_RULES: RuleBuilder[] = [
   progressionRule,
+  priorityRule,
   developmentalRule,
   sessionCapRule,
   reactiveRule,
