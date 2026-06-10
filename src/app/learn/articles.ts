@@ -1,10 +1,15 @@
+export interface ArticleSection {
+  heading: string
+  body: string
+}
+
 export interface Article {
   id: string
   title: string
   summary: string
   readTime: string
   sources: string[]
-  sections: { heading: string; body: string }[]
+  sections: ArticleSection[]
 }
 
 export type TabKey = 'grunderna' | 'teknik' | 'mindset' | 'beteende'
@@ -135,7 +140,7 @@ export const CATEGORIES: Record<TabKey, Article[]> = {
       ],
     },
     {
-      id: 'box-traning',
+      id: 'box-training',
       title: 'Burträning — så bygger du en plats hunden älskar',
       summary: 'En bur är inte ett straff. Rätt introducerad blir den hundens favorit-vilo-plats.',
       readTime: '5 min',
@@ -164,7 +169,7 @@ export const CATEGORIES: Record<TabKey, Article[]> = {
       ],
     },
     {
-      id: 'ensam-traning',
+      id: 'ensam-training',
       title: 'Ensam hemma — bygg upp tiden gradvis',
       summary: 'Hopp direkt till 4 timmar = panik. Här är ladd-stegen från 30 sekunder.',
       readTime: '5 min',
