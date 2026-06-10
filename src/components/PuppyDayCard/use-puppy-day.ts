@@ -39,7 +39,7 @@ export interface UsePuppyDayResult {
 }
 
 export function usePuppyDay({
-  dogId, todayDate, breed, trainingWeek, ageWeeks,
+  dogId, todayDate, trainingWeek, ageWeeks,
   goals, environment, rewardPreference, takesRewardsOutdoors, householdPets,
 }: UsePuppyDayParams): UsePuppyDayResult {
   const [zone, setZone] = useState<PuppyZone | null>(null)
@@ -65,13 +65,13 @@ export function usePuppyDay({
     try {
       if (currentZone === 'green') {
         const planUrl = buildWeekPlanUrl({
-          breed, trainingWeek, ageWeeks, dogId, goals,
+          trainingWeek, ageWeeks, dogId, goals,
           environment, rewardPreference, takesRewardsOutdoors, householdPets,
         })
         const [planRes, progressData, metricsData] = await Promise.all([
           fetch(planUrl),
-          apiFetch(`/api/training/progress?breed=${breed}&date=${todayDate}&dogId=${encodeURIComponent(dogId)}`, ProgressMapSchema),
-          apiFetch(`/api/training/metrics?breed=${breed}&date=${todayDate}&dogId=${encodeURIComponent(dogId)}`, MetricsMapSchema),
+          apiFetch(`/api/training/progress?date=${todayDate}&dogId=${encodeURIComponent(dogId)}`, ProgressMapSchema),
+          apiFetch(`/api/training/metrics?date=${todayDate}&dogId=${encodeURIComponent(dogId)}`, MetricsMapSchema),
         ])
         if (planRes.ok) {
           const body = await planRes.json()
@@ -95,8 +95,8 @@ export function usePuppyDay({
         setMetrics(metricsData)
       } else if (currentZone === 'yellow') {
         const [progressData, metricsData] = await Promise.all([
-          apiFetch(`/api/training/progress?breed=${breed}&date=${todayDate}&dogId=${encodeURIComponent(dogId)}`, ProgressMapSchema),
-          apiFetch(`/api/training/metrics?breed=${breed}&date=${todayDate}&dogId=${encodeURIComponent(dogId)}`, MetricsMapSchema),
+          apiFetch(`/api/training/progress?date=${todayDate}&dogId=${encodeURIComponent(dogId)}`, ProgressMapSchema),
+          apiFetch(`/api/training/metrics?date=${todayDate}&dogId=${encodeURIComponent(dogId)}`, MetricsMapSchema),
         ])
         setProgress(progressData)
         setMetrics(metricsData)
@@ -109,7 +109,7 @@ export function usePuppyDay({
     } finally {
       setLoadingExercises(false)
     }
-  }, [breed, trainingWeek, ageWeeks, dogId, todayDate, goals, environment, rewardPreference, takesRewardsOutdoors, householdPets])
+  }, [trainingWeek, ageWeeks, dogId, todayDate, goals, environment, rewardPreference, takesRewardsOutdoors, householdPets])
 
   useEffect(() => {
     if (zone) void fetchForZone(zone)

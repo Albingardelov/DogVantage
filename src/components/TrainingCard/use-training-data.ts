@@ -34,7 +34,7 @@ interface Params extends WeekPlanUrlParams {
  */
 export function useTrainingData(params: Params): UseTrainingDataResult {
   const {
-    breed, trainingWeek, ageWeeks, dogId, goals, environment, rewardPreference,
+    trainingWeek, ageWeeks, dogId, goals, environment, rewardPreference,
     takesRewardsOutdoors, householdPets, todayDate,
   } = params
 
@@ -51,17 +51,17 @@ export function useTrainingData(params: Params): UseTrainingDataResult {
     setReferral(null)
     try {
       const planUrl = buildWeekPlanUrl({
-        breed, trainingWeek, ageWeeks, dogId, goals, environment,
+        trainingWeek, ageWeeks, dogId, goals, environment,
         rewardPreference, takesRewardsOutdoors, householdPets,
       })
       const [planRes, progressRes, metricsRes] = await Promise.all([
         fetch(planUrl),
         apiFetch(
-          `/api/training/progress?breed=${breed}&date=${todayDate}&dogId=${encodeURIComponent(dogId)}`,
+          `/api/training/progress?date=${todayDate}&dogId=${encodeURIComponent(dogId)}`,
           ProgressMapSchema,
         ),
         apiFetch(
-          `/api/training/metrics?breed=${breed}&date=${todayDate}&dogId=${encodeURIComponent(dogId)}`,
+          `/api/training/metrics?date=${todayDate}&dogId=${encodeURIComponent(dogId)}`,
           MetricsMapSchema,
         ),
       ])
@@ -88,7 +88,7 @@ export function useTrainingData(params: Params): UseTrainingDataResult {
     } finally {
       setLoading(false)
     }
-  }, [breed, trainingWeek, ageWeeks, todayDate, goals, environment, rewardPreference, takesRewardsOutdoors, householdPets, dogId])
+  }, [trainingWeek, ageWeeks, todayDate, goals, environment, rewardPreference, takesRewardsOutdoors, householdPets, dogId])
 
   useEffect(() => { refresh() }, [refresh])
 

@@ -2,12 +2,11 @@
 
 import { useState } from 'react'
 import { IconCheckCircle, IconConfetti, IconMedal, RatingIcon } from '@/components/icons'
-import type { Breed, ExerciseSummary, QuickRating } from '@/types'
+import type { ExerciseSummary, QuickRating } from '@/types'
 import styles from './SessionLogForm.module.css'
 
 interface Props {
   dogId: string
-  breed: Breed
   weekNumber: number
   exercises?: ExerciseSummary[]
   onSaved: () => void
@@ -101,7 +100,7 @@ function computeHeroStats(exercises?: ExerciseSummary[]) {
   return { rate, count: exercises.length, reps: totalAttempts }
 }
 
-export default function SessionLogForm({ dogId, breed, weekNumber, exercises, onSaved, onCancel }: Props) {
+export default function SessionLogForm({ dogId, weekNumber, exercises, onSaved, onCancel }: Props) {
   const [rating, setRating] = useState<QuickRating | null>(null)
   const [focus, setFocus] = useState(3)
   const [obedience, setObedience] = useState(3)
@@ -135,7 +134,6 @@ export default function SessionLogForm({ dogId, breed, weekNumber, exercises, on
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           dog_id: dogId,
-          breed,
           week_number: weekNumber,
           quick_rating: rating,
           focus,

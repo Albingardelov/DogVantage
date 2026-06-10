@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
           { status: 422 },
         )
       }
-      if (err instanceof Error && err.message === 'breed and week required') {
+      if (err instanceof Error && (err.message === 'week required' || err.message === 'invalid dog breed profile')) {
         return NextResponse.json({ error: err.message }, { status: 400 })
       }
       return apiError(err, 'plan_generation_failed')

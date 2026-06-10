@@ -55,6 +55,7 @@ function resolveHashes(
   customIds?: string[],
   focusAreas?: string[],
   priorityExercises?: string[],
+  progressionRule?: string | null,
 ) {
   return {
     onboardingHash: onboardingContext ? shortHash(onboardingContext) : undefined,
@@ -63,6 +64,7 @@ function resolveHashes(
     priorityHash: priorityExercises && priorityExercises.length > 0
       ? shortHash([...priorityExercises].sort().join(','))
       : undefined,
+    progressionHash: progressionRule ? shortHash(progressionRule) : undefined,
   }
 }
 
@@ -77,6 +79,7 @@ function weekPlanCacheKey(
   planVersion?: string,
   focusHash?: string,
   priorityHash?: string,
+  progressionHash?: string,
 ): string {
   const parts = [`weekplan`, breed, ageBucket(ageWeeks), goalsBucket(goals)]
   if (dogId) parts.push(dogId)
@@ -84,6 +87,7 @@ function weekPlanCacheKey(
   if (customHash) parts.push(`c${customHash}`)
   if (focusHash) parts.push(`f${focusHash}`)
   if (priorityHash) parts.push(`p${priorityHash}`)
+  if (progressionHash) parts.push(`g${progressionHash}`)
   if (planVersion) parts.push(planVersion)
   if (dateKey) parts.push(dateKey)
   return parts.join('_')
@@ -101,9 +105,10 @@ export async function getCachedWeekPlan(
   planVersion?: string,
   focusAreas?: string[],
   priorityExercises?: string[],
+  progressionRule?: string | null,
 ): Promise<WeekPlan | null> {
-  const { onboardingHash, customHash, focusHash, priorityHash } =
-    resolveHashes(onboardingContext, customIds, focusAreas, priorityExercises)
+  const { onboardingHash, customHash, focusHash, priorityHash, progressionHash } =
+    resolveHashes(onboardingContext, customIds, focusAreas, priorityExercises, progressionRule)
   const cacheBreed = weekPlanCacheKey(
     breed,
     ageWeeks,
@@ -115,6 +120,7 @@ export async function getCachedWeekPlan(
     planVersion,
     focusHash,
     priorityHash,
+    progressionHash,
   )
   let query = getSupabaseAdmin()
     .from('training_cache')
@@ -206,9 +212,10 @@ export async function setCachedWeekPlan(
   planVersion?: string,
   focusAreas?: string[],
   priorityExercises?: string[],
+  progressionRule?: string | null,
 ): Promise<void> {
-  const { onboardingHash, customHash, focusHash, priorityHash } =
-    resolveHashes(onboardingContext, customIds, focusAreas, priorityExercises)
+  const { onboardingHash, customHash, focusHash, priorityHash, progressionHash } =
+    resolveHashes(onboardingContext, customIds, focusAreas, priorityExercises, progressionRule)
   const { error } = await getSupabaseAdmin()
     .from('training_cache')
     .upsert({
@@ -223,6 +230,7 @@ export async function setCachedWeekPlan(
         planVersion,
         focusHash,
         priorityHash,
+        progressionHash,
       ),
       week_number: weekNumber,
       content: JSON.stringify(plan),

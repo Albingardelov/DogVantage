@@ -122,7 +122,7 @@ export default function TrainingCard(props: Props) {
     try {
       const [focusRes, progressionRes] = await Promise.all([
         fetch(`/api/training/focus?dogId=${encodeURIComponent(dogId)}`),
-        fetch(`/api/training/progression?dogId=${encodeURIComponent(dogId)}&breed=${breed}`),
+        fetch(`/api/training/progression?dogId=${encodeURIComponent(dogId)}`),
       ])
       if (focusRes.ok) {
         const focusBody = await focusRes.json() as { areas?: WeeklyFocusArea[]; exerciseIds?: string[] }
@@ -172,7 +172,7 @@ export default function TrainingCard(props: Props) {
     fetch('/api/training/progress', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ breed, date: todayDate, dogId, exerciseId, count: newDone }),
+      body: JSON.stringify({ date: todayDate, dogId, exerciseId, count: newDone }),
     }).catch(console.error)
   }
 
@@ -194,7 +194,7 @@ export default function TrainingCard(props: Props) {
     fetch('/api/training/metrics', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ breed, date: todayDate, dogId, exerciseId, patch }),
+      body: JSON.stringify({ date: todayDate, dogId, exerciseId, patch }),
     }).catch(console.error)
   }
 
@@ -361,7 +361,6 @@ export default function TrainingCard(props: Props) {
           <div className={styles.logSheet}>
             <SessionLogForm
               dogId={dogId}
-              breed={breed}
               weekNumber={trainingWeek}
               exercises={buildExerciseSummaries(todayExercises, metrics)}
               onSaved={() => setShowLogForm(false)}

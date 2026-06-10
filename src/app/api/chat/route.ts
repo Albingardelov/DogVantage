@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { aiErrorResponse } from '@/lib/ai/errors'
-import { withAuth } from '@/lib/api/with-auth'
+import { withAuthAndDog } from '@/lib/api/with-auth'
 import { apiError } from '@/lib/api/errors'
 import { getSubscriptionState, hasFeature } from '@/lib/billing/subscription'
 import { queryRAG } from '@/lib/ai/rag'
@@ -9,7 +9,8 @@ import { getMetrics } from '@/lib/supabase/daily-exercise-metrics'
 import { getCachedChat, setCachedChat, touchCacheEntry } from '@/lib/supabase/training-cache'
 import { incrementChatCount, DAILY_CHAT_LIMIT } from '@/lib/supabase/chat-usage'
 import { detectSecretExposure } from '@/lib/ai/safety-guards'
-import type { Breed } from '@/types'
+import { getAgeInWeeks } from '@/lib/dog/age'
+import { getBehaviorContextPayloadFromDb } from '@/lib/dog/build-behavior-context'
 
 function todayDateString(): string {
   return new Date().toISOString().split('T')[0]
@@ -33,19 +34,28 @@ function formatMetricsForPrompt(metrics: Record<string, import('@/types').DailyE
 
 export async function POST(req: NextRequest) {
   try {
-    return withAuth(req, async ({ user }) => {
-      const { query, breed, weekNumber, ageWeeks, trainingWeek, dogId, onboardingContext } = await req.json() as {
+    return withAuthAndDog(req, async ({ user, dog, supabase }) => {
+      const { query } = await req.json() as {
         query: string
-        breed: Breed
-        weekNumber?: number
-        ageWeeks?: number
-        trainingWeek?: number
-        dogId?: string
-        onboardingContext?: string
       }
 
-      if (!query || !breed) {
-        return NextResponse.json({ error: 'query and breed required' }, { status: 400 })
+      if (!query) {
+        return NextResponse.json({ error: 'query required' }, { status: 400 })
+      }
+
+      const { data: profile } = await supabase
+        .from('dog_profiles')
+        .select('birthdate, training_week')
+        .eq('id', dog.id)
+        .single()
+      const { context: onboardingContext } = await getBehaviorContextPayloadFromDb(supabase, dog.id)
+
+      const ageWeeks = profile?.birthdate ? Math.max(1, getAgeInWeeks(profile.birthdate)) : undefined
+      const logsWeek = typeof profile?.training_week === 'number' ? profile.training_week : undefined
+      const breed = dog.breed
+
+      if (!breed) {
+        return NextResponse.json({ error: 'dog profile breed missing' }, { status: 400 })
       }
       if (detectSecretExposure(query) || detectSecretExposure(onboardingContext)) {
         return NextResponse.json(
@@ -64,23 +74,19 @@ export async function POST(req: NextRequest) {
         )
       }
 
-      const logsWeek = typeof trainingWeek === 'number'
-        ? trainingWeek
-        : (typeof weekNumber === 'number' ? weekNumber : undefined)
-      const phaseAgeWeeks = typeof ageWeeks === 'number' ? ageWeeks : (typeof weekNumber === 'number' ? weekNumber : undefined)
-      const shouldFetchLogs = typeof logsWeek === 'number' && Boolean(dogId)
-      const shouldFetchMetrics = Boolean(dogId)
+      const shouldFetchLogs = typeof logsWeek === 'number'
+      const shouldFetchMetrics = Boolean(dog.id)
 
       const [logStrings, metricsStrings, cached] = await Promise.all([
         shouldFetchLogs
-          ? getRecentLogs(dogId!, logsWeek!).then((logs) => formatLogsForPrompt(logs))
+          ? getRecentLogs(dog.id, logsWeek!).then((logs) => formatLogsForPrompt(logs))
           : Promise.resolve([]),
         shouldFetchMetrics
-          ? getMetrics(breed, todayDateString(), dogId ?? '')
+          ? getMetrics(breed, todayDateString(), dog.id)
             .then((metrics) => formatMetricsForPrompt(metrics))
             .catch(() => [])
           : Promise.resolve([]),
-        getCachedChat(query, breed, phaseAgeWeeks).catch(() => null),
+        getCachedChat(query, breed, ageWeeks).catch(() => null),
       ])
 
       const isPersonalized =
@@ -88,7 +94,7 @@ export async function POST(req: NextRequest) {
       if (!isPersonalized) {
         if (cached) {
           // LRU touch can run in the background.
-          void touchCacheEntry(query, breed, phaseAgeWeeks).catch(() => {})
+          void touchCacheEntry(query, breed, ageWeeks).catch(() => {})
           return NextResponse.json(cached)
         }
       }
@@ -104,11 +110,11 @@ export async function POST(req: NextRequest) {
         )
       }
 
-      const result = await queryRAG(query, breed, logStrings, phaseAgeWeeks, metricsStrings, onboardingContext)
+      const result = await queryRAG(query, breed, logStrings, ageWeeks, metricsStrings, onboardingContext ?? undefined)
 
       if (!isPersonalized) {
         try {
-          await setCachedChat(query, breed, result, phaseAgeWeeks)
+          await setCachedChat(query, breed, result, ageWeeks)
         } catch (err) {
           console.error('[/api/chat] cache write failed', err)
         }

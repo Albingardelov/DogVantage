@@ -21,7 +21,6 @@ export default function SkillsPage() {
 function SkillsView() {
   const { activeDog: profile } = useActiveDog()
   const dogId = profile?.id ?? null
-  const breed = profile?.breed ?? null
   const dogName = profile?.name ?? 'Din hund'
   const [priorityExerciseIds, setPriorityExerciseIds] = useState<string[]>([])
   const [focusWeek, setFocusWeek] = useState<string | null>(null)
@@ -105,9 +104,8 @@ function SkillsView() {
         {focusWeek && (
           <p className={styles.weekHint}>Prioriteringar gäller för {focusWeek}</p>
         )}
-        {dogId && breed && (
+        {dogId && (
           <SkillProgressSection
-            breed={breed}
             dogId={dogId}
             weeks={8}
             title="Övningsöversikt senaste 8 veckorna"

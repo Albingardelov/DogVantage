@@ -1,7 +1,10 @@
 import type { Breed, HouseholdPet, RewardPreference, TrainingEnvironment, TrainingGoal } from '@/types'
 
 export interface WeekPlanUrlParams {
-  breed: Breed
+  /**
+   * @deprecated Week API resolves breed server-side from dog profile.
+   */
+  breed?: Breed
   trainingWeek: number
   ageWeeks: number
   dogId: string
@@ -19,7 +22,6 @@ export interface WeekPlanUrlParams {
  */
 export function buildWeekPlanUrl(p: WeekPlanUrlParams): string {
   const params = new URLSearchParams()
-  params.set('breed', p.breed)
   params.set('week', String(p.trainingWeek))
   params.set('ageWeeks', String(p.ageWeeks))
   params.set('dogId', p.dogId)

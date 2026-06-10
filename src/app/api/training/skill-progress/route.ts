@@ -3,9 +3,8 @@ import { withAuthAndDog } from '@/lib/api/with-auth'
 import { apiError } from '@/lib/api/errors'
 import { getSupabaseAdmin } from '@/lib/supabase/client'
 import { aggregateSkillProgress, type MetricRow } from '@/lib/training/skill-progress'
-import { isValidBreed } from '@/lib/breeds/registry'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
-import type { Breed, ExerciseSummary } from '@/types'
+import type { ExerciseSummary } from '@/types'
 
 function daysAgo(days: number): string {
   const d = new Date()
@@ -14,13 +13,14 @@ function daysAgo(days: number): string {
 }
 
 export async function GET(req: NextRequest) {
-  const breed = req.nextUrl.searchParams.get('breed')
+  const requestedBreed = req.nextUrl.searchParams.get('breed')
   const weeksParam = Number(req.nextUrl.searchParams.get('weeks') ?? '4')
   const weeks = Number.isFinite(weeksParam) ? Math.min(12, Math.max(1, Math.round(weeksParam))) : 4
 
-  if (!breed || !isValidBreed(breed)) return NextResponse.json({ error: 'breed required' }, { status: 400 })
-
   return withAuthAndDog(req, async ({ dog }) => {
+    if (requestedBreed && requestedBreed !== dog.breed) {
+      console.warn(`[GET /api/training/skill-progress] ignored mismatched breed query="${requestedBreed}" for dog=${dog.id}`)
+    }
     const since = daysAgo(weeks * 7 + 7)
     const admin = getSupabaseAdmin()
 
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
         .from('daily_exercise_metrics')
         .select('exercise_id, date, success_count, fail_count, criteria_level_id')
         .eq('dog_id', dog.id)
-        .eq('breed', breed)
+        .eq('breed', dog.breed)
         .gte('date', since),
       admin
         .from('session_logs')

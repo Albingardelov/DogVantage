@@ -623,7 +623,6 @@ function Dashboard() {
           profile?.id && (
             <SessionLogForm
               dogId={profile.id}
-              breed={profile.breed}
               weekNumber={trainingWeek}
               onSaved={handleLogSaved}
               onCancel={() => setShowLogForm(false)}

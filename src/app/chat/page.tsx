@@ -7,47 +7,6 @@ import { FeatureGate } from '@/components/billing/FeatureGate'
 import Avatar from '@/components/Avatar'
 import BottomNav from '@/components/BottomNav'
 import { useActiveDog } from '@/lib/dog/active-dog-context'
-import { getAgeInWeeks } from '@/lib/dog/age'
-import { buildBehaviorContext } from '@/lib/dog/behavior'
-import type { DogProfile, TrainingEnvironment, RewardPreference } from '@/types'
-
-const ENV_LABELS: Record<TrainingEnvironment, string> = {
-  city:   'Stad (mycket folk och hundar)',
-  suburb: 'Förort / blandat',
-  rural:  'Land / natur',
-}
-
-const REWARD_LABELS: Record<RewardPreference, string> = {
-  food:   'Mat',
-  toy:    'Leksak',
-  social: 'Socialt (beröm/lek)',
-  mixed:  'Blandat',
-}
-
-const TRAINING_BACKGROUND_LABELS: Record<string, string> = {
-  beginner: 'Nybörjare',
-  some_training: 'Viss träningserfarenhet',
-  experienced: 'Erfaren',
-}
-
-function buildOnboardingContext(profile: DogProfile): string | undefined {
-  const prefs = profile.onboarding
-  const lines: string[] = []
-  if (prefs?.trainingBackground) {
-    lines.push(`Förarerfarenhet: ${TRAINING_BACKGROUND_LABELS[prefs.trainingBackground] ?? prefs.trainingBackground}`)
-  }
-  if (prefs?.environment) lines.push(`Miljö: ${ENV_LABELS[prefs.environment] ?? prefs.environment}`)
-  if (prefs?.rewardPreference) lines.push(`Belöning som funkar bäst: ${REWARD_LABELS[prefs.rewardPreference] ?? prefs.rewardPreference}`)
-  if (prefs?.takesRewardsOutdoors != null) {
-    lines.push(`Tar belöning utomhus: ${prefs.takesRewardsOutdoors ? 'Ja' : 'Nej — prioritera inne-träning eller extra hög-värde belöning ute'}`)
-  }
-  const behaviorContext = buildBehaviorContext(profile)
-  if (behaviorContext) {
-    lines.push('')
-    lines.push(behaviorContext)
-  }
-  return lines.length > 0 ? lines.join('\n') : undefined
-}
 import styles from './page.module.css'
 
 export default function ChatPage() {
@@ -63,7 +22,6 @@ function Chat() {
   const searchParams = useSearchParams()
   const initialQuestion = searchParams.get('question') ?? undefined
 
-  const ageWeeks = profile ? Math.max(1, getAgeInWeeks(profile.birthdate)) : 0
   const trainingWeek = profile?.trainingWeek ?? 1
   const dogName = profile?.name ?? 'din hund'
 
@@ -77,15 +35,12 @@ function Chat() {
         </div>
       </header>
 
-      {profile && (
+      {profile?.id && (
         <FeatureGate feature="ai_chat">
           <ChatInterface
-            breed={profile.breed}
-            ageWeeks={ageWeeks}
             trainingWeek={trainingWeek}
             initialQuestion={initialQuestion}
             dogId={profile.id}
-            onboardingContext={buildOnboardingContext(profile)}
           />
         </FeatureGate>
       )}
