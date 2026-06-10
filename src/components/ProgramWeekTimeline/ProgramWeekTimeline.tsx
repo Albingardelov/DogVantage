@@ -5,6 +5,31 @@ interface Props {
   ageWeeks: number
 }
 
+export interface PhaseInfo {
+  phaseName: string
+  phasePct: number
+  weekRange: string
+  nextPhaseLabel: string | null
+  weeksToNext: number | null
+}
+
+export function getPhaseInfo(ageWeeks: number): PhaseInfo | null {
+  if (!Number.isFinite(ageWeeks) || ageWeeks <= 0 || ageWeeks > 60) return null
+  const currentPhase = getPhaseForWeek(ageWeeks)
+  const currentIdx = TRAINING_CURRICULUM.indexOf(currentPhase)
+  const nextPhase = TRAINING_CURRICULUM[currentIdx + 1] ?? null
+  const phaseStart = currentPhase.weeks.from
+  const phaseEnd = currentPhase.weeks.to === 9999 ? phaseStart + 52 : currentPhase.weeks.to
+  const phaseSpan = Math.max(1, phaseEnd - phaseStart)
+  return {
+    phaseName: currentPhase.label,
+    phasePct: Math.min(1, Math.max(0, (ageWeeks - phaseStart) / phaseSpan)),
+    weekRange: `${phaseStart}–${currentPhase.weeks.to === 9999 ? '∞' : phaseEnd}`,
+    nextPhaseLabel: nextPhase?.label ?? null,
+    weeksToNext: nextPhase ? Math.max(0, nextPhase.weeks.from - ageWeeks) : null,
+  }
+}
+
 /**
  * Mini-timeline that explains what "Programvecka X" means in plain language:
  * which curriculum phase the dog is in, how many weeks remain until the next

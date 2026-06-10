@@ -6,6 +6,7 @@ import { IconCaretDown, IconPlus, SelectionCheck } from '@/components/icons'
 import Avatar from './Avatar'
 import styles from './DogSwitcher.module.css'
 
+
 interface DogSwitcherProps {
   onAddDog: () => void
 }
@@ -36,8 +37,7 @@ export default function DogSwitcher({ onAddDog }: DogSwitcherProps) {
         onClick={() => setOpen(true)}
         aria-label="Byt hund"
       >
-        <Avatar name={activeDog.name} size={28} />
-        {activeDog.name}
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{activeDog.name}</span>
         <IconCaretDown size="sm" className={styles.chevron} />
       </button>
 
