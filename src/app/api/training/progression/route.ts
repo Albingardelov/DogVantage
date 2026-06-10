@@ -4,7 +4,7 @@ import { apiError } from '@/lib/api/errors'
 import { getSupabaseAdmin } from '@/lib/supabase/client'
 import { computeProgressionDecisions, type ProgressionMetricRow } from '@/lib/training/progression-rules'
 import { isValidBreed } from '@/lib/breeds/registry'
-import type { Breed, ExerciseSummary } from '@/types'
+import type { Breed, ExerciseSummary, LatencyBucket } from '@/types'
 
 function daysAgo(days: number): string {
   const d = new Date()
@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
       date: r.date,
       success_count: r.success_count ?? 0,
       fail_count: r.fail_count ?? 0,
-      latency_bucket: r.latency_bucket,
+      latency_bucket: r.latency_bucket as LatencyBucket | null,
       criteria_level_id: r.criteria_level_id ?? null,
     }))
 
