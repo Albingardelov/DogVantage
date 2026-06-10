@@ -132,18 +132,6 @@ export async function queryRAG(
     // If we cannot retrieve evidence, we do not generate unsupported guidance.
   }
 
-  if (chunks.length === 0) {
-    return {
-      content:
-        'Jag hittar inget tillräckligt relevant källdokument för just den här frågan ännu. Jag vill inte gissa. Lägg gärna till eller välj en guide som täcker momentet (t.ex. sitt/stanna/inkallning), så kan jag ge dokumentbaserade steg direkt.',
-      source: '',
-      source_url: '',
-      sources: undefined,
-      attributionNote:
-        'Inget material från uppladdade dokument hade tillräcklig träff för frågan, så svaret stoppades för att undvika råd utan dokumentstöd.',
-    }
-  }
-
   // 2. Build the "ritning" (blueprint) — breed profile + training phase
   const breedProfile = formatBreedProfileShort(breed)
   const phaseInfo = weekAge != null ? `\n${formatCurrentPhaseShort(weekAge)}` : ''
