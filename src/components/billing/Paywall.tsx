@@ -45,8 +45,8 @@ export function Paywall() {
           <p className={styles.price}>39 kr/mån</p>
           <ul>
             <li>Veckoplan</li>
-            <li>Logg & kalender</li>
-            <li>Lär-bibliotek</li>
+            <li>Historik & kalender</li>
+            <li>Guidebibliotek</li>
           </ul>
           <button type="button" onClick={() => handleCheckout('basic')} disabled={loading !== null}>
             {loading === 'basic' ? 'Öppnar checkout…' : 'Starta Basic 39 kr'}

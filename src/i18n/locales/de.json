@@ -13,7 +13,7 @@
   "nav": {
     "dashboard": "Start",
     "calendar": "Kalender",
-    "learn": "Lernen",
+    "learn": "Leitfäden",
     "chat": "Chat",
     "profile": "Profil",
     "logOut": "Abmelden"
@@ -44,7 +44,7 @@
     "features": {
       "weeklyPlan": "Wochenplan",
       "logsAndCalendar": "Protokolle und Kalender",
-      "learnLibrary": "Lern-Bibliothek",
+      "learnLibrary": "Leitfaden-Bibliothek",
       "aiChat": "AI-Chat",
       "multipleDogs": "Mehrere Hunde",
       "customExercises": "Eigene AI-Übungen"
@@ -98,7 +98,7 @@
     "weekPlan": "Wochenplan"
   },
   "learn": {
-    "title": "Lernen",
+    "title": "Leitfäden",
     "readGuide": "Leitfaden lesen"
   },
   "apiErrors": {

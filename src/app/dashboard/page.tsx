@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import ProfileGuard from '@/components/ProfileGuard'
 import TrainingCard from '@/components/TrainingCard/TrainingCard'
@@ -60,6 +60,16 @@ interface ContextualTip {
   title: string
   body: string
   learnId?: string // links to article on /learn
+}
+
+interface ProgressionHint {
+  exerciseId: string
+  label: string
+  decision: 'advance' | 'hold' | 'regress'
+  reason: string
+  attempts: number
+  successRate: number
+  criteriaLevelId: string | null
 }
 
 function getContextualTips(profile: DogProfile, ageWeeks: number): ContextualTip[] {
@@ -175,6 +185,7 @@ function getAgeAlert(ageWeeks: number): AgeAlert | null {
 
 function Dashboard() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { activeDog: profile } = useActiveDog()
   const { state: subscription } = useSubscription()
   const [showLogForm, setShowLogForm] = useState(false)
@@ -188,6 +199,7 @@ function Dashboard() {
   const [handlerTip, setHandlerTip] = useState<HandlerFeedbackTip | null>(null)
   const [heatState, setHeatState] = useState<{ isInHeat: boolean; skenfasActive: boolean } | null>(null)
   const [streak, setStreak] = useState<number | null>(null)
+  const [progressionHints, setProgressionHints] = useState<ProgressionHint[]>([])
 
   const ageWeeks = profile ? Math.max(1, getAgeInWeeks(profile.birthdate)) : 0
   const homecomeDate = profile?.onboarding?.homecomeDate
@@ -245,19 +257,39 @@ function Dashboard() {
     }
   }, [profile?.id])
 
+  const refreshProgressionHints = useCallback(async () => {
+    if (!profile?.id || !profile?.breed) return
+    try {
+      const params = new URLSearchParams({
+        dogId: profile.id,
+        breed: profile.breed,
+      })
+      const res = await fetch(`/api/training/progression?${params}`)
+      if (!res.ok) throw new Error('Kunde inte hämta progression')
+      const data = await res.json() as { decisions?: ProgressionHint[] }
+      setProgressionHints(data.decisions ?? [])
+    } catch (e) {
+      console.error('[dashboard progression]', e)
+      setProgressionHints([])
+    }
+  }, [profile?.id, profile?.breed])
+
   useEffect(() => {
     if (!profile?.breed) {
       setWeekStats(null)
       setHandlerTip(null)
       setHeatState(null)
       setStreak(null)
+      setProgressionHints([])
       return
     }
     setWeekStats(null)
     setStreak(null)
+    setProgressionHints([])
     refreshWeekStats()
     refreshHandlerTip()
     refreshStreak()
+    refreshProgressionHints()
     if (profile.id && profile.sex === 'female' && profile.castrationStatus === 'intact') {
       fetch(`/api/training/heat?dogId=${encodeURIComponent(profile.id)}`)
         .then((r) => r.ok ? r.json() : null)
@@ -266,12 +298,21 @@ function Dashboard() {
     } else {
       setHeatState(null)
     }
-  }, [profile?.breed, profile?.id, profile?.sex, profile?.castrationStatus, refreshWeekStats, refreshHandlerTip, refreshStreak])
+  }, [profile?.breed, profile?.id, profile?.sex, profile?.castrationStatus, refreshWeekStats, refreshHandlerTip, refreshStreak, refreshProgressionHints])
+
+  useEffect(() => {
+    if (searchParams.get('log') === '1') {
+      setShowLogForm(true)
+      document.getElementById('today-training')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [searchParams])
 
   function handleLogSaved() {
     setShowLogForm(false)
     refreshWeekStats()
     refreshHandlerTip()
+    refreshStreak()
+    refreshProgressionHints()
   }
 
   function dismissTip(id: string) {
@@ -287,6 +328,7 @@ function Dashboard() {
     ? getContextualTips(profile, ageWeeks).filter((t) => !dismissedTips.includes(t.id))
     : []
   const showHandlerTip = handlerTip && !dismissedTips.includes(handlerTip.id)
+  const actionableProgression = progressionHints.filter((h) => h.decision !== 'hold')
 
   return (
     <main className={styles.main}>
@@ -301,7 +343,7 @@ function Dashboard() {
             }} />
             <Link href="/calendar" className={styles.weekBadge}>
               <IconCalendar size="sm" className={styles.weekBadgeIcon} />
-              Programvecka {trainingWeek}
+              Programvecka {trainingWeek} · Se veckoschema
               <IconCaretRight size="sm" className={styles.weekBadgeArrow} />
             </Link>
             <StreakBadge streak={streak} />
@@ -344,6 +386,17 @@ function Dashboard() {
       </header>
 
       <div className={styles.scrollArea}>
+        <button
+          className={styles.logCta}
+          onClick={() => {
+            document.getElementById('today-training')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }}
+          type="button"
+        >
+          <IconPaw size="md" className={styles.logCtaIcon} />
+          <span>Starta dagens pass</span>
+        </button>
+
         {ageAlert && (
           <div className={`${styles.ageAlert} ${ageAlert.tone === 'warning' ? styles.ageAlertWarning : styles.ageAlertInfo}`}>
             <p className={styles.ageAlertTitle}>{ageAlert.title}</p>
@@ -420,11 +473,12 @@ function Dashboard() {
             type="button"
           >
             <IconFlask size="md" className={styles.logCtaIcon} />
-            <span>Gör snabb screening (10–12 min)</span>
+            <span>Starta nivåtest (10–12 min)</span>
           </button>
         )}
-        {profile && beforeHomecoming ? (
-          <div className={styles.countdownCard}>
+        <div id="today-training">
+          {profile && beforeHomecoming ? (
+            <div className={styles.countdownCard}>
             <div className={styles.countdownIcon}>
               <IconPaw size="xl" />
             </div>
@@ -444,41 +498,59 @@ function Dashboard() {
                 <li>Boka veterinärbesök inom 1–2 veckor</li>
               </ul>
             </div>
+            </div>
+          ) : profile ? (
+            isPuppyMode(ageWeeks) ? (
+              <PuppyDayCard
+              trainingWeek={trainingWeek}
+              ageWeeks={ageWeeks}
+              breed={profile.breed}
+              dogName={dogName}
+              dogId={profile.id ?? ''}
+              goals={profile.onboarding?.goals}
+              environment={profile.onboarding?.environment}
+              rewardPreference={profile.onboarding?.rewardPreference}
+              takesRewardsOutdoors={profile.onboarding?.takesRewardsOutdoors}
+              householdPets={profile.onboarding?.householdPets}
+              />
+            ) : (
+              <TrainingCard
+              trainingWeek={trainingWeek}
+              ageWeeks={ageWeeks}
+              breed={profile.breed}
+              dogName={dogName}
+              dogId={profile.id ?? ''}
+              goals={profile.onboarding?.goals}
+              environment={profile.onboarding?.environment}
+              rewardPreference={profile.onboarding?.rewardPreference}
+              takesRewardsOutdoors={profile.onboarding?.takesRewardsOutdoors}
+              householdPets={profile.onboarding?.householdPets}
+              />
+            )
+          ) : null}
+        </div>
+
+        {actionableProgression.length > 0 && (
+          <div className={styles.progressionCard}>
+            <p className={styles.progressionTitle}>Nästa steg i progressionen</p>
+            <div className={styles.progressionList}>
+              {actionableProgression.slice(0, 3).map((hint) => (
+                <div key={`${hint.exerciseId}-${hint.criteriaLevelId ?? 'none'}`} className={styles.progressionItem}>
+                  <span className={`${styles.progressionBadge} ${hint.decision === 'advance' ? styles.progressionUp : styles.progressionDown}`}>
+                    {hint.decision === 'advance' ? 'Höj ett steg' : 'Sänk ett steg'}
+                  </span>
+                  <p className={styles.progressionItemTitle}>{hint.label}</p>
+                  <p className={styles.progressionReason}>{hint.reason}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        ) : profile ? (
-          isPuppyMode(ageWeeks) ? (
-            <PuppyDayCard
-              trainingWeek={trainingWeek}
-              ageWeeks={ageWeeks}
-              breed={profile.breed}
-              dogName={dogName}
-              dogId={profile.id ?? ''}
-              goals={profile.onboarding?.goals}
-              environment={profile.onboarding?.environment}
-              rewardPreference={profile.onboarding?.rewardPreference}
-              takesRewardsOutdoors={profile.onboarding?.takesRewardsOutdoors}
-              householdPets={profile.onboarding?.householdPets}
-            />
-          ) : (
-            <TrainingCard
-              trainingWeek={trainingWeek}
-              ageWeeks={ageWeeks}
-              breed={profile.breed}
-              dogName={dogName}
-              dogId={profile.id ?? ''}
-              goals={profile.onboarding?.goals}
-              environment={profile.onboarding?.environment}
-              rewardPreference={profile.onboarding?.rewardPreference}
-              takesRewardsOutdoors={profile.onboarding?.takesRewardsOutdoors}
-              householdPets={profile.onboarding?.householdPets}
-            />
-          )
-        ) : null}
+        )}
 
         {profile && (
           <div className={styles.statsGrid}>
             <StatCard
-              label="Pass loggade"
+              label="Pass i historik"
               value={weekStats === null ? '…' : String(weekStats.count)}
               sub="denna vecka"
               tone="primary"
@@ -505,7 +577,7 @@ function Dashboard() {
             type="button"
           >
             <IconPencil size="md" className={styles.logCtaIcon} />
-            <span>Logga träningspass</span>
+            <span>Logga pass manuellt</span>
           </button>
         ) : (
           profile?.id && (

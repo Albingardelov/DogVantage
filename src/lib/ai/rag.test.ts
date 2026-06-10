@@ -98,4 +98,77 @@ describe('queryRAG', () => {
     expect(result.content).toContain('veterinär')
     expect(vi.mocked(client.chat.completions.create)).not.toHaveBeenCalled()
   })
+
+  it('fetches a wider candidate set for foundational obedience questions', async () => {
+    const { searchBreedChunks } = await import('@/lib/supabase/breed-chunks')
+    const { queryRAG } = await import('./rag')
+    await queryRAG('Hur tränar jag sitt och stanna bäst?', 'labrador')
+    expect(vi.mocked(searchBreedChunks)).toHaveBeenCalledWith(
+      expect.any(Array),
+      'labrador',
+      12
+    )
+  })
+
+  it('prioritizes curated obedience sources when query is obedience-focused', async () => {
+    const { searchBreedChunks } = await import('@/lib/supabase/breed-chunks')
+    vi.mocked(searchBreedChunks).mockResolvedValueOnce([
+      {
+        id: 'generic-top',
+        content: 'Allmän rastext.',
+        source: 'standard-labrador.pdf',
+        source_url: 'https://skk.se',
+        doc_version: '2024',
+        page_ref: 's.1',
+        similarity: 0.95,
+      },
+      {
+        id: 'obedience-priority',
+        content: 'Stegvis sitt/stanna med belöning.',
+        source: 'rspca-basic-commands.pdf',
+        source_url: 'https://www.rspca.org.uk/documents/example.pdf',
+        doc_version: 'RSPCA 2.0',
+        page_ref: 's.2',
+        similarity: 0.8,
+      },
+    ] satisfies ChunkMatch[])
+
+    const { queryRAG } = await import('./rag')
+    const result = await queryRAG('Hur lär jag valpen sitt?', 'labrador')
+    expect(result.source).toContain('rspca-basic-commands.pdf')
+  })
+
+  it('returns blocked response when no document chunks match and does not call Groq', async () => {
+    const { searchBreedChunks } = await import('@/lib/supabase/breed-chunks')
+    vi.mocked(searchBreedChunks).mockResolvedValueOnce([])
+    const { getGroqClient } = await import('@/lib/ai/client')
+    const client = getGroqClient()
+    const { queryRAG } = await import('./rag')
+    const result = await queryRAG('Hur tränar jag plats?', 'labrador')
+    expect(result.content).toContain('Jag vill inte gissa')
+    expect(result.attributionNote).toContain('dokument')
+    expect(result.sources).toBeUndefined()
+    expect(vi.mocked(client.chat.completions.create)).not.toHaveBeenCalled()
+  })
+
+  it('blocks low-similarity chunks to avoid unsupported guidance', async () => {
+    const { searchBreedChunks } = await import('@/lib/supabase/breed-chunks')
+    vi.mocked(searchBreedChunks).mockResolvedValueOnce([
+      {
+        id: 'low-sim',
+        content: 'Svag träff.',
+        source: 'some-source.pdf',
+        source_url: 'https://example.com/some-source.pdf',
+        doc_version: '1',
+        page_ref: 's.1',
+        similarity: 0.2,
+      },
+    ] satisfies ChunkMatch[])
+    const { getGroqClient } = await import('@/lib/ai/client')
+    const client = getGroqClient()
+    const { queryRAG } = await import('./rag')
+    const result = await queryRAG('Hur tränar jag sitt?', 'labrador')
+    expect(result.content).toContain('Jag vill inte gissa')
+    expect(vi.mocked(client.chat.completions.create)).not.toHaveBeenCalled()
+  })
 })

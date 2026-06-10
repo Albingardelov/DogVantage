@@ -258,7 +258,7 @@ function ProfileView() {
           <span className={styles.avatarEditBadge}>✎</span>
         </button>
         <span className={styles.dogName}>{profile.name}</span>
-        <span className={styles.dogMeta}>{breedLabel(profile.breed)} · {ageLabel} · Vecka {profile.trainingWeek ?? 1}</span>
+        <span className={styles.dogMeta}>{breedLabel(profile.breed)} · {ageLabel} · Programvecka {profile.trainingWeek ?? 1}</span>
       </div>
 
       <div className={styles.scrollArea}>
@@ -585,7 +585,7 @@ function ProfileView() {
         </div>
 
         <div className={styles.section}>
-          <span className={styles.sectionTitle}>Egna träningspass</span>
+          <span className={styles.sectionTitle}>Egna övningar</span>
           <FeatureGate feature="custom_exercises">
             <CustomExerciseList dogId={profile.id} />
           </FeatureGate>

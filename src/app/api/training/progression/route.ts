@@ -1,0 +1,76 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { withAuthAndDog } from '@/lib/api/with-auth'
+import { apiError } from '@/lib/api/errors'
+import { getSupabaseAdmin } from '@/lib/supabase/client'
+import { computeProgressionDecisions, type ProgressionMetricRow } from '@/lib/training/progression-rules'
+import { isValidBreed } from '@/lib/breeds/registry'
+import type { Breed, ExerciseSummary } from '@/types'
+
+function daysAgo(days: number): string {
+  const d = new Date()
+  d.setUTCDate(d.getUTCDate() - days)
+  return d.toISOString().slice(0, 10)
+}
+
+export async function GET(req: NextRequest) {
+  const breed = req.nextUrl.searchParams.get('breed')
+  if (!breed || !isValidBreed(breed)) {
+    return NextResponse.json({ error: 'breed required' }, { status: 400 })
+  }
+
+  return withAuthAndDog(req, async ({ dog }) => {
+    const since = daysAgo(14)
+    const admin = getSupabaseAdmin()
+
+    const [metricsRes, logsRes] = await Promise.all([
+      admin
+        .from('daily_exercise_metrics')
+        .select('exercise_id, date, success_count, fail_count, latency_bucket, criteria_level_id')
+        .eq('dog_id', dog.id)
+        .eq('breed', breed as Breed)
+        .gte('date', since),
+      admin
+        .from('session_logs')
+        .select('exercises')
+        .eq('dog_id', dog.id)
+        .order('created_at', { ascending: false })
+        .limit(80),
+    ])
+
+    if (metricsRes.error) {
+      return apiError(metricsRes.error, 'failed_to_load_progression')
+    }
+
+    const labels: Record<string, string> = {}
+    const logs = logsRes.data ?? []
+    for (const row of logs) {
+      const exercises = (row as { exercises: ExerciseSummary[] | null }).exercises ?? []
+      for (const ex of exercises) {
+        if (ex.id && ex.label && !labels[ex.id]) labels[ex.id] = ex.label
+      }
+    }
+
+    const rows: ProgressionMetricRow[] = (metricsRes.data ?? []).map((r) => ({
+      exercise_id: r.exercise_id,
+      date: r.date,
+      success_count: r.success_count ?? 0,
+      fail_count: r.fail_count ?? 0,
+      latency_bucket: r.latency_bucket,
+      criteria_level_id: r.criteria_level_id ?? null,
+    }))
+
+    const decisions = computeProgressionDecisions(rows, { windowDays: 7, now: new Date() })
+      .slice(0, 4)
+      .map((d) => ({
+        exerciseId: d.exercise_id,
+        label: labels[d.exercise_id] ?? d.exercise_id,
+        decision: d.decision,
+        reason: d.reason,
+        attempts: d.attempts,
+        successRate: d.success_rate,
+        criteriaLevelId: d.criteria_level_id,
+      }))
+
+    return NextResponse.json({ decisions })
+  })
+}

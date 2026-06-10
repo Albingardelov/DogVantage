@@ -24,9 +24,18 @@ const REWARD_LABELS: Record<RewardPreference, string> = {
   mixed:  'Blandat',
 }
 
+const TRAINING_BACKGROUND_LABELS: Record<string, string> = {
+  beginner: 'Nybörjare',
+  some_training: 'Viss träningserfarenhet',
+  experienced: 'Erfaren',
+}
+
 function buildOnboardingContext(profile: DogProfile): string | undefined {
   const prefs = profile.onboarding
   const lines: string[] = []
+  if (prefs?.trainingBackground) {
+    lines.push(`Förarerfarenhet: ${TRAINING_BACKGROUND_LABELS[prefs.trainingBackground] ?? prefs.trainingBackground}`)
+  }
   if (prefs?.environment) lines.push(`Miljö: ${ENV_LABELS[prefs.environment] ?? prefs.environment}`)
   if (prefs?.rewardPreference) lines.push(`Belöning som funkar bäst: ${REWARD_LABELS[prefs.rewardPreference] ?? prefs.rewardPreference}`)
   if (prefs?.takesRewardsOutdoors != null) {

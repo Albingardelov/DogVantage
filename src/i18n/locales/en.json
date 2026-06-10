@@ -13,7 +13,7 @@
   "nav": {
     "dashboard": "Home",
     "calendar": "Calendar",
-    "learn": "Learn",
+    "learn": "Guides",
     "chat": "Chat",
     "profile": "Profile",
     "logOut": "Log out"
@@ -44,7 +44,7 @@
     "features": {
       "weeklyPlan": "Weekly plan",
       "logsAndCalendar": "Logs and calendar",
-      "learnLibrary": "Learn library",
+      "learnLibrary": "Guide library",
       "aiChat": "AI chat",
       "multipleDogs": "Multiple dogs",
       "customExercises": "Custom AI exercises"
@@ -98,7 +98,7 @@
     "weekPlan": "Weekly plan"
   },
   "learn": {
-    "title": "Learn",
+    "title": "Guides",
     "readGuide": "Read guide"
   },
   "apiErrors": {
