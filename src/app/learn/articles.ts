@@ -18,7 +18,7 @@ export const TAB_LABELS: Record<TabKey, string> = {
   grunderna: 'Valp & Grunder',
   teknik: 'Träningsteknik',
   mindset: 'Förarmindset',
-  beteende: 'Beteende',
+  beteende: 'Beteende & Reaktivitet',
 }
 
 export const CATEGORIES: Record<TabKey, Article[]> = {
