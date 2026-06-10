@@ -121,6 +121,48 @@ const DOCS: DocSpec[] = [
     sourceUrl: 'https://images.akc.org/pdf/star_puppy/6_Weeks_Class.pdf',
     docVersion: 'AKC STAR',
   },
+  // ASPCA Pro — managing leash-reactive dogs (counter-conditioning, threshold work)
+  {
+    file: 'docs/training-guides/aspca-reactive-dogs-on-leash.pdf',
+    breed: 'general',
+    sourceUrl: 'https://www.aspcapro.org/sites/default/files/aspca-reactive-dogs-on-leash.pdf',
+    docVersion: 'ASPCA Pro',
+  },
+  // ASPCA Pro — treating separation anxiety (systematic desensitization protocol)
+  {
+    file: 'docs/training-guides/aspca-separation-anxiety.pdf',
+    breed: 'general',
+    sourceUrl: 'https://www.aspcapro.org/sites/default/files/behavior-2020-treating-anxiety.pdf',
+    docVersion: 'ASPCA Pro 2020',
+  },
+  // SPCA — crate training guide (positive introduction, step-by-step protocol)
+  {
+    file: 'docs/training-guides/spca-crate-training.pdf',
+    breed: 'general',
+    sourceUrl: 'https://spca.org/wp-content/uploads/2023/07/Crate-Training-Your-Dog.pdf',
+    docVersion: 'SPCA 2023',
+  },
+  // APDT — dominance theory critique and modern training alternatives
+  {
+    file: 'docs/training-guides/apdt-dominance-dog-training.pdf',
+    breed: 'general',
+    sourceUrl: 'https://apdt.com/wp-content/uploads/2017/01/dominance-and-dog-training.pdf',
+    docVersion: 'APDT 2017',
+  },
+  // Oregon Humane Society — positive reinforcement overview (R+, timing, shaping)
+  {
+    file: 'docs/training-guides/oregonhumane-positive-reinforcement.pdf',
+    breed: 'general',
+    sourceUrl: 'https://www.oregonhumane.org/wp-content/uploads/Positive-Reinforcement-Training_6.13.19.pdf',
+    docVersion: 'Oregon Humane 2019',
+  },
+  // McGill University — institutional positive reinforcement training SOP
+  {
+    file: 'docs/training-guides/mcgill-positive-reinforcement-sop.pdf',
+    breed: 'general',
+    sourceUrl: 'https://www.mcgill.ca/research/files/research/638_-_positive_reinforcement_training_-_mcgill.pdf',
+    docVersion: 'McGill SOP 638',
+  },
   // Note: dog-training-101.pdf (18 MB ≈ 9000 chunks) is intentionally excluded
   // — too large for the free embedding tier. Add if you upgrade the API plan.
   // Braque Français — FCI standard (French)
