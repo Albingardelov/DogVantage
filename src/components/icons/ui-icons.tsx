@@ -30,6 +30,7 @@ import {
   Smiley,
   SmileyMeh,
   SmileySad,
+  SignOut,
   Target,
   Warning,
   WarningCircle,
@@ -148,6 +149,10 @@ export function IconCircleFilled({
 
 export function IconCircleOutline({ size = 'sm', className }: { size?: IconSize; className?: string }) {
   return <DvIcon icon={Circle} size={size} weight="regular" className={className} />
+}
+
+export function IconSignOut({ size = 'md', className }: { size?: IconSize; className?: string }) {
+  return <DvIcon icon={SignOut} size={size} weight="regular" className={className} />
 }
 
 const RATING_ICONS = {

@@ -16,7 +16,7 @@ import StreakBadge from '@/components/StreakBadge'
 import { useActiveDog } from '@/lib/dog/active-dog-context'
 import { useSubscription } from '@/lib/billing/subscription-context'
 import { getAgeInWeeks, daysUntilHomecoming, isPuppy, isPuppyMode, trainingWeekFromHomecoming } from '@/lib/dog/age'
-import ProgramWeekTimeline from '@/components/ProgramWeekTimeline/ProgramWeekTimeline'
+import ProgramWeekTimeline, { getPhaseInfo } from '@/components/ProgramWeekTimeline/ProgramWeekTimeline'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import { getHandlerFeedbackTip, type HandlerFeedbackTip } from '@/lib/training/handler-feedback'
 import { computeStreak } from '@/lib/training/streak'
@@ -29,6 +29,7 @@ import {
   IconFlask,
   IconPaw,
   IconPencil,
+  IconSignOut,
 } from '@/components/icons'
 import type { DogProfile, BehaviorProfile, SessionLog } from '@/types'
 import styles from './page.module.css'
@@ -47,6 +48,21 @@ function getGreeting(): string {
   if (hour < 11) return 'God morgon!'
   if (hour < 17) return 'God dag!'
   return 'God kväll!'
+}
+
+function PhaseRing({ pct }: { pct: number }) {
+  const r = 19
+  const c = 2 * Math.PI * r
+  return (
+    <div className={styles.ring}>
+      <svg width={46} height={46} className={styles.ringSvg}>
+        <circle className={styles.ringTrack} cx={23} cy={23} r={r} fill="none" strokeWidth={5} />
+        <circle className={styles.ringFill} cx={23} cy={23} r={r} fill="none" strokeWidth={5}
+          strokeDasharray={`${c * pct} ${c}`} />
+      </svg>
+      <span className={styles.ringPct}>{Math.round(pct * 100)}%</span>
+    </div>
+  )
 }
 
 interface AgeAlert {
@@ -322,6 +338,7 @@ function Dashboard() {
   }
 
   const dogName = profile?.name ?? '…'
+  const phaseInfo = getPhaseInfo(ageWeeks)
   const needsAssessment = Boolean(profile) && (profile?.assessment?.status ?? 'not_started') !== 'completed' && ageWeeks >= 26
   const ageAlert = profile ? getAgeAlert(ageWeeks) : null
   const contextualTips = profile
@@ -334,55 +351,71 @@ function Dashboard() {
     <main className={styles.main}>
       <header className={styles.header}>
         <div className={styles.decorCircle} aria-hidden="true" />
-        <div className={styles.headerContent}>
-          <div className={styles.headerText}>
+
+        {/* Rad 1: avatar + hälsning/namn + streak + logga ut */}
+        <div className={styles.idRow}>
+          <button
+            type="button"
+            className={styles.avatarBtn}
+            onClick={() => router.push('/profile')}
+            aria-label="Öppna profil"
+          >
+            <Avatar name={dogName} dogId={profile?.id} size={50} />
+          </button>
+
+          <div className={styles.idText}>
             <span className={styles.greeting}>{getGreeting()}</span>
             <DogSwitcher onAddDog={() => {
               if (subscription.tier === 'pro' && subscription.isActive) setShowAddDog(true)
               else router.push('/profile?section=billing')
             }} />
-            <Link href="/calendar" className={styles.weekBadge}>
-              <IconCalendar size="sm" className={styles.weekBadgeIcon} />
-              Programvecka {trainingWeek} · Se veckoschema
-              <IconCaretRight size="sm" className={styles.weekBadgeArrow} />
-            </Link>
-            <StreakBadge streak={streak} />
-            <ProgramWeekTimeline ageWeeks={ageWeeks} />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button
-              type="button"
-              onClick={async () => {
-                try {
-                  await getSupabaseBrowser().auth.signOut()
-                } finally {
-                  router.replace('/')
-                }
-              }}
-              style={{
-                background: 'none',
-                border: '1px solid rgba(255,255,255,0.35)',
-                color: '#fff',
-                padding: '8px 10px',
-                borderRadius: 12,
-                cursor: 'pointer',
-                fontSize: 12,
-                fontWeight: 600,
-              }}
-              aria-label="Logga ut"
-            >
-              Logga ut
-            </button>
-            <button
-              type="button"
-              onClick={() => router.push('/profile')}
-              style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', borderRadius: '50%' }}
-              aria-label="Öppna profil"
-            >
-              <Avatar name={dogName} dogId={profile?.id} size={64} />
-            </button>
-          </div>
+
+          {(streak ?? 0) > 0 && (
+            <span className={styles.streakMini} aria-label={`${streak} dagar i rad`}>
+              <IconPaw size="sm" /> {streak}
+            </span>
+          )}
+
+          <button
+            type="button"
+            className={styles.iconBtn}
+            aria-label="Logga ut"
+            title="Logga ut"
+            onClick={async () => {
+              try { await getSupabaseBrowser().auth.signOut() }
+              finally { router.replace('/') }
+            }}
+          >
+            <IconSignOut size="md" />
+          </button>
         </div>
+
+        {/* Rad 2: fas-hjälte */}
+        {phaseInfo && (
+          <div className={styles.phase}>
+            <div className={styles.phaseTop}>
+              <div style={{ minWidth: 0 }}>
+                <div className={styles.phaseOver}>NUVARANDE FAS</div>
+                <div className={styles.phaseTitle}>{phaseInfo.phaseName}</div>
+              </div>
+              <PhaseRing pct={phaseInfo.phasePct} />
+            </div>
+
+            <Link href="/calendar" className={styles.weekLink}>
+              <span className={styles.weekLeft}>
+                <IconCalendar size="sm" /> Programvecka {trainingWeek} · v. {phaseInfo.weekRange}
+              </span>
+              <IconCaretRight size="sm" />
+            </Link>
+
+            {phaseInfo.nextPhaseLabel && phaseInfo.weeksToNext !== null && (
+              <div className={styles.phaseNext}>
+                Nästa fas om {phaseInfo.weeksToNext} v · {phaseInfo.nextPhaseLabel}
+              </div>
+            )}
+          </div>
+        )}
       </header>
 
       <div className={styles.scrollArea}>

@@ -27,6 +27,7 @@ export {
   IconPlus,
   IconRestDay,
   IconSend,
+  IconSignOut,
   IconSwap,
   IconTarget,
   IconWarning,
