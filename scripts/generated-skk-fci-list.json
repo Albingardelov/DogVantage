@@ -1,0 +1,754 @@
+[
+  {
+    "fciNumber": 3,
+    "fallbackBreed": "skk_fci_3"
+  },
+  {
+    "fciNumber": 8,
+    "fallbackBreed": "skk_fci_8"
+  },
+  {
+    "fciNumber": 12,
+    "fallbackBreed": "skk_fci_12"
+  },
+  {
+    "fciNumber": 13,
+    "fallbackBreed": "skk_fci_13"
+  },
+  {
+    "fciNumber": 16,
+    "fallbackBreed": "skk_fci_16"
+  },
+  {
+    "fciNumber": 17,
+    "fallbackBreed": "skk_fci_17"
+  },
+  {
+    "fciNumber": 30,
+    "fallbackBreed": "skk_fci_30"
+  },
+  {
+    "fciNumber": 31,
+    "fallbackBreed": "skk_fci_31"
+  },
+  {
+    "fciNumber": 32,
+    "fallbackBreed": "skk_fci_32"
+  },
+  {
+    "fciNumber": 33,
+    "fallbackBreed": "skk_fci_33"
+  },
+  {
+    "fciNumber": 34,
+    "fallbackBreed": "skk_fci_34"
+  },
+  {
+    "fciNumber": 35,
+    "fallbackBreed": "skk_fci_35"
+  },
+  {
+    "fciNumber": 36,
+    "fallbackBreed": "skk_fci_36"
+  },
+  {
+    "fciNumber": 40,
+    "fallbackBreed": "skk_fci_40"
+  },
+  {
+    "fciNumber": 41,
+    "fallbackBreed": "skk_fci_41"
+  },
+  {
+    "fciNumber": 42,
+    "fallbackBreed": "skk_fci_42"
+  },
+  {
+    "fciNumber": 43,
+    "fallbackBreed": "skk_fci_43"
+  },
+  {
+    "fciNumber": 44,
+    "fallbackBreed": "skk_fci_44"
+  },
+  {
+    "fciNumber": 46,
+    "fallbackBreed": "skk_fci_46"
+  },
+  {
+    "fciNumber": 47,
+    "fallbackBreed": "skk_fci_47"
+  },
+  {
+    "fciNumber": 48,
+    "fallbackBreed": "skk_fci_48"
+  },
+  {
+    "fciNumber": 49,
+    "fallbackBreed": "skk_fci_49"
+  },
+  {
+    "fciNumber": 51,
+    "fallbackBreed": "skk_fci_51"
+  },
+  {
+    "fciNumber": 52,
+    "fallbackBreed": "skk_fci_52"
+  },
+  {
+    "fciNumber": 53,
+    "fallbackBreed": "skk_fci_53"
+  },
+  {
+    "fciNumber": 54,
+    "fallbackBreed": "skk_fci_54"
+  },
+  {
+    "fciNumber": 55,
+    "fallbackBreed": "skk_fci_55"
+  },
+  {
+    "fciNumber": 56,
+    "fallbackBreed": "skk_fci_56"
+  },
+  {
+    "fciNumber": 59,
+    "fallbackBreed": "skk_fci_59"
+  },
+  {
+    "fciNumber": 64,
+    "fallbackBreed": "skk_fci_64"
+  },
+  {
+    "fciNumber": 66,
+    "fallbackBreed": "skk_fci_66"
+  },
+  {
+    "fciNumber": 67,
+    "fallbackBreed": "skk_fci_67"
+  },
+  {
+    "fciNumber": 70,
+    "fallbackBreed": "skk_fci_70"
+  },
+  {
+    "fciNumber": 71,
+    "fallbackBreed": "skk_fci_71"
+  },
+  {
+    "fciNumber": 74,
+    "fallbackBreed": "skk_fci_74"
+  },
+  {
+    "fciNumber": 75,
+    "fallbackBreed": "skk_fci_75"
+  },
+  {
+    "fciNumber": 78,
+    "fallbackBreed": "skk_fci_78"
+  },
+  {
+    "fciNumber": 80,
+    "fallbackBreed": "skk_fci_80"
+  },
+  {
+    "fciNumber": 83,
+    "fallbackBreed": "skk_fci_83"
+  },
+  {
+    "fciNumber": 86,
+    "fallbackBreed": "skk_fci_86"
+  },
+  {
+    "fciNumber": 87,
+    "fallbackBreed": "skk_fci_87"
+  },
+  {
+    "fciNumber": 89,
+    "fallbackBreed": "skk_fci_89"
+  },
+  {
+    "fciNumber": 91,
+    "fallbackBreed": "skk_fci_91"
+  },
+  {
+    "fciNumber": 92,
+    "fallbackBreed": "skk_fci_92"
+  },
+  {
+    "fciNumber": 93,
+    "fallbackBreed": "skk_fci_93"
+  },
+  {
+    "fciNumber": 94,
+    "fallbackBreed": "skk_fci_94"
+  },
+  {
+    "fciNumber": 96,
+    "fallbackBreed": "skk_fci_96"
+  },
+  {
+    "fciNumber": 102,
+    "fallbackBreed": "skk_fci_102"
+  },
+  {
+    "fciNumber": 105,
+    "fallbackBreed": "skk_fci_105"
+  },
+  {
+    "fciNumber": 106,
+    "fallbackBreed": "skk_fci_106"
+  },
+  {
+    "fciNumber": 108,
+    "fallbackBreed": "skk_fci_108"
+  },
+  {
+    "fciNumber": 113,
+    "fallbackBreed": "skk_fci_113"
+  },
+  {
+    "fciNumber": 116,
+    "fallbackBreed": "skk_fci_116"
+  },
+  {
+    "fciNumber": 118,
+    "fallbackBreed": "skk_fci_118"
+  },
+  {
+    "fciNumber": 123,
+    "fallbackBreed": "skk_fci_123"
+  },
+  {
+    "fciNumber": 124,
+    "fallbackBreed": "skk_fci_124"
+  },
+  {
+    "fciNumber": 128,
+    "fallbackBreed": "skk_fci_128"
+  },
+  {
+    "fciNumber": 130,
+    "fallbackBreed": "skk_fci_130"
+  },
+  {
+    "fciNumber": 133,
+    "fallbackBreed": "skk_fci_133"
+  },
+  {
+    "fciNumber": 137,
+    "fallbackBreed": "skk_fci_137"
+  },
+  {
+    "fciNumber": 138,
+    "fallbackBreed": "skk_fci_138"
+  },
+  {
+    "fciNumber": 139,
+    "fallbackBreed": "skk_fci_139"
+  },
+  {
+    "fciNumber": 141,
+    "fallbackBreed": "skk_fci_141"
+  },
+  {
+    "fciNumber": 142,
+    "fallbackBreed": "skk_fci_142"
+  },
+  {
+    "fciNumber": 145,
+    "fallbackBreed": "skk_fci_145"
+  },
+  {
+    "fciNumber": 149,
+    "fallbackBreed": "skk_fci_149"
+  },
+  {
+    "fciNumber": 151,
+    "fallbackBreed": "skk_fci_151"
+  },
+  {
+    "fciNumber": 154,
+    "fallbackBreed": "skk_fci_154"
+  },
+  {
+    "fciNumber": 155,
+    "fallbackBreed": "skk_fci_155"
+  },
+  {
+    "fciNumber": 159,
+    "fallbackBreed": "skk_fci_159"
+  },
+  {
+    "fciNumber": 160,
+    "fallbackBreed": "skk_fci_160"
+  },
+  {
+    "fciNumber": 164,
+    "fallbackBreed": "skk_fci_164"
+  },
+  {
+    "fciNumber": 165,
+    "fallbackBreed": "skk_fci_165"
+  },
+  {
+    "fciNumber": 167,
+    "fallbackBreed": "skk_fci_167"
+  },
+  {
+    "fciNumber": 168,
+    "fallbackBreed": "skk_fci_168"
+  },
+  {
+    "fciNumber": 171,
+    "fallbackBreed": "skk_fci_171"
+  },
+  {
+    "fciNumber": 173,
+    "fallbackBreed": "skk_fci_173"
+  },
+  {
+    "fciNumber": 175,
+    "fallbackBreed": "skk_fci_175"
+  },
+  {
+    "fciNumber": 176,
+    "fallbackBreed": "skk_fci_176"
+  },
+  {
+    "fciNumber": 179,
+    "fallbackBreed": "skk_fci_179"
+  },
+  {
+    "fciNumber": 180,
+    "fallbackBreed": "skk_fci_180"
+  },
+  {
+    "fciNumber": 181,
+    "fallbackBreed": "skk_fci_181"
+  },
+  {
+    "fciNumber": 186,
+    "fallbackBreed": "skk_fci_186"
+  },
+  {
+    "fciNumber": 187,
+    "fallbackBreed": "skk_fci_187"
+  },
+  {
+    "fciNumber": 188,
+    "fallbackBreed": "skk_fci_188"
+  },
+  {
+    "fciNumber": 190,
+    "fallbackBreed": "skk_fci_190"
+  },
+  {
+    "fciNumber": 192,
+    "fallbackBreed": "skk_fci_192"
+  },
+  {
+    "fciNumber": 194,
+    "fallbackBreed": "skk_fci_194"
+  },
+  {
+    "fciNumber": 196,
+    "fallbackBreed": "skk_fci_196"
+  },
+  {
+    "fciNumber": 197,
+    "fallbackBreed": "skk_fci_197"
+  },
+  {
+    "fciNumber": 199,
+    "fallbackBreed": "skk_fci_199"
+  },
+  {
+    "fciNumber": 201,
+    "fallbackBreed": "skk_fci_201"
+  },
+  {
+    "fciNumber": 202,
+    "fallbackBreed": "skk_fci_202"
+  },
+  {
+    "fciNumber": 203,
+    "fallbackBreed": "skk_fci_203"
+  },
+  {
+    "fciNumber": 204,
+    "fallbackBreed": "skk_fci_204"
+  },
+  {
+    "fciNumber": 206,
+    "fallbackBreed": "skk_fci_206"
+  },
+  {
+    "fciNumber": 207,
+    "fallbackBreed": "skk_fci_207"
+  },
+  {
+    "fciNumber": 211,
+    "fallbackBreed": "skk_fci_211"
+  },
+  {
+    "fciNumber": 213,
+    "fallbackBreed": "skk_fci_213"
+  },
+  {
+    "fciNumber": 216,
+    "fallbackBreed": "skk_fci_216"
+  },
+  {
+    "fciNumber": 217,
+    "fallbackBreed": "skk_fci_217"
+  },
+  {
+    "fciNumber": 224,
+    "fallbackBreed": "skk_fci_224"
+  },
+  {
+    "fciNumber": 225,
+    "fallbackBreed": "skk_fci_225"
+  },
+  {
+    "fciNumber": 226,
+    "fallbackBreed": "skk_fci_226"
+  },
+  {
+    "fciNumber": 227,
+    "fallbackBreed": "skk_fci_227"
+  },
+  {
+    "fciNumber": 233,
+    "fallbackBreed": "skk_fci_233"
+  },
+  {
+    "fciNumber": 234,
+    "fallbackBreed": "skk_fci_234"
+  },
+  {
+    "fciNumber": 236,
+    "fallbackBreed": "skk_fci_236"
+  },
+  {
+    "fciNumber": 237,
+    "fallbackBreed": "skk_fci_237"
+  },
+  {
+    "fciNumber": 238,
+    "fallbackBreed": "skk_fci_238"
+  },
+  {
+    "fciNumber": 240,
+    "fallbackBreed": "skk_fci_240"
+  },
+  {
+    "fciNumber": 241,
+    "fallbackBreed": "skk_fci_241"
+  },
+  {
+    "fciNumber": 244,
+    "fallbackBreed": "skk_fci_244"
+  },
+  {
+    "fciNumber": 245,
+    "fallbackBreed": "skk_fci_245"
+  },
+  {
+    "fciNumber": 246,
+    "fallbackBreed": "skk_fci_246"
+  },
+  {
+    "fciNumber": 247,
+    "fallbackBreed": "skk_fci_247"
+  },
+  {
+    "fciNumber": 248,
+    "fallbackBreed": "skk_fci_248"
+  },
+  {
+    "fciNumber": 249,
+    "fallbackBreed": "skk_fci_249"
+  },
+  {
+    "fciNumber": 251,
+    "fallbackBreed": "skk_fci_251"
+  },
+  {
+    "fciNumber": 252,
+    "fallbackBreed": "skk_fci_252"
+  },
+  {
+    "fciNumber": 254,
+    "fallbackBreed": "skk_fci_254"
+  },
+  {
+    "fciNumber": 259,
+    "fallbackBreed": "skk_fci_259"
+  },
+  {
+    "fciNumber": 261,
+    "fallbackBreed": "skk_fci_261"
+  },
+  {
+    "fciNumber": 262,
+    "fallbackBreed": "skk_fci_262"
+  },
+  {
+    "fciNumber": 265,
+    "fallbackBreed": "skk_fci_265"
+  },
+  {
+    "fciNumber": 266,
+    "fallbackBreed": "skk_fci_266"
+  },
+  {
+    "fciNumber": 267,
+    "fallbackBreed": "skk_fci_267"
+  },
+  {
+    "fciNumber": 268,
+    "fallbackBreed": "skk_fci_268"
+  },
+  {
+    "fciNumber": 271,
+    "fallbackBreed": "skk_fci_271"
+  },
+  {
+    "fciNumber": 273,
+    "fallbackBreed": "skk_fci_273"
+  },
+  {
+    "fciNumber": 276,
+    "fallbackBreed": "skk_fci_276"
+  },
+  {
+    "fciNumber": 277,
+    "fallbackBreed": "skk_fci_277"
+  },
+  {
+    "fciNumber": 278,
+    "fallbackBreed": "skk_fci_278"
+  },
+  {
+    "fciNumber": 281,
+    "fallbackBreed": "skk_fci_281"
+  },
+  {
+    "fciNumber": 282,
+    "fallbackBreed": "skk_fci_282"
+  },
+  {
+    "fciNumber": 283,
+    "fallbackBreed": "skk_fci_283"
+  },
+  {
+    "fciNumber": 284,
+    "fallbackBreed": "skk_fci_284"
+  },
+  {
+    "fciNumber": 285,
+    "fallbackBreed": "skk_fci_285"
+  },
+  {
+    "fciNumber": 286,
+    "fallbackBreed": "skk_fci_286"
+  },
+  {
+    "fciNumber": 287,
+    "fallbackBreed": "skk_fci_287"
+  },
+  {
+    "fciNumber": 288,
+    "fallbackBreed": "skk_fci_288"
+  },
+  {
+    "fciNumber": 291,
+    "fallbackBreed": "skk_fci_291"
+  },
+  {
+    "fciNumber": 292,
+    "fallbackBreed": "skk_fci_292"
+  },
+  {
+    "fciNumber": 294,
+    "fallbackBreed": "skk_fci_294"
+  },
+  {
+    "fciNumber": 298,
+    "fallbackBreed": "skk_fci_298"
+  },
+  {
+    "fciNumber": 299,
+    "fallbackBreed": "skk_fci_299"
+  },
+  {
+    "fciNumber": 300,
+    "fallbackBreed": "skk_fci_300"
+  },
+  {
+    "fciNumber": 303,
+    "fallbackBreed": "skk_fci_303"
+  },
+  {
+    "fciNumber": 304,
+    "fallbackBreed": "skk_fci_304"
+  },
+  {
+    "fciNumber": 305,
+    "fallbackBreed": "skk_fci_305"
+  },
+  {
+    "fciNumber": 307,
+    "fallbackBreed": "skk_fci_307"
+  },
+  {
+    "fciNumber": 309,
+    "fallbackBreed": "skk_fci_309"
+  },
+  {
+    "fciNumber": 310,
+    "fallbackBreed": "skk_fci_310"
+  },
+  {
+    "fciNumber": 311,
+    "fallbackBreed": "skk_fci_311"
+  },
+  {
+    "fciNumber": 313,
+    "fallbackBreed": "skk_fci_313"
+  },
+  {
+    "fciNumber": 314,
+    "fallbackBreed": "skk_fci_314"
+  },
+  {
+    "fciNumber": 315,
+    "fallbackBreed": "skk_fci_315"
+  },
+  {
+    "fciNumber": 317,
+    "fallbackBreed": "skk_fci_317"
+  },
+  {
+    "fciNumber": 318,
+    "fallbackBreed": "skk_fci_318"
+  },
+  {
+    "fciNumber": 319,
+    "fallbackBreed": "skk_fci_319"
+  },
+  {
+    "fciNumber": 320,
+    "fallbackBreed": "skk_fci_320"
+  },
+  {
+    "fciNumber": 326,
+    "fallbackBreed": "skk_fci_326"
+  },
+  {
+    "fciNumber": 327,
+    "fallbackBreed": "skk_fci_327"
+  },
+  {
+    "fciNumber": 328,
+    "fallbackBreed": "skk_fci_328"
+  },
+  {
+    "fciNumber": 329,
+    "fallbackBreed": "skk_fci_329"
+  },
+  {
+    "fciNumber": 331,
+    "fallbackBreed": "skk_fci_331"
+  },
+  {
+    "fciNumber": 332,
+    "fallbackBreed": "skk_fci_332"
+  },
+  {
+    "fciNumber": 333,
+    "fallbackBreed": "skk_fci_333"
+  },
+  {
+    "fciNumber": 334,
+    "fallbackBreed": "skk_fci_334"
+  },
+  {
+    "fciNumber": 336,
+    "fallbackBreed": "skk_fci_336"
+  },
+  {
+    "fciNumber": 340,
+    "fallbackBreed": "skk_fci_340"
+  },
+  {
+    "fciNumber": 342,
+    "fallbackBreed": "skk_fci_342"
+  },
+  {
+    "fciNumber": 344,
+    "fallbackBreed": "skk_fci_344"
+  },
+  {
+    "fciNumber": 346,
+    "fallbackBreed": "skk_fci_346"
+  },
+  {
+    "fciNumber": 349,
+    "fallbackBreed": "skk_fci_349"
+  },
+  {
+    "fciNumber": 350,
+    "fallbackBreed": "skk_fci_350"
+  },
+  {
+    "fciNumber": 352,
+    "fallbackBreed": "skk_fci_352"
+  },
+  {
+    "fciNumber": 353,
+    "fallbackBreed": "skk_fci_353"
+  },
+  {
+    "fciNumber": 354,
+    "fallbackBreed": "skk_fci_354"
+  },
+  {
+    "fciNumber": 356,
+    "fallbackBreed": "skk_fci_356"
+  },
+  {
+    "fciNumber": 359,
+    "fallbackBreed": "skk_fci_359"
+  },
+  {
+    "fciNumber": 360,
+    "fallbackBreed": "skk_fci_360"
+  },
+  {
+    "fciNumber": 363,
+    "fallbackBreed": "skk_fci_363"
+  },
+  {
+    "fciNumber": 364,
+    "fallbackBreed": "skk_fci_364"
+  },
+  {
+    "fciNumber": 365,
+    "fallbackBreed": "skk_fci_365"
+  },
+  {
+    "fciNumber": 366,
+    "fallbackBreed": "skk_fci_366"
+  },
+  {
+    "fciNumber": 369,
+    "fallbackBreed": "skk_fci_369"
+  },
+  {
+    "fciNumber": 371,
+    "fallbackBreed": "skk_fci_371"
+  }
+]

@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DogVantage · Dashboard-header (B)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --color-bg:#faf8f4; --color-surface:#fff; --color-primary:#2d6a4f; --color-primary-dark:#1b4332;
+    --color-primary-light:#52b788; --color-accent:#f4a261; --color-text:#1c1917; --color-text-muted:#5c5752; --color-border:#e7e0d8;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; color: #1c1917;
+    background: radial-gradient(900px 600px at 50% -10%, #eef5f0, transparent 60%), linear-gradient(180deg,#f3f1ec,#ece7df); min-height: 100vh; }
+  .stage { min-height: 100vh; display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 38px 20px 60px; }
+  .cap { text-align: center; max-width: 520px; }
+  .cap h1 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.3px; }
+  .cap p { margin: 8px 0 0; font-size: 14px; color: #5c5752; line-height: 1.55; }
+  .row { display: flex; gap: 26px; flex-wrap: wrap; justify-content: center; align-items: flex-start; margin-top: 8px; }
+  .item { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .item .lbl { font-size: 12px; font-weight: 700; color: #5c5752; text-transform: uppercase; letter-spacing: 0.05em; }
+  .phone { border-radius: 42px; background: #000; box-shadow: 0 18px 44px rgba(0,0,0,0.18); }
+
+  /* ── Header B (production-intent markup) ── */
+  .hdr { position: relative; overflow: hidden; padding: 18px 20px 22px; background: linear-gradient(160deg,var(--color-primary-dark),var(--color-primary)); color: #fff; }
+  .hdrDecor { position: absolute; top: -50px; right: -40px; width: 170px; height: 170px; border-radius: 50%; background: rgba(255,255,255,0.05); pointer-events: none; }
+  .idRow { position: relative; display: flex; align-items: center; gap: 13px; }
+  .avatar { width: 50px; height: 50px; border-radius: 50%; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.6); overflow: hidden; }
+  .idText { flex: 1; min-width: 0; }
+  .greet { font-size: 12.5px; font-weight: 500; color: rgba(255,255,255,0.8); }
+  .nameBtn { display: flex; align-items: center; gap: 5px; background: none; border: none; padding: 0; color: #fff; cursor: pointer; max-width: 100%; }
+  .name { font-size: 23px; font-weight: 800; letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .streakMini { display: inline-flex; align-items: center; gap: 5px; background: rgba(244,162,97,0.2); border-radius: 999px; padding: 5px 10px; font-size: 12px; font-weight: 700; color: #fbd9b6; flex-shrink: 0; }
+  .iconBtn { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.1); border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+  .iconBtn:hover { background: rgba(255,255,255,0.18); }
+  .phase { position: relative; margin-top: 16px; background: rgba(255,255,255,0.1); border-radius: 16px; padding: 16px; }
+  .phaseTop { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 12px; }
+  .phaseOver { font-size: 11px; font-weight: 700; letter-spacing: 0.07em; color: rgba(255,255,255,0.55); margin-bottom: 3px; }
+  .phaseTitle { font-size: 18px; font-weight: 800; letter-spacing: -0.2px; }
+  .ring { position: relative; width: 46px; height: 46px; flex-shrink: 0; }
+  .ringPct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; }
+  .weekLink { display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: #fff; background: rgba(255,255,255,0.12); border-radius: 10px; padding: 9px 13px; cursor: pointer; transition: background .15s; }
+  .weekLink:hover { background: rgba(255,255,255,0.2); }
+  .weekLeft { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; }
+  .phaseNext { font-size: 11.5px; color: rgba(255,255,255,0.65); margin-top: 10px; }
+  .bodyHint { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .bodyHint > div { height: 60px; border-radius: 12px; background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" rx="22" fill="#1b4332"/>
+    <circle cx="28" cy="30" r="11" fill="#6b8f7d"/>
+    <rect x="44" y="22" width="34" height="8" rx="4" fill="#fff"/>
+    <rect x="44" y="36" width="20" height="6" rx="3" fill="rgba(255,255,255,0.4)"/>
+    <rect x="20" y="56" width="60" height="26" rx="9" fill="rgba(255,255,255,0.12)"/>
+    <rect x="26" y="64" width="34" height="6" rx="3" fill="#fff"/>
+    <circle cx="70" cy="69" r="7" fill="none" stroke="#52b788" stroke-width="3"/>
+  </svg>
+</template>
+
+<script src="image-slot.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="ex-shared.jsx"></script>
+
+<script type="text/babel">
+  const R = 19, C = 2 * Math.PI * R;
+  function Ring({ pct }) {
+    return (
+      <div className="ring">
+        <svg width="46" height="46" style={{ transform: 'rotate(-90deg)' }}>
+          <circle cx="23" cy="23" r={R} fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="5" />
+          <circle cx="23" cy="23" r={R} fill="none" stroke="#52b788" strokeWidth="5" strokeLinecap="round" strokeDasharray={`${C * pct} ${C}`} />
+        </svg>
+        <span className="ringPct">{Math.round(pct * 100)}%</span>
+      </div>
+    );
+  }
+
+  function HeaderB({ name, slotId, streak = 0, pct = 0.62 }) {
+    return (
+      <div className="hdr">
+        <div className="hdrDecor" />
+        <div className="idRow">
+          <image-slot id={slotId} class="avatar" shape="circle" placeholder="Foto" src="" ref={(el)=>{ if(el){ el.style.width='50px'; el.style.height='50px'; } }}></image-slot>
+          <div className="idText">
+            <span className="greet">God morgon!</span>
+            <button className="nameBtn">
+              <span className="name">{name}</span>
+              <Ph name="caret-down" size={16} color="rgba(255,255,255,0.7)" style={{ flexShrink: 0 }} />
+            </button>
+          </div>
+          <span className="streakMini"><Ph name="fire" weight="fill" size={13} color="#f4a261" /> {streak}</span>
+          <button className="iconBtn" title="Logga ut" aria-label="Logga ut"><Ph name="sign-out" size={16} color="rgba(255,255,255,0.85)" /></button>
+        </div>
+        <div className="phase">
+          <div className="phaseTop">
+            <div style={{ minWidth: 0 }}>
+              <div className="phaseOver">NUVARANDE FAS</div>
+              <div className="phaseTitle">Grundläggande lydnad</div>
+            </div>
+            <Ring pct={pct} />
+          </div>
+          <a className="weekLink">
+            <span className="weekLeft"><Ph name="target" size={15} color="rgba(255,255,255,0.85)" /> Programvecka 4 · v. 10–16</span>
+            <Ph name="caret-right" size={14} color="rgba(255,255,255,0.7)" />
+          </a>
+          <div className="phaseNext">Nästa fas om 2 v · Konsolidering &amp; impulskontroll</div>
+        </div>
+      </div>
+    );
+  }
+
+  function Phone({ name, slotId, streak, pct }) {
+    return (
+      <div className="phone">
+        <IOSDevice width={360} height={620}>
+          <div style={{ minHeight: '100%', background: 'var(--color-bg)' }}>
+            <div style={{ paddingTop: 44 }}><HeaderB name={name} slotId={slotId} streak={streak} pct={pct} /></div>
+            <div className="bodyHint"><div /><div /></div>
+          </div>
+        </IOSDevice>
+      </div>
+    );
+  }
+
+  function App() {
+    return (
+      <div className="stage">
+        <div className="cap">
+          <h1>Dashboard-header · Kompakt hjälte (B)</h1>
+          <p>Avatar + namn ihop, fasen som hjälte med ring-progress, vecka som tappbar rad, och logga ut nedtonad till en ikon. Släpp gärna in Stoffes foto i avatar-cirkeln. Till höger: test med ett långt namn (klipps elegant).</p>
+        </div>
+        <div className="row">
+          <div className="item">
+            <span className="lbl">Standard</span>
+            <Phone name="Stoffe" slotId="dog-stoffe" streak={0} pct={0.62} />
+          </div>
+          <div className="item">
+            <span className="lbl">Långt namn + streak</span>
+            <Phone name="Bertil-Augustin" slotId="dog-long" streak={7} pct={0.4} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
