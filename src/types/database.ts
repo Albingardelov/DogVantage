@@ -267,32 +267,6 @@ export type Database = {
           },
         ]
       }
-      dog_state: {
-        Row: {
-          dog_id: string
-          payload: Json
-          computed_at: string
-        }
-        Insert: {
-          dog_id: string
-          payload: Json
-          computed_at?: string
-        }
-        Update: {
-          dog_id?: string
-          payload?: Json
-          computed_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "dog_state_dog_id_fkey"
-            columns: ["dog_id"]
-            isOneToOne: true
-            referencedRelation: "dog_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       dog_profiles: {
         Row: {
           assessment: Json | null
@@ -334,6 +308,32 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      dog_state: {
+        Row: {
+          dog_id: string
+          payload: Json
+          computed_at: string
+        }
+        Insert: {
+          dog_id: string
+          payload: Json
+          computed_at?: string
+        }
+        Update: {
+          dog_id?: string
+          payload?: Json
+          computed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dog_state_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: true
+            referencedRelation: "dog_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       heat_cycles: {
         Row: {
