@@ -60,6 +60,10 @@ export async function recomputeDogState(
       .gte('date', isoDaysAgo(CHECKIN_WINDOW_DAYS)),
   ])
 
+  if (metricsRes.error) throw new Error(`metrics fetch failed: ${metricsRes.error.message}`)
+  if (logsRes.error) throw new Error(`session logs fetch failed: ${logsRes.error.message}`)
+  if (checkinsRes.error) throw new Error(`check-ins fetch failed: ${checkinsRes.error.message}`)
+
   const payload = computeDogState({
     metrics: metricsRes.data ?? [],
     sessionLogs: (logsRes.data ?? []) as unknown as SessionLog[],
@@ -70,7 +74,8 @@ export async function recomputeDogState(
 
   payload.thresholdAdjustments = previous?.thresholdAdjustments ?? {}
 
-  const { error } = await getSupabaseAdmin()
+  // A failed cache write must not fail the read path — the payload is already valid.
+  const { error } = await admin
     .from('dog_state')
     .upsert(
       { dog_id: dogId, payload: payload as unknown as Json, computed_at: new Date().toISOString() },
