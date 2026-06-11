@@ -30,13 +30,12 @@ export async function getDogState(dogId: string): Promise<DogStatePayload> {
     return cached.payload as unknown as DogStatePayload
   }
 
-  const previous = (cached?.payload ?? null) as DogStatePayload | null
-  return recomputeDogState(dogId, previous)
+  return recomputeDogState(dogId, (cached?.payload as unknown as DogStatePayload | null)?.thresholdAdjustments ?? {})
 }
 
 export async function recomputeDogState(
   dogId: string,
-  previous: DogStatePayload | null = null,
+  carryOverAdjustments: Record<string, number> = {},
 ): Promise<DogStatePayload> {
   const started = Date.now()
   const admin = getSupabaseAdmin()
@@ -72,7 +71,7 @@ export async function recomputeDogState(
     ),
   })
 
-  payload.thresholdAdjustments = previous?.thresholdAdjustments ?? {}
+  payload.thresholdAdjustments = carryOverAdjustments
 
   // A failed cache write must not fail the read path — the payload is already valid.
   const { error } = await admin
@@ -94,4 +93,32 @@ export async function recomputeDogState(
   })
 
   return payload
+}
+
+export async function updateThresholdAdjustments(
+  dogId: string,
+  adjustments: Record<string, number>,
+): Promise<void> {
+  const admin = getSupabaseAdmin()
+  const { data } = await admin
+    .from('dog_state')
+    .select('payload')
+    .eq('dog_id', dogId)
+    .maybeSingle()
+
+  if (!data) {
+    await recomputeDogState(dogId, adjustments)
+    return
+  }
+
+  const payload = data.payload as unknown as DogStatePayload
+  payload.thresholdAdjustments = adjustments
+  // .update rör inte computed_at — kalibreringen ska inte maskera stale aggregat som färska.
+  const { error } = await admin
+    .from('dog_state')
+    .update({ payload: payload as unknown as Json })
+    .eq('dog_id', dogId)
+  if (error) {
+    console.warn('[dog-state] threshold adjustment write failed:', error.message)
+  }
 }
