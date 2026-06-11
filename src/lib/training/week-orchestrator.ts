@@ -24,6 +24,9 @@ import { getWeeklyFocusPreferences } from '@/lib/supabase/weekly-focus'
 import { getActiveHeatCycle, getLastEndedHeatCycle, isSkenfasActive } from '@/lib/supabase/heat-cycles'
 import { getSupabaseAdmin } from '@/lib/supabase/client'
 import { computeProgressionDecisions, formatProgressionRule, type ProgressionMetricRow } from '@/lib/training/progression-rules'
+import { computeHandlerStruggle, dampAdvances } from '@/lib/training/handler-state'
+import { getDogState } from '@/lib/supabase/dog-state'
+import { getRecentQuizStats } from '@/lib/supabase/learning-progress'
 import { getHomecomeWeekPlan } from '@/lib/training/homecoming-plan'
 import { generateWeekPlan, PLAN_VERSION } from '@/lib/ai/week-plan'
 import { buildDeterministicWeekPlan } from '@/lib/training/deterministic-week-planner'
@@ -194,7 +197,26 @@ export async function buildWeekContextFromRequest(
       date,
     }))
   })
-  const progressionDecisions = computeProgressionDecisions(recentMetrics, { sessionRows })
+  const rawProgressionDecisions = computeProgressionDecisions(recentMetrics, { sessionRows })
+  const handlerStruggle = await (async () => {
+    try {
+      const [dogState, quizStats] = await Promise.all([
+        getDogState(dog.id),
+        getRecentQuizStats(dog.user_id, dog.id),
+      ])
+      return computeHandlerStruggle(dogState.handler, quizStats)
+    } catch {
+      return { struggling: false, dimensions: [], reason: null }
+    }
+  })()
+  const progressionDecisions = dampAdvances(rawProgressionDecisions, handlerStruggle)
+  if (handlerStruggle.struggling) {
+    trackTelemetry('handler_struggle_damping', {
+      dogId: dog.id,
+      dimensions: handlerStruggle.dimensions,
+      dampedCount: rawProgressionDecisions.filter((d) => d.decision === 'advance').length,
+    })
+  }
   const progressionRule = formatProgressionRule(
     progressionDecisions,
     Object.fromEntries(customExercises.map((e: { exercise_id: string; label: string }) => [e.exercise_id, e.label])),
