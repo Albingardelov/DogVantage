@@ -46,6 +46,7 @@ export interface ExerciseProgressionDecision {
 const MIN_ATTEMPTS = 10
 const MIN_SESSIONS = 2
 const ADVANCE_THRESHOLD = 0.80
+const MAX_ADVANCE_THRESHOLD = 0.90
 const REGRESS_THRESHOLD = 0.60
 
 function latencyWeight(bucket: LatencyBucket | null): number {
@@ -64,7 +65,7 @@ function latencyWeight(bucket: LatencyBucket | null): number {
  */
 export function computeProgressionDecisions(
   rows: ProgressionMetricRow[],
-  options: { windowDays?: number; now?: Date; sessionRows?: ProgressionSessionRow[] } = {},
+  options: { windowDays?: number; now?: Date; sessionRows?: ProgressionSessionRow[]; thresholdOverrides?: Record<string, number> } = {},
 ): ExerciseProgressionDecision[] {
   const windowDays = options.windowDays ?? 7
   const now = options.now ?? new Date()
@@ -73,6 +74,7 @@ export function computeProgressionDecisions(
   const cutoffStr = cutoff.toISOString().slice(0, 10)
 
   const sessionRows = options.sessionRows ?? []
+  const thresholdOverrides = options.thresholdOverrides ?? {}
 
   type Accum = {
     success: number
@@ -129,6 +131,11 @@ export function computeProgressionDecisions(
     const latencyAdjust = acc.latencyCount > 0 ? acc.latencyScore / acc.latencyCount : 0
     const adjustedRate = rawRate + latencyAdjust
 
+    const advanceThreshold = Math.min(
+      ADVANCE_THRESHOLD + (thresholdOverrides[exerciseId] ?? 0),
+      MAX_ADVANCE_THRESHOLD,
+    )
+
     let decision: ProgressionDecision
     let reason: string
     if (sessionCount < MIN_SESSIONS) {
@@ -137,7 +144,7 @@ export function computeProgressionDecisions(
     } else if (attempts < MIN_ATTEMPTS) {
       decision = 'hold'
       reason = `${attempts} reps på fönstret — för få datapunkter, håll nuvarande nivå`
-    } else if (adjustedRate >= ADVANCE_THRESHOLD) {
+    } else if (adjustedRate >= advanceThreshold) {
       decision = 'advance'
       reason = `${Math.round(rawRate * 100)}% lyckade över ${attempts} reps — höj kriteriet ett steg`
     } else if (adjustedRate <= REGRESS_THRESHOLD) {
