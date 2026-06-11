@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type { ChunkMatch, TrainingResult } from '@/types'
 
 vi.mock('@/lib/ai/embed', () => ({
-  embedText: vi.fn().mockResolvedValue(new Array(3072).fill(0.1)),
+  embedText: vi.fn().mockResolvedValue(new Array(1536).fill(0.1)),
 }))
 
 vi.mock('@/lib/supabase/breed-chunks', () => ({
@@ -35,6 +35,7 @@ vi.mock('@/lib/ai/client', () => {
   return {
     getGroqClient: () => client,
     GROQ_MODEL: 'llama-3.3-70b-versatile',
+    AI_TIMEOUTS: { embed: 10_000, chat: 25_000, weekPlan: 20_000 },
   }
 })
 
@@ -138,20 +139,19 @@ describe('queryRAG', () => {
     expect(result.source).toContain('rspca-basic-commands.pdf')
   })
 
-  it('returns blocked response when no document chunks match and does not call Groq', async () => {
+  it('falls back to general methodology with attribution note when no document chunks match', async () => {
     const { searchBreedChunks } = await import('@/lib/supabase/breed-chunks')
     vi.mocked(searchBreedChunks).mockResolvedValueOnce([])
     const { getGroqClient } = await import('@/lib/ai/client')
     const client = getGroqClient()
     const { queryRAG } = await import('./rag')
     const result = await queryRAG('Hur tränar jag plats?', 'labrador')
-    expect(result.content).toContain('Jag vill inte gissa')
     expect(result.attributionNote).toContain('dokument')
     expect(result.sources).toBeUndefined()
-    expect(vi.mocked(client.chat.completions.create)).not.toHaveBeenCalled()
+    expect(vi.mocked(client.chat.completions.create)).toHaveBeenCalledTimes(1)
   })
 
-  it('blocks low-similarity chunks to avoid unsupported guidance', async () => {
+  it('excludes low-similarity chunks and answers from general methodology instead', async () => {
     const { searchBreedChunks } = await import('@/lib/supabase/breed-chunks')
     vi.mocked(searchBreedChunks).mockResolvedValueOnce([
       {
@@ -168,7 +168,11 @@ describe('queryRAG', () => {
     const client = getGroqClient()
     const { queryRAG } = await import('./rag')
     const result = await queryRAG('Hur tränar jag sitt?', 'labrador')
-    expect(result.content).toContain('Jag vill inte gissa')
-    expect(vi.mocked(client.chat.completions.create)).not.toHaveBeenCalled()
+    expect(result.attributionNote).toContain('dokument')
+    expect(result.sources).toBeUndefined()
+    const callArgs = vi.mocked(client.chat.completions.create).mock.calls[0][0] as {
+      messages: Array<{ content: string }>
+    }
+    expect(callArgs.messages[0].content).not.toContain('Svag träff.')
   })
 })

@@ -1,5 +1,5 @@
 import { embedText } from './embed'
-import { getGroqClient, GROQ_MODEL } from './client'
+import { AI_TIMEOUTS, getGroqClient, GROQ_MODEL } from './client'
 import { searchBreedChunks } from '@/lib/supabase/breed-chunks'
 import { formatBreedProfileShort, formatCurrentPhaseShort } from './breed-profiles'
 import {
@@ -80,7 +80,7 @@ function isHowToQuery(query: string): boolean {
   return cues.some((cue) => normalized.includes(cue))
 }
 
-function chunksToSourceRefs(chunks: ChunkMatch[]): TrainingSourceRef[] {
+export function chunksToSourceRefs(chunks: ChunkMatch[]): TrainingSourceRef[] {
   const seen = new Set<string>()
   const out: TrainingSourceRef[] = []
   for (const c of chunks) {
@@ -196,7 +196,7 @@ Regler: svara på svenska, anpassa till hundens ålder i veckor. ${lengthRule} $
     ],
     temperature: 0.4,
     max_tokens: 700,
-  })
+  }, { timeout: AI_TIMEOUTS.chat })
 
   const usage = completion.usage
   if (usage) {

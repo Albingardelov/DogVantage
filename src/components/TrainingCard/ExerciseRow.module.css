@@ -96,6 +96,22 @@
   color: rgba(255, 255, 255, 0.9);
 }
 
+.sourcesRow {
+  margin: 6px 0 0;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.sourceLink {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.sourceLink:hover {
+  color: #fff;
+}
+
 /* Guide chip */
 .guideChip {
   display: inline-flex;

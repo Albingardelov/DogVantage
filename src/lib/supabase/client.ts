@@ -11,8 +11,9 @@ function requireEnv(name: string, value: string | undefined): string {
 export function getSupabaseAdmin(): SupabaseClient<Database> {
   if (_supabaseAdmin) return _supabaseAdmin
   const url = requireEnv('supabaseUrl', process.env.NEXT_PUBLIC_SUPABASE_URL)
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-  const anonKey = requireEnv('supabaseAnonKey', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
-  _supabaseAdmin = createClient<Database>(url, serviceKey ?? anonKey)
+  // Fail fast instead of silently falling back to the anon key — an "admin"
+  // client with anon permissions makes RPCs and admin queries fail quietly.
+  const serviceKey = requireEnv('SUPABASE_SERVICE_ROLE_KEY', process.env.SUPABASE_SERVICE_ROLE_KEY)
+  _supabaseAdmin = createClient<Database>(url, serviceKey)
   return _supabaseAdmin
 }

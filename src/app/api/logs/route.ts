@@ -1,8 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAuthAndDog } from '@/lib/api/with-auth'
 import { apiError } from '@/lib/api/errors'
+import { getStruggleAdvice, type CoachTip } from '@/lib/ai/doc-learning'
 import type { Json } from '@/types/database'
-import type { QuickRating, ExerciseSummary } from '@/types'
+import type { Breed, QuickRating, ExerciseSummary } from '@/types'
+
+const STRUGGLE_MIN_ATTEMPTS = 4
+const STRUGGLE_MAX_RATE = 0.5
+
+function findStrugglingExercise(exercises: ExerciseSummary[] | undefined): ExerciseSummary | null {
+  if (!exercises || exercises.length === 0) return null
+  let worst: ExerciseSummary | null = null
+  let worstRate = STRUGGLE_MAX_RATE
+  for (const ex of exercises) {
+    const attempts = ex.success_count + ex.fail_count
+    if (attempts < STRUGGLE_MIN_ATTEMPTS) continue
+    const rate = ex.success_count / attempts
+    if (rate < worstRate) {
+      worstRate = rate
+      worst = ex
+    }
+  }
+  return worst
+}
 
 export async function POST(req: NextRequest) {
   return withAuthAndDog(req, async ({ user, dog, supabase }) => {
@@ -49,7 +69,17 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (error) return apiError(error, 'failed_to_save_log')
-    return NextResponse.json(data, { status: 201 })
+
+    // If one exercise clearly struggled, attach source-cited coaching advice.
+    // Cached per (breed, exercise) so this is usually instant; failures are
+    // silent — the saved log is the critical path, the tip is a bonus.
+    let coachTip: CoachTip | null = null
+    const struggling = findStrugglingExercise(exercises)
+    if (struggling) {
+      coachTip = await getStruggleAdvice(dog.breed as Breed, struggling.id).catch(() => null)
+    }
+
+    return NextResponse.json({ ...data, coachTip }, { status: 201 })
   })
 }
 

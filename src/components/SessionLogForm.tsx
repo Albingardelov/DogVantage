@@ -2,8 +2,12 @@
 
 import { useState } from 'react'
 import { IconCheckCircle, IconConfetti, IconMedal, RatingIcon } from '@/components/icons'
+import { CoachTipSchema } from '@/types/api/schemas'
+import type { z } from 'zod'
 import type { ExerciseSummary, QuickRating } from '@/types'
 import styles from './SessionLogForm.module.css'
+
+type CoachTip = z.infer<typeof CoachTipSchema>
 
 interface Props {
   dogId: string
@@ -111,6 +115,7 @@ export default function SessionLogForm({ dogId, weekNumber, exercises, onSaved, 
   const [nextSession, setNextSession] = useState<NextSessionIntent | null>(null)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [coachTip, setCoachTip] = useState<CoachTip | null>(null)
 
   const { rate, count, reps } = computeHeroStats(exercises)
 
@@ -129,7 +134,7 @@ export default function SessionLogForm({ dogId, weekNumber, exercises, onSaved, 
               : '[Nästa pass: kan höja]'
         combinedNotes = combinedNotes ? `${combinedNotes}\n${tag}` : tag
       }
-      await fetch('/api/logs', {
+      const res = await fetch('/api/logs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -145,8 +150,18 @@ export default function SessionLogForm({ dogId, weekNumber, exercises, onSaved, 
           exercises: exercises && exercises.length > 0 ? exercises : undefined,
         }),
       })
+
+      let tip: CoachTip | null = null
+      try {
+        const body = await res.json()
+        const parsed = CoachTipSchema.safeParse(body?.coachTip)
+        if (parsed.success) tip = parsed.data
+      } catch { /* tip is a bonus */ }
+
+      setCoachTip(tip)
       setSaved(true)
-      setTimeout(() => onSaved(), 1200)
+      // With a coach tip the user closes manually; otherwise auto-close.
+      if (!tip) setTimeout(() => onSaved(), 1200)
     } finally {
       setSaving(false)
     }
@@ -160,6 +175,31 @@ export default function SessionLogForm({ dogId, weekNumber, exercises, onSaved, 
           <IconMedal size="hero" />
         </div>
         <p className={styles.savedTitle}>Pass sparat!</p>
+        {coachTip && (
+          <div className={styles.coachTip}>
+            <span className={styles.coachTipKicker}>Coachtips · {coachTip.exerciseLabel}</span>
+            <p className={styles.coachTipText}>{coachTip.advice}</p>
+            {coachTip.sources[0] && (
+              <p className={styles.coachTipSource}>
+                Källa:{' '}
+                {coachTip.sources[0].source_url ? (
+                  <a
+                    href={coachTip.sources[0].source_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {coachTip.sources[0].source}
+                  </a>
+                ) : (
+                  coachTip.sources[0].source
+                )}
+              </p>
+            )}
+            <button type="button" className={styles.coachTipClose} onClick={onSaved}>
+              Fortsätt
+            </button>
+          </div>
+        )}
       </div>
     )
   }

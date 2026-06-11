@@ -10,6 +10,7 @@ import SessionLogForm from '@/components/SessionLogForm'
 import Avatar from '@/components/Avatar'
 import BottomNav from '@/components/BottomNav'
 import LearningChecklistCard from '@/components/LearningChecklistCard'
+import MicroLessonCard from '@/components/MicroLessonCard'
 import DogSwitcher from '@/components/DogSwitcher'
 import AddDogModal from '@/components/AddDogModal'
 import StreakBadge from '@/components/StreakBadge'
@@ -493,6 +494,8 @@ function Dashboard() {
         ))}
 
         {profile && (profile.trainingWeek ?? 1) <= 3 && <LearningChecklistCard />}
+
+        {profile?.id && !beforeHomecoming && <MicroLessonCard dogId={profile.id} />}
 
         {needsAssessment && (
           <button
