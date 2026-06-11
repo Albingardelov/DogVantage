@@ -14,6 +14,9 @@ export interface ChunkMatch {
   doc_version: string
   page_ref: string
   similarity: number
+  topic?: string
+  life_stage?: string
+  difficulty?: number
 }
 
 export interface ChunkSource {

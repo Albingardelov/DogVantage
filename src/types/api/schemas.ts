@@ -89,6 +89,60 @@ export const CoachTipSchema = z.object({
   advice: z.string(),
   sources: z.array(TrainingSourceRefSchema),
 })
+
+export const CurriculumModuleSchema = z.object({
+  id: z.string(),
+  order: z.number(),
+  title: z.string(),
+  goal: z.string(),
+  exerciseId: z.string().optional(),
+  readMinutes: z.number(),
+  summary: z.string(),
+  body: z.string(),
+  keyPoints: z.array(z.string()),
+  sources: z.array(TrainingSourceRefSchema),
+  completed: z.boolean().optional(),
+  unlocked: z.boolean().optional(),
+})
+
+export const CurriculumOverviewSchema = z.object({
+  lifeStage: z.enum(['puppy', 'junior', 'adolescent', 'adult']),
+  modules: z.array(CurriculumModuleSchema),
+  completedCount: z.number(),
+})
+
+export const QuizQuestionSchema = z.object({
+  cardKey: z.string(),
+  question: z.string(),
+  options: z.array(z.string()),
+  correctIndex: z.number(),
+  explanation: z.string(),
+})
+
+export const QuizSessionSchema = z.object({
+  contextKey: z.string(),
+  title: z.string(),
+  questions: z.array(QuizQuestionSchema),
+})
+
+export const QuizSessionResponseSchema = z.object({
+  session: QuizSessionSchema.nullable(),
+})
+
+export const QuizGradeResultSchema = z.object({
+  cardKey: z.string(),
+  correct: z.boolean(),
+  correctIndex: z.number(),
+  explanation: z.string(),
+  nextReviewDays: z.number(),
+})
+
+export const QuizGradeResponseSchema = z.object({
+  results: z.array(QuizGradeResultSchema),
+  correctCount: z.number(),
+  total: z.number(),
+})
+
 export const ProgressMapSchema = z.record(z.string(), z.number())
 
 export type TrainingResultDTO = z.infer<typeof TrainingResultSchema>

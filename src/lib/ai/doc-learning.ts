@@ -1,11 +1,11 @@
-import { embedText } from './embed'
 import { AI_TIMEOUTS, getGroqClient, GROQ_MODEL } from './client'
 import { chunksToSourceRefs } from './rag'
-import { searchBreedChunks } from '@/lib/supabase/breed-chunks'
 import { getSupabaseAdmin } from '@/lib/supabase/client'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
 import { exerciseLabel } from '@/lib/training/exercise-label'
-import type { Breed, ChunkMatch, TrainingSourceRef } from '@/types'
+import { retrieveDocumentChunks, formatChunksForPrompt } from '@/lib/learning/doc-retrieval'
+import { topicForExerciseId, type LifeStageFilter } from '@/lib/learning/chunk-metadata'
+import type { Breed, TrainingSourceRef } from '@/types'
 
 // Proactive learning features built on the document knowledge base:
 // - "Läs mer" source links per exercise
@@ -16,9 +16,7 @@ import type { Breed, ChunkMatch, TrainingSourceRef } from '@/types'
 // content is user-independent, so cost is one embed + one Groq call per
 // unique key, shared across all users.
 
-// Lower than chat's 0.72: these are supplementary links/lessons, not
-// generated answers that must be strictly grounded.
-const MIN_SOURCE_SIMILARITY = 0.66
+// Lower than chat's 0.72: supplementary links/lessons use doc-retrieval MIN_SIMILARITY.
 
 export interface MicroLesson {
   title: string
@@ -45,7 +43,9 @@ export async function getExerciseSources(
   const cached = await readCache<TrainingSourceRef[]>(cacheKey)
   if (cached) return cached
 
-  const chunks = await retrieveChunks(breed, retrievalQuery(exerciseId), 4)
+  const chunks = await retrieveDocumentChunks(breed, retrievalQuery(exerciseId), 4, {
+    topic: topicForExerciseId(exerciseId),
+  })
   const sources = chunksToSourceRefs(chunks).slice(0, 2)
   await writeCache(cacheKey, 'exercise_sources', sources)
   return sources
@@ -63,10 +63,13 @@ export async function getMicroLesson(
   const cached = await readCache<MicroLesson>(cacheKey)
   if (cached) return cached
 
-  const chunks = await retrieveChunks(breed, retrievalQuery(exerciseId), 3)
+  const chunks = await retrieveDocumentChunks(breed, retrievalQuery(exerciseId), 3, {
+    topic: topicForExerciseId(exerciseId),
+    lifeStage: lifeStage as LifeStageFilter,
+  })
   if (chunks.length === 0) return null
 
-  const documentContext = formatChunks(chunks)
+  const documentContext = formatChunksForPrompt(chunks)
   const generated = await generateJson<{ title?: string; body?: string }>([
     {
       role: 'system',
@@ -108,10 +111,11 @@ export async function getStruggleAdvice(
   if (cached) return cached
 
   const spec = getExerciseSpec(exerciseId)
-  const chunks = await retrieveChunks(
+  const chunks = await retrieveDocumentChunks(
     breed,
     `${label} vanliga problem, hunden misslyckas, sänka kriteriet, felsökning`,
     3,
+    { topic: topicForExerciseId(exerciseId) },
   )
   if (chunks.length === 0 && !spec) return null
 
@@ -119,7 +123,7 @@ export async function getStruggleAdvice(
     ? `\n=== FELSÖKNING (appens övningsguide) ===\n${spec.troubleshooting.map((t) => `• ${t}`).join('\n')}`
     : ''
   const documentContext = chunks.length > 0
-    ? `\n=== KÄLLDOKUMENT ===\n${formatChunks(chunks)}`
+    ? `\n=== KÄLLDOKUMENT ===\n${formatChunksForPrompt(chunks)}`
     : ''
 
   const generated = await generateJson<{ advice?: string }>([
@@ -157,26 +161,7 @@ function retrievalQuery(exerciseId: string): string {
   return spec?.definition ? `${label}. ${spec.definition}` : `hundträning ${label}`
 }
 
-async function retrieveChunks(breed: Breed, query: string, count: number): Promise<ChunkMatch[]> {
-  try {
-    const embedding = await embedText(query)
-    const retrieved = await searchBreedChunks(embedding, breed, count * 2)
-    return retrieved
-      .filter((c) => Number.isFinite(c.similarity) && c.similarity >= MIN_SOURCE_SIMILARITY)
-      .slice(0, count)
-  } catch (err) {
-    console.error('[doc-learning] retrieval failed:', err instanceof Error ? err.message : String(err))
-    return []
-  }
-}
-
-function formatChunks(chunks: ChunkMatch[]): string {
-  return chunks
-    .map((c) => `${c.content}\n[Källa: ${c.source}${c.source_url ? ` — ${c.source_url}` : ''}]`)
-    .join('\n\n')
-}
-
-async function generateJson<T>(
+ async function generateJson<T>(
   messages: Array<{ role: 'system' | 'user'; content: string }>,
   maxTokens: number,
 ): Promise<T | null> {
