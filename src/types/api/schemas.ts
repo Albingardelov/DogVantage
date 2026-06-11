@@ -145,6 +145,32 @@ export const QuizGradeResponseSchema = z.object({
 
 export const ProgressMapSchema = z.record(z.string(), z.number())
 
+export const DogStateExerciseStatSchema = z.object({
+  exerciseId: z.string(),
+  successRate: z.number(),
+  attempts: z.number(),
+})
+
+export const DogStatePayloadSchema = z.object({
+  version: z.literal(1),
+  weakExercises: z.array(DogStateExerciseStatSchema),
+  strongExercises: z.array(DogStateExerciseStatSchema),
+  environmentDifficulty: z.record(z.string(), z.number()),
+  handler: z.object({
+    timing: z.number().nullable(),
+    consistency: z.number().nullable(),
+    reading: z.number().nullable(),
+    sampleSize: z.number(),
+  }),
+  zoneSummary: z.object({
+    greenDays: z.number(),
+    yellowDays: z.number(),
+    redDays: z.number(),
+    window: z.literal(14),
+  }),
+  thresholdAdjustments: z.record(z.string(), z.number()),
+})
+
 export type TrainingResultDTO = z.infer<typeof TrainingResultSchema>
 export type WeekPlanDTO = z.infer<typeof WeekPlanSchema>
 export type SessionLogDTO = z.infer<typeof SessionLogSchema>
