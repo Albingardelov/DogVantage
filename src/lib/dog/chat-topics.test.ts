@@ -27,4 +27,13 @@ describe('extractChatTopic', () => {
   it('matches reactivity before generic leash topics for utfall queries', () => {
     expect(extractChatTopic('utfall mot hundar när han drar i kopplet')).toBe('reaktivitet')
   })
+
+  it('does not flag fear inside other words', () => {
+    expect(extractChatTopic('Vår hund är orädd och självsäker')).toBeNull()
+    expect(extractChatTopic('Vi ska rädda en hund från gatan')).toBeNull()
+  })
+
+  it('does not flag stress inside compound words', () => {
+    expect(extractChatTopic('Hur undviker vi stressåterfall?')).toBeNull()
+  })
 })

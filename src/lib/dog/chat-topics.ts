@@ -5,8 +5,9 @@ const TOPIC_LEXICON: Array<{ topic: string; pattern: RegExp }> = [
   { topic: 'inkallning', pattern: /inkallning|kommer inte när|springer iväg/i },
   { topic: 'ensamhet', pattern: /ensam hemma|separationsångest|lämna.{0,20}ensam/i },
   { topic: 'bitande', pattern: /\bbits\b|biter|nafsar/i },
-  { topic: 'rädsla', pattern: /rädd|rädsla|skotträdd/i },
-  { topic: 'stress', pattern: /stressad|\bstress\b|varva ner/i },
+  // \b är opålitligt runt å/ä/ö i JS-regex — svenska ordgränser kräver lookaround.
+  { topic: 'rädsla', pattern: /(?<![a-zåäö])rädd(?![a-zåäö])|(?<![a-zåäö])rädsla|skotträdd/i },
+  { topic: 'stress', pattern: /stressad|(?<![a-zåäö])stress(?![a-zåäö])|varva ner/i },
   { topic: 'rumsrenhet', pattern: /kissar inne|bajsar inne|rumsren/i },
   { topic: 'matvägran', pattern: /äter inte|matvägran/i },
 ]
