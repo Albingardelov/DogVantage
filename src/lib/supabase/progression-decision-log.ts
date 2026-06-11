@@ -7,7 +7,10 @@ import type {
   DecisionOutcome,
 } from '@/lib/training/decision-calibration'
 
-const OUTCOME_HISTORY_LIMIT = 50
+// Must cover HISTORY_WINDOW (10, decision-calibration.ts) rows per actively
+// trained exercise — a smaller global limit silently drops the exercises with
+// the oldest outcomes from calibration.
+const OUTCOME_HISTORY_LIMIT = 200
 
 export async function logProgressionDecisions(
   dogId: string,
