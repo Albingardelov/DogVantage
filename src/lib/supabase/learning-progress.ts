@@ -135,3 +135,49 @@ export async function getDueQuizCount(userId: string, dogId: string): Promise<nu
   if (error) throw new Error(error.message)
   return count ?? 0
 }
+
+export async function getRecentQuizStats(
+  userId: string,
+  dogId: string,
+  limit = 10,
+): Promise<{ answered: number; correct: number } | null> {
+  const chain = admin()
+    .from('quiz_cards')
+    .select('last_result') as unknown as {
+      eq(col: string, val: string): typeof chain
+      not(col: string, op: string, val: unknown): typeof chain
+      order(col: string, opts: { ascending: boolean }): typeof chain
+      limit(n: number): Promise<{ data: Array<{ last_result: boolean | null }> | null; error: { message: string } | null }>
+    }
+  const { data, error } = await chain
+    .eq('user_id', userId)
+    .eq('dog_id', dogId)
+    .not('last_result', 'is', null)
+    .order('updated_at', { ascending: false })
+    .limit(limit)
+  if (error || !data || data.length === 0) return null
+  return {
+    answered: data.length,
+    correct: data.filter((r) => r.last_result === true).length,
+  }
+}
+
+export async function listFailedQuizModuleIds(
+  userId: string,
+  dogId: string,
+): Promise<string[]> {
+  const chain = admin()
+    .from('quiz_cards')
+    .select('context_key') as EqChain
+  const { data, error } = await chain
+    .eq('user_id', userId)
+    .eq('dog_id', dogId)
+    .eq('last_result', false as unknown as string)
+  if (error || !data) return []
+  const ids = new Set<string>()
+  for (const row of data) {
+    const key = String(row['context_key'])
+    if (key.startsWith('curr_')) ids.add(key.slice('curr_'.length))
+  }
+  return [...ids]
+}
