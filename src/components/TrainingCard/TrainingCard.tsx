@@ -21,6 +21,8 @@ import { useTodayExercises } from './use-today-exercises'
 import { useExerciseSources } from './use-exercise-sources'
 import { advanceGuard, EMPTY_GUARD, type SessionGuard } from '@/lib/training/session-coach'
 import { useDogState } from './use-dog-state'
+import { useDayCheckIn } from './use-day-checkin'
+import DayCheckInCard from './DayCheckInCard'
 import { buildExerciseSummaries, emptyMetrics } from './exercise-helpers'
 import { NextBanner, LoadingIndicator, ReferralCard, RestDay, ChevronRight } from './parts'
 import DayProgressBar from './DayProgressBar'
@@ -52,6 +54,8 @@ export default function TrainingCard(props: Props) {
     useTrainingData({ ...props, todayDate })
   const { customSpecs, refresh: refreshCustomSpecs } = useCustomSpecs(dogId)
   const dogState = useDogState(dogId)
+  const { checkIn, loaded: checkInLoaded, save: saveDayCheckIn } = useDayCheckIn(dogId, todayDate)
+  const [checkInDismissed, setCheckInDismissed] = useState(false)
 
   const [sessionGuard, setSessionGuard] = useState<Record<string, SessionGuard>>({})
   const [showWeekView, setShowWeekView] = useState(false)
@@ -74,8 +78,16 @@ export default function TrainingCard(props: Props) {
   const {
     todayPlan, todayExercisesWithIndex, todayExercises, displayedExercises,
     nextExerciseId, nextExercise, swapCandidates, setSwaps,
-    completedCount,
-  } = useTodayExercises({ weekPlan, progress, focusAreas, simpleFocus })
+    completedCount, scaleMode, scaleNote,
+  } = useTodayExercises({
+    weekPlan,
+    progress,
+    focusAreas,
+    simpleFocus,
+    dayCheckIn: checkIn,
+    metrics,
+    priorityIds: priorityExerciseIds,
+  })
 
   const todayExerciseIds = useMemo(() => todayExercises.map((e) => e.id), [todayExercises])
   const exerciseSources = useExerciseSources(dogId, todayExerciseIds)
@@ -232,6 +244,14 @@ export default function TrainingCard(props: Props) {
           <PreSessionChecklist ageWeeks={ageWeeks} dateKey={todayDate} dogId={dogId} />
         )}
 
+        {!loading && checkInLoaded && !checkIn && !checkInDismissed && !todayPlan?.rest && (
+          <DayCheckInCard
+            dogName={props.dogName}
+            onSave={saveDayCheckIn}
+            onDismiss={() => setCheckInDismissed(true)}
+          />
+        )}
+
         {!loading && weekPlan && (
           <WeekFocusPanel
             copy={weekFocusCopy}
@@ -304,6 +324,10 @@ export default function TrainingCard(props: Props) {
         {!loading && referral && <ReferralCard text={referral} />}
         {!loading && todayPlan?.rest && <RestDay />}
 
+        {!loading && scaleNote && (
+          <p className={styles.scaleNote}>{scaleNote}</p>
+        )}
+
         {!loading && todayExercises.length > 0 && (
           <div className={styles.exercises}>
             {displayedExercises.map(({ current: ex, originalIdx }) => {
@@ -326,7 +350,7 @@ export default function TrainingCard(props: Props) {
                   ageWeeks={ageWeeks}
                   sessionNext={nextExerciseId === ex.id}
                   rootId={nextExerciseId === ex.id ? 'training-session-next' : undefined}
-                  onSwap={swapCandidates.length > 0 ? () => handleSwap(originalIdx) : undefined}
+                  onSwap={scaleMode === 'full' && swapCandidates.length > 0 ? () => handleSwap(originalIdx) : undefined}
                   reasonBadges={reasonBadgesForExercise(ex.id)}
                   sources={exerciseSources[ex.id]}
                 />

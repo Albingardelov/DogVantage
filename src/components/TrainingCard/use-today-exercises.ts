@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { DayPlan, Exercise, WeekPlan } from '@/types'
+import type { DayPlan, DailyExerciseMetrics, Exercise, WeekPlan } from '@/types'
 import { focusExerciseIds, type WeeklyFocusArea } from '@/lib/training/weekly-focus'
+import { scaleDayPlan, type DayCheckInState, type DayScaleMode } from '@/lib/training/day-scaler'
 
 const SWEDISH_DAYS = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag']
 
@@ -9,6 +10,9 @@ interface UseTodayExercisesArgs {
   progress: Record<string, number>
   focusAreas: WeeklyFocusArea[]
   simpleFocus: boolean
+  dayCheckIn: DayCheckInState | null
+  metrics: Record<string, DailyExerciseMetrics>
+  priorityIds: string[]
 }
 
 interface UseTodayExercisesResult {
@@ -23,24 +27,39 @@ interface UseTodayExercisesResult {
   setSwaps: React.Dispatch<React.SetStateAction<Record<number, Exercise>>>
   completedCount: number
   progressPct: number
+  scaleMode: DayScaleMode
+  scaleNote: string | null
 }
 
-/**
- * Derives today's exercise list from the week plan, applying any local
- * swaps the user has made and identifying which exercise is next.
- * Also handles smooth-scrolling the next exercise into view when it
- * changes (skipped if prefers-reduced-motion is on).
- */
 export function useTodayExercises({
   weekPlan,
   progress,
   focusAreas,
   simpleFocus,
+  dayCheckIn,
+  metrics,
+  priorityIds,
 }: UseTodayExercisesArgs): UseTodayExercisesResult {
   const todayName = SWEDISH_DAYS[new Date().getDay()]
-  const todayPlan = weekPlan?.days.find((d) => d.day === todayName)
+  const rawTodayPlan = weekPlan?.days.find((d) => d.day === todayName)
 
   const [swaps, setSwaps] = useState<Record<number, Exercise>>({})
+
+  const scaled = useMemo(
+    () =>
+      scaleDayPlan(rawTodayPlan?.exercises ?? [], rawTodayPlan?.rest ? null : dayCheckIn, {
+        metrics,
+        priorityIds,
+      }),
+    [rawTodayPlan, dayCheckIn, metrics, priorityIds],
+  )
+
+  const todayPlan: DayPlan | undefined = useMemo(() => {
+    if (!rawTodayPlan) return undefined
+    if (scaled.mode === 'rest') return { ...rawTodayPlan, rest: true, exercises: [] }
+    if (scaled.mode === 'full') return rawTodayPlan
+    return { ...rawTodayPlan, exercises: scaled.exercises }
+  }, [rawTodayPlan, scaled])
 
   const todayExercisesWithIndex = useMemo(
     () =>
@@ -117,5 +136,7 @@ export function useTodayExercises({
     setSwaps,
     completedCount,
     progressPct,
+    scaleMode: scaled.mode,
+    scaleNote: scaled.note,
   }
 }
