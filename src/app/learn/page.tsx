@@ -4,11 +4,19 @@ import { useState, Suspense } from 'react'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import ProfileGuard from '@/components/ProfileGuard'
 import BottomNav from '@/components/BottomNav'
+import CurriculumView from '@/components/CurriculumView'
+import { useActiveDog } from '@/lib/dog/active-dog-context'
 import { IconCaretRight } from '@/components/icons'
 import { CATEGORIES, TAB_LABELS, type TabKey } from './articles'
 import styles from './page.module.css'
 
-const TAB_KEYS = Object.keys(TAB_LABELS) as TabKey[]
+type LearnTab = TabKey | 'kurs'
+
+const STATIC_TABS = Object.keys(TAB_LABELS) as TabKey[]
+const TAB_LABELS_EXT: Record<LearnTab, string> = {
+  kurs: 'Din kurs',
+  ...TAB_LABELS,
+}
 
 export default function LearnPage() {
   return (
@@ -24,12 +32,15 @@ function Learn() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
+  const { activeDog } = useActiveDog()
 
-  const rawTab = searchParams.get('tab') as TabKey | null
-  const activeTab: TabKey = rawTab && rawTab in CATEGORIES ? rawTab : 'grunderna'
+  const rawTab = searchParams.get('tab') as LearnTab | null
+  const activeTab: LearnTab = rawTab === 'kurs' || (rawTab && rawTab in CATEGORIES)
+    ? rawTab
+    : 'kurs'
   const [expandedId, setExpandedId] = useState<string | null>(searchParams.get('article'))
 
-  function setTab(tab: TabKey) {
+  function setTab(tab: LearnTab) {
     const params = new URLSearchParams(searchParams.toString())
     params.set('tab', tab)
     params.delete('article')
@@ -37,7 +48,7 @@ function Learn() {
     setExpandedId(null)
   }
 
-  const articles = CATEGORIES[activeTab]
+  const articles = activeTab !== 'kurs' ? CATEGORIES[activeTab as TabKey] : []
 
   return (
     <main className={styles.main}>
@@ -47,7 +58,7 @@ function Learn() {
       </header>
 
       <nav className={styles.tabs} aria-label="Guidekategorier">
-        {TAB_KEYS.map((tab) => (
+        {(['kurs', ...STATIC_TABS] as LearnTab[]).map((tab) => (
           <button
             key={tab}
             type="button"
@@ -55,13 +66,20 @@ function Learn() {
             onClick={() => setTab(tab)}
             aria-current={activeTab === tab ? 'page' : undefined}
           >
-            {TAB_LABELS[tab]}
+            {TAB_LABELS_EXT[tab]}
           </button>
         ))}
       </nav>
 
       <div className={styles.body}>
-        {articles.map((article) => {
+        {activeTab === 'kurs' && activeDog?.id && (
+          <CurriculumView dogId={activeDog.id} />
+        )}
+        {activeTab === 'kurs' && !activeDog?.id && (
+          <p className={styles.subtitle}>Logga in och välj hund för att se din kurs.</p>
+        )}
+
+        {activeTab !== 'kurs' && articles.map((article) => {
           const isOpen = expandedId === article.id
           return (
             <div key={article.id} className={`${styles.card} ${isOpen ? styles.cardOpen : ''}`}>

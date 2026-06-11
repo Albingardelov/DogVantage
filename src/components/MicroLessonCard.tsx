@@ -5,6 +5,7 @@ import { apiFetch } from '@/lib/api/fetch'
 import { MicroLessonResponseSchema } from '@/types/api/schemas'
 import type { z } from 'zod'
 import type { MicroLessonSchema } from '@/types/api/schemas'
+import Link from 'next/link'
 import styles from './MicroLessonCard.module.css'
 
 type MicroLesson = z.infer<typeof MicroLessonSchema>
@@ -71,6 +72,12 @@ export default function MicroLessonCard({ dogId }: { dogId: string }) {
             )}
           </p>
         )}
+        <Link
+          href={`/learn/quiz?dogId=${encodeURIComponent(dogId)}&contextKey=${encodeURIComponent(`micro_${lesson.exerciseId}`)}&title=${encodeURIComponent(lesson.title)}&body=${encodeURIComponent(lesson.body.slice(0, 400))}&exerciseId=${encodeURIComponent(lesson.exerciseId)}`}
+          className={styles.quizBtn}
+        >
+          Testa dig (2 frågor)
+        </Link>
       </div>
       <button type="button" className={styles.dismiss} onClick={dismiss} aria-label="Stäng dagens mikrolektion">
         Stäng

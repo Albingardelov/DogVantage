@@ -1,6 +1,7 @@
 import { PDFParse } from 'pdf-parse'
 import { embedText } from './embed'
 import { getSupabaseAdmin } from '@/lib/supabase/client'
+import { classifyChunkContent } from '@/lib/learning/chunk-metadata'
 import type { Breed } from '@/types'
 
 const CHUNK_SIZE = 2000    // chars ≈ 500 tokens
@@ -35,15 +36,20 @@ export async function ingestPDF(
 
   let inserted = 0
   for (const content of chunks) {
+    const meta = classifyChunkContent(content)
     const embedding = await embedText(content)
-    const { error } = await getSupabaseAdmin().from('breed_chunks').insert({
+    const { error } = await (getSupabaseAdmin().from('breed_chunks') as unknown as {
+      insert: (row: Record<string, unknown>) => Promise<{ error: { message: string } | null }>
+    }).insert({
       breed,
       source: filename,
       source_url: sourceUrl,
       doc_version: docVersion,
       page_ref: '',
       content,
-      // pgvector accepts number[] at runtime but generated types say string
+      topic: meta.topic,
+      life_stage: meta.lifeStage,
+      difficulty: meta.difficulty,
       embedding: embedding as unknown as string,
     })
     if (error) throw new Error(`Insert failed: ${error.message}`)

@@ -65,3 +65,16 @@
 .dismiss:hover {
   color: var(--color-primary);
 }
+
+.quizBtn {
+  display: inline-block;
+  margin-top: var(--space-3);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.quizBtn:hover {
+  text-decoration: underline;
+}
