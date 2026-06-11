@@ -172,6 +172,46 @@ describe('computeProgressionDecisions', () => {
   })
 })
 
+describe('computeProgressionDecisions thresholdOverrides', () => {
+  it('thresholdOverrides raises the advance bar per exercise', () => {
+    // 17/20 = 85% raw rate (no latency) → normally advance; with override +0.10 → 0.90 threshold → hold
+    const rows = [
+      row({ id: 'sitt', date: '2026-05-10', s: 9, f: 1 }),
+      row({ id: 'sitt', date: '2026-05-09', s: 8, f: 2 }),
+    ]
+    const sessions = [
+      sessionRow({ id: 'sitt', date: '2026-05-10' }),
+      sessionRow({ id: 'sitt', date: '2026-05-09' }),
+    ]
+    const withoutOverride = computeProgressionDecisions(rows, { now: today, sessionRows: sessions })
+    const withOverride = computeProgressionDecisions(rows, {
+      now: today,
+      sessionRows: sessions,
+      thresholdOverrides: { sitt: 0.10 },
+    })
+    expect(withoutOverride[0].decision).toBe('advance')
+    expect(withOverride[0].decision).toBe('hold')
+  })
+
+  it('threshold override is capped at 0.9', () => {
+    // 92% success rate with override 0.5 → 0.8 + 0.5 capped to 0.9 → still advance
+    const rows = [
+      row({ id: 'inkallning', date: '2026-05-10', s: 10, f: 0 }),
+      row({ id: 'inkallning', date: '2026-05-09', s: 9, f: 1 }),
+    ]
+    const sessions = [
+      sessionRow({ id: 'inkallning', date: '2026-05-10' }),
+      sessionRow({ id: 'inkallning', date: '2026-05-09' }),
+    ]
+    const result = computeProgressionDecisions(rows, {
+      now: today,
+      sessionRows: sessions,
+      thresholdOverrides: { inkallning: 0.5 },
+    })
+    expect(result[0].decision).toBe('advance')
+  })
+})
+
 describe('formatProgressionRule', () => {
   it('returns null when no actionable decisions', () => {
     const rule = formatProgressionRule([
