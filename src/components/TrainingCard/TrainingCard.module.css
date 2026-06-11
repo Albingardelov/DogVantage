@@ -320,6 +320,14 @@
   line-height: 1.4;
 }
 
+.scaleNote {
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  opacity: 0.85;
+}
+
 .logOverlay {
   position: fixed;
   inset: 0;
