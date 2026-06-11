@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { DayPlan, DailyExerciseMetrics, Exercise, WeekPlan } from '@/types'
 import { focusExerciseIds, type WeeklyFocusArea } from '@/lib/training/weekly-focus'
 import { scaleDayPlan, type DayCheckInState, type DayScaleMode } from '@/lib/training/day-scaler'
+import { CALM_EXERCISE_IDS } from '@/lib/training/puppy-zone'
 
 const SWEDISH_DAYS = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag']
 
@@ -45,13 +46,33 @@ export function useTodayExercises({
 
   const [swaps, setSwaps] = useState<Record<number, Exercise>>({})
 
+  // Scaling only reads the calm exercises' counters — keying on them keeps the
+  // derived plan referentially stable while reps on other exercises churn `metrics`.
+  const calmMetricsKey = CALM_EXERCISE_IDS
+    .map((id) => `${metrics[id]?.success_count ?? 0}:${metrics[id]?.fail_count ?? 0}`)
+    .join('|')
+
+  const scalingMetrics = useMemo(
+    () =>
+      Object.fromEntries(
+        CALM_EXERCISE_IDS
+          .filter((id) => metrics[id])
+          .map((id) => [id, {
+            success_count: metrics[id].success_count,
+            fail_count: metrics[id].fail_count,
+          }]),
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [calmMetricsKey],
+  )
+
   const scaled = useMemo(
     () =>
       scaleDayPlan(rawTodayPlan?.exercises ?? [], rawTodayPlan?.rest ? null : dayCheckIn, {
-        metrics,
+        metrics: scalingMetrics,
         priorityIds,
       }),
-    [rawTodayPlan, dayCheckIn, metrics, priorityIds],
+    [rawTodayPlan, dayCheckIn, scalingMetrics, priorityIds],
   )
 
   const todayPlan: DayPlan | undefined = useMemo(() => {
