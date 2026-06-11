@@ -158,16 +158,22 @@ export type Database = {
           dog_id: string
           date: string
           zone: string
+          handler_energy: string | null
+          minutes_available: number | null
         }
         Insert: {
           dog_id: string
           date: string
           zone: string
+          handler_energy?: string | null
+          minutes_available?: number | null
         }
         Update: {
           dog_id?: string
           date?: string
           zone?: string
+          handler_energy?: string | null
+          minutes_available?: number | null
         }
         Relationships: [
           {
