@@ -171,3 +171,28 @@
   color: var(--color-primary);
   border: 1px solid var(--color-border);
 }
+
+.flagRow {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.flagRecommended,
+.flagReview {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.flagRecommended {
+  background: color-mix(in srgb, var(--color-primary) 18%, transparent);
+  color: var(--color-primary);
+}
+
+.flagReview {
+  background: color-mix(in srgb, var(--color-accent, #f4a261) 18%, transparent);
+  color: var(--color-accent, #f4a261);
+}

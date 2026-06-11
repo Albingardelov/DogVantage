@@ -85,6 +85,21 @@ export default function CurriculumView({ dogId }: { dogId: string }) {
             >
               <span className={styles.moduleOrder}>{mod.order}</span>
               <div className={styles.moduleMeta}>
+                {(mod.recommended || mod.reviewSuggested) && (
+                  <div className={styles.flagRow}>
+                    {mod.recommended && (
+                      <span
+                        className={styles.flagRecommended}
+                        title={mod.recommendationReason ?? undefined}
+                      >
+                        Rekommenderad för dig
+                      </span>
+                    )}
+                    {mod.reviewSuggested && (
+                      <span className={styles.flagReview}>Repetera</span>
+                    )}
+                  </div>
+                )}
                 <h2 className={styles.moduleTitle}>{mod.title}</h2>
                 <p className={styles.moduleGoal}>{mod.summary}</p>
               </div>
