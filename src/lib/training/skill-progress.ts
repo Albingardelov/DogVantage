@@ -146,7 +146,7 @@ export function aggregateSkillProgress(
   return topN ? results.slice(0, topN) : results
 }
 
-function inferEnvironment(criteriaLevelId: string | null): SkillEnvironment {
+export function inferEnvironment(criteriaLevelId: string | null): SkillEnvironment {
   if (!criteriaLevelId) return 'mixed'
   if (criteriaLevelId.includes('park')) return 'park'
   if (criteriaLevelId.includes('outdoor') || criteriaLevelId.includes('garden') || criteriaLevelId.includes('street')) {

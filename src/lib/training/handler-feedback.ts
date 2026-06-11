@@ -15,12 +15,12 @@ export interface HandlerFeedbackTip {
 const MIN_SAMPLES = 3
 const LOW_THRESHOLD = 3.0
 
-interface DimensionStats {
+export interface DimensionStats {
   avg: number
   count: number
 }
 
-function statsFor(
+export function statsFor(
   logs: SessionLog[],
   picker: (log: SessionLog) => number | undefined
 ): DimensionStats | null {
