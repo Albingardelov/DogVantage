@@ -10,7 +10,7 @@ import ZoneCheckIn from './ZoneCheckIn'
 import RecoveryCard from './RecoveryCard'
 import styles from './PuppyDayCard.module.css'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
-import { buildRecommendation } from '../TrainingCard/recommendation'
+import { advanceGuard, EMPTY_GUARD, type SessionGuard } from '@/lib/training/session-coach'
 import { buildExerciseSummaries, emptyMetrics } from '../TrainingCard/exercise-helpers'
 import { usePuppyDay } from './use-puppy-day'
 import SessionLogForm from '@/components/SessionLogForm'
@@ -44,7 +44,7 @@ export default function PuppyDayCard(props: Props) {
   const todayDate = useMemo(todayStr, [])
   const [showLogForm, setShowLogForm] = useState(false)
   const [guideExerciseId, setGuideExerciseId] = useState<string | null>(null)
-  const [sessionGuard, setSessionGuard] = useState<Record<string, { consecutiveFails: number; consecutiveSlow: number }>>({})
+  const [sessionGuard, setSessionGuard] = useState<Record<string, SessionGuard>>({})
 
   const { zone, exercises, progress, metrics, loading, error, saveZone, setProgress, setMetrics } =
     usePuppyDay({ ...props, todayDate })
@@ -55,28 +55,27 @@ export default function PuppyDayCard(props: Props) {
     [exercises, progress],
   )
 
-  function handleRepClick(exerciseId: string, currentDone: number, maxReps: number) {
-    if (currentDone >= maxReps) return
-    const newDone = currentDone + 1
-    const newProgress = { ...progress, [exerciseId]: newDone }
+  function commitProgress(exerciseId: string, count: number) {
+    const newProgress = { ...progress, [exerciseId]: count }
     setProgress(newProgress)
     if (exercises.every((e) => (newProgress[e.id] ?? 0) >= e.reps)) setShowLogForm(true)
     fetch('/api/training/progress', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date: todayDate, dogId, exerciseId, count: newDone }),
+      body: JSON.stringify({ date: todayDate, dogId, exerciseId, count }),
     }).catch(console.error)
   }
 
+  function handleRepClick(exerciseId: string, currentDone: number, maxReps: number) {
+    if (currentDone >= maxReps) return
+    commitProgress(exerciseId, currentDone + 1)
+  }
+
   function patchMetrics(exerciseId: string, patch: Partial<DailyExerciseMetrics>) {
-    setSessionGuard((prev) => {
-      const cur = prev[exerciseId] ?? { consecutiveFails: 0, consecutiveSlow: 0 }
-      let next = cur
-      if ('fail_count' in patch) next = { ...next, consecutiveFails: next.consecutiveFails + 1 }
-      if (patch.latency_bucket === 'gt3s') next = { ...next, consecutiveSlow: next.consecutiveSlow + 1 }
-      if ('success_count' in patch) next = { consecutiveFails: 0, consecutiveSlow: 0 }
-      return { ...prev, [exerciseId]: next }
-    })
+    setSessionGuard((prev) => ({
+      ...prev,
+      [exerciseId]: advanceGuard(prev[exerciseId] ?? EMPTY_GUARD, patch),
+    }))
     setMetrics((prev) => ({
       ...prev,
       [exerciseId]: { ...(prev[exerciseId] ?? emptyMetrics()), ...patch },
@@ -148,10 +147,6 @@ export default function PuppyDayCard(props: Props) {
             {exercises.map((ex) => {
               const spec = getExerciseSpec(ex.id)
               const m = metrics[ex.id] ?? null
-              const guard = sessionGuard[ex.id] ?? { consecutiveFails: 0, consecutiveSlow: 0 }
-              const rec = buildRecommendation(
-                m?.success_count ?? 0, m?.fail_count ?? 0, m?.latency_bucket ?? null, ageWeeks, guard,
-              )
               return (
                 <ExerciseRow
                   key={ex.id}
@@ -161,8 +156,8 @@ export default function PuppyDayCard(props: Props) {
                   onOpenGuide={() => setGuideExerciseId(ex.id)}
                   spec={spec}
                   metrics={m}
-                  recommendation={rec?.message ?? null}
-                  showTroubleshooting={rec?.kind === 'lower' || rec?.kind === 'stop'}
+                  guard={sessionGuard[ex.id] ?? EMPTY_GUARD}
+                  onEndExercise={() => commitProgress(ex.id, ex.reps)}
                   onMetricsPatch={(patch) => patchMetrics(ex.id, patch)}
                   ageWeeks={ageWeeks}
                   sessionNext={nextExerciseId === ex.id}
