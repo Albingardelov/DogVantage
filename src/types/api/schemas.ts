@@ -143,6 +143,12 @@ export const QuizGradeResponseSchema = z.object({
   total: z.number(),
 })
 
+export const DayCheckInResponseSchema = z.object({
+  zone: z.enum(['green', 'yellow', 'red']).nullable(),
+  handlerEnergy: z.enum(['low', 'ok', 'high']).nullable(),
+  minutesAvailable: z.number().nullable(),
+})
+
 export const ProgressMapSchema = z.record(z.string(), z.number())
 
 export const DogStateExerciseStatSchema = z.object({
