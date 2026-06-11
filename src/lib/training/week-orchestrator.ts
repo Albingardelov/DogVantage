@@ -34,6 +34,7 @@ import {
   markDecisionsEvaluated,
 } from '@/lib/supabase/progression-decision-log'
 import { getRecentQuizStats } from '@/lib/supabase/learning-progress'
+import { getRecentChatTopics } from '@/lib/supabase/chat-topics'
 import { getHomecomeWeekPlan } from '@/lib/training/homecoming-plan'
 import { generateWeekPlan, PLAN_VERSION } from '@/lib/ai/week-plan'
 import { buildDeterministicWeekPlan } from '@/lib/training/deterministic-week-planner'
@@ -184,9 +185,13 @@ export async function buildWeekContextFromRequest(
   if (castrationStatus) sexLines.push(`Kastration: ${castrationStatus === 'intact' ? 'Intakt' : castrationStatus === 'castrated' ? 'Kastrerad' : 'Okänt'}`)
   if (isInHeat) sexLines.push('Status: Löper just nu')
   if (skenfasActive) sexLines.push('Status: Skenfas-fönster aktivt (6–9 v efter löp)')
-  const onboardingContext = sexLines.length > 0
-    ? [baseOnboardingContext, sexLines.join('\n')].filter(Boolean).join('\n')
-    : baseOnboardingContext
+  const recentTopics = await getRecentChatTopics(dog.id).catch(() => [] as string[])
+  const topicLine = recentTopics.length > 0
+    ? `Föraren har nyligen frågat AI-coachen om: ${recentTopics.join(', ')}`
+    : null
+  const onboardingContext = [baseOnboardingContext, sexLines.length > 0 ? sexLines.join('\n') : null, topicLine]
+    .filter(Boolean)
+    .join('\n')
 
   const performanceSummary = formatPerformanceSummary(formatLogsForPrompt(recentLogs))
   const customExercises = customRows.map((r: { exercise_id: string; label: string }) => ({

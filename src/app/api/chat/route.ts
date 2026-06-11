@@ -11,6 +11,10 @@ import { incrementChatCount, DAILY_CHAT_LIMIT } from '@/lib/supabase/chat-usage'
 import { detectSecretExposure } from '@/lib/ai/safety-guards'
 import { getAgeInWeeks } from '@/lib/dog/age'
 import { getBehaviorContextPayloadFromDb } from '@/lib/dog/build-behavior-context'
+import { extractChatTopic } from '@/lib/dog/chat-topics'
+import { summarizeDogTimeline } from '@/lib/dog/timeline'
+import { logChatTopic, getRecentChatTopics } from '@/lib/supabase/chat-topics'
+import { getCheckIns } from '@/lib/supabase/daily-check-ins'
 
 function todayDateString(): string {
   return new Date().toISOString().split('T')[0]
@@ -49,6 +53,21 @@ export async function POST(req: NextRequest) {
         .eq('id', dog.id)
         .single()
       const { context: onboardingContext } = await getBehaviorContextPayloadFromDb(supabase, dog.id)
+
+      const timelineContext = await (async () => {
+        try {
+          const since = new Date()
+          since.setUTCDate(since.getUTCDate() - 14)
+          const [checkIns, recentTopics] = await Promise.all([
+            getCheckIns(dog.id, since.toISOString().slice(0, 10), todayDateString()),
+            getRecentChatTopics(dog.id),
+          ])
+          return summarizeDogTimeline({ checkIns, recentTopics })
+        } catch {
+          return null
+        }
+      })()
+      const chatContext = [onboardingContext, timelineContext].filter(Boolean).join('\n') || undefined
 
       const ageWeeks = profile?.birthdate ? Math.max(1, getAgeInWeeks(profile.birthdate)) : undefined
       const logsWeek = typeof profile?.training_week === 'number' ? profile.training_week : undefined
@@ -90,7 +109,7 @@ export async function POST(req: NextRequest) {
       ])
 
       const isPersonalized =
-        logStrings.length > 0 || metricsStrings.length > 0 || !!onboardingContext
+        logStrings.length > 0 || metricsStrings.length > 0 || !!chatContext
       if (!isPersonalized) {
         if (cached) {
           // LRU touch can run in the background.
@@ -110,7 +129,7 @@ export async function POST(req: NextRequest) {
         )
       }
 
-      const result = await queryRAG(query, breed, logStrings, ageWeeks, metricsStrings, onboardingContext ?? undefined)
+      const result = await queryRAG(query, breed, logStrings, ageWeeks, metricsStrings, chatContext)
 
       if (!isPersonalized) {
         try {
@@ -118,6 +137,13 @@ export async function POST(req: NextRequest) {
         } catch (err) {
           console.error('[/api/chat] cache write failed', err)
         }
+      }
+
+      const topic = extractChatTopic(query)
+      if (topic) {
+        void logChatTopic(dog.id, topic).catch(() => {
+          // Ämnesloggning är telemetri — får aldrig fälla chatsvaret.
+        })
       }
 
       return NextResponse.json(result)
