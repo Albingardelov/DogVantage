@@ -58,6 +58,35 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_topics: {
+        Row: {
+          id: string
+          dog_id: string
+          topic: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          dog_id: string
+          topic: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          dog_id?: string
+          topic?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_topics_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dog_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_usage: {
         Row: {
           count: number
