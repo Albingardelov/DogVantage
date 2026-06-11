@@ -10,6 +10,8 @@ export interface CurriculumModuleDef {
   /** Optional linked exercise in the training app */
   exerciseId?: string
   readMinutes: number
+  /** Handler dimension this module primarily trains — learning layer uses a literal union, not an import from training */
+  dimension?: 'timing' | 'consistency' | 'reading'
 }
 
 /** Beginner-first curriculum — ordered for owners who are learning alongside their dog. */
@@ -30,6 +32,7 @@ export const CURRICULUM_MODULES: CurriculumModuleDef[] = [
     topic: 'marker',
     exerciseId: 'marker',
     readMinutes: 3,
+    dimension: 'timing',
   },
   {
     id: 'sitt',
@@ -39,6 +42,7 @@ export const CURRICULUM_MODULES: CurriculumModuleDef[] = [
     topic: 'sit',
     exerciseId: 'sitt',
     readMinutes: 3,
+    dimension: 'consistency',
   },
   {
     id: 'inkallning',
@@ -57,6 +61,7 @@ export const CURRICULUM_MODULES: CurriculumModuleDef[] = [
     topic: 'leash',
     exerciseId: 'lat',
     readMinutes: 4,
+    dimension: 'consistency',
   },
   {
     id: 'hantering',
@@ -66,6 +71,7 @@ export const CURRICULUM_MODULES: CurriculumModuleDef[] = [
     topic: 'handling',
     exerciseId: 'hantering',
     readMinutes: 3,
+    dimension: 'reading',
   },
   {
     id: 'socialisering',
@@ -74,6 +80,7 @@ export const CURRICULUM_MODULES: CurriculumModuleDef[] = [
     goal: 'Positiva möten, val av stimuli, rätt förväntningar.',
     topic: 'socialization',
     readMinutes: 4,
+    dimension: 'reading',
   },
   {
     id: 'bur',

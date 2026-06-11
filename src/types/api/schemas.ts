@@ -103,6 +103,9 @@ export const CurriculumModuleSchema = z.object({
   sources: z.array(TrainingSourceRefSchema),
   completed: z.boolean().optional(),
   unlocked: z.boolean().optional(),
+  recommended: z.boolean().optional(),
+  recommendationReason: z.string().nullable().optional(),
+  reviewSuggested: z.boolean().optional(),
 })
 
 export const CurriculumOverviewSchema = z.object({

@@ -24,9 +24,21 @@ export interface CurriculumModuleContent {
   sources: TrainingSourceRef[]
 }
 
+export interface CurriculumPersonalization {
+  weakExerciseIds: string[]
+  strugglingDimensions: Array<'timing' | 'consistency' | 'reading'>
+  failedModuleIds: string[]
+}
+
 export interface CurriculumOverview {
   lifeStage: LifeStage
-  modules: Array<CurriculumModuleContent & { completed: boolean; unlocked: boolean }>
+  modules: Array<CurriculumModuleContent & {
+    completed: boolean
+    unlocked: boolean
+    recommended: boolean
+    recommendationReason: string | null
+    reviewSuggested: boolean
+  }>
   completedCount: number
 }
 
@@ -34,19 +46,35 @@ export async function getCurriculumOverview(
   breed: Breed,
   lifeStage: LifeStage,
   completedModuleids: string[],
+  personalization?: CurriculumPersonalization,
 ): Promise<CurriculumOverview> {
   const defs = modulesForLifeStage(lifeStage)
   const completedSet = new Set(completedModuleids)
+  const weakSet = new Set(personalization?.weakExerciseIds ?? [])
+  const dimSet = new Set(personalization?.strugglingDimensions ?? [])
+  const failedSet = new Set(personalization?.failedModuleIds ?? [])
   const modules: CurriculumOverview['modules'] = []
 
   for (const def of defs) {
     const prior = defs.filter((m) => m.order < def.order)
-    const unlocked = prior.every((m) => completedSet.has(m.id))
+    const matchesDimension = Boolean(def.dimension && dimSet.has(def.dimension))
+    const matchesWeakExercise = Boolean(def.exerciseId && weakSet.has(def.exerciseId))
+    const recommended = matchesDimension || matchesWeakExercise
+    const recommendationReason = matchesDimension
+      ? 'Dina egna skattningar visar att det här är din svaga punkt just nu.'
+      : matchesWeakExercise
+        ? 'Träningsdatan visar att den här övningen behöver mer stöd.'
+        : null
+    // Rekommenderade moduler låses upp av behov, inte ordning.
+    const unlocked = recommended || prior.every((m) => completedSet.has(m.id))
     const content = await getModuleContent(breed, lifeStage, def)
     modules.push({
       ...content,
       completed: completedSet.has(def.id),
       unlocked,
+      recommended,
+      recommendationReason,
+      reviewSuggested: failedSet.has(def.id),
     })
   }
 

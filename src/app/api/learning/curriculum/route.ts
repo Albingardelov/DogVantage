@@ -3,7 +3,9 @@ import { withAuthAndDog } from '@/lib/api/with-auth'
 import { getAgeInWeeks, type LifeStage } from '@/lib/dog/age'
 import { getCurriculumOverview } from '@/lib/learning/curriculum'
 import { lifeStageFromAgeWeeks } from '@/lib/learning/curriculum-def'
-import { listCompletedModules } from '@/lib/supabase/learning-progress'
+import { listCompletedModules, listFailedQuizModuleIds } from '@/lib/supabase/learning-progress'
+import { getDogState } from '@/lib/supabase/dog-state'
+import { computeHandlerStruggle } from '@/lib/training/handler-state'
 import type { Breed } from '@/types'
 
 export async function GET(req: NextRequest) {
@@ -19,7 +21,25 @@ export async function GET(req: NextRequest) {
     const lifeStage: LifeStage = lifeStageFromAgeWeeks(ageWeeks)
 
     const completed = await listCompletedModules(user.id, dog.id)
-    const overview = await getCurriculumOverview(breed, lifeStage, completed)
+
+    const personalization = await (async () => {
+      try {
+        const [dogState, failedModuleIds] = await Promise.all([
+          getDogState(dog.id),
+          listFailedQuizModuleIds(user.id, dog.id),
+        ])
+        const struggle = computeHandlerStruggle(dogState.handler, null)
+        return {
+          weakExerciseIds: dogState.weakExercises.map((e) => e.exerciseId),
+          strugglingDimensions: struggle.dimensions,
+          failedModuleIds,
+        }
+      } catch {
+        return undefined
+      }
+    })()
+
+    const overview = await getCurriculumOverview(breed, lifeStage, completed, personalization)
     return NextResponse.json(overview)
   })
 }
