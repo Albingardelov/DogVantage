@@ -1,0 +1,228 @@
+/* PuppyDayCard.module.css — BRAND-ALIGNED
+ * Åtgärdar: (1) off-brand färger, (2) odefinierade CSS-vars,
+ * (4) kort-skugga/mönster, (5) gul-toner → accent.
+ * Alla färger kommer nu från src/styles/tokens.css. Logik/markup oförändrad
+ * (utom emoji→ikon i ZoneCheckIn.tsx + RecoveryCard.tsx, se separata filer,
+ * och ZONE_COLORS i PuppyDayCard.tsx, se README). */
+
+/* Card shell — matchar övriga kort (TrainingCard/dashboard) */
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius-card);          /* 16px */
+  padding: var(--space-5);                     /* 20px */
+  margin: 0 var(--space-4) var(--space-4);     /* 0 16 16 */
+  box-shadow: var(--shadow-sm);                /* 0 2px 12px rgba(0,0,0,.08) */
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.headerTitle {
+  font-weight: var(--font-bold);
+  font-size: var(--text-lg);
+  color: var(--color-text);
+}
+
+.zoneBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  padding: 4px 11px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-alt);
+  color: var(--color-text);
+}
+
+.zoneDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Gul-ruta — byggd på accent istället för Tailwind-amber */
+.yellowFrame {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: var(--text-sm);
+  color: #9a5a22;                              /* mörkare accent för WCAG */
+  background: #fdf1e6;                          /* ljus accent-tint */
+  border: 1px solid #f7e0cb;
+  border-radius: var(--radius-input);
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.exercises {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+/* Knapp i samma stil som TrainingCard .weekBtn */
+.askBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.6875rem var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  width: 100%;
+  color: var(--color-text-muted);
+  transition: background var(--transition-fast);
+}
+.askBtn:hover { background: var(--color-bg-alt); }
+
+.errorMsg {
+  font-size: var(--text-sm);
+  color: var(--color-error);
+  text-align: center;
+  padding: 12px 0;
+}
+
+/* ── ZoneCheckIn ── */
+.checkIn { padding: 4px 0; }
+
+.checkInQ {
+  font-weight: var(--font-bold);
+  font-size: var(--text-lg);
+  margin: 0 0 4px;
+  color: var(--color-text);
+}
+
+.checkInLead {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin: 0 0 16px;
+}
+
+.zones {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.zoneBtn {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 14px 16px;
+  border-radius: var(--radius-input);
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: transform 0.1s;
+}
+.zoneBtn:active { transform: scale(0.98); }
+
+/* Trafikljus-semantik bevarad, men via brand-tokens */
+.zoneBtnGreen  { border-color: var(--color-primary); background: var(--color-green-50); }
+.zoneBtnYellow { border-color: var(--color-accent);  background: #fdf1e6; }
+.zoneBtnRed    { border-color: var(--color-error);   background: #fbeaea; }
+
+/* Vit ikon-cirkel (ersätter emojin) */
+.zoneIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.zoneBtnText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.zoneLabel { font-weight: var(--font-bold); font-size: var(--text-base); color: var(--color-text); }
+.zoneDesc  { font-size: var(--text-sm); color: var(--color-text-muted); }
+
+/* ── RecoveryCard ── */
+.recovery { padding: 4px 0; }
+
+.recoveryHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.recoveryTitle { font-weight: var(--font-bold); font-size: var(--text-lg); color: var(--color-text); }
+
+.recoveryDesc {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  margin: 0 0 16px;
+}
+
+.tipList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tipItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--color-text);
+}
+
+.tipIcon { color: var(--color-primary); flex-shrink: 0; margin-top: 1px; }
+
+/* ── Loading ── */
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: var(--space-6) 0;
+  justify-content: center;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }

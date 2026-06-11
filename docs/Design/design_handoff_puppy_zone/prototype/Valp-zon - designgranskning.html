@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DogVantage · Valp-zon – designgranskning</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --color-bg:#faf8f4; --color-bg-alt:#f2ede5; --color-surface:#fff;
+    --color-primary:#2d6a4f; --color-primary-dark:#1b4332; --color-primary-light:#52b788;
+    --color-accent:#f4a261; --color-green-50:#edf8f2; --color-green-100:#d8f0e5;
+    --color-text:#1c1917; --color-text-muted:#5c5752; --color-border:#e7e0d8; --color-error:#d62828;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased; color: #1c1917;
+    background: #eceae5;
+  }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 40px 28px 80px; }
+  .pageHead h1 { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.4px; }
+  .pageHead p { margin: 8px 0 0; font-size: 15px; color: #5c5752; max-width: 760px; line-height: 1.55; }
+
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 36px; }
+  .colHead { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+  .pill { font-size: 12px; font-weight: 700; padding: 4px 11px; border-radius: 999px; letter-spacing: 0.02em; }
+  .pillCur { background: #e7e0d8; color: #5c5752; }
+  .pillBrand { background: #d8f0e5; color: #1b4332; }
+  .colHead h2 { margin: 0; font-size: 17px; font-weight: 700; }
+  .colHead span.sub { font-size: 13px; color: #5c5752; }
+
+  .frames { display: flex; flex-direction: column; gap: 30px; }
+  .frameRow { }
+  .frameLabel { font-size: 13px; font-weight: 600; color: #5c5752; margin: 0 0 10px; }
+
+  .findings { margin-top: 56px; }
+  .findings h2 { font-size: 19px; font-weight: 800; margin: 0 0 18px; }
+  .fgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .fcard { background: #fff; border-radius: 14px; padding: 18px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-left: 4px solid var(--color-accent); }
+  .fcard.good { border-left-color: var(--color-primary); }
+  .fcard h3 { margin: 0 0 6px; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .fcard p { margin: 0; font-size: 13px; color: #5c5752; line-height: 1.55; }
+  .fcard code { background: #f2ede5; border-radius: 5px; padding: 1px 5px; font-size: 12px; color: #1b4332; }
+  .tag { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 7px; border-radius: 999px; }
+  .tagFix { background: #fdf1e6; color: #c8742f; }
+  .tagGood { background: #d8f0e5; color: #1b4332; }
+
+  @media (max-width: 920px) { .cols { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" rx="22" fill="#faf8f4"/>
+    <circle cx="32" cy="40" r="9" fill="#2d6a4f"/>
+    <circle cx="50" cy="40" r="9" fill="#f4a261"/>
+    <circle cx="68" cy="40" r="9" fill="#d62828"/>
+    <rect x="28" y="60" width="44" height="7" rx="3.5" fill="#d8f0e5"/>
+    <rect x="28" y="71" width="30" height="7" rx="3.5" fill="#e7e0d8"/>
+  </svg>
+</template>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="ex-shared.jsx"></script>
+<script type="text/babel" src="puppy-review.jsx"></script>
+
+<script type="text/babel">
+  function Phone({ children }) {
+    return (
+      <div style={{ borderRadius: 44, background: '#000', boxShadow: '0 20px 50px rgba(0,0,0,0.18)', width: 380, maxWidth: '100%' }}>
+        <IOSDevice width={380} height={760}>
+          <div style={{ paddingTop: 50, minHeight: '100%', background: '#faf8f4' }}>{children}</div>
+        </IOSDevice>
+      </div>
+    );
+  }
+
+  const STATES = [
+    ['Incheckning — "Hur är hunden idag?"', 'CurCheckIn', 'BrandCheckIn'],
+    ['Grön dag — full träning', 'CurGreen', 'BrandGreen'],
+    ['Gul dag — kort & enkelt', 'CurYellow', 'BrandYellow'],
+    ['Röd dag — återhämtning', 'CurRed', 'BrandRed'],
+  ];
+
+  const FINDINGS = [
+    ['fix', 'Off-brand färger', <>Zonerna använder generiska <code>#22c55e</code>/<code>#eab308</code>/<code>#ef4444</code> och grått <code>#6b7280</code>. Grön-zonens <code>#22c55e</code> krockar med appens varumärkesgröna <code>#2d6a4f</code>. Använd brand-tokens och behåll trafikljus-semantiken via <code>primary</code> / <code>accent</code> / <code>error</code>.</>],
+    ['fix', 'Odefinierade CSS-variabler', <>Modulen refererar <code>var(--surface)</code> och <code>var(--text-primary)</code> som inte finns i <code>tokens.css</code> → faller tillbaka på <code>#fff</code>/<code>#111</code>. Resten av appen använder <code>--color-surface</code> / <code>--color-text</code> (<code>#1c1917</code>).</>],
+    ['fix', 'Emoji vs ikon-system', <>🟢🟡🔴 bryter mot appens Phosphor-ikoner. Smiley / smiley-meh / smiley-sad speglar hundens dagsform och matchar resten av UI:t.</>],
+    ['fix', 'Kort-skugga & ram avviker', <>Valp-kortet har <code>0 1px 4px</code>-skugga; övriga kort använder <code>--shadow-sm</code> (<code>0 2px 12px</code>) och header-strip + radie enligt <code>TrainingCard</code>. Återanvänd samma kort-mönster.</>],
+    ['fix', 'Gul-toner är "amber", inte accent', <>Gul-zonen <code>#fef3c7</code>/<code>#92400e</code> är Tailwind-amber. Bygg på <code>--color-accent #f4a261</code> så det känns som DogVantage.</>],
+    ['good', 'Stark grund-idé', <>Tre-zons-incheckningen (reglerbar / stissig / kaos) är pedagogisk och valp-anpassad. Röd-dag → ren återhämtning utan krav är precis rätt ton.</>],
+    ['good', 'Smart logik', <>Grön återanvänder veckoplanen (och hoppar förbi vilodag), gul väljer en lugn övning utifrån tidigare utfall. Bara presentationen behöver linje upp.</>],
+    ['good', 'Tydlig dagsbadge', <>Zon-badgen i headern ger bra kontext. Behåll den — bara byt färg/typografi till tokens.</>],
+  ];
+
+  function App() {
+    return (
+      <div className="wrap">
+        <div className="pageHead">
+          <h1>Valp-zon — designgranskning</h1>
+          <p>Den nya valp-zonen (daglig incheckning → grön/gul/röd dag) recensad. Vänster: <strong>som den är byggd nu</strong> (troget återskapad från <code>PuppyDayCard.module.css</code>). Höger: <strong>brand-justerat förslag</strong> med era tokens, ikon-system och kort-mönster — samma logik och copy.</p>
+        </div>
+
+        <div className="cols">
+          <div>
+            <div className="colHead"><span className="pill pillCur">Som byggt</span><span className="sub">PuppyDayCard.module.css</span></div>
+            <div className="frames">
+              {STATES.map(([label, Cur]) => {
+                const C = window[Cur];
+                return (
+                  <div className="frameRow" key={Cur}>
+                    <p className="frameLabel">{label}</p>
+                    <Phone><C /></Phone>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <div>
+            <div className="colHead"><span className="pill pillBrand">Brand-justerat</span><span className="sub">DogVantage-tokens + ikoner</span></div>
+            <div className="frames">
+              {STATES.map(([label, , Brand]) => {
+                const B = window[Brand];
+                return (
+                  <div className="frameRow" key={Brand}>
+                    <p className="frameLabel">{label}</p>
+                    <Phone><B /></Phone>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div className="findings">
+          <h2>Vad jag hittade</h2>
+          <div className="fgrid">
+            {FINDINGS.map(([kind, title, body], i) => (
+              <div className={`fcard ${kind === 'good' ? 'good' : ''}`} key={i}>
+                <h3><span className={`tag ${kind === 'good' ? 'tagGood' : 'tagFix'}`}>{kind === 'good' ? 'Bra' : 'Justera'}</span>{title}</h3>
+                <p>{body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
