@@ -373,6 +373,50 @@ export type Database = {
           },
         ]
       }
+      progression_decision_log: {
+        Row: {
+          id: string
+          dog_id: string
+          exercise_id: string
+          decision: string
+          success_rate: number
+          criteria_level_id: string | null
+          created_at: string
+          evaluated_at: string | null
+          outcome: string | null
+        }
+        Insert: {
+          id?: string
+          dog_id: string
+          exercise_id: string
+          decision: string
+          success_rate: number
+          criteria_level_id?: string | null
+          created_at?: string
+          evaluated_at?: string | null
+          outcome?: string | null
+        }
+        Update: {
+          id?: string
+          dog_id?: string
+          exercise_id?: string
+          decision?: string
+          success_rate?: number
+          criteria_level_id?: string | null
+          created_at?: string
+          evaluated_at?: string | null
+          outcome?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "progression_decision_log_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dog_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       session_logs: {
         Row: {
           breed: string
