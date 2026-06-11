@@ -6,10 +6,19 @@ type QueryResult = { data: Row[] | null; error: { message: string } | null; coun
 type SingleResult = { data: Row | null; error: { message: string } | null }
 type CountResult = { count: number | null; error: { message: string } | null }
 
+// Local query shim: quiz_cards/curriculum_progress are not in the hand-maintained
+// Database types, so the typed admin client cannot query them directly.
 type EqChain = {
-  eq: (col: string, val: string) => EqChain
+  eq: (col: string, val: string | boolean) => EqChain
   in: (col: string, vals: string[]) => Promise<QueryResult>
 } & Promise<QueryResult>
+
+type RecentChain = {
+  eq: (col: string, val: string) => RecentChain
+  not: (col: string, op: string, val: null) => RecentChain
+  order: (col: string, opts: { ascending: boolean }) => RecentChain
+  limit: (n: number) => Promise<QueryResult>
+}
 
 type QuizEqChain = {
   eq: (col: string, val: string) => QuizEqChain
@@ -143,12 +152,7 @@ export async function getRecentQuizStats(
 ): Promise<{ answered: number; correct: number } | null> {
   const chain = admin()
     .from('quiz_cards')
-    .select('last_result') as unknown as {
-      eq(col: string, val: string): typeof chain
-      not(col: string, op: string, val: unknown): typeof chain
-      order(col: string, opts: { ascending: boolean }): typeof chain
-      limit(n: number): Promise<{ data: Array<{ last_result: boolean | null }> | null; error: { message: string } | null }>
-    }
+    .select('last_result') as unknown as RecentChain
   const { data, error } = await chain
     .eq('user_id', userId)
     .eq('dog_id', dogId)
@@ -172,7 +176,7 @@ export async function listFailedQuizModuleIds(
   const { data, error } = await chain
     .eq('user_id', userId)
     .eq('dog_id', dogId)
-    .eq('last_result', false as unknown as string)
+    .eq('last_result', false)
   if (error || !data) return []
   const ids = new Set<string>()
   for (const row of data) {
