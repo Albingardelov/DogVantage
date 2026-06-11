@@ -18,6 +18,7 @@ import styles from './ExerciseRow.module.css'
 import type { DailyExerciseMetrics, Exercise, LatencyBucket, TrainingSourceRef } from '@/types'
 import type { ExerciseSpec } from '@/lib/training/exercise-specs'
 import { isPuppy as isPuppyAge } from '@/lib/dog/age'
+import { buildCoachAction, type SessionGuard } from '@/lib/training/session-coach'
 
 interface Props {
   exercise: Exercise
@@ -26,8 +27,9 @@ interface Props {
   onOpenGuide?: () => void
   spec: ExerciseSpec | null
   metrics: DailyExerciseMetrics | null
-  recommendation: string | null
-  showTroubleshooting: boolean
+  guard: SessionGuard
+  advanceThresholdDelta?: number
+  onEndExercise?: () => void
   onMetricsPatch: (patch: Partial<DailyExerciseMetrics>) => void
   ageWeeks?: number
   /** Primär "nästa övning" i dagens pass (visuell ram, ej samma som rep-prickarnas nästa) */
@@ -128,8 +130,9 @@ export default function ExerciseRow({
   onOpenGuide,
   spec,
   metrics,
-  recommendation,
-  showTroubleshooting,
+  guard,
+  advanceThresholdDelta,
+  onEndExercise,
   onMetricsPatch,
   ageWeeks,
   sessionNext: _sessionNext,
@@ -158,6 +161,22 @@ export default function ExerciseRow({
   const activeLevel = allowedLevels?.find((l) => l.id === criteriaLevelId) ?? allowedLevels?.[0] ?? null
   const currentLevelLabel = activeLevel?.label ?? null
   const currentLevelCriteria = activeLevel?.criteria ?? null
+
+  const coach = buildCoachAction({
+    successCount,
+    failCount,
+    latencyBucket,
+    ageWeeks,
+    guard,
+    ladder: allowedLevels,
+    currentLevelId: criteriaLevelId,
+    advanceThresholdDelta,
+  })
+  const showTroubleshooting = coach?.kind === 'lower' || coach?.kind === 'stop'
+  const suggestedLevel =
+    coach?.suggestedLevelId && allowedLevels
+      ? allowedLevels.find((l) => l.id === coach.suggestedLevelId) ?? null
+      : null
 
   function spawnFloat(kind: 'success' | 'miss') {
     const id = Date.now() + Math.random()
@@ -321,15 +340,29 @@ export default function ExerciseRow({
         )}
       </div>
 
-      {/* Recommendation */}
-      {recommendation && (
+      {/* Coach */}
+      {coach && (
         <div
           className={`${styles.recommendation} ${showTroubleshooting ? styles.recommendationAlert : ''}`}
           role={showTroubleshooting ? 'alert' : undefined}
         >
           {showTroubleshooting && <IconWarning size="sm" />}
-          <span>{recommendation}</span>
+          <span>{coach.message}</span>
         </div>
+      )}
+      {!isComplete && suggestedLevel && (coach?.kind === 'lower' || coach?.kind === 'stop' || coach?.kind === 'raise') && (
+        <button
+          type="button"
+          className={styles.coachActionBtn}
+          onClick={() => onMetricsPatch({ criteria_level_id: suggestedLevel.id })}
+        >
+          {coach.kind === 'raise' ? `Höj till: ${suggestedLevel.label}` : `Sänk till: ${suggestedLevel.label}`}
+        </button>
+      )}
+      {!isComplete && coach?.kind === 'end_on_success' && onEndExercise && (
+        <button type="button" className={styles.coachActionBtn} onClick={onEndExercise}>
+          Avsluta på topp
+        </button>
       )}
 
       {/* Incomplete actions */}

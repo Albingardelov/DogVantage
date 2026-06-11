@@ -327,6 +327,24 @@
   z-index: 2;
 }
 
+/* ── Coach action button ──────────────────────────────────── */
+.coachActionBtn {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-full);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+}
+
 /* ── Complete state ───────────────────────────────────────── */
 .completeArea {
   display: flex;

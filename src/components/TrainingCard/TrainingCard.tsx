@@ -19,7 +19,8 @@ import { useTrainingData } from './use-training-data'
 import { useCustomSpecs } from './use-custom-specs'
 import { useTodayExercises } from './use-today-exercises'
 import { useExerciseSources } from './use-exercise-sources'
-import { buildRecommendation, type SessionGuard } from './recommendation'
+import { advanceGuard, EMPTY_GUARD, type SessionGuard } from '@/lib/training/session-coach'
+import { useDogState } from './use-dog-state'
 import { buildExerciseSummaries, emptyMetrics } from './exercise-helpers'
 import { NextBanner, LoadingIndicator, ReferralCard, RestDay, ChevronRight } from './parts'
 import DayProgressBar from './DayProgressBar'
@@ -50,6 +51,7 @@ export default function TrainingCard(props: Props) {
   const { weekPlan, progress, metrics, loading, error, referral, refresh, setProgress, setMetrics } =
     useTrainingData({ ...props, todayDate })
   const { customSpecs, refresh: refreshCustomSpecs } = useCustomSpecs(dogId)
+  const dogState = useDogState(dogId)
 
   const [sessionGuard, setSessionGuard] = useState<Record<string, SessionGuard>>({})
   const [showWeekView, setShowWeekView] = useState(false)
@@ -163,10 +165,8 @@ export default function TrainingCard(props: Props) {
     return () => document.removeEventListener('mousedown', onPointerDown)
   }, [])
 
-  function handleRepClick(exerciseId: string, currentDone: number, maxReps: number) {
-    if (currentDone >= maxReps) return
-    const newDone = currentDone + 1
-    const newProgress = { ...progress, [exerciseId]: newDone }
+  function commitProgress(exerciseId: string, count: number) {
+    const newProgress = { ...progress, [exerciseId]: count }
     setProgress(newProgress)
 
     const allDone = todayExercises.length > 0 &&
@@ -176,19 +176,20 @@ export default function TrainingCard(props: Props) {
     fetch('/api/training/progress', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date: todayDate, dogId, exerciseId, count: newDone }),
+      body: JSON.stringify({ date: todayDate, dogId, exerciseId, count }),
     }).catch(console.error)
   }
 
+  function handleRepClick(exerciseId: string, currentDone: number, maxReps: number) {
+    if (currentDone >= maxReps) return
+    commitProgress(exerciseId, currentDone + 1)
+  }
+
   function patchMetrics(exerciseId: string, patch: Partial<DailyExerciseMetrics>) {
-    setSessionGuard((prev) => {
-      const cur = prev[exerciseId] ?? { consecutiveFails: 0, consecutiveSlow: 0 }
-      let next = cur
-      if ('fail_count' in patch) next = { ...next, consecutiveFails: next.consecutiveFails + 1 }
-      if (patch.latency_bucket === 'gt3s') next = { ...next, consecutiveSlow: next.consecutiveSlow + 1 }
-      if ('success_count' in patch) next = { consecutiveFails: 0, consecutiveSlow: 0 }
-      return { ...prev, [exerciseId]: next }
-    })
+    setSessionGuard((prev) => ({
+      ...prev,
+      [exerciseId]: advanceGuard(prev[exerciseId] ?? EMPTY_GUARD, patch),
+    }))
 
     setMetrics((prev) => ({
       ...prev,
@@ -308,10 +309,7 @@ export default function TrainingCard(props: Props) {
             {displayedExercises.map(({ current: ex, originalIdx }) => {
               const spec = customSpecs[ex.id] ?? getExerciseSpec(ex.id)
               const m = metrics[ex.id] ?? null
-              const guard = sessionGuard[ex.id] ?? { consecutiveFails: 0, consecutiveSlow: 0 }
-              const rec = buildRecommendation(
-                m?.success_count ?? 0, m?.fail_count ?? 0, m?.latency_bucket ?? null, ageWeeks, guard,
-              )
+              const guard = sessionGuard[ex.id] ?? EMPTY_GUARD
               return (
                 <ExerciseRow
                   key={`${originalIdx}-${ex.id}`}
@@ -321,8 +319,9 @@ export default function TrainingCard(props: Props) {
                   onOpenGuide={() => setGuideExerciseId(ex.id)}
                   spec={spec}
                   metrics={m}
-                  recommendation={rec?.message ?? null}
-                  showTroubleshooting={rec?.kind === 'lower' || rec?.kind === 'stop'}
+                  guard={guard}
+                  advanceThresholdDelta={dogState?.thresholdAdjustments[ex.id] ?? 0}
+                  onEndExercise={() => commitProgress(ex.id, ex.reps)}
                   onMetricsPatch={(patch) => patchMetrics(ex.id, patch)}
                   ageWeeks={ageWeeks}
                   sessionNext={nextExerciseId === ex.id}
