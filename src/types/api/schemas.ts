@@ -66,6 +66,29 @@ export const DailyExerciseMetricsSchema = z.object({
 })
 
 export const MetricsMapSchema = z.record(z.string(), DailyExerciseMetricsSchema)
+
+export const ExerciseSourcesResponseSchema = z.object({
+  sources: z.record(z.string(), z.array(TrainingSourceRefSchema)),
+})
+
+export const MicroLessonSchema = z.object({
+  title: z.string(),
+  body: z.string(),
+  exerciseId: z.string(),
+  exerciseLabel: z.string(),
+  sources: z.array(TrainingSourceRefSchema),
+})
+
+export const MicroLessonResponseSchema = z.object({
+  lesson: MicroLessonSchema.nullable(),
+})
+
+export const CoachTipSchema = z.object({
+  exerciseId: z.string(),
+  exerciseLabel: z.string(),
+  advice: z.string(),
+  sources: z.array(TrainingSourceRefSchema),
+})
 export const ProgressMapSchema = z.record(z.string(), z.number())
 
 export type TrainingResultDTO = z.infer<typeof TrainingResultSchema>

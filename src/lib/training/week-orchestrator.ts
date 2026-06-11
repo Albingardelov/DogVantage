@@ -26,8 +26,11 @@ import { getSupabaseAdmin } from '@/lib/supabase/client'
 import { computeProgressionDecisions, formatProgressionRule, type ProgressionMetricRow } from '@/lib/training/progression-rules'
 import { getHomecomeWeekPlan } from '@/lib/training/homecoming-plan'
 import { generateWeekPlan, PLAN_VERSION } from '@/lib/ai/week-plan'
+import { buildDeterministicWeekPlan } from '@/lib/training/deterministic-week-planner'
 import type { WeekPlanInput } from '@/lib/training/week-context'
 import { getCachedWeekPlan, setCachedWeekPlan } from '@/lib/supabase/training-cache'
+import { tryAcquireGenerationLock, releaseGenerationLock } from '@/lib/supabase/generation-lock'
+import { trackTelemetry } from '@/lib/telemetry'
 
 const ENV_LABELS: Record<TrainingEnvironment, string> = {
   city: 'Stad (mycket folk och hundar)',
@@ -238,6 +241,9 @@ export async function buildWeekContextFromRequest(
   }
 }
 
+const LOCK_WAIT_ATTEMPTS = 5
+const LOCK_WAIT_INTERVAL_MS = 1500
+
 export async function getOrGenerateWeekPlan(ctx: WeekOrchestratorContext): Promise<WeekPlan> {
   if (ctx.isHomecomeWeek) return getHomecomeWeekPlan(ctx.hasCats)
 
@@ -253,9 +259,70 @@ export async function getOrGenerateWeekPlan(ctx: WeekOrchestratorContext): Promi
     cacheScope: ctx.cacheKey ?? null,
   }
 
-  let cached: WeekPlan | null = null
+  const cached = await readCachedPlan(ctx)
+  if (cached) {
+    trackTelemetry('week-plan-api', { ...baseTelemetry, source: 'cache', cacheHit: true })
+    return cached
+  }
+
+  // Singleflight: only one concurrent generation per dog+week. Parallel
+  // requests (dashboard + calendar, double-clicks, cache invalidation after a
+  // PLAN_VERSION bump) would otherwise each trigger their own AI generation.
+  const lockKey = `weekplan:${ctx.dogId}:${ctx.trainingWeek}:${PLAN_VERSION}`
+  const lockAcquired = await tryAcquireGenerationLock(lockKey)
+
+  if (!lockAcquired) {
+    // Someone else is generating — wait briefly for their cache write.
+    for (let i = 0; i < LOCK_WAIT_ATTEMPTS; i++) {
+      await sleep(LOCK_WAIT_INTERVAL_MS)
+      const plan = await readCachedPlan(ctx)
+      if (plan) {
+        trackTelemetry('week-plan-api', { ...baseTelemetry, source: 'cache-wait', cacheHit: true })
+        return plan
+      }
+    }
+    // Still nothing: serve the deterministic plan without AI polish rather
+    // than piling on another AI generation. Not cached — the lock holder's
+    // full plan will land in cache for the next request.
+    trackTelemetry('week-plan-api', { ...baseTelemetry, source: 'deterministic-singleflight', cacheHit: false })
+    return buildDeterministicWeekPlan(ctx.input).plan
+  }
+
   try {
-    cached = await getCachedWeekPlan(
+    const plan = await generateWeekPlan(ctx.input)
+    trackTelemetry('week-plan-api', { ...baseTelemetry, source: 'generated', cacheHit: false })
+    await setCachedWeekPlan(
+      ctx.breed,
+      ctx.trainingWeek,
+      plan,
+      ctx.ageWeeks,
+      ctx.goals,
+      ctx.cacheKey,
+      ctx.dogId,
+      ctx.onboardingContext,
+      ctx.customIds,
+      PLAN_VERSION,
+      ctx.focusAreas,
+      ctx.priorityExercises,
+      ctx.input.progressionRule,
+    ).catch((e) => {
+      console.error('[GET /api/training/week] cache write failed:', e)
+      trackTelemetry('week-plan-api', {
+        ...baseTelemetry,
+        source: 'generated',
+        cacheHit: false,
+        cacheWriteFailed: true,
+      })
+    })
+    return plan
+  } finally {
+    await releaseGenerationLock(lockKey)
+  }
+}
+
+async function readCachedPlan(ctx: WeekOrchestratorContext): Promise<WeekPlan | null> {
+  try {
+    return await getCachedWeekPlan(
       ctx.breed,
       ctx.trainingWeek,
       ctx.ageWeeks,
@@ -271,55 +338,12 @@ export async function getOrGenerateWeekPlan(ctx: WeekOrchestratorContext): Promi
     )
   } catch (e) {
     console.error('[GET /api/training/week] cache read failed:', e)
+    return null
   }
-  if (cached) {
-    console.log(
-      '[telemetry:week-plan-api]',
-      JSON.stringify({
-        ...baseTelemetry,
-        source: 'cache',
-        cacheHit: true,
-      }),
-    )
-    return cached
-  }
+}
 
-  const plan = await generateWeekPlan(ctx.input)
-  console.log(
-    '[telemetry:week-plan-api]',
-    JSON.stringify({
-      ...baseTelemetry,
-      source: 'generated',
-      cacheHit: false,
-    }),
-  )
-  await setCachedWeekPlan(
-    ctx.breed,
-    ctx.trainingWeek,
-    plan,
-    ctx.ageWeeks,
-    ctx.goals,
-    ctx.cacheKey,
-    ctx.dogId,
-    ctx.onboardingContext,
-    ctx.customIds,
-    PLAN_VERSION,
-    ctx.focusAreas,
-    ctx.priorityExercises,
-    ctx.input.progressionRule,
-  ).catch((e) => {
-    console.error('[GET /api/training/week] cache write failed:', e)
-    console.log(
-      '[telemetry:week-plan-api]',
-      JSON.stringify({
-        ...baseTelemetry,
-        source: 'generated',
-        cacheHit: false,
-        cacheWriteFailed: true,
-      }),
-    )
-  })
-  return plan
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 function parsePets(params: URLSearchParams): HouseholdPet[] {

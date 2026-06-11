@@ -5,6 +5,14 @@ export const GEMINI_TEXT_MODEL = 'gemini-2.5-flash'
 export const GEMINI_PLAN_MODEL = 'gemini-2.5-flash-lite'
 export const GROQ_MODEL = 'llama-3.3-70b-versatile'
 
+// Hard request timeouts (ms). A hung AI provider must never hold a serverless
+// function open until the platform max — fail fast and let callers fall back.
+export const AI_TIMEOUTS = {
+  embed: 10_000,
+  chat: 25_000,
+  weekPlan: 20_000,
+} as const
+
 let _genAI: GoogleGenerativeAI | null = null
 let _embedModel: ReturnType<GoogleGenerativeAI['getGenerativeModel']> | null = null
 let _textModel: ReturnType<GoogleGenerativeAI['getGenerativeModel']> | null = null
@@ -44,7 +52,7 @@ export function getGeminiPlanModel() {
 export function getGroqClient(): Groq {
   if (_groq) return _groq
   const apiKey = requireEnv('GROQ_API_KEY', process.env.GROQ_API_KEY)
-  _groq = new Groq({ apiKey })
+  _groq = new Groq({ apiKey, timeout: AI_TIMEOUTS.chat, maxRetries: 1 })
   return _groq
 }
 

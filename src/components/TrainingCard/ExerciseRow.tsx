@@ -15,7 +15,7 @@ import {
   IconX,
 } from '@/components/icons'
 import styles from './ExerciseRow.module.css'
-import type { DailyExerciseMetrics, Exercise, LatencyBucket } from '@/types'
+import type { DailyExerciseMetrics, Exercise, LatencyBucket, TrainingSourceRef } from '@/types'
 import type { ExerciseSpec } from '@/lib/training/exercise-specs'
 import { isPuppy as isPuppyAge } from '@/lib/dog/age'
 
@@ -41,6 +41,8 @@ interface Props {
     tone: 'priority' | 'focus' | 'weak'
     detail?: string
   }>
+  /** Dokumentkällor från kunskapsbasen — visas som "Läs mer"-länkar */
+  sources?: TrainingSourceRef[]
 }
 
 const LATENCY_OPTIONS: { id: LatencyBucket; label: string }[] = [
@@ -134,6 +136,7 @@ export default function ExerciseRow({
   rootId,
   onSwap,
   reasonBadges = [],
+  sources = [],
 }: Props) {
   const [combo, setCombo] = useState(0)
   const [floats, setFloats] = useState<{ id: number; kind: 'success' | 'miss' }[]>([])
@@ -238,6 +241,28 @@ export default function ExerciseRow({
           {currentLevelCriteria && (
             <p className={styles.criteriaText}>
               <strong>Dagens kriterium:</strong> {currentLevelCriteria}
+            </p>
+          )}
+          {sources.length > 0 && (
+            <p className={styles.sourcesRow}>
+              Läs mer:{' '}
+              {sources.map((s, i) => (
+                <span key={s.source_url || s.source}>
+                  {i > 0 && ' · '}
+                  {s.source_url ? (
+                    <a
+                      href={s.source_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.sourceLink}
+                    >
+                      {s.source}
+                    </a>
+                  ) : (
+                    s.source
+                  )}
+                </span>
+              ))}
             </p>
           )}
         </div>

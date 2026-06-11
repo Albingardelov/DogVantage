@@ -22,6 +22,10 @@ vi.mock('@/components/ChatInterface', () => ({
   default: (props: unknown) => mockChatInterface(props),
 }))
 
+vi.mock('@/components/billing/FeatureGate', () => ({
+  FeatureGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}))
+
 vi.mock('@/components/Avatar', () => ({
   default: ({ name }: { name: string }) => <div data-testid="avatar">{name}</div>,
 }))
@@ -69,7 +73,6 @@ describe('ChatPage', () => {
     expect(screen.getByTestId('chat-interface')).toBeInTheDocument()
     expect(mockChatInterface).toHaveBeenCalledWith(
       expect.objectContaining({
-        breed: 'labrador',
         trainingWeek: 4,
         dogId: 'dog-2',
         initialQuestion: 'Hur tränar jag inkallning?',

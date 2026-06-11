@@ -3,6 +3,7 @@ import { GOAL_EXERCISE_IDS } from '@/lib/training/goal-exercises'
 import { focusExerciseIds } from '@/lib/training/weekly-focus'
 import { allowedExerciseIdsForBreed } from '@/lib/training/allowed-exercises'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
+import { exerciseLabel } from '@/lib/training/exercise-label'
 import type { WeekPlanInput } from '@/lib/training/week-context'
 import type { ExerciseProgressionDecision } from '@/lib/training/progression-rules'
 
@@ -11,16 +12,6 @@ const REST_DAY_INDEXES = new Set([1, 4]) // Tue + Fri
 const REACTIVE_EXERCISE_IDS = new Set(['lat'])
 const OBEDIENCE_REQUIRING_RELEASE = new Set(['sitt', 'ligg', 'stanna', 'plats'])
 const CALM_REACTIVE_EXERCISES = new Set(['namn', 'hantering', 'fokus', 'plats', 'fri', 'marker'])
-
-const LABEL_OVERRIDES: Record<string, string> = {
-  namn: 'Namnkontakt',
-  lat: 'LAT',
-  kontrollerat_sok: 'Kontrollerat sök',
-  box_traning: 'Boxträning',
-  ensam_traning: 'Ensamträning',
-  bett_inhibition: 'Bitinhibition',
-  stoppsignal: 'Stoppsignal',
-}
 
 type ProgressionByExercise = Map<string, ExerciseProgressionDecision['decision']>
 
@@ -165,7 +156,7 @@ function scoreExercise(id: string, ctx: PickCtx): number {
 
 function toExercise(id: string, ctx: PickCtx): Exercise {
   const spec = getExerciseSpec(id)
-  const label = ctx.customLabels.get(id) ?? LABEL_OVERRIDES[id] ?? spec?.exerciseId?.replaceAll('_', ' ')?.replace(/\b\w/g, (c) => c.toUpperCase()) ?? id
+  const label = ctx.customLabels.get(id) ?? exerciseLabel(id)
   const decision = ctx.progressionMap.get(id) ?? 'hold'
   return {
     id,

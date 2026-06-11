@@ -18,6 +18,7 @@ import AddCustomExerciseModal from '@/components/AddCustomExerciseModal'
 import { useTrainingData } from './use-training-data'
 import { useCustomSpecs } from './use-custom-specs'
 import { useTodayExercises } from './use-today-exercises'
+import { useExerciseSources } from './use-exercise-sources'
 import { buildRecommendation, type SessionGuard } from './recommendation'
 import { buildExerciseSummaries, emptyMetrics } from './exercise-helpers'
 import { NextBanner, LoadingIndicator, ReferralCard, RestDay, ChevronRight } from './parts'
@@ -73,6 +74,9 @@ export default function TrainingCard(props: Props) {
     nextExerciseId, nextExercise, swapCandidates, setSwaps,
     completedCount,
   } = useTodayExercises({ weekPlan, progress, focusAreas, simpleFocus })
+
+  const todayExerciseIds = useMemo(() => todayExercises.map((e) => e.id), [todayExercises])
+  const exerciseSources = useExerciseSources(dogId, todayExerciseIds)
 
   const repsPlanned = useMemo(
     () => todayExercises.reduce((sum, exercise) => sum + exercise.reps, 0),
@@ -325,6 +329,7 @@ export default function TrainingCard(props: Props) {
                   rootId={nextExerciseId === ex.id ? 'training-session-next' : undefined}
                   onSwap={swapCandidates.length > 0 ? () => handleSwap(originalIdx) : undefined}
                   reasonBadges={reasonBadgesForExercise(ex.id)}
+                  sources={exerciseSources[ex.id]}
                 />
               )
             })}
