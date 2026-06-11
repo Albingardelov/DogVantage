@@ -24,8 +24,15 @@ import { getWeeklyFocusPreferences } from '@/lib/supabase/weekly-focus'
 import { getActiveHeatCycle, getLastEndedHeatCycle, isSkenfasActive } from '@/lib/supabase/heat-cycles'
 import { getSupabaseAdmin } from '@/lib/supabase/client'
 import { computeProgressionDecisions, formatProgressionRule, type ProgressionMetricRow } from '@/lib/training/progression-rules'
-import { computeHandlerStruggle, dampAdvances } from '@/lib/training/handler-state'
-import { getDogState } from '@/lib/supabase/dog-state'
+import { computeHandlerStruggle, dampAdvances, type HandlerStruggle } from '@/lib/training/handler-state'
+import { getDogState, updateThresholdAdjustments } from '@/lib/supabase/dog-state'
+import { evaluateDecisions, computeThresholdAdjustments } from '@/lib/training/decision-calibration'
+import {
+  getPendingDecisions,
+  getRecentAdvanceOutcomes,
+  logProgressionDecisions,
+  markDecisionsEvaluated,
+} from '@/lib/supabase/progression-decision-log'
 import { getRecentQuizStats } from '@/lib/supabase/learning-progress'
 import { getHomecomeWeekPlan } from '@/lib/training/homecoming-plan'
 import { generateWeekPlan, PLAN_VERSION } from '@/lib/ai/week-plan'
@@ -197,18 +204,58 @@ export async function buildWeekContextFromRequest(
       date,
     }))
   })
-  const rawProgressionDecisions = computeProgressionDecisions(recentMetrics, { sessionRows })
-  const handlerStruggle = await (async () => {
+  const adaptiveContext = await (async () => {
     try {
       const [dogState, quizStats] = await Promise.all([
         getDogState(dog.id),
         getRecentQuizStats(dog.user_id, dog.id),
       ])
-      return computeHandlerStruggle(dogState.handler, quizStats)
+      return { dogState, quizStats }
     } catch {
-      return { struggling: false, dimensions: [], reason: null }
+      return null
     }
   })()
+
+  let thresholdOverrides = adaptiveContext?.dogState.thresholdAdjustments ?? {}
+  if (adaptiveContext) {
+    try {
+      const pending = await getPendingDecisions(dog.id)
+      if (pending.length > 0) {
+        const observed = computeProgressionDecisions(recentMetrics, { sessionRows })
+        const evaluations = evaluateDecisions(
+          pending,
+          observed.map((d) => ({
+            exercise_id: d.exercise_id,
+            decision: d.decision,
+            success_rate: d.success_rate,
+          })),
+        )
+        if (evaluations.length > 0) {
+          await markDecisionsEvaluated(evaluations)
+          const outcomes = await getRecentAdvanceOutcomes(dog.id)
+          thresholdOverrides = computeThresholdAdjustments(thresholdOverrides, outcomes)
+          await updateThresholdAdjustments(dog.id, thresholdOverrides)
+          trackTelemetry('progression_decision_evaluated', {
+            dogId: dog.id,
+            evaluated: evaluations.length,
+            bad: evaluations.filter((e) => e.outcome === 'bad').length,
+            good: evaluations.filter((e) => e.outcome === 'good').length,
+          })
+        }
+      }
+    } catch (e) {
+      // Kalibrering får aldrig blockera planeringen.
+      console.warn('[week-orchestrator] calibration skipped:', e instanceof Error ? e.message : String(e))
+    }
+  }
+
+  const rawProgressionDecisions = computeProgressionDecisions(recentMetrics, {
+    sessionRows,
+    thresholdOverrides,
+  })
+  const handlerStruggle = adaptiveContext
+    ? computeHandlerStruggle(adaptiveContext.dogState.handler, adaptiveContext.quizStats)
+    : { struggling: false, dimensions: [], reason: null } satisfies HandlerStruggle
   const progressionDecisions = dampAdvances(rawProgressionDecisions, handlerStruggle)
   if (handlerStruggle.struggling) {
     trackTelemetry('handler_struggle_damping', {
@@ -313,6 +360,9 @@ export async function getOrGenerateWeekPlan(ctx: WeekOrchestratorContext): Promi
   try {
     const plan = await generateWeekPlan(ctx.input)
     trackTelemetry('week-plan-api', { ...baseTelemetry, source: 'generated', cacheHit: false })
+    logProgressionDecisions(ctx.dogId, ctx.input.progressionDecisions ?? []).catch((e) => {
+      console.warn('[week-orchestrator] decision log failed:', e instanceof Error ? e.message : String(e))
+    })
     await setCachedWeekPlan(
       ctx.breed,
       ctx.trainingWeek,
