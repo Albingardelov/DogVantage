@@ -192,6 +192,22 @@ export const DogStatePayloadSchema = z.object({
   thresholdAdjustments: z.record(z.string(), z.number()),
 })
 
+export const ChatHistoryMessageSchema = z.object({
+  role: z.enum(['user', 'assistant']),
+  content: z.string(),
+  created_at: z.string(),
+})
+
+export const ChatHistoryResponseSchema = z.object({
+  messages: z.array(ChatHistoryMessageSchema),
+})
+
+export const WeeklyFocusResponseSchema = z.object({
+  isoWeek: z.string(),
+  areas: z.array(z.string()),
+  exerciseIds: z.array(z.string()),
+})
+
 export type TrainingResultDTO = z.infer<typeof TrainingResultSchema>
 export type WeekPlanDTO = z.infer<typeof WeekPlanSchema>
 export type SessionLogDTO = z.infer<typeof SessionLogSchema>
