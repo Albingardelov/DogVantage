@@ -128,6 +128,10 @@ export async function queryRAG(
     return BEHAVIOR_RESPONSE
   }
 
+  const history = (opts.history ?? []).filter(
+    (m) => !detectHealthIssue(m.content) && !detectBehaviorEmergency(m.content),
+  )
+
   // 1. Embed the query and retrieve breed-specific document chunks.
   // We only return training guidance when the query has reliable document support.
   const matchCount = query.length > 80 ? 6 : 3
@@ -206,7 +210,7 @@ Regler: svara på svenska, anpassa till hundens ålder i veckor. ${lengthRule} $
     model: GROQ_MODEL,
     messages: [
       { role: 'system', content: systemPrompt },
-      ...(opts.history ?? []).map((m) => ({ role: m.role, content: m.content })),
+      ...history.map((m) => ({ role: m.role, content: m.content })),
       { role: 'user', content: query },
     ],
     temperature: 0.4,

@@ -206,6 +206,22 @@ describe('queryRAG', () => {
     expect(systemMsg).toContain('Inkallning 40 % (20 försök)')
   })
 
+  it('filters guard-triggering turns out of history', async () => {
+    const { getGroqClient } = await import('@/lib/ai/client')
+    const client = getGroqClient()
+    const { queryRAG } = await import('./rag')
+    await queryRAG('Och hur går jag vidare?', 'labrador', [], 12, [], undefined, {
+      history: [
+        { role: 'user', content: 'hunden haltar efter träning' },
+        { role: 'user', content: 'Hur tränar jag inkallning?' },
+        { role: 'assistant', content: 'Börja inomhus med kort avstånd.' },
+      ],
+    })
+    const call = vi.mocked(client.chat.completions.create).mock.calls[0][0] as { messages: { role: string; content: string }[] }
+    expect(call.messages).toHaveLength(4)
+    expect(call.messages.map((m) => m.content)).not.toContain('hunden haltar efter träning')
+  })
+
   it('omits dog state section without context', async () => {
     const { getGroqClient } = await import('@/lib/ai/client')
     const client = getGroqClient()
