@@ -100,6 +100,16 @@ export function chunksToSourceRefs(chunks: ChunkMatch[]): TrainingSourceRef[] {
   return out
 }
 
+export interface ChatHistoryEntry {
+  role: 'user' | 'assistant'
+  content: string
+}
+
+export interface QueryRAGOptions {
+  history?: ChatHistoryEntry[]
+  dogStateContext?: string | null
+}
+
 // ─── Main RAG query ───────────────────────────────────────────────────────────
 export async function queryRAG(
   query: string,
@@ -107,7 +117,8 @@ export async function queryRAG(
   recentLogs: string[] = [],
   weekAge?: number,
   todayMetrics: string[] = [],
-  onboardingContext?: string
+  onboardingContext?: string,
+  opts: QueryRAGOptions = {}
 ): Promise<TrainingResult> {
   if (detectHealthIssue(query)) return VET_RESPONSE
   // Behaviour-emergency check: short-circuit if either the query OR the
@@ -172,6 +183,9 @@ export async function queryRAG(
   const onboardingSection = onboardingContext
     ? `\n=== TRÄNARKONTEXT ===\n${onboardingContext}\nAnpassa råden (träningsmetod, belöningsval, miljö) utifrån ovanstående.\n`
     : ''
+  const dogStateSection = opts.dogStateContext
+    ? `\n=== HUNDPROFIL (DATA) ===\n${opts.dogStateContext}\nAnvänd datan ovan för individanpassade råd — referera till hundens faktiska siffror när det är relevant.\n`
+    : ''
   const howToQuery = isHowToQuery(query)
   const responseFormat = howToQuery
     ? 'Svarsmall för momentfrågor: 1) Mål 2) Setup nu 3) Nästa 3–5 reps (numrerat) 4) När höja/sänka kriteriet 5) Stoppsignal 6) Vad som ska loggas i appen 7) En kort följdfråga till föraren.'
@@ -185,13 +199,14 @@ export async function queryRAG(
 === RASPROFIL ===
 ${breedProfile}
 ${phaseInfo}
-${documentContext ? `\n=== KÄLLDOKUMENT ===\n${documentContext}\n` : ''}${onboardingSection}${metricsSection}${logsSection}
+${documentContext ? `\n=== KÄLLDOKUMENT ===\n${documentContext}\n` : ''}${onboardingSection}${dogStateSection}${metricsSection}${logsSection}
 Regler: svara på svenska, anpassa till hundens ålder i veckor. ${lengthRule} ${responseFormat} Nämn källnamn om KÄLLDOKUMENT finns — annars påstå inte att du citerar ett dokument.`
 
   const completion = await getGroqClient().chat.completions.create({
     model: GROQ_MODEL,
     messages: [
       { role: 'system', content: systemPrompt },
+      ...(opts.history ?? []).map((m) => ({ role: m.role, content: m.content })),
       { role: 'user', content: query },
     ],
     temperature: 0.4,
