@@ -10,7 +10,7 @@ import { updateDogProfile } from '@/lib/dog/profile'
 import { saveDogPhoto } from '@/lib/dog/photo'
 import { useActiveDog } from '@/lib/dog/active-dog-context'
 import { getAgeInWeeks, daysUntilHomecoming } from '@/lib/dog/age'
-import { GOALS, ENVIRONMENTS, REWARDS } from '@/components/DogProfileForm'
+import { GOALS, getGoalsForBreed, ENVIRONMENTS, REWARDS } from '@/components/DogProfileForm'
 import { HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'
 import { ALL_BREED_OPTIONS } from '@/lib/breeds/registry'
 import {
@@ -51,6 +51,7 @@ function ProfileView() {
   const [sex, setSex] = useState<DogSex | ''>('')
   const [castrationStatus, setCastrationStatus] = useState<CastrationStatus | ''>('')
   const [homecomeDate, setHomecomeDate] = useState('')
+  const [birthdate, setBirthdate] = useState('')
   const [isInHeat, setIsInHeat] = useState(false)
   const [skenfasActive, setSkenfasActive] = useState(false)
   const [heatLoading, setHeatLoading] = useState(false)
@@ -76,6 +77,7 @@ function ProfileView() {
     setSex(activeDog.sex ?? '')
     setCastrationStatus(activeDog.castrationStatus ?? '')
     setHomecomeDate(activeDog.onboarding?.homecomeDate ?? '')
+    setBirthdate(activeDog.birthdate ?? '')
     setSaved(false)
     if (activeDog.id) {
       fetch(`/api/training/heat?dogId=${encodeURIComponent(activeDog.id)}`)
@@ -157,6 +159,7 @@ function ProfileView() {
     const updated: DogProfile = {
       ...profile,
       trainingWeek: safeWeek,
+      birthdate: birthdate || profile.birthdate,
       onboarding: {
         ...(profile.onboarding ?? { takesRewardsOutdoors: true, goals, environment, rewardPreference }),
         goals,
@@ -173,6 +176,7 @@ function ProfileView() {
         id: profile.id,
         onboarding: updated.onboarding,
         trainingWeek: safeWeek,
+        birthdate: birthdate || undefined,
         sex: sex || undefined,
         castrationStatus: castrationStatus || undefined,
       })
@@ -267,7 +271,9 @@ function ProfileView() {
           <div className={styles.field}>
             <span className={styles.fieldLabel}>Mål (välj ett eller flera)</span>
             <div className={styles.optionList} role="group" aria-label="Mål">
-              {GOALS.map((o) => {
+              {GOALS.filter((o) =>
+                goals.includes(o.value) || getGoalsForBreed(profile.breed).some((g) => g.value === o.value)
+              ).map((o) => {
                 const selected = goals.includes(o.value)
                 return (
                   <button
@@ -278,7 +284,10 @@ function ProfileView() {
                     onClick={() => toggleGoal(o.value)}
                     className={`${styles.optionBtn} ${selected ? styles.optionBtnSelected : ''}`}
                   >
-                    <span>{o.label}</span>
+                    <span className={styles.optionText}>
+                      <span>{o.label}</span>
+                      <span className={styles.optionDescription}>{o.description}</span>
+                    </span>
                     {selected && <SelectionCheck />}
                   </button>
                 )
@@ -426,6 +435,20 @@ function ProfileView() {
 
         <div className={styles.section}>
           <span className={styles.sectionTitle}>Om hunden</span>
+          <div className={styles.field}>
+            <label className={styles.fieldLabel} htmlFor="dog-birthdate">Födelsedag</label>
+            <input
+              id="dog-birthdate"
+              className={styles.textarea}
+              type="date"
+              value={birthdate}
+              max={new Date().toISOString().slice(0, 10)}
+              onChange={(e) => { setBirthdate(e.target.value); setSaved(false) }}
+            />
+            <span className={styles.helper}>
+              Styr ålders- och utvecklingsfasanpassningen i träningsplanen.
+            </span>
+          </div>
           <div className={styles.field}>
             <label className={styles.fieldLabel} htmlFor="owner-notes">
               Något vi bör veta?{' '}

@@ -26,6 +26,17 @@ export const GOAL_LABELS: Record<TrainingGoal, string> = {
   problem_solving:    'Lösa problem (koppel/inkallning)',
 }
 
+/** Owner-facing summary of what each goal trains. Keep in sync with GOAL_EXERCISE_IDS. */
+export const GOAL_DESCRIPTIONS: Record<TrainingGoal, string> = {
+  everyday_obedience: 'Namnkontakt, inkallning, koppelgång, stanna kvar och hantering.',
+  sport:              'Precision och fart: sitt, ligg, fokus, fotgående och inkallning med höga kriterier.',
+  hunting:            'Apportering med dummies, stoppsignal, stadga, kontrollerat sök, orientering och vattenarbete.',
+  herding:            'Vallningsarbete: impulskontroll och stoppsignal mot rörliga retningar, stadga och orientering.',
+  impulse_control:    'Lugn och väntan: impulskontroll, stanna kvar, stadga och hantering i korta pass.',
+  nosework:           'Doftsök som mental aktivering, kombinerat med stanna kvar och inkallning.',
+  problem_solving:    'Riktad träning mot koppeldrag, inkallning, impulskontroll och fokus i utmanande miljöer.',
+}
+
 export const GOAL_RULES: Record<TrainingGoal, string> = {
   everyday_obedience: 'Inkludera vardagsrelevanta övningar som koppel, inkallning, hantering.',
   sport:              'Prioritera precision och snabbhet: sitt, ligg, fokus, inkallning med hög kriterienivå.',

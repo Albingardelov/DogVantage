@@ -6,6 +6,7 @@ import { saveDogProfile } from '@/lib/dog/profile'
 import { saveDogPhoto } from '@/lib/dog/photo'
 import { getAgeInWeeks } from '@/lib/dog/age'
 import { resolveBreedProfile } from '@/lib/ai/breed-profiles'
+import { GOAL_DESCRIPTIONS } from '@/lib/training/goal-exercises'
 import { HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import { IconCamera, SelectionCheck } from '@/components/icons'
@@ -16,17 +17,17 @@ import styles from './DogProfileForm.module.css'
 
 const ALL_HOUSEHOLD_PETS = Object.keys(HOUSEHOLD_PET_LABELS) as HouseholdPet[]
 
-export const GOALS: { value: TrainingGoal; label: string }[] = [
-  { value: 'everyday_obedience', label: 'Vardagslydnad' },
-  { value: 'sport', label: 'Sport / tävling' },
-  { value: 'hunting', label: 'Jakt / bruk' },
-  { value: 'herding', label: 'Vallning' },
-  { value: 'impulse_control', label: 'Impulskontroll & lugn' },
-  { value: 'nosework', label: 'Nosework / doftsök' },
-  { value: 'problem_solving', label: 'Lösa problem (t.ex. koppel/inkallning)' },
+export const GOALS: { value: TrainingGoal; label: string; description: string }[] = [
+  { value: 'everyday_obedience', label: 'Vardagslydnad', description: GOAL_DESCRIPTIONS.everyday_obedience },
+  { value: 'sport', label: 'Sport / tävling', description: GOAL_DESCRIPTIONS.sport },
+  { value: 'hunting', label: 'Jakt / bruk', description: GOAL_DESCRIPTIONS.hunting },
+  { value: 'herding', label: 'Vallning', description: GOAL_DESCRIPTIONS.herding },
+  { value: 'impulse_control', label: 'Impulskontroll & lugn', description: GOAL_DESCRIPTIONS.impulse_control },
+  { value: 'nosework', label: 'Nosework / doftsök', description: GOAL_DESCRIPTIONS.nosework },
+  { value: 'problem_solving', label: 'Lösa problem (t.ex. koppel/inkallning)', description: GOAL_DESCRIPTIONS.problem_solving },
 ]
 
-function getGoalsForBreed(breed: string): { value: TrainingGoal; label: string }[] {
+export function getGoalsForBreed(breed: string): typeof GOALS {
   if (!breed) return GOALS
   const profile = resolveBreedProfile(breed)
   return GOALS.filter((g) => !profile.hiddenGoals.includes(g.value))
@@ -586,7 +587,7 @@ export function MultiChoiceField({
   label: string
   values: string[]
   onChange: (v: string[]) => void
-  options: { value: string; label: string }[]
+  options: { value: string; label: string; description?: string }[]
 }) {
   function toggle(v: string) {
     if (values.includes(v)) {
@@ -612,7 +613,10 @@ export function MultiChoiceField({
               onClick={() => toggle(o.value)}
               className={`${styles.breedOption} ${selected ? styles.breedOptionSelected : ''}`}
             >
-              <span>{o.label}</span>
+              <span className={styles.optionText}>
+                <span>{o.label}</span>
+                {o.description && <span className={styles.optionDescription}>{o.description}</span>}
+              </span>
               {selected && <SelectionCheck />}
             </button>
           )

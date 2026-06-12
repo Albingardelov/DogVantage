@@ -85,6 +85,7 @@ export async function updateProfile(fields: Partial<DogProfile>): Promise<void> 
     onboarding?: Json | null
     assessment?: Json | null
     name?: string
+    birthdate?: string
     sex?: DogSex | null
     castration_status?: CastrationStatus | null
   } = {}
@@ -92,6 +93,7 @@ export async function updateProfile(fields: Partial<DogProfile>): Promise<void> 
   if (fields.onboarding !== undefined) updates.onboarding = fields.onboarding as unknown as Json | null
   if (fields.assessment !== undefined) updates.assessment = fields.assessment as unknown as Json | null
   if (fields.name !== undefined) updates.name = fields.name
+  if (fields.birthdate !== undefined) updates.birthdate = fields.birthdate
   if (fields.sex !== undefined) updates.sex = fields.sex ?? null
   if (fields.castrationStatus !== undefined) updates.castration_status = fields.castrationStatus ?? null
 
