@@ -700,6 +700,56 @@ export const CATEGORIES: Record<TabKey, Article[]> = {
       ],
     },
     {
+      id: 'nosework-doftsok',
+      title: 'Nosework — doftsök som sport',
+      summary: 'Världens mest demokratiska hundsport: alla raser, alla åldrar, och nosen gör jobbet.',
+      readTime: '5 min',
+      sources: ['SNWK Regler för prov och tävling Nose Work (2022)'],
+      sections: [
+        {
+          heading: 'Vad nosework är',
+          body: 'Nosework går ut på att hunden söker upp gömda måldofter (eukalyptus, lagerblad och lavendel i Sverige) i fyra miljöer: behållare, inomhus, utomhus och på fordon. Sporten byggdes för att alla hundar ska kunna delta — SNWK:s regelverk har inga rasbegränsningar, och även reaktiva hundar tävlar eftersom hundarna arbetar en i taget.',
+        },
+        {
+          heading: 'Börja med godissök',
+          body: 'Innan måldofter introduceras: göm godbitar i ett rum och låt hunden söka fritt. Det lär hunden att aktivt, uthålligt sökande lönar sig och att nosen — inte ögonen eller du — löser uppgiften. Sök i kartonger är en klassisk start: en låda med godis bland fem tomma, och svårigheten ökar därifrån.',
+        },
+        {
+          heading: 'Introducera måldoft',
+          body: 'Måldoften paras med belöning: doftburk fram, hunden nosar, markera och belöna vid källan. Belöna alltid så nära doftkällan som möjligt — det bygger den precisa utpekning som krävs på prov. SNWK:s doftprov är första officiella steget: hunden ska självständigt hitta och markera doften inom utsatt tid.',
+        },
+        {
+          heading: 'Därför passar det i din veckoplan',
+          body: 'Doftsök är mentalt högintensivt: tio minuters fokuserat sök tröttar mer än en halvtimmes promenad. Det gör nosework till perfekt aktivering på gula dagar och för hundar som behöver jobba med fokus och självständighet. Appens nosework-övningar följer samma progression — från fritt godissök till systematiskt sök.',
+        },
+      ],
+    },
+    {
+      id: 'viltspar-grunder',
+      title: 'Viltspår — lugnt spårarbete för alla hundar',
+      summary: 'Hunden spårar i sele och lina i sin egen takt. Provformen är öppen för alla raser.',
+      readTime: '5 min',
+      sources: ['SKK Regler för viltspårprov (2022)'],
+      sections: [
+        {
+          heading: 'Vad viltspår är',
+          body: 'Viltspår simulerar eftersök av skadat klövvilt: ett blodspår läggs i skogsmark och hunden arbetar i spårsele och lång lina med föraren bakom. SKK:s provform har två klasser — anlagsklass (cirka 600 meter, 2–5 timmar gammalt spår) och öppen klass (äldre spår med vinklar och bloduppehåll). Alla raser får starta.',
+        },
+        {
+          heading: 'Första spåret hemma',
+          body: 'Börja enkelt: dra en godisbit eller lite mat i gräset några meter och låt hunden följa med nosen i marken. Förläng gradvis och lägg spåret med några minuters ålder. Poängen i början är att hunden förstår uppgiften — följ doftstråket i marken — inte att det är svårt.',
+        },
+        {
+          heading: 'Lina, sele och tempo',
+          body: 'Spårarbete sker i sele med lina på minst 5 meter. Linan är din kommunikationskanal: håll jämn, mjuk kontakt och låt hunden arbeta i sin egen takt. Dra aldrig i linan för att styra — tappar hunden spåret, stanna lugnt och låt den ringa in och hitta tillbaka själv. Det är självständigheten domaren vill se.',
+        },
+        {
+          heading: 'Varför viltspår är så bra träning',
+          body: 'Spårarbete är lugnt, metodiskt och självförtroendebyggande — särskilt bra för stressade eller övertända hundar som behöver lära sig att arbeta i låg puls. Det kräver ingen specialmark att börja: en gräsmatta och en bit korv räcker för de första veckorna.',
+        },
+      ],
+    },
+    {
       id: 'vallning-kom-igang',
       title: 'Vallning — kom igång rätt',
       summary: 'Vallanlag testas och utvecklas under kontrollerade former. Djurvälfärden för tackorna är alltid överordnad.',
