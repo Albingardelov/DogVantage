@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import type { Breed } from '@/types'
 import { ALL_BREED_OPTIONS } from '@/lib/breeds/registry'
+import { IconCaretLeft } from '@/components/icons'
 import styles from './page.module.css'
 
 const BREEDS: { value: Breed; label: string }[] = [...ALL_BREED_OPTIONS]
@@ -53,7 +54,7 @@ export default function UploadPage() {
 
   return (
     <main className={styles.main}>
-      <Link href="/dashboard" className={styles.back}>← Tillbaka</Link>
+      <Link href="/dashboard" className={styles.back}><IconCaretLeft size="sm" /> Tillbaka</Link>
 
       <h1 className={styles.heading}>Bidra med ett RAS-dokument</h1>
       <p className={styles.sub}>

@@ -17,6 +17,7 @@ import {
   IconCaretLeft,
   IconCircleFilled,
   IconCircleOutline,
+  IconPencil,
   IconWarningCircle,
   SelectionCheck,
 } from '@/components/icons'
@@ -259,7 +260,7 @@ function ProfileView() {
           aria-label="Byt profilbild"
         >
           <Avatar key={photoKey} name={profile.name} dogId={profile.id} size={72} bordered={false} />
-          <span className={styles.avatarEditBadge}>✎</span>
+          <span className={styles.avatarEditBadge}><IconPencil size="sm" /></span>
         </button>
         <span className={styles.dogName}>{profile.name}</span>
         <span className={styles.dogMeta}>{breedLabel(profile.breed)} · {ageLabel} · Programvecka {profile.trainingWeek ?? 1}</span>
