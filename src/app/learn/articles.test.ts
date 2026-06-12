@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest'
 import { CATEGORIES, type Article } from './articles'
 
 describe('CATEGORIES', () => {
-  it('has exactly 4 categories', () => {
-    expect(Object.keys(CATEGORIES)).toHaveLength(4)
+  it('has exactly 5 categories', () => {
+    expect(Object.keys(CATEGORIES)).toHaveLength(5)
   })
 
   it('every category has at least one article', () => {

@@ -12,13 +12,14 @@ export interface Article {
   sections: ArticleSection[]
 }
 
-export type TabKey = 'grunderna' | 'teknik' | 'mindset' | 'beteende'
+export type TabKey = 'grunderna' | 'teknik' | 'mindset' | 'beteende' | 'arbete'
 
 export const TAB_LABELS: Record<TabKey, string> = {
   grunderna: 'Valp & Grunder',
   teknik: 'Träningsteknik',
   mindset: 'Förarmindset',
   beteende: 'Beteende & Reaktivitet',
+  arbete: 'Jakt & Arbete',
 }
 
 export const CATEGORIES: Record<TabKey, Article[]> = {
@@ -610,6 +611,116 @@ export const CATEGORIES: Record<TabKey, Article[]> = {
         {
           heading: 'Vad du kan göra själv just nu',
           body: 'Håll hunden under threshold (avstånd > working distance), kör LAT på säkra avstånd, undvik att stacka triggers, säkerställ vila och bra mat, och dokumentera vad som triggar. Den informationen sparar konsulten tid.',
+        },
+      ],
+    },
+  ],
+  arbete: [
+    {
+      id: 'apportering-dummy-grunder',
+      title: 'Apportering & dummyträning — grunderna',
+      summary: 'Kedjan gripa → bära → lämna av i hand byggs baklänges, inomhus, långt innan första kastet ute.',
+      readTime: '6 min',
+      sources: ['SSRK Anvisningar Working Test Retriever (2024)', 'NAVHDA Versatile Hunting Dog Training Issue (2022)'],
+      sections: [
+        {
+          heading: 'Vad apportering egentligen är',
+          body: 'En komplett apport är en beteendekedja: hunden markerar fallet, springer ut, griper mjukt, bär hela vägen tillbaka och lämnar av i handen. SSRK:s bedömning vid working test tittar på just helheten — en hund som släpper dummyn två meter bort eller tuggar på den tappar kedjans värde. Träna därför delarna separat innan du sätter ihop dem.',
+        },
+        {
+          heading: 'Börja med avlämningen — inte kastet',
+          body: 'Det vanligaste nybörjarfelet är att börja kasta direkt. Börja i stället baklänges: lär hunden att det lönar sig att lägga saker i din hand. Sitt på golvet hemma, erbjud dummyn, och byt mot godis i samma sekund som hunden håller den mot din hand. När avlämningen sitter är resten av kedjan mest transport.',
+        },
+        {
+          heading: 'Gripa och bära',
+          body: 'Belöna först varje frivillig beröring av dummyn, sedan grepp, sedan ett par sekunders hållande. Backa några steg när hunden håller — de flesta hundar följer automatiskt efter, och plötsligt har du bärande på köpet. Jaga aldrig en hund som springer iväg med dummyn; bli intressant i stället (backa, locka), annars lär du den att leka jaga-mig.',
+        },
+        {
+          heading: 'Stadga före kastet',
+          body: 'En jakthund ska sitta kvar när dummyn flyger och gå först på signal. Det är ren impulskontroll: håll i halsbandet/selen, kasta kort, vänta en sekund, släpp med tydlig signal. Öka väntetiden gradvis. NAVHDA-materialet betonar att stadga byggd med lugn och positiv förstärkning håller bättre under jaktstress än stadga byggd med tjat.',
+        },
+        {
+          heading: 'Från korridor till fält',
+          body: 'Generalisera stegvis: korridor inne → trädgård → kort kast i fält → kast i högre gräs → dolda apporter. Höj bara en svårighet i taget (avstånd, underlag, synlighet, störning). Når ni 80 % lyckade reps på en nivå är det dags att höja — det är samma tröskel som appens progression använder.',
+        },
+      ],
+    },
+    {
+      id: 'stadga-stand-stoppsignal',
+      title: 'Stadga, stånd och stoppsignal',
+      summary: 'Kontrollmomenten som gör jakten säker — och varför de tränas som lugn, inte lydnad.',
+      readTime: '5 min',
+      sources: ['NAVHDA Gun Dog Test Aims & Rules (2025)', 'FA Jaktprovsregler för stående fågelhundar (2017)'],
+      sections: [
+        {
+          heading: 'Varför kontrollmomenten är kärnan',
+          body: 'På jaktprov bedöms inte bara hundens jaktlust utan främst dess kontrollerbarhet: står den kvar i stånd tills föraren är framme, stannar den på signal, är den stadig vid flog och skott. FA:s regelverk och NAVHDA:s provordningar är samstämmiga — en okontrollerad hund är en säkerhetsrisk, oavsett hur mycket fågel den hittar.',
+        },
+        {
+          heading: 'Stoppsignalen byggs i vardagen',
+          body: 'Börja inne: säg din stoppsignal (visselpipa eller röst) när hunden ändå är på väg att stanna, och belöna stillaståendet på avstånd. Kasta sedan belöningen till hunden i stället för att kalla in — då lär den sig att stopp inte betyder "kom hit", utan "frys där du är". Först när stoppet sitter i trädgården är det dags för fältmiljö.',
+        },
+        {
+          heading: 'Stånd är instinkt — stadga är träning',
+          body: 'Stående fågelhundar har ståndet medfött; din uppgift är att förlänga det. Stör aldrig en ung hund i stånd — gå lugnt fram, beröm stillhet, och avbryt hellre passet än låter hunden lära sig att tjuvresa. NAVHDA:s linje är att tidiga positiva fågelkontakter med korta, lyckade stånd bygger mer stadga än korrigeringar någonsin gör.',
+        },
+        {
+          heading: 'Skottfasthet i rätt ordning',
+          body: 'Skott introduceras på avstånd medan hunden gör något den älskar (äter, jagar dummy), aldrig rakt över en oförberedd hund. Minska avståndet över veckor. Reagerar hunden — öka avståndet igen. En skotträdd hund är mycket svårare att reparera än att bygga rätt från början.',
+        },
+        {
+          heading: 'Koppling till appens övningar',
+          body: 'Övningarna stoppsignal, stadga och impulskontroll i din veckoplan är förträning för exakt de här momenten. Loggar du dem ärligt (lyckad/miss) anpassar planen nivån så att ni alltid tränar på rätt svårighet — hellre tio lätta lyckade stopp än tre svåra misslyckade.',
+        },
+      ],
+    },
+    {
+      id: 'vattenarbete-sok',
+      title: 'Vattenarbete och sök',
+      summary: 'Simglädje först, apport sedan. Så bygger du vattenpassion utan att skapa vattenskräck.',
+      readTime: '5 min',
+      sources: ['NAVHDA Rules Book (2024)', 'NAVHDA Utility Training Intro, Whalen (2018)'],
+      sections: [
+        {
+          heading: 'Vattenglädje går före allt',
+          body: 'Hundens första vattenmöten avgör allt som kommer sedan. Låt den vada själv på grunt, varmt vatten — kasta aldrig i en hund, och tvinga aldrig. Gå gärna i själv; många unghundar följer föraren ut. Målet med de första tio passen är bara att vatten = roligt.',
+        },
+        {
+          heading: 'Första vattenapporten',
+          body: 'Börja med flytande dummy på så grunt vatten att hunden bottnar hela vägen. Öka djupet i centimeter, inte meter. Whalens NAVHDA-material beskriver progressionen: apport över vatten hunden bottnar i → kort simapport → apport där hunden måste korsa vatten till andra sidan. Varje steg ska sitta innan nästa.',
+        },
+        {
+          heading: 'Sök är systematik, inte slump',
+          body: 'I NAVHDA:s duck search släpps hunden på ett vattenområde där den självständigt ska söka av vegetation och vattenytor. Träningen börjar med synliga apporter i vasskanten och flyttas gradvis till dolda, så att hunden lär sig att uthålligt sök alltid lönar sig — även när den inte ser något falla.',
+        },
+        {
+          heading: 'Håll passen korta och varma',
+          body: 'Vattenarbete är fysiskt tungt och kallt vatten tar energi snabbt. Tre–fyra korta lyckade apporter slår tjugo halvdana. Avsluta alltid på topp, torka hunden, och räkna vattenpass som högintensiv träning i din dagsplanering.',
+        },
+      ],
+    },
+    {
+      id: 'vallning-kom-igang',
+      title: 'Vallning — kom igång rätt',
+      summary: 'Vallanlag testas och utvecklas under kontrollerade former. Djurvälfärden för tackorna är alltid överordnad.',
+      readTime: '5 min',
+      sources: ['SVaK Regelbok för vallhundsprov (2017)', 'SVaK Tävlingsanvisningar (2024)'],
+      sections: [
+        {
+          heading: 'Vad vallanlag är',
+          body: 'SVaK:s anlagsprov beskriver de egenskaper alla vallraser delar: intresse för djuren, samarbete med föraren, drivkraft att kontrollera flockens rörelse och balans — förmågan att lägga sig på rätt punkt för att styra flocken utan att splittra den. Det är instinkter som testas och formas, inte kommandon som läras in.',
+        },
+        {
+          heading: 'Börja aldrig på egen hand',
+          body: 'Vallning tränas på levande djur, och tackor är inte träningsredskap som tål misstag. All introduktion ska ske hos en erfaren vallningsinstruktör med vana skolfår, ordentlig inhägnad och möjlighet att avbryta direkt. En ung hund som får jaga får en enda gång kan etablera ett mönster som tar månader att träna bort.',
+        },
+        {
+          heading: 'Förträningen gör ni hemma',
+          body: 'Det som avgör om vallningsträningen lyckas är kontrollen ni redan har: blixtsnabb inkallning, pålitligt stopp på avstånd och impulskontroll runt rörelse. Övningarna i din veckoplan — stoppsignal, impulskontroll, stadga mot rörliga retningar — är exakt den grunden. Sitter de inte i parken sitter de inte bland får.',
+        },
+        {
+          heading: 'Anlagsprov som första mål',
+          body: 'Ett vallanlagsprov hos SVaK är rätt första steg: hunden får möta får under kontrollerade former medan en domare beskriver dess naturliga anlag. Det ger er ett ärligt utgångsläge och kontakt med instruktörer. Därifrån byggs riktiga vallhundsprov stegvis enligt regelboken.',
         },
       ],
     },
