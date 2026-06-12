@@ -38,7 +38,7 @@ describe('formatDogStateForPrompt', () => {
       ],
     })
     expect(out).toContain('Sitt i parken 40 %')
-    expect(out).not.toContain('Miljösvårighet')
+    expect(out).not.toContain('Andel lyckade per miljö')
   })
 
   it('falls back to aggregated environment difficulty', () => {
@@ -46,7 +46,7 @@ describe('formatDogStateForPrompt', () => {
       ...emptyPayload(),
       environmentDifficulty: { home: 0.85, outdoor: 0.55 },
     })
-    expect(out).toContain('Miljösvårighet')
+    expect(out).toContain('Andel lyckade per miljö')
     expect(out).toContain('hemma 85 %')
     expect(out).toContain('utomhus 55 %')
   })

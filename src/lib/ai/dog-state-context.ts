@@ -42,7 +42,7 @@ export function formatDogStateForPrompt(payload: DogStatePayload): string | null
     const envs = Object.entries(payload.environmentDifficulty) as [SkillEnvironment, number][]
     if (envs.length > 0) {
       const items = envs.map(([env, rate]) => `${ENV_LABELS[env]} ${pct(rate)}`).join(', ')
-      lines.push(`Miljösvårighet: ${items}`)
+      lines.push(`Andel lyckade per miljö: ${items}`)
     }
   }
 
@@ -59,7 +59,7 @@ export function formatDogStateForPrompt(payload: DogStatePayload): string | null
 
   const z = payload.zoneSummary
   if (z.greenDays + z.yellowDays + z.redDays > 0) {
-    lines.push(`Dagsform senaste 14 d: ${z.greenDays} gröna, ${z.yellowDays} gula, ${z.redDays} röda dagar`)
+    lines.push(`Dagsform senaste ${z.window} d: ${z.greenDays} gröna, ${z.yellowDays} gula, ${z.redDays} röda dagar`)
   }
 
   return lines.length > 0 ? lines.join('\n') : null
