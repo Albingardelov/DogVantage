@@ -3,9 +3,12 @@ import { withAuthAndDog } from '@/lib/api/with-auth'
 import { getSupabaseAdmin } from '@/lib/supabase/client'
 import { getMicroLesson } from '@/lib/ai/doc-learning'
 import { getAgeInWeeks, getLifeStage } from '@/lib/dog/age'
+import { rankWeakestExercises, pickMicroLessonExercise, type ExerciseMetricRow } from '@/lib/learning/micro-lesson'
+import { listRecentMicroQuizExercises } from '@/lib/supabase/learning-progress'
 import type { Breed } from '@/types'
 
-const MIN_ATTEMPTS = 4
+// A completed lesson stays gone this long before its topic can come back.
+const COMPLETED_WINDOW_DAYS = 7
 
 // Fallback topics when the dog has no recent metrics — foundational skill per life stage.
 const STAGE_FALLBACK: Record<string, string> = {
@@ -16,7 +19,7 @@ const STAGE_FALLBACK: Record<string, string> = {
 }
 
 export async function GET(req: NextRequest) {
-  return withAuthAndDog(req, async ({ dog, supabase }) => {
+  return withAuthAndDog(req, async ({ user, dog, supabase }) => {
     const breed = dog.breed as Breed
 
     const { data: profile } = await supabase
@@ -27,14 +30,23 @@ export async function GET(req: NextRequest) {
     const ageWeeks = profile?.birthdate ? getAgeInWeeks(profile.birthdate) : undefined
     const lifeStage = getLifeStage(ageWeeks)
 
-    const exerciseId = (await findWeakestExercise(dog.id)) ?? STAGE_FALLBACK[lifeStage] ?? 'inkallning'
+    const since = new Date()
+    since.setUTCDate(since.getUTCDate() - COMPLETED_WINDOW_DAYS)
+    const [ranked, completedIds] = await Promise.all([
+      getRankedWeakExercises(dog.id),
+      listRecentMicroQuizExercises(user.id, dog.id, since.toISOString()).catch(() => [] as string[]),
+    ])
+
+    const fallback = STAGE_FALLBACK[lifeStage] ?? 'inkallning'
+    const exerciseId = pickMicroLessonExercise(ranked, fallback, new Set(completedIds))
+    if (!exerciseId) return NextResponse.json({ lesson: null })
 
     const lesson = await getMicroLesson(breed, lifeStage, exerciseId)
     return NextResponse.json({ lesson })
   })
 }
 
-async function findWeakestExercise(dogId: string): Promise<string | null> {
+async function getRankedWeakExercises(dogId: string): Promise<string[]> {
   const since = new Date()
   since.setUTCDate(since.getUTCDate() - 14)
 
@@ -44,25 +56,5 @@ async function findWeakestExercise(dogId: string): Promise<string | null> {
     .eq('dog_id', dogId)
     .gte('date', since.toISOString().slice(0, 10))
 
-  if (!data || data.length === 0) return null
-
-  const byExercise = new Map<string, { success: number; attempts: number }>()
-  for (const row of data) {
-    const agg = byExercise.get(row.exercise_id) ?? { success: 0, attempts: 0 }
-    agg.success += row.success_count ?? 0
-    agg.attempts += (row.success_count ?? 0) + (row.fail_count ?? 0)
-    byExercise.set(row.exercise_id, agg)
-  }
-
-  let weakest: string | null = null
-  let weakestRate = Infinity
-  for (const [exerciseId, agg] of byExercise) {
-    if (agg.attempts < MIN_ATTEMPTS) continue
-    const rate = agg.success / agg.attempts
-    if (rate < weakestRate) {
-      weakestRate = rate
-      weakest = exerciseId
-    }
-  }
-  return weakest
+  return rankWeakestExercises((data ?? []) as ExerciseMetricRow[])
 }

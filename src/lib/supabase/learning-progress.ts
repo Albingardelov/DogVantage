@@ -20,6 +20,13 @@ type RecentChain = {
   limit: (n: number) => Promise<QueryResult>
 }
 
+type MicroChain = {
+  eq: (col: string, val: string) => MicroChain
+  like: (col: string, pattern: string) => MicroChain
+  not: (col: string, op: string, val: null) => MicroChain
+  gte: (col: string, val: string) => Promise<QueryResult>
+}
+
 type QuizEqChain = {
   eq: (col: string, val: string) => QuizEqChain
   lte: (col: string, val: string) => Promise<CountResult>
@@ -131,6 +138,27 @@ export async function updateQuizCard(
     .eq('dog_id', dogId)
     .eq('card_key', cardKey)
   if (error) throw new Error(error.message)
+}
+
+const MICRO_CONTEXT_PREFIX = 'micro_'
+
+/** Exercise ids whose micro-lesson quiz has been answered since the given timestamp. */
+export async function listRecentMicroQuizExercises(
+  userId: string,
+  dogId: string,
+  sinceIso: string,
+): Promise<string[]> {
+  const chain = admin()
+    .from('quiz_cards')
+    .select('context_key') as unknown as MicroChain
+  const { data, error } = await chain
+    .eq('user_id', userId)
+    .eq('dog_id', dogId)
+    .like('context_key', `${MICRO_CONTEXT_PREFIX}%`)
+    .not('last_result', 'is', null)
+    .gte('updated_at', sinceIso)
+  if (error || !data) return []
+  return [...new Set(data.map((r) => String(r.context_key).slice(MICRO_CONTEXT_PREFIX.length)))]
 }
 
 export async function getDueQuizCount(userId: string, dogId: string): Promise<number> {
