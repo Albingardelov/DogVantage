@@ -424,7 +424,7 @@ export default function ExerciseRow({
               Nästa övning <IconCaretRight size="sm" />
             </button>
           ) : (
-            <p className={styles.allDoneMsg}>Du är klar för idag — bra jobbat! 🎉</p>
+            <p className={styles.allDoneMsg}>Du är klar för idag — bra jobbat!</p>
           )}
           <button type="button" className={styles.undoBtn} onClick={handleUndo}>
             Starta om kombo

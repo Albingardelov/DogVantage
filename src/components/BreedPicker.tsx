@@ -4,6 +4,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { ALL_BREED_OPTIONS } from '@/lib/breeds/registry'
 import type { BreedOption } from '@/lib/breeds/registry'
+import { IconClose } from '@/components/icons'
 import styles from './BreedPicker.module.css'
 
 interface Props {
@@ -53,7 +54,7 @@ export default function BreedPicker({ value, onChange, placeholder = 'Sök ras�
     return (
       <button type="button" onClick={handleClear} className={styles.selected}>
         <span>{selectedEntry.nameSv}</span>
-        <span aria-hidden="true">✕</span>
+        <span aria-hidden="true"><IconClose size="sm" /></span>
       </button>
     )
   }
