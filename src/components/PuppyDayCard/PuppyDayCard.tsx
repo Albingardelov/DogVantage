@@ -162,6 +162,7 @@ export default function PuppyDayCard(props: Props) {
                   ageWeeks={ageWeeks}
                   sessionNext={nextExerciseId === ex.id}
                   rootId={nextExerciseId === ex.id ? 'training-session-next' : undefined}
+                  hasNextExercise={nextExerciseId !== null}
                 />
               )
             })}

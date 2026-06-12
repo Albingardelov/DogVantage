@@ -36,6 +36,8 @@ interface Props {
   sessionNext?: boolean
   /** Ankare för scroll när nästa övning byts (t.ex. `training-session-next`) */
   rootId?: string
+  /** Finns det en kvarvarande övning idag? Styr "Nästa övning" vs "klar för idag". */
+  hasNextExercise?: boolean
   /** Visas bara om callbacken är satt — byt ut till annan övning ur veckofokus */
   onSwap?: () => void
   reasonBadges?: Array<{
@@ -137,6 +139,7 @@ export default function ExerciseRow({
   ageWeeks,
   sessionNext: _sessionNext,
   rootId,
+  hasNextExercise = true,
   onSwap,
   reasonBadges = [],
   sources = [],
@@ -410,15 +413,19 @@ export default function ExerciseRow({
               <div className={styles.statLabel}>reps satt</div>
             </div>
           </div>
-          <button
-            type="button"
-            className={styles.ctaBtn}
-            onClick={() => {
-              document.getElementById('training-session-next')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-            }}
-          >
-            Nästa övning <IconCaretRight size="sm" />
-          </button>
+          {hasNextExercise ? (
+            <button
+              type="button"
+              className={styles.ctaBtn}
+              onClick={() => {
+                document.getElementById('training-session-next')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+              }}
+            >
+              Nästa övning <IconCaretRight size="sm" />
+            </button>
+          ) : (
+            <p className={styles.allDoneMsg}>Du är klar för idag — bra jobbat! 🎉</p>
+          )}
           <button type="button" className={styles.undoBtn} onClick={handleUndo}>
             Starta om kombo
           </button>
