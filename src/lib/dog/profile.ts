@@ -1,4 +1,5 @@
 import { getProfile, saveProfile, updateProfile, getAllProfiles } from '@/lib/supabase/dog-profiles'
+import { autoAdvancedTrainingWeek } from './age'
 import type { DogProfile } from '@/types'
 
 export async function getDogProfile(): Promise<DogProfile | null> {
@@ -14,5 +15,19 @@ export async function updateDogProfile(fields: Partial<DogProfile>): Promise<voi
 }
 
 export async function getAllDogProfiles(): Promise<DogProfile[]> {
-  return getAllProfiles()
+  const dogs = await getAllProfiles()
+  return Promise.all(dogs.map(syncTrainingWeek))
+}
+
+/** Advances training_week from the homecoming date. Returns the dog unchanged if persisting fails. */
+async function syncTrainingWeek(dog: DogProfile): Promise<DogProfile> {
+  const advanced = autoAdvancedTrainingWeek(dog.trainingWeek, dog.onboarding?.homecomeDate)
+  if (advanced === null || !dog.id) return dog
+  try {
+    await updateProfile({ id: dog.id, trainingWeek: advanced })
+    return { ...dog, trainingWeek: advanced }
+  } catch (e) {
+    console.error('[syncTrainingWeek]', e)
+    return dog
+  }
 }
