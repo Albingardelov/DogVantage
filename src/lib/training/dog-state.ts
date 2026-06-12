@@ -17,11 +17,19 @@ export interface DogStateExerciseStat {
   attempts: number
 }
 
+export interface DogStateEnvExerciseStat {
+  exerciseId: string
+  environment: SkillEnvironment
+  successRate: number
+  attempts: number
+}
+
 export interface DogStatePayload {
   version: 1
   weakExercises: DogStateExerciseStat[]
   strongExercises: DogStateExerciseStat[]
   environmentDifficulty: Partial<Record<SkillEnvironment, number>>
+  environmentByExercise?: DogStateEnvExerciseStat[]
   handler: {
     timing: number | null
     consistency: number | null

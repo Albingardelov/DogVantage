@@ -164,11 +164,19 @@ export const DogStateExerciseStatSchema = z.object({
   attempts: z.number(),
 })
 
+export const DogStateEnvExerciseStatSchema = z.object({
+  exerciseId: z.string(),
+  environment: z.enum(['home', 'outdoor', 'park', 'mixed']),
+  successRate: z.number(),
+  attempts: z.number(),
+})
+
 export const DogStatePayloadSchema = z.object({
   version: z.literal(1),
   weakExercises: z.array(DogStateExerciseStatSchema),
   strongExercises: z.array(DogStateExerciseStatSchema),
   environmentDifficulty: z.record(z.string(), z.number()),
+  environmentByExercise: z.array(DogStateEnvExerciseStatSchema).optional(),
   handler: z.object({
     timing: z.number().nullable(),
     consistency: z.number().nullable(),
