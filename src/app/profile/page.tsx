@@ -510,7 +510,7 @@ function ProfileView() {
             </div>
             <span className={styles.helper}>
               {homecomeDate
-                ? 'Veckan beräknas automatiskt från hämtningsdatumet nedan — justera bara om du vill avvika.'
+                ? 'Veckan räknas upp automatiskt från hämtningsdatumet. Du kan hoppa fram manuellt — vill du backa, flytta fram hämtningsdatumet istället.'
                 : 'Justera om du vill backa eller hoppa fram i programmet. Påverkar nästa veckoplan.'}
             </span>
           </div>

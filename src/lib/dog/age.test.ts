@@ -1,5 +1,36 @@
 import { describe, it, expect } from 'vitest'
-import { getAgeInWeeks, getLifeStage, isPuppy, isPuppyMode } from './age'
+import { getAgeInWeeks, getLifeStage, isPuppy, isPuppyMode, autoAdvancedTrainingWeek } from './age'
+
+function daysAgo(days: number): string {
+  return new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+}
+
+describe('autoAdvancedTrainingWeek', () => {
+  it('returns null without a homecome date', () => {
+    expect(autoAdvancedTrainingWeek(1, undefined)).toBeNull()
+  })
+
+  it('returns null when stored week already matches the computed week', () => {
+    expect(autoAdvancedTrainingWeek(1, daysAgo(3))).toBeNull()
+  })
+
+  it('advances to the computed week when time has passed', () => {
+    expect(autoAdvancedTrainingWeek(1, daysAgo(26))).toBe(4)
+  })
+
+  it('returns null when stored week is ahead of the computed week (manual jump)', () => {
+    expect(autoAdvancedTrainingWeek(10, daysAgo(26))).toBeNull()
+  })
+
+  it('treats missing stored week as week 1', () => {
+    expect(autoAdvancedTrainingWeek(undefined, daysAgo(7))).toBe(2)
+  })
+
+  it('returns null before homecoming', () => {
+    const future = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    expect(autoAdvancedTrainingWeek(1, future)).toBeNull()
+  })
+})
 
 describe('getAgeInWeeks', () => {
   it('returns 0 for a dog born today', () => {

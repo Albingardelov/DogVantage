@@ -41,3 +41,16 @@ export function trainingWeekFromHomecoming(homecomeDate: string): number {
   if (days < 0) return 1
   return Math.floor(days / 7) + 1
 }
+
+/**
+ * Week the stored training_week should advance to, or null when no change applies.
+ * Only ever advances — a stored week ahead of the computed one is a deliberate manual jump.
+ */
+export function autoAdvancedTrainingWeek(
+  trainingWeek: number | undefined,
+  homecomeDate: string | undefined,
+): number | null {
+  if (!homecomeDate) return null
+  const computed = trainingWeekFromHomecoming(homecomeDate)
+  return computed > (trainingWeek ?? 1) ? computed : null
+}
