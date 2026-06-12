@@ -175,4 +175,44 @@ describe('queryRAG', () => {
     }
     expect(callArgs.messages[0].content).not.toContain('Svag träff.')
   })
+
+  it('includes prior conversation turns as chat messages', async () => {
+    const { getGroqClient } = await import('@/lib/ai/client')
+    const client = getGroqClient()
+    const { queryRAG } = await import('./rag')
+    await queryRAG('Och hur går jag vidare?', 'labrador', [], 12, [], undefined, {
+      history: [
+        { role: 'user', content: 'Hur tränar jag inkallning?' },
+        { role: 'assistant', content: 'Börja inomhus med kort avstånd.' },
+      ],
+    })
+    const call = vi.mocked(client.chat.completions.create).mock.calls[0][0] as { messages: { role: string; content: string }[] }
+    expect(call.messages).toHaveLength(4)
+    expect(call.messages[1]).toEqual({ role: 'user', content: 'Hur tränar jag inkallning?' })
+    expect(call.messages[2]).toEqual({ role: 'assistant', content: 'Börja inomhus med kort avstånd.' })
+    expect(call.messages[3]).toEqual({ role: 'user', content: 'Och hur går jag vidare?' })
+  })
+
+  it('includes dog state section in system prompt when provided', async () => {
+    const { getGroqClient } = await import('@/lib/ai/client')
+    const client = getGroqClient()
+    const { queryRAG } = await import('./rag')
+    await queryRAG('Hur går vi vidare med sitt?', 'labrador', [], 12, [], undefined, {
+      dogStateContext: 'Svaga övningar (senaste 28 d): Inkallning 40 % (20 försök)',
+    })
+    const call = vi.mocked(client.chat.completions.create).mock.calls[0][0] as { messages: { role: string; content: string }[] }
+    const systemMsg = call.messages.find((m) => m.role === 'system')?.content ?? ''
+    expect(systemMsg).toContain('=== HUNDPROFIL (DATA) ===')
+    expect(systemMsg).toContain('Inkallning 40 % (20 försök)')
+  })
+
+  it('omits dog state section without context', async () => {
+    const { getGroqClient } = await import('@/lib/ai/client')
+    const client = getGroqClient()
+    const { queryRAG } = await import('./rag')
+    await queryRAG('Hur går vi vidare med sitt?', 'labrador', [], 12, [])
+    const call = vi.mocked(client.chat.completions.create).mock.calls[0][0] as { messages: { role: string; content: string }[] }
+    const systemMsg = call.messages.find((m) => m.role === 'system')?.content ?? ''
+    expect(systemMsg).not.toContain('HUNDPROFIL')
+  })
 })
