@@ -7,6 +7,10 @@ export const CHUNK_TOPICS = [
   'socialization',
   'crate',
   'handling',
+  'retrieve',
+  'hunting',
+  'herding',
+  'nosework',
   'general',
 ] as const
 
@@ -21,6 +25,12 @@ export interface ChunkMetadata {
 }
 
 const TOPIC_PATTERNS: Array<{ topic: ChunkTopic; re: RegExp }> = [
+  // Working-dog topics first — their vocabulary is specific and must win over
+  // generic words like "sitt" that also appear in field-training texts.
+  { topic: 'retrieve', re: /(?:apporter|apport\b|dummy|dummies|retrieve|avlämning|lämna av i hand|fetch|markering av fall)/i },
+  { topic: 'hunting', re: /(?:stånd\b|stadga|stoppsignal|fågelhund|jaktprov|fältarbete|eftersök|duck search|pointing dog|gun ?dog|bird dog|viltspår|resning av fågel|flush)/i },
+  { topic: 'herding', re: /(?:vallning|vallhund|vallanlag|herding|fårflock|kreatur|sheepdog|drive the flock)/i },
+  { topic: 'nosework', re: /(?:nosework|nose work|doftsök|luktsök|scent ?work|sökövning)/i },
   { topic: 'marker', re: /(?:marker|clicker|markör|ladda mark|charge the mark)/i },
   { topic: 'recall', re: /(?:recall|inkallning|kom hit|come when called)/i },
   { topic: 'sit', re: /\b(?:sit|sitt)\b/i },
@@ -65,6 +75,10 @@ export function classifyChunkContent(content: string): ChunkMetadata {
 
 export function topicForExerciseId(exerciseId: string): ChunkTopic {
   const id = exerciseId.toLowerCase()
+  if (id.includes('apport')) return 'retrieve'
+  if (id.includes('stadga') || id.includes('stoppsignal') || id.includes('sok') || id.includes('vatten') || id.includes('orientering')) return 'hunting'
+  if (id.includes('vallning') || id.includes('vall_')) return 'herding'
+  if (id.includes('nosework')) return 'nosework'
   if (id.includes('marker') || id.includes('mark')) return 'marker'
   if (id.includes('inkall') || id.includes('recall') || id === 'kom') return 'recall'
   if (id.includes('sitt') || id === 'sit' || id.includes('plats')) return 'sit'
