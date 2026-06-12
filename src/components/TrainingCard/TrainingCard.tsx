@@ -350,6 +350,7 @@ export default function TrainingCard(props: Props) {
                   ageWeeks={ageWeeks}
                   sessionNext={nextExerciseId === ex.id}
                   rootId={nextExerciseId === ex.id ? 'training-session-next' : undefined}
+                  hasNextExercise={nextExerciseId !== null}
                   onSwap={scaleMode === 'full' && swapCandidates.length > 0 ? () => handleSwap(originalIdx) : undefined}
                   reasonBadges={reasonBadgesForExercise(ex.id)}
                   sources={exerciseSources[ex.id]}

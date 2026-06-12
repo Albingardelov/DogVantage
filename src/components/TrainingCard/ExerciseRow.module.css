@@ -457,3 +457,14 @@
     to   { opacity: 0; transform: translate(var(--bx), var(--by)); }
   }
 }
+
+.allDoneMsg {
+  margin: 0;
+  padding: 14px;
+  text-align: center;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+}
