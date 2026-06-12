@@ -35,6 +35,28 @@ export async function getMetrics(
   } satisfies DailyExerciseMetrics]))
 }
 
+/** Distinct dates (YYYY-MM-DD, sorted) with at least one logged rep in the range. */
+export async function getTrainingDays(
+  dogId: string,
+  from: string,
+  to: string
+): Promise<string[]> {
+  const { data, error } = await getSupabaseAdmin()
+    .from('daily_exercise_metrics')
+    .select('date, success_count, fail_count')
+    .eq('dog_id', dogId)
+    .gte('date', from)
+    .lte('date', to)
+
+  if (error) throw new Error(`Training days fetch failed: ${error.message}`)
+
+  const days = new Set<string>()
+  for (const r of (data ?? []) as { date: string; success_count: number | null; fail_count: number | null }[]) {
+    if ((r.success_count ?? 0) + (r.fail_count ?? 0) > 0) days.add(r.date)
+  }
+  return [...days].sort()
+}
+
 export async function upsertMetrics(
   breed: Breed,
   date: string,

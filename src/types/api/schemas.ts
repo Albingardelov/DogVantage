@@ -57,6 +57,10 @@ export const SessionLogSchema = z.object({
 
 export const SessionLogArraySchema = z.array(SessionLogSchema)
 
+export const TrainingDaysResponseSchema = z.object({
+  days: z.array(z.string()),
+})
+
 export const DailyExerciseMetricsSchema = z.object({
   success_count: z.number(),
   fail_count: z.number(),
