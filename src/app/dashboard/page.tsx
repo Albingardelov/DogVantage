@@ -22,7 +22,7 @@ import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import { getHandlerFeedbackTip, type HandlerFeedbackTip } from '@/lib/training/handler-feedback'
 import { computeStreak } from '@/lib/training/streak'
 import { apiFetch } from '@/lib/api/fetch'
-import { SessionLogArraySchema } from '@/types/api/schemas'
+import { SessionLogArraySchema, TrainingDaysResponseSchema } from '@/types/api/schemas'
 import {
   IconCalendar,
   IconCaretRight,
@@ -169,6 +169,11 @@ function getContextualTips(profile: DogProfile, ageWeeks: number): ContextualTip
   return tips
 }
 
+function toLocalDateString(ms: number): string {
+  const d = new Date(ms)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 /** Innevarande kalendervecka: måndag 00:00 – söndag 23:59 (lokal tid). */
 function getWeekRangeMs(now = new Date()): { start: number; end: number } {
   const d = new Date(now)
@@ -228,19 +233,28 @@ function Dashboard() {
     if (!profile?.id) return
     try {
       const { start, end } = getWeekRangeMs()
-      const params = new URLSearchParams({
+      const logParams = new URLSearchParams({
         dogId: profile.id,
         from: new Date(start).toISOString(),
         to: new Date(end).toISOString(),
       })
-      const weekLogs = await apiFetch(`/api/logs?${params}`, SessionLogArraySchema)
-      const count = weekLogs.length
-      if (count === 0) {
-        setWeekStats({ count: 0, avg: null })
-        return
-      }
-      const sumScore = weekLogs.reduce((acc, l) => acc + (l.focus + l.obedience) / 2, 0)
-      setWeekStats({ count, avg: sumScore / count })
+      const dayParams = new URLSearchParams({
+        dogId: profile.id,
+        from: toLocalDateString(start),
+        to: toLocalDateString(end - 1),
+      })
+      const [weekLogs, activity] = await Promise.all([
+        apiFetch(`/api/logs?${logParams}`, SessionLogArraySchema),
+        apiFetch(`/api/training/metrics?${dayParams}`, TrainingDaysResponseSchema)
+          .catch(() => ({ days: [] as string[] })),
+      ])
+      const trainedDays = new Set(activity.days)
+      for (const log of weekLogs) trainedDays.add(toLocalDateString(new Date(log.created_at).getTime()))
+      const count = trainedDays.size
+      const avg = weekLogs.length > 0
+        ? weekLogs.reduce((acc, l) => acc + (l.focus + l.obedience) / 2, 0) / weekLogs.length
+        : null
+      setWeekStats({ count, avg })
     } catch (e) {
       console.error('[dashboard week stats]', e)
       setWeekStats({ count: 0, avg: null })
@@ -593,7 +607,7 @@ function Dashboard() {
         {profile && (
           <div className={styles.statsGrid}>
             <StatCard
-              label="Pass i historik"
+              label="Träningsdagar"
               value={weekStats === null ? '…' : String(weekStats.count)}
               sub="denna vecka"
               tone="primary"

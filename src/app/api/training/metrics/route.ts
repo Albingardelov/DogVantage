@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getMetrics, upsertMetrics } from '@/lib/supabase/daily-exercise-metrics'
+import { getMetrics, getTrainingDays, upsertMetrics } from '@/lib/supabase/daily-exercise-metrics'
 import { getExerciseSpec, isValidCriteriaLevel } from '@/lib/training/exercise-specs'
 import { withAuthAndDog } from '@/lib/api/with-auth'
 import type { DailyExerciseMetrics, LatencyBucket } from '@/types'
@@ -84,6 +84,15 @@ function parsePatch(body: unknown): {
 
 export async function GET(req: NextRequest) {
   const requestedBreed = req.nextUrl.searchParams.get('breed')
+  const from = req.nextUrl.searchParams.get('from')
+  const to = req.nextUrl.searchParams.get('to')
+  if (isValidDateString(from) && isValidDateString(to)) {
+    return withAuthAndDog(req, async ({ dog }) => {
+      const days = await getTrainingDays(dog.id, from, to)
+      return NextResponse.json({ days })
+    })
+  }
+
   const date = req.nextUrl.searchParams.get('date')
   if (!isValidDateString(date)) {
     return NextResponse.json({ error: 'date required' }, { status: 400 })
