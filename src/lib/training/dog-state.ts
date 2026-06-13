@@ -53,10 +53,12 @@ const MIN_ATTEMPTS = 10
 const WEAK_THRESHOLD = 0.6
 const STRONG_THRESHOLD = 0.8
 const MAX_LISTED = 3
+const MIN_ENV_ATTEMPTS = 8
 
 export function computeDogState(inputs: DogStateInputs): DogStatePayload {
   const byExercise = new Map<string, { success: number; attempts: number }>()
   const byEnvironment = new Map<SkillEnvironment, { success: number; attempts: number }>()
+  const byExerciseEnv = new Map<string, { exerciseId: string; environment: SkillEnvironment; success: number; attempts: number }>()
 
   for (const row of inputs.metrics) {
     const attempts = row.success_count + row.fail_count
@@ -72,6 +74,12 @@ export function computeDogState(inputs: DogStateInputs): DogStatePayload {
     envAgg.success += row.success_count
     envAgg.attempts += attempts
     byEnvironment.set(env, envAgg)
+
+    const pairKey = `${row.exercise_id}|${env}`
+    const pair = byExerciseEnv.get(pairKey) ?? { exerciseId: row.exercise_id, environment: env, success: 0, attempts: 0 }
+    pair.success += row.success_count
+    pair.attempts += attempts
+    byExerciseEnv.set(pairKey, pair)
   }
 
   const rated: DogStateExerciseStat[] = [...byExercise.entries()]
@@ -110,11 +118,22 @@ export function computeDogState(inputs: DogStateInputs): DogStatePayload {
     else if (zone === 'red') redDays += 1
   }
 
+  const environmentByExercise: DogStateEnvExerciseStat[] = [...byExerciseEnv.values()]
+    .filter((e) => e.attempts >= MIN_ENV_ATTEMPTS)
+    .map((e) => ({
+      exerciseId: e.exerciseId,
+      environment: e.environment,
+      successRate: e.success / e.attempts,
+      attempts: e.attempts,
+    }))
+    .sort((a, b) => a.exerciseId.localeCompare(b.exerciseId) || a.environment.localeCompare(b.environment))
+
   return {
     version: 1,
     weakExercises,
     strongExercises,
     environmentDifficulty,
+    environmentByExercise,
     handler: {
       timing: timing?.avg ?? null,
       consistency: consistency?.avg ?? null,
