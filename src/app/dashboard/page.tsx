@@ -11,6 +11,7 @@ import Avatar from '@/components/Avatar'
 import BottomNav from '@/components/BottomNav'
 import LearningChecklistCard from '@/components/LearningChecklistCard'
 import MicroLessonCard from '@/components/MicroLessonCard'
+import InsightCard from '@/components/InsightCard/InsightCard'
 import DogSwitcher from '@/components/DogSwitcher'
 import AddDogModal from '@/components/AddDogModal'
 import StreakBadge from '@/components/StreakBadge'
@@ -574,6 +575,8 @@ function Dashboard() {
             )
           ) : null}
         </div>
+
+        {profile?.id && !beforeHomecoming && <InsightCard dogId={profile.id} />}
 
         {progressionHints.length > 0 && (
           <div className={styles.progressionCard}>
