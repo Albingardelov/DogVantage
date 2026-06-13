@@ -126,4 +126,36 @@ describe('computeDogState', () => {
     })
     expect(state.zoneSummary).toEqual({ greenDays: 2, yellowDays: 1, redDays: 1, window: 14 })
   })
+
+  it('aggregates per exercise and environment with >= 8 attempts', () => {
+    const state = computeDogState({
+      ...EMPTY,
+      metrics: [
+        metricRow('sitt', 9, 1, 'home_quiet'),
+        metricRow('sitt', 4, 6, 'park_distractions'),
+        metricRow('sitt', 3, 2, 'outdoor_garden'),
+      ],
+    })
+    expect(state.environmentByExercise).toEqual([
+      { exerciseId: 'sitt', environment: 'home', successRate: 0.9, attempts: 10 },
+      { exerciseId: 'sitt', environment: 'park', successRate: 0.4, attempts: 10 },
+    ])
+  })
+
+  it('sums multiple rows for the same exercise-environment pair', () => {
+    const state = computeDogState({
+      ...EMPTY,
+      metrics: [
+        metricRow('plats', 3, 2, 'home_quiet', '2026-06-09'),
+        metricRow('plats', 4, 1, 'home_quiet', '2026-06-10'),
+      ],
+    })
+    expect(state.environmentByExercise).toEqual([
+      { exerciseId: 'plats', environment: 'home', successRate: 0.7, attempts: 10 },
+    ])
+  })
+
+  it('returns empty environmentByExercise without data', () => {
+    expect(computeDogState(EMPTY).environmentByExercise).toEqual([])
+  })
 })
