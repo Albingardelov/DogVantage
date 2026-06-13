@@ -15,6 +15,12 @@ import { extractChatTopic } from '@/lib/dog/chat-topics'
 import { summarizeDogTimeline } from '@/lib/dog/timeline'
 import { logChatTopic, getRecentChatTopics } from '@/lib/supabase/chat-topics'
 import { getCheckIns } from '@/lib/supabase/daily-check-ins'
+import { getChatMessages, appendChatExchange } from '@/lib/supabase/chat-messages'
+import { getDogState } from '@/lib/supabase/dog-state'
+import { formatDogStateForPrompt } from '@/lib/ai/dog-state-context'
+import type { ChatHistoryEntry } from '@/lib/ai/rag'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import type { Database } from '@/types/database'
 
 function todayDateString(): string {
   return new Date().toISOString().split('T')[0]
@@ -34,6 +40,22 @@ function formatMetricsForPrompt(metrics: Record<string, import('@/types').DailyE
       return bits.join(', ')
     })
     .slice(0, 12)
+}
+
+const PROMPT_HISTORY_LIMIT = 8
+const HISTORY_CHAR_LIMIT = 1000
+
+async function persistExchange(
+  supabase: SupabaseClient<Database>,
+  dogId: string,
+  query: string,
+  answer: string,
+): Promise<void> {
+  try {
+    await appendChatExchange(supabase, dogId, query, answer)
+  } catch (e) {
+    console.warn('[/api/chat] history persist failed:', e instanceof Error ? e.message : String(e))
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -96,7 +118,7 @@ export async function POST(req: NextRequest) {
       const shouldFetchLogs = typeof logsWeek === 'number'
       const shouldFetchMetrics = Boolean(dog.id)
 
-      const [logStrings, metricsStrings, cached] = await Promise.all([
+      const [logStrings, metricsStrings, cached, historyRows, dogStateContext] = await Promise.all([
         shouldFetchLogs
           ? getRecentLogs(dog.id, logsWeek!).then((logs) => formatLogsForPrompt(logs))
           : Promise.resolve([]),
@@ -106,14 +128,25 @@ export async function POST(req: NextRequest) {
             .catch(() => [])
           : Promise.resolve([]),
         getCachedChat(query, breed, ageWeeks).catch(() => null),
+        getChatMessages(supabase, dog.id, PROMPT_HISTORY_LIMIT).catch(() => []),
+        getDogState(dog.id)
+          .then((state) => formatDogStateForPrompt(state))
+          .catch(() => null),
       ])
 
+      const history: ChatHistoryEntry[] = historyRows.map((m) => ({
+        role: m.role,
+        content: m.content.slice(0, HISTORY_CHAR_LIMIT),
+      }))
+
       const isPersonalized =
-        logStrings.length > 0 || metricsStrings.length > 0 || !!chatContext
+        logStrings.length > 0 || metricsStrings.length > 0 || !!chatContext ||
+        history.length > 0 || !!dogStateContext
       if (!isPersonalized) {
         if (cached) {
           // LRU touch can run in the background.
           void touchCacheEntry(query, breed, ageWeeks).catch(() => {})
+          await persistExchange(supabase, dog.id, query, cached.content)
           return NextResponse.json(cached)
         }
       }
@@ -129,7 +162,13 @@ export async function POST(req: NextRequest) {
         )
       }
 
-      const result = await queryRAG(query, breed, logStrings, ageWeeks, metricsStrings, chatContext)
+      // Persistens täcker även guard-svaren (VET/BEHAVIOR) — de returneras som vanliga TrainingResult.
+      const result = await queryRAG(query, breed, logStrings, ageWeeks, metricsStrings, chatContext, {
+        history,
+        dogStateContext,
+      })
+
+      await persistExchange(supabase, dog.id, query, result.content)
 
       if (!isPersonalized) {
         try {
