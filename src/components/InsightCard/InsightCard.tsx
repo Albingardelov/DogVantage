@@ -46,7 +46,7 @@ export default function InsightCard({ dogId }: Props) {
 
   useEffect(() => {
     let cancelled = false
-    apiFetch(`/api/training/dog-state?dogId=${dogId}`, DogStatePayloadSchema)
+    apiFetch(`/api/training/dog-state?dogId=${encodeURIComponent(dogId)}`, DogStatePayloadSchema)
       .then((payload) => {
         if (cancelled) return
         const found = findEnvironmentGapInsight(payload)
@@ -71,9 +71,9 @@ export default function InsightCard({ dogId }: Props) {
     if (saving) return
     setSaving(true)
     try {
-      const focus = await apiFetch(`/api/training/focus?dogId=${dogId}`, WeeklyFocusResponseSchema)
+      const focus = await apiFetch(`/api/training/focus?dogId=${encodeURIComponent(dogId)}`, WeeklyFocusResponseSchema)
       if (!focus.exerciseIds.includes(current.exerciseId)) {
-        await apiFetch(`/api/training/focus?dogId=${dogId}`, WeeklyFocusResponseSchema, {
+        await apiFetch(`/api/training/focus?dogId=${encodeURIComponent(dogId)}`, WeeklyFocusResponseSchema, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ exerciseIds: [...focus.exerciseIds, current.exerciseId] }),
@@ -89,13 +89,13 @@ export default function InsightCard({ dogId }: Props) {
   }
 
   return (
-    <div className={styles.card}>
+    <section className={styles.card} aria-labelledby="insight-card-title">
       <div className={styles.iconWrap}>
         <IconTarget size="md" />
       </div>
       <div className={styles.content}>
         <p className={styles.kicker}>Veckans insikt</p>
-        <p className={styles.title}>{copy.title}</p>
+        <h2 id="insight-card-title" className={styles.title}>{copy.title}</h2>
         <p className={styles.body}>{copy.body}</p>
         {prioritized ? (
           <p className={styles.confirmation}>
@@ -110,6 +110,6 @@ export default function InsightCard({ dogId }: Props) {
       <button type="button" className={styles.dismiss} onClick={dismiss} aria-label="Stäng insikt">
         <IconClose size="sm" />
       </button>
-    </div>
+    </section>
   )
 }
