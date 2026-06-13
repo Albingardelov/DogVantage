@@ -142,6 +142,9 @@ export async function POST(req: NextRequest) {
       const isPersonalized =
         logStrings.length > 0 || metricsStrings.length > 0 || !!chatContext ||
         history.length > 0 || !!dogStateContext
+      // Den delade cachen tjänar bara frågor utan personlig kontext (effektivt
+      // ekipagets första fråga); så fort historik eller dog-state finns är svaret
+      // personligt och får aldrig serveras från en bredd/ålder-nyckel.
       if (!isPersonalized) {
         if (cached) {
           // LRU touch can run in the background.
