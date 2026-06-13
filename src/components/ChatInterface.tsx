@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import type { ChatMessage, TrainingSourceRef } from '@/types'
 import { IconPaw, IconSend } from '@/components/icons'
 import { apiFetch, ApiError } from '@/lib/api/fetch'
-import { TrainingResultSchema } from '@/types/api/schemas'
+import { TrainingResultSchema, ChatHistoryResponseSchema } from '@/types/api/schemas'
 import styles from './ChatInterface.module.css'
 
 interface Props {
@@ -13,10 +13,15 @@ interface Props {
   dogId: string
 }
 
+const GREETING: ChatMessage = {
+  role: 'model',
+  content: 'Hej! Jag är din träningsassistent. För bäst hjälp: skriv övning + hur det gick idag, så får du en konkret plan för nästa reps.',
+}
+
 export default function ChatInterface({ trainingWeek, initialQuestion, dogId }: Props) {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'model', content: 'Hej! Jag är din träningsassistent. För bäst hjälp: skriv övning + hur det gick idag, så får du en konkret plan för nästa reps.' },
-  ])
+  const [messages, setMessages] = useState<ChatMessage[]>([GREETING])
+  const [historyLoaded, setHistoryLoaded] = useState(false)
+  const [hasHistory, setHasHistory] = useState(false)
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -26,6 +31,28 @@ export default function ChatInterface({ trainingWeek, initialQuestion, dogId }: 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
+
+  useEffect(() => {
+    let cancelled = false
+    apiFetch(`/api/chat/history?dogId=${dogId}`, ChatHistoryResponseSchema)
+      .then((data) => {
+        if (cancelled || data.messages.length === 0) return
+        setHasHistory(true)
+        setMessages(
+          data.messages.map((m) => ({
+            role: m.role === 'assistant' ? ('model' as const) : ('user' as const),
+            content: m.content,
+          })),
+        )
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setHistoryLoaded(true)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [dogId])
 
   async function send(text?: string, opts?: { isRetry?: boolean }) {
     const query = (text ?? input).trim()
@@ -76,12 +103,11 @@ export default function ChatInterface({ trainingWeek, initialQuestion, dogId }: 
   useEffect(() => {
     if (!initialQuestion || didAutoSendRef.current) return
     if (loading) return
-    // Only auto-send when the chat is still fresh (1 greeting message)
-    if (messages.length !== 1) return
+    if (!historyLoaded) return
     didAutoSendRef.current = true
     send(initialQuestion)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialQuestion, messages.length, loading])
+  }, [initialQuestion, historyLoaded, loading])
 
   useEffect(() => {
     const el = inputRef.current
@@ -168,7 +194,7 @@ export default function ChatInterface({ trainingWeek, initialQuestion, dogId }: 
         <div ref={bottomRef} />
       </div>
 
-      {messages.length < 6 && (
+      {historyLoaded && !hasHistory && messages.length < 6 && (
         <div className={styles.quickRow}>
           {quickPrompts.map((q) => (
             <button
@@ -193,13 +219,13 @@ export default function ChatInterface({ trainingWeek, initialQuestion, dogId }: 
           onKeyDown={handleKeyDown}
           placeholder="Skriv en fråga…"
           rows={1}
-          disabled={loading}
+          disabled={loading || !historyLoaded}
         />
         <button
           type="button"
           className={styles.sendBtn}
           onClick={() => send()}
-          disabled={!input.trim() || loading}
+          disabled={!input.trim() || loading || !historyLoaded}
           aria-label="Skicka"
         >
           <IconSend size="md" />
