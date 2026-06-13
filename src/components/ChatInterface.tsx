@@ -103,11 +103,11 @@ export default function ChatInterface({ trainingWeek, initialQuestion, dogId }: 
   useEffect(() => {
     if (!initialQuestion || didAutoSendRef.current) return
     if (loading) return
-    if (!historyLoaded) return
+    if (!historyLoaded || hasHistory) return
     didAutoSendRef.current = true
     send(initialQuestion)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialQuestion, historyLoaded, loading])
+  }, [initialQuestion, historyLoaded, hasHistory, loading])
 
   useEffect(() => {
     const el = inputRef.current
