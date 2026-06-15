@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import ExerciseRow from './ExerciseRow'
 import WeekView from './WeekView'
@@ -21,11 +21,14 @@ import { useTodayExercises } from './use-today-exercises'
 import { useExerciseSources } from './use-exercise-sources'
 import { advanceGuard, EMPTY_GUARD, type SessionGuard } from '@/lib/training/session-coach'
 import { useDogState } from './use-dog-state'
+import { useExerciseHistory } from './use-exercise-history'
+import { exerciseMaturity } from './maturity'
 import { useDayCheckIn } from './use-day-checkin'
 import DayCheckInCard from './DayCheckInCard'
 import { buildExerciseSummaries, emptyMetrics } from './exercise-helpers'
-import { NextBanner, LoadingIndicator, ReferralCard, RestDay, ChevronRight } from './parts'
+import { NextBanner, LoadingIndicator, ReferralCard, RestDay, ChevronRight, DayComplete } from './parts'
 import DayProgressBar from './DayProgressBar'
+import TrainingOnboarding from './TrainingOnboarding'
 
 function todayDateString(): string {
   return new Date().toISOString().split('T')[0]
@@ -54,6 +57,7 @@ export default function TrainingCard(props: Props) {
     useTrainingData({ ...props, todayDate })
   const { customSpecs, refresh: refreshCustomSpecs } = useCustomSpecs(dogId)
   const dogState = useDogState(dogId)
+  const practicedExercises = useExerciseHistory(dogId)
   const { checkIn, loaded: checkInLoaded, save: saveDayCheckIn } = useDayCheckIn(dogId, todayDate)
   const [checkInDismissed, setCheckInDismissed] = useState(false)
 
@@ -63,12 +67,11 @@ export default function TrainingCard(props: Props) {
   const [guideExerciseId, setGuideExerciseId] = useState<string | null>(null)
   const [showAddCustom, setShowAddCustom] = useState(false)
   const [simpleFocus, setSimpleFocus] = useState(false)
+  const [planningOpen, setPlanningOpen] = useState(false)
   const [focusAreas, setFocusAreas] = useState<WeeklyFocusArea[]>([])
   const [priorityExerciseIds, setPriorityExerciseIds] = useState<string[]>([])
   const [regressExerciseIds, setRegressExerciseIds] = useState<string[]>([])
   const [regressReasonByExercise, setRegressReasonByExercise] = useState<Record<string, string>>({})
-  const [legendOpen, setLegendOpen] = useState<'priority' | 'focus' | 'weak' | null>(null)
-  const legendRef = useRef<HTMLDivElement | null>(null)
 
   const weekFocusCopy = useMemo(
     () => buildWeekFocusCopy({ breed, ageWeeks, trainingWeek, goals }),
@@ -105,6 +108,10 @@ export default function TrainingCard(props: Props) {
     [todayExercises, progress],
   )
 
+  const allComplete = !loading && todayExercises.length > 0 &&
+    todayExercises.every((e) => (progress[e.id] ?? 0) >= e.reps)
+  const dayRate = repsDone > 0 && repsPlanned > 0 ? Math.round((repsDone / repsPlanned) * 100) : null
+
   const focusExerciseSet = useMemo(() => new Set(focusExerciseIds(focusAreas)), [focusAreas])
   const priorityExerciseSet = useMemo(() => new Set(priorityExerciseIds), [priorityExerciseIds])
   const regressExerciseSet = useMemo(() => new Set(regressExerciseIds), [regressExerciseIds])
@@ -127,9 +134,9 @@ export default function TrainingCard(props: Props) {
     }
     if (regressExerciseSet.has(exerciseId)) {
       badges.push({
-        label: 'Svag färdighet',
+        label: 'Behöver mer tid',
         tone: 'weak',
-        detail: regressReasonByExercise[exerciseId] ?? 'Systemet ser låg träffsäkerhet och håller/sänker nivån.',
+        detail: regressReasonByExercise[exerciseId] ?? 'Träffsäkerheten är under 80 % just nu, så vi stannar på samma nivå ett tag till — så ska inlärning gå till.',
       })
     }
     return badges
@@ -165,17 +172,6 @@ export default function TrainingCard(props: Props) {
   useEffect(() => {
     refreshPlanningSignals()
   }, [refreshPlanningSignals])
-
-  useEffect(() => {
-    function onPointerDown(event: MouseEvent) {
-      if (!legendRef.current) return
-      if (!legendRef.current.contains(event.target as Node)) {
-        setLegendOpen(null)
-      }
-    }
-    document.addEventListener('mousedown', onPointerDown)
-    return () => document.removeEventListener('mousedown', onPointerDown)
-  }, [])
 
   function commitProgress(exerciseId: string, count: number) {
     const newProgress = { ...progress, [exerciseId]: count }
@@ -232,6 +228,7 @@ export default function TrainingCard(props: Props) {
 
   return (
     <>
+      {dogId && <TrainingOnboarding dogId={dogId} />}
       <section className={styles.card}>
         <div className={styles.header}>
           <span className={styles.headerTitle}>Dagens pass</span>
@@ -253,21 +250,35 @@ export default function TrainingCard(props: Props) {
         )}
 
         {!loading && weekPlan && (
-          <WeekFocusPanel
-            copy={weekFocusCopy}
-            simpleFocus={simpleFocus}
-            onToggleSimple={() => setSimpleFocus((s) => !s)}
-            totalExercises={todayExercises.length}
-            canSimple={todayExercises.length > 2 && !todayPlan?.rest}
-          />
-        )}
-
-        {dogId && (
-          <WeeklyFocusPicker
-            dogId={dogId}
-            onLoaded={(areas) => { setFocusAreas(areas); refreshPlanningSignals() }}
-            onChange={(areas) => { setFocusAreas(areas); refresh(); refreshPlanningSignals() }}
-          />
+          <>
+            <button
+              type="button"
+              className={styles.planningToggle}
+              onClick={() => setPlanningOpen((v) => !v)}
+              aria-expanded={planningOpen}
+            >
+              Veckofokus &amp; inställningar
+              <ChevronRight />
+            </button>
+            {planningOpen && (
+              <div className={styles.planningPanel}>
+                <WeekFocusPanel
+                  copy={weekFocusCopy}
+                  simpleFocus={simpleFocus}
+                  onToggleSimple={() => setSimpleFocus((s) => !s)}
+                  totalExercises={todayExercises.length}
+                  canSimple={todayExercises.length > 2 && !todayPlan?.rest}
+                />
+                {dogId && (
+                  <WeeklyFocusPicker
+                    dogId={dogId}
+                    onLoaded={(areas) => { setFocusAreas(areas); refreshPlanningSignals() }}
+                    onChange={(areas) => { setFocusAreas(areas); refresh(); refreshPlanningSignals() }}
+                  />
+                )}
+              </div>
+            )}
+          </>
         )}
 
         {!loading && (
@@ -282,43 +293,6 @@ export default function TrainingCard(props: Props) {
           <NextBanner label={nextExercise.label} />
         )}
 
-        {!loading && todayExercises.length > 0 && !todayPlan?.rest && (
-          <div ref={legendRef}>
-            <div className={styles.badgeLegend}>
-              <button
-                type="button"
-                className={`${styles.badgeLegendItem} ${styles.badgePriority}`}
-                onClick={() => setLegendOpen((prev) => prev === 'priority' ? null : 'priority')}
-              >
-                Prioriterad
-              </button>
-              <button
-                type="button"
-                className={`${styles.badgeLegendItem} ${styles.badgeFocus}`}
-                onClick={() => setLegendOpen((prev) => prev === 'focus' ? null : 'focus')}
-              >
-                Veckofokus
-              </button>
-              <button
-                type="button"
-                className={`${styles.badgeLegendItem} ${styles.badgeWeak}`}
-                onClick={() => setLegendOpen((prev) => prev === 'weak' ? null : 'weak')}
-              >
-                Svag färdighet
-              </button>
-            </div>
-            {legendOpen && (
-              <p className={styles.legendHelp}>
-                {legendOpen === 'priority'
-                  ? 'Prioriterad: du har valt att övningen ska få extra plats i veckoplanen.'
-                  : legendOpen === 'focus'
-                    ? 'Veckofokus: övningen kommer från ditt aktiva fokusområde för veckan.'
-                    : 'Svag färdighet: aktuell data visar låg träffsäkerhet, så nivån hålls eller sänks.'}
-              </p>
-            )}
-          </div>
-        )}
-
         {loading && <LoadingIndicator />}
         {!loading && error && <p className={styles.errorMsg}>Kunde inte hämta träningsplan. Försök igen.</p>}
         {!loading && referral && <ReferralCard text={referral} />}
@@ -328,12 +302,17 @@ export default function TrainingCard(props: Props) {
           <p className={styles.scaleNote}>{scaleNote}</p>
         )}
 
+        {allComplete && (
+          <DayComplete repsDone={repsDone} successRate={dayRate} />
+        )}
+
         {!loading && todayExercises.length > 0 && (
           <div className={styles.exercises}>
             {displayedExercises.map(({ current: ex, originalIdx }) => {
               const spec = customSpecs[ex.id] ?? getExerciseSpec(ex.id)
               const m = metrics[ex.id] ?? null
               const guard = sessionGuard[ex.id] ?? EMPTY_GUARD
+              const maturity = exerciseMaturity(ex.id, practicedExercises)
               return (
                 <ExerciseRow
                   key={`${originalIdx}-${ex.id}`}
@@ -354,6 +333,8 @@ export default function TrainingCard(props: Props) {
                   onSwap={scaleMode === 'full' && swapCandidates.length > 0 ? () => handleSwap(originalIdx) : undefined}
                   reasonBadges={reasonBadgesForExercise(ex.id)}
                   sources={exerciseSources[ex.id]}
+                  maturity={maturity}
+                  dayComplete={allComplete}
                 />
               )
             })}

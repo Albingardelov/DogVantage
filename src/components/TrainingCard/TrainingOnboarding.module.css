@@ -1,0 +1,32 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 50;
+}
+
+.sheet {
+  background: var(--color-surface);
+  border-radius: 20px 20px 0 0;
+  padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+  width: 100%;
+  max-width: 480px;
+}
+
+.stepCount { font-size: 13px; color: var(--color-text-muted); }
+.title { margin: 8px 0; font-size: 20px; }
+.body { margin: 0 0 20px; line-height: 1.6; color: var(--color-text-muted); }
+.actions { display: flex; justify-content: space-between; align-items: center; }
+.skip { background: none; border: none; color: var(--color-text-muted); cursor: pointer; }
+.next {
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-weight: 600;
+  cursor: pointer;
+}
