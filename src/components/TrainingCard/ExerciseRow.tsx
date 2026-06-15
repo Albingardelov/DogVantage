@@ -18,7 +18,7 @@ import styles from './ExerciseRow.module.css'
 import type { DailyExerciseMetrics, Exercise, LatencyBucket, TrainingSourceRef } from '@/types'
 import type { ExerciseSpec } from '@/lib/training/exercise-specs'
 import { isPuppy as isPuppyAge } from '@/lib/dog/age'
-import { buildCoachAction, type SessionGuard } from '@/lib/training/session-coach'
+import { buildCoachAction, latencyMeaning, type SessionGuard } from '@/lib/training/session-coach'
 import type { ExerciseMaturity } from './maturity'
 import { topBadge } from './badges'
 
@@ -426,7 +426,9 @@ export default function ExerciseRow({
                   </button>
                 ))}
               </div>
-              <p className={styles.latencyHint}>Svarstid efter signal</p>
+              <p className={styles.latencyHint}>
+                {latencyBucket ? latencyMeaning(latencyBucket) : 'Svarstid efter signal'}
+              </p>
               {onSwap && (
                 <button type="button" className={styles.swapBtn} onClick={onSwap}>
                   <IconSwap size="sm" /> Byt mot fokus

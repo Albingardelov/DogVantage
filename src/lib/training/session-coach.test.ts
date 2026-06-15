@@ -3,6 +3,7 @@ import {
   advanceGuard,
   buildCoachAction,
   EMPTY_GUARD,
+  latencyMeaning,
   type CoachInput,
 } from './session-coach'
 import type { CriteriaLevel } from '@/lib/training/exercise-specs'
@@ -126,5 +127,14 @@ describe('buildCoachAction', () => {
     }))
     expect(action?.kind).toBe('lower')
     expect(action?.suggestedLevelId).toBeNull()
+  })
+})
+
+describe('latencyMeaning', () => {
+  it('explains each bucket in plain language', () => {
+    expect(latencyMeaning('lt1s')).toMatch(/snabbt/i)
+    expect(latencyMeaning('1to3s')).toMatch(/okej/i)
+    expect(latencyMeaning('gt3s')).toMatch(/för svårt|svårt/i)
+    expect(latencyMeaning(null)).toBe('')
   })
 })
