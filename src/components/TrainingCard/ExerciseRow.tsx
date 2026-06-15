@@ -19,6 +19,7 @@ import type { DailyExerciseMetrics, Exercise, LatencyBucket, TrainingSourceRef }
 import type { ExerciseSpec } from '@/lib/training/exercise-specs'
 import { isPuppy as isPuppyAge } from '@/lib/dog/age'
 import { buildCoachAction, type SessionGuard } from '@/lib/training/session-coach'
+import type { ExerciseMaturity } from './maturity'
 
 interface Props {
   exercise: Exercise
@@ -47,6 +48,8 @@ interface Props {
   }>
   /** Dokumentkällor från kunskapsbasen — visas som "Läs mer"-länkar */
   sources?: TrainingSourceRef[]
+  /** 'new' = aldrig loggad → lugnt "Lär dig"-läge; 'practiced' = full kraftvy */
+  maturity?: ExerciseMaturity
 }
 
 const LATENCY_OPTIONS: { id: LatencyBucket; label: string }[] = [
@@ -143,6 +146,7 @@ export default function ExerciseRow({
   onSwap,
   reasonBadges = [],
   sources = [],
+  maturity = 'practiced',
 }: Props) {
   const [combo, setCombo] = useState(0)
   const [floats, setFloats] = useState<{ id: number; kind: 'success' | 'miss' }[]>([])
@@ -164,6 +168,9 @@ export default function ExerciseRow({
   const activeLevel = allowedLevels?.find((l) => l.id === criteriaLevelId) ?? allowedLevels?.[0] ?? null
   const currentLevelLabel = activeLevel?.label ?? null
   const currentLevelCriteria = activeLevel?.criteria ?? null
+
+  const isNew = maturity === 'new'
+  const [showAdvanced, setShowAdvanced] = useState(false)
 
   const coach = buildCoachAction({
     successCount,
@@ -249,20 +256,32 @@ export default function ExerciseRow({
             <p className={styles.definitionText}>{spec.definition}</p>
           )}
           {allowedLevels && currentLevelLabel && (
-            <button
-              type="button"
-              className={styles.criteriaChip}
-              onClick={cycleCriteria}
-              aria-label="Byt kriterienivå"
-            >
-              <IconTarget size="sm" />
-              <span>{currentLevelLabel}</span>
-              <IconArrowsClockwise size="sm" />
-            </button>
+            isNew ? (
+              <span className={styles.criteriaChip}>
+                <IconTarget size="sm" />
+                <span>{currentLevelLabel}</span>
+              </span>
+            ) : (
+              <button
+                type="button"
+                className={styles.criteriaChip}
+                onClick={cycleCriteria}
+                aria-label="Byt kriterienivå"
+              >
+                <IconTarget size="sm" />
+                <span>{currentLevelLabel}</span>
+                <IconArrowsClockwise size="sm" />
+              </button>
+            )
           )}
           {currentLevelCriteria && (
             <p className={styles.criteriaText}>
               <strong>Dagens kriterium:</strong> {currentLevelCriteria}
+            </p>
+          )}
+          {isNew && spec?.guide?.steps?.[0] && (
+            <p className={styles.firstStep}>
+              <strong>Så gör du:</strong> {spec.guide.steps[0]}
             </p>
           )}
           {sources.length > 0 && (
@@ -379,24 +398,33 @@ export default function ExerciseRow({
               <IconX size="sm" /> Miss
             </button>
           </div>
-          <div className={styles.latencyRow}>
-            {LATENCY_OPTIONS.map((o) => (
-              <button
-                key={o.id}
-                type="button"
-                className={`${styles.latencyBtn} ${latencyBucket === o.id ? styles.latencyBtnSelected : ''}`}
-                onClick={() => onMetricsPatch({ latency_bucket: o.id })}
-                aria-pressed={latencyBucket === o.id}
-              >
-                <IconLightning size="sm" />
-                {o.label}
-              </button>
-            ))}
-          </div>
-          <p className={styles.latencyHint}>Svarstid efter signal</p>
-          {onSwap && (
-            <button type="button" className={styles.swapBtn} onClick={onSwap}>
-              <IconSwap size="sm" /> Byt mot fokus
+          {(!isNew || showAdvanced) && (
+            <>
+              <div className={styles.latencyRow}>
+                {LATENCY_OPTIONS.map((o) => (
+                  <button
+                    key={o.id}
+                    type="button"
+                    className={`${styles.latencyBtn} ${latencyBucket === o.id ? styles.latencyBtnSelected : ''}`}
+                    onClick={() => onMetricsPatch({ latency_bucket: o.id })}
+                    aria-pressed={latencyBucket === o.id}
+                  >
+                    <IconLightning size="sm" />
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+              <p className={styles.latencyHint}>Svarstid efter signal</p>
+              {onSwap && (
+                <button type="button" className={styles.swapBtn} onClick={onSwap}>
+                  <IconSwap size="sm" /> Byt mot fokus
+                </button>
+              )}
+            </>
+          )}
+          {isNew && !showAdvanced && (
+            <button type="button" className={styles.showMoreBtn} onClick={() => setShowAdvanced(true)}>
+              Visa mer
             </button>
           )}
         </>

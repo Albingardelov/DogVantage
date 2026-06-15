@@ -21,6 +21,8 @@ import { useTodayExercises } from './use-today-exercises'
 import { useExerciseSources } from './use-exercise-sources'
 import { advanceGuard, EMPTY_GUARD, type SessionGuard } from '@/lib/training/session-coach'
 import { useDogState } from './use-dog-state'
+import { useExerciseHistory } from './use-exercise-history'
+import { exerciseMaturity } from './maturity'
 import { useDayCheckIn } from './use-day-checkin'
 import DayCheckInCard from './DayCheckInCard'
 import { buildExerciseSummaries, emptyMetrics } from './exercise-helpers'
@@ -54,6 +56,7 @@ export default function TrainingCard(props: Props) {
     useTrainingData({ ...props, todayDate })
   const { customSpecs, refresh: refreshCustomSpecs } = useCustomSpecs(dogId)
   const dogState = useDogState(dogId)
+  const practicedExercises = useExerciseHistory(dogId)
   const { checkIn, loaded: checkInLoaded, save: saveDayCheckIn } = useDayCheckIn(dogId, todayDate)
   const [checkInDismissed, setCheckInDismissed] = useState(false)
 
@@ -334,6 +337,7 @@ export default function TrainingCard(props: Props) {
               const spec = customSpecs[ex.id] ?? getExerciseSpec(ex.id)
               const m = metrics[ex.id] ?? null
               const guard = sessionGuard[ex.id] ?? EMPTY_GUARD
+              const maturity = exerciseMaturity(ex.id, practicedExercises)
               return (
                 <ExerciseRow
                   key={`${originalIdx}-${ex.id}`}
@@ -354,6 +358,7 @@ export default function TrainingCard(props: Props) {
                   onSwap={scaleMode === 'full' && swapCandidates.length > 0 ? () => handleSwap(originalIdx) : undefined}
                   reasonBadges={reasonBadgesForExercise(ex.id)}
                   sources={exerciseSources[ex.id]}
+                  maturity={maturity}
                 />
               )
             })}
