@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import ExerciseRow from './ExerciseRow'
 import WeekView from './WeekView'
@@ -70,8 +70,6 @@ export default function TrainingCard(props: Props) {
   const [priorityExerciseIds, setPriorityExerciseIds] = useState<string[]>([])
   const [regressExerciseIds, setRegressExerciseIds] = useState<string[]>([])
   const [regressReasonByExercise, setRegressReasonByExercise] = useState<Record<string, string>>({})
-  const [legendOpen, setLegendOpen] = useState<'priority' | 'focus' | 'weak' | null>(null)
-  const legendRef = useRef<HTMLDivElement | null>(null)
 
   const weekFocusCopy = useMemo(
     () => buildWeekFocusCopy({ breed, ageWeeks, trainingWeek, goals }),
@@ -130,9 +128,9 @@ export default function TrainingCard(props: Props) {
     }
     if (regressExerciseSet.has(exerciseId)) {
       badges.push({
-        label: 'Svag färdighet',
+        label: 'Behöver mer tid',
         tone: 'weak',
-        detail: regressReasonByExercise[exerciseId] ?? 'Systemet ser låg träffsäkerhet och håller/sänker nivån.',
+        detail: regressReasonByExercise[exerciseId] ?? 'Träffsäkerheten är under 80 % just nu, så vi stannar på samma nivå ett tag till — så ska inlärning gå till.',
       })
     }
     return badges
@@ -168,17 +166,6 @@ export default function TrainingCard(props: Props) {
   useEffect(() => {
     refreshPlanningSignals()
   }, [refreshPlanningSignals])
-
-  useEffect(() => {
-    function onPointerDown(event: MouseEvent) {
-      if (!legendRef.current) return
-      if (!legendRef.current.contains(event.target as Node)) {
-        setLegendOpen(null)
-      }
-    }
-    document.addEventListener('mousedown', onPointerDown)
-    return () => document.removeEventListener('mousedown', onPointerDown)
-  }, [])
 
   function commitProgress(exerciseId: string, count: number) {
     const newProgress = { ...progress, [exerciseId]: count }
@@ -283,43 +270,6 @@ export default function TrainingCard(props: Props) {
 
         {!loading && nextExercise && !todayPlan?.rest && !(simpleFocus && todayExercises.length > 2) && (
           <NextBanner label={nextExercise.label} />
-        )}
-
-        {!loading && todayExercises.length > 0 && !todayPlan?.rest && (
-          <div ref={legendRef}>
-            <div className={styles.badgeLegend}>
-              <button
-                type="button"
-                className={`${styles.badgeLegendItem} ${styles.badgePriority}`}
-                onClick={() => setLegendOpen((prev) => prev === 'priority' ? null : 'priority')}
-              >
-                Prioriterad
-              </button>
-              <button
-                type="button"
-                className={`${styles.badgeLegendItem} ${styles.badgeFocus}`}
-                onClick={() => setLegendOpen((prev) => prev === 'focus' ? null : 'focus')}
-              >
-                Veckofokus
-              </button>
-              <button
-                type="button"
-                className={`${styles.badgeLegendItem} ${styles.badgeWeak}`}
-                onClick={() => setLegendOpen((prev) => prev === 'weak' ? null : 'weak')}
-              >
-                Svag färdighet
-              </button>
-            </div>
-            {legendOpen && (
-              <p className={styles.legendHelp}>
-                {legendOpen === 'priority'
-                  ? 'Prioriterad: du har valt att övningen ska få extra plats i veckoplanen.'
-                  : legendOpen === 'focus'
-                    ? 'Veckofokus: övningen kommer från ditt aktiva fokusområde för veckan.'
-                    : 'Svag färdighet: aktuell data visar låg träffsäkerhet, så nivån hålls eller sänks.'}
-              </p>
-            )}
-          </div>
         )}
 
         {loading && <LoadingIndicator />}

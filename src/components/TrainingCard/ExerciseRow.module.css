@@ -486,3 +486,23 @@
   cursor: pointer;
   padding: 4px 0;
 }
+
+.badgeInfo {
+  margin-left: 6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  background: none;
+  color: inherit;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.badgeHelp {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary, #cbd5e1);
+}
