@@ -67,6 +67,7 @@ export default function TrainingCard(props: Props) {
   const [guideExerciseId, setGuideExerciseId] = useState<string | null>(null)
   const [showAddCustom, setShowAddCustom] = useState(false)
   const [simpleFocus, setSimpleFocus] = useState(false)
+  const [planningOpen, setPlanningOpen] = useState(false)
   const [focusAreas, setFocusAreas] = useState<WeeklyFocusArea[]>([])
   const [priorityExerciseIds, setPriorityExerciseIds] = useState<string[]>([])
   const [regressExerciseIds, setRegressExerciseIds] = useState<string[]>([])
@@ -249,21 +250,35 @@ export default function TrainingCard(props: Props) {
         )}
 
         {!loading && weekPlan && (
-          <WeekFocusPanel
-            copy={weekFocusCopy}
-            simpleFocus={simpleFocus}
-            onToggleSimple={() => setSimpleFocus((s) => !s)}
-            totalExercises={todayExercises.length}
-            canSimple={todayExercises.length > 2 && !todayPlan?.rest}
-          />
-        )}
-
-        {dogId && (
-          <WeeklyFocusPicker
-            dogId={dogId}
-            onLoaded={(areas) => { setFocusAreas(areas); refreshPlanningSignals() }}
-            onChange={(areas) => { setFocusAreas(areas); refresh(); refreshPlanningSignals() }}
-          />
+          <>
+            <button
+              type="button"
+              className={styles.planningToggle}
+              onClick={() => setPlanningOpen((v) => !v)}
+              aria-expanded={planningOpen}
+            >
+              Veckofokus &amp; inställningar
+              <ChevronRight />
+            </button>
+            {planningOpen && (
+              <div className={styles.planningPanel}>
+                <WeekFocusPanel
+                  copy={weekFocusCopy}
+                  simpleFocus={simpleFocus}
+                  onToggleSimple={() => setSimpleFocus((s) => !s)}
+                  totalExercises={todayExercises.length}
+                  canSimple={todayExercises.length > 2 && !todayPlan?.rest}
+                />
+                {dogId && (
+                  <WeeklyFocusPicker
+                    dogId={dogId}
+                    onLoaded={(areas) => { setFocusAreas(areas); refreshPlanningSignals() }}
+                    onChange={(areas) => { setFocusAreas(areas); refresh(); refreshPlanningSignals() }}
+                  />
+                )}
+              </div>
+            )}
+          </>
         )}
 
         {!loading && (
