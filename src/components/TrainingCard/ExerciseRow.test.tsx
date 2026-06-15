@@ -42,4 +42,14 @@ describe('ExerciseRow maturity', () => {
     expect(screen.getByText('Svarstid efter signal')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Visa mer' })).not.toBeInTheDocument()
   })
+
+  it('shows the per-row done message on the last exercise when the day is not complete', () => {
+    render(<ExerciseRow {...base} done={3} hasNextExercise={false} />)
+    expect(screen.getByText(/Du är klar för idag/)).toBeInTheDocument()
+  })
+
+  it('suppresses the per-row done message when the whole day is complete', () => {
+    render(<ExerciseRow {...base} done={3} hasNextExercise={false} dayComplete />)
+    expect(screen.queryByText(/Du är klar för idag/)).not.toBeInTheDocument()
+  })
 })

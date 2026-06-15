@@ -51,6 +51,8 @@ interface Props {
   sources?: TrainingSourceRef[]
   /** 'new' = aldrig loggad → lugnt "Lär dig"-läge; 'practiced' = full kraftvy */
   maturity?: ExerciseMaturity
+  /** Hela dagens pass är klart → rad-meddelandet dämpas, DayComplete tar över på sidnivå */
+  dayComplete?: boolean
 }
 
 const LATENCY_OPTIONS: { id: LatencyBucket; label: string }[] = [
@@ -148,6 +150,7 @@ export default function ExerciseRow({
   reasonBadges = [],
   sources = [],
   maturity = 'practiced',
+  dayComplete = false,
 }: Props) {
   const [combo, setCombo] = useState(0)
   const [floats, setFloats] = useState<{ id: number; kind: 'success' | 'miss' }[]>([])
@@ -465,9 +468,9 @@ export default function ExerciseRow({
             >
               Nästa övning <IconCaretRight size="sm" />
             </button>
-          ) : (
+          ) : !dayComplete ? (
             <p className={styles.allDoneMsg}>Du är klar för idag — bra jobbat!</p>
-          )}
+          ) : null}
           <button type="button" className={styles.undoBtn} onClick={handleUndo}>
             Starta om kombo
           </button>
