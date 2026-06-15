@@ -173,6 +173,7 @@ export default function ExerciseRow({
   const isNew = maturity === 'new'
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [badgeOpen, setBadgeOpen] = useState(false)
+  const badge = topBadge(reasonBadges)
 
   const coach = buildCoachAction({
     successCount,
@@ -235,37 +236,33 @@ export default function ExerciseRow({
             <ExerciseIcon exerciseId={exercise.id} size="md" />
             <span className={styles.exerciseName}>{exercise.label}</span>
           </div>
-          {(() => {
-            const badge = topBadge(reasonBadges)
-            if (!badge) return null
-            return (
-              <div className={styles.reasonRow}>
-                <span
-                  className={`${styles.reasonBadge} ${
-                    badge.tone === 'priority'
-                      ? styles.reasonPriority
-                      : badge.tone === 'focus'
-                        ? styles.reasonFocus
-                        : styles.reasonWeak
-                  }`}
+          {badge && (
+            <div className={styles.reasonRow}>
+              <span
+                className={`${styles.reasonBadge} ${
+                  badge.tone === 'priority'
+                    ? styles.reasonPriority
+                    : badge.tone === 'focus'
+                      ? styles.reasonFocus
+                      : styles.reasonWeak
+                }`}
+              >
+                {badge.label}
+              </span>
+              {badge.detail && (
+                <button
+                  type="button"
+                  className={styles.badgeInfo}
+                  onClick={() => setBadgeOpen((v) => !v)}
+                  aria-label={`Förklara: ${badge.label}`}
                 >
-                  {badge.label}
-                </span>
-                {badge.detail && (
-                  <button
-                    type="button"
-                    className={styles.badgeInfo}
-                    onClick={() => setBadgeOpen((v) => !v)}
-                    aria-label={`Förklara: ${badge.label}`}
-                  >
-                    ?
-                  </button>
-                )}
-              </div>
-            )
-          })()}
-          {badgeOpen && topBadge(reasonBadges)?.detail && (
-            <p className={styles.badgeHelp}>{topBadge(reasonBadges)!.detail}</p>
+                  ?
+                </button>
+              )}
+            </div>
+          )}
+          {badgeOpen && badge?.detail && (
+            <p className={styles.badgeHelp}>{badge.detail}</p>
           )}
           {spec?.definition && (
             <p className={styles.definitionText}>{spec.definition}</p>
