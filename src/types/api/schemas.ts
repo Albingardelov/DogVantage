@@ -75,6 +75,10 @@ export const ExerciseSourcesResponseSchema = z.object({
   sources: z.record(z.string(), z.array(TrainingSourceRefSchema)),
 })
 
+export const ExerciseHistoryPayloadSchema = z.object({
+  practicedExerciseIds: z.array(z.string()),
+})
+
 export const MicroLessonSchema = z.object({
   title: z.string(),
   body: z.string(),
