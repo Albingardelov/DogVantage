@@ -351,3 +351,15 @@
   padding: var(--space-5);
   padding-bottom: calc(var(--space-8) + env(safe-area-inset-bottom));
 }
+
+.dayComplete {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 24px 16px;
+  text-align: center;
+}
+.dayCompleteIcon { color: var(--accent, #52b788); }
+.dayCompleteTitle { font-size: 18px; font-weight: 600; }
+.dayCompleteSub { font-size: 14px; color: var(--text-secondary, #94a3b8); }
