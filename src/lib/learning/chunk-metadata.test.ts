@@ -30,6 +30,46 @@ describe('topicForExerciseId', () => {
   })
 })
 
+describe('classifyChunkContent behaviour & welfare topics', () => {
+  it('detects resource guarding', () => {
+    expect(classifyChunkContent('Food and resource guarding: teach the dog to enjoy people approaching the food bowl.').topic).toBe('resource_guarding')
+  })
+
+  it('detects separation anxiety', () => {
+    expect(classifyChunkContent('When treating a dog with separation anxiety, teach him to tolerate being left alone.').topic).toBe('separation')
+  })
+
+  it('detects fear / noise phobia', () => {
+    expect(classifyChunkContent('Many dogs develop a noise phobia of fireworks and thunder storms.').topic).toBe('fear')
+  })
+
+  it('detects body language', () => {
+    expect(classifyChunkContent('Reading body language: yawning and lip-licking are calming signals of stress.').topic).toBe('body_language')
+  })
+
+  it('detects enrichment', () => {
+    expect(classifyChunkContent('Provide enrichment with puzzle toys and a snuffle mat for mental stimulation.').topic).toBe('enrichment')
+  })
+
+  it('detects senior / cognitive dysfunction', () => {
+    expect(classifyChunkContent('Canine cognitive dysfunction is a doggie dementia affecting senior dogs.').topic).toBe('senior')
+  })
+
+  it('detects cooperative care / muzzle training', () => {
+    expect(classifyChunkContent('Cooperative care: teach your dog to wear a basket muzzle willingly.').topic).toBe('cooperative_care')
+  })
+
+  it('does not mis-tag English prose as sit/down', () => {
+    const meta = classifyChunkContent('Help your dog calm down and settle when guests arrive; let him sit out the chaos.')
+    expect(meta.topic).not.toBe('sit')
+    expect(meta.topic).not.toBe('down')
+  })
+
+  it('detects adolescent life stage over puppy when teenage terms dominate', () => {
+    expect(classifyChunkContent('Teenage trouble: bonding with your adolescent dog during the teen months.').lifeStage).toBe('adolescent')
+  })
+})
+
 describe('classifyChunkContent working-dog topics', () => {
   it('detects retrieve topic from dummy training content', () => {
     const meta = classifyChunkContent('Kasta dummyn 3–5 meter och belöna när hunden apporterar och lämnar av i hand.')

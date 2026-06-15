@@ -8,6 +8,7 @@
     "start": "next start",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
+    "ingest:behavior": "npx tsx scripts/ingest-behavior-welfare-docs.ts",
     "ingest:skk": "npx tsx scripts/ingest-skk-rasstandarder.ts",
     "ingest:skk:cleanup": "npx tsx scripts/cleanup-skk-ingest.ts",
     "ingest:skk:remap": "npx tsx scripts/remap-skk-fci-breeds.ts",
