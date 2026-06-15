@@ -6,8 +6,9 @@ import { ExerciseHistoryPayloadSchema } from '@/types/api/schemas'
 
 /**
  * Set of exercise ids the dog has trained before today. Supplementary —
- * fails to an empty set, which callers treat as "all practiced" (no
- * forced beginner mode) to avoid surprising experienced handlers.
+ * fails to an empty set. An empty set makes every exercise read as "new",
+ * so a failed fetch (or a brand-new dog) falls back to the calmer guided
+ * view rather than the full power view.
  */
 export function useExerciseHistory(dogId: string): Set<string> {
   const [practiced, setPracticed] = useState<Set<string>>(new Set())
