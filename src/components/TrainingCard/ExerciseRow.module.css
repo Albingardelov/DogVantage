@@ -468,3 +468,21 @@
   font-size: var(--text-sm);
   font-weight: var(--font-semibold);
 }
+
+.firstStep {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-secondary, #cbd5e1);
+}
+
+.showMoreBtn {
+  margin-top: 8px;
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: var(--accent, #52b788);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 0;
+}
