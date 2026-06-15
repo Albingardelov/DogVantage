@@ -28,6 +28,7 @@ import DayCheckInCard from './DayCheckInCard'
 import { buildExerciseSummaries, emptyMetrics } from './exercise-helpers'
 import { NextBanner, LoadingIndicator, ReferralCard, RestDay, ChevronRight } from './parts'
 import DayProgressBar from './DayProgressBar'
+import TrainingOnboarding from './TrainingOnboarding'
 
 function todayDateString(): string {
   return new Date().toISOString().split('T')[0]
@@ -222,6 +223,7 @@ export default function TrainingCard(props: Props) {
 
   return (
     <>
+      {dogId && <TrainingOnboarding dogId={dogId} />}
       <section className={styles.card}>
         <div className={styles.header}>
           <span className={styles.headerTitle}>Dagens pass</span>
