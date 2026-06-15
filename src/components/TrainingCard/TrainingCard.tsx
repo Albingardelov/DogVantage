@@ -334,6 +334,7 @@ export default function TrainingCard(props: Props) {
                   reasonBadges={reasonBadgesForExercise(ex.id)}
                   sources={exerciseSources[ex.id]}
                   maturity={maturity}
+                  dayComplete={allComplete}
                 />
               )
             })}
