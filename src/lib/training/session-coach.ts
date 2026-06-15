@@ -124,12 +124,25 @@ export function buildCoachAction(input: CoachInput): CoachAction | null {
       kind: 'lower',
       suggestedLevelId: lowerLevelId,
       message:
-        'Sänk kriteriet ett steg och höj belöningsvärdet. Många miss eller långsam svarstid betyder oftast att kraven är för höga just nu.',
+        'Träffsäkerheten är under 80 %, så vi sänker ett steg och höjer belöningsvärdet. Det är inte ett misslyckande — under 80 % betyder bara att kraven är för höga just nu.',
     }
   }
   return {
     kind: 'keep',
     suggestedLevelId: null,
-    message: 'Behåll nivån och stabilisera (sikta på ≥80% och kort latens).',
+    message: 'Behåll nivån och stabilisera. Målet är ≥80 % lyckade med kort svarstid innan vi höjer — så ska inlärning gå till.',
+  }
+}
+
+export function latencyMeaning(bucket: LatencyBucket | null): string {
+  switch (bucket) {
+    case 'lt1s':
+      return 'Under 1 sek — hunden svarar snabbt. Bra timing och rätt svårighet.'
+    case '1to3s':
+      return '1–3 sek — okej, men håll koll. Tvekar hunden ofta kan kriteriet vara lite för svårt.'
+    case 'gt3s':
+      return 'Över 3 sek — oftast för svårt just nu, inte olydnad. Sänk kriteriet eller höj belöningen.'
+    default:
+      return ''
   }
 }
