@@ -20,6 +20,7 @@ import type { ExerciseSpec } from '@/lib/training/exercise-specs'
 import { isPuppy as isPuppyAge } from '@/lib/dog/age'
 import { buildCoachAction, type SessionGuard } from '@/lib/training/session-coach'
 import type { ExerciseMaturity } from './maturity'
+import { topBadge } from './badges'
 
 interface Props {
   exercise: Exercise
@@ -171,6 +172,7 @@ export default function ExerciseRow({
 
   const isNew = maturity === 'new'
   const [showAdvanced, setShowAdvanced] = useState(false)
+  const [badgeOpen, setBadgeOpen] = useState(false)
 
   const coach = buildCoachAction({
     successCount,
@@ -233,11 +235,12 @@ export default function ExerciseRow({
             <ExerciseIcon exerciseId={exercise.id} size="md" />
             <span className={styles.exerciseName}>{exercise.label}</span>
           </div>
-          {reasonBadges.length > 0 && (
-            <div className={styles.reasonRow}>
-              {reasonBadges.map((badge) => (
+          {(() => {
+            const badge = topBadge(reasonBadges)
+            if (!badge) return null
+            return (
+              <div className={styles.reasonRow}>
                 <span
-                  key={`${exercise.id}-${badge.label}`}
                   className={`${styles.reasonBadge} ${
                     badge.tone === 'priority'
                       ? styles.reasonPriority
@@ -245,12 +248,24 @@ export default function ExerciseRow({
                         ? styles.reasonFocus
                         : styles.reasonWeak
                   }`}
-                  title={badge.detail}
                 >
                   {badge.label}
                 </span>
-              ))}
-            </div>
+                {badge.detail && (
+                  <button
+                    type="button"
+                    className={styles.badgeInfo}
+                    onClick={() => setBadgeOpen((v) => !v)}
+                    aria-label={`Förklara: ${badge.label}`}
+                  >
+                    ?
+                  </button>
+                )}
+              </div>
+            )
+          })()}
+          {badgeOpen && topBadge(reasonBadges)?.detail && (
+            <p className={styles.badgeHelp}>{topBadge(reasonBadges)!.detail}</p>
           )}
           {spec?.definition && (
             <p className={styles.definitionText}>{spec.definition}</p>
