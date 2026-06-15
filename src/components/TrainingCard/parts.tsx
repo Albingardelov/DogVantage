@@ -1,4 +1,4 @@
-import { IconChevronRight, IconRestDay } from '@/components/icons'
+import { IconChevronRight, IconRestDay, IconMedal } from '@/components/icons'
 import styles from './TrainingCard.module.css'
 
 export function NextBanner({ label }: { label: string }) {
@@ -34,6 +34,18 @@ export function RestDay() {
       <IconRestDay size="xl" className={styles.restIcon} />
       <span className={styles.restTitle}>Vilodag idag</span>
       <span className={styles.restSub}>Vila och återhämtning — bra jobbat i veckan!</span>
+    </div>
+  )
+}
+
+export function DayComplete({ repsDone, successRate }: { repsDone: number; successRate: number | null }) {
+  return (
+    <div className={styles.dayComplete} role="status">
+      <IconMedal size="xl" className={styles.dayCompleteIcon} />
+      <span className={styles.dayCompleteTitle}>Klart för idag — bra jobbat!</span>
+      <span className={styles.dayCompleteSub}>
+        {repsDone} reps satt{successRate !== null ? ` · ${successRate}% lyckade` : ''}
+      </span>
     </div>
   )
 }

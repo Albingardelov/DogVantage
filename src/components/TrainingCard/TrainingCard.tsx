@@ -26,7 +26,7 @@ import { exerciseMaturity } from './maturity'
 import { useDayCheckIn } from './use-day-checkin'
 import DayCheckInCard from './DayCheckInCard'
 import { buildExerciseSummaries, emptyMetrics } from './exercise-helpers'
-import { NextBanner, LoadingIndicator, ReferralCard, RestDay, ChevronRight } from './parts'
+import { NextBanner, LoadingIndicator, ReferralCard, RestDay, ChevronRight, DayComplete } from './parts'
 import DayProgressBar from './DayProgressBar'
 import TrainingOnboarding from './TrainingOnboarding'
 
@@ -106,6 +106,10 @@ export default function TrainingCard(props: Props) {
       }, 0),
     [todayExercises, progress],
   )
+
+  const allComplete = !loading && todayExercises.length > 0 &&
+    todayExercises.every((e) => (progress[e.id] ?? 0) >= e.reps)
+  const dayRate = repsDone > 0 && repsPlanned > 0 ? Math.round((repsDone / repsPlanned) * 100) : null
 
   const focusExerciseSet = useMemo(() => new Set(focusExerciseIds(focusAreas)), [focusAreas])
   const priorityExerciseSet = useMemo(() => new Set(priorityExerciseIds), [priorityExerciseIds])
@@ -281,6 +285,10 @@ export default function TrainingCard(props: Props) {
 
         {!loading && scaleNote && (
           <p className={styles.scaleNote}>{scaleNote}</p>
+        )}
+
+        {allComplete && (
+          <DayComplete repsDone={repsDone} successRate={dayRate} />
         )}
 
         {!loading && todayExercises.length > 0 && (
