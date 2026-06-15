@@ -473,7 +473,7 @@
   margin: 8px 0 0;
   font-size: 14px;
   line-height: 1.5;
-  color: var(--text-secondary, #cbd5e1);
+  color: var(--color-text-muted);
 }
 
 .showMoreBtn {
@@ -481,7 +481,7 @@
   align-self: flex-start;
   background: none;
   border: none;
-  color: var(--accent, #52b788);
+  color: var(--color-primary);
   font-size: 14px;
   cursor: pointer;
   padding: 4px 0;
@@ -504,5 +504,5 @@
   margin: 6px 0 0;
   font-size: 13px;
   line-height: 1.5;
-  color: var(--text-secondary, #cbd5e1);
+  color: var(--color-text-muted);
 }
