@@ -20,7 +20,7 @@ describe('useExerciseHistory', () => {
     expect(result.current.has('ligg')).toBe(false)
   })
 
-  it('returns an empty set on error (treat all as practiced upstream)', async () => {
+  it('returns an empty set on error (callers fall back to calmer "new" view)', async () => {
     mockApiFetch.mockRejectedValue(new Error('boom'))
     const { result } = renderHook(() => useExerciseHistory('dog-1'))
     await waitFor(() => expect(mockApiFetch).toHaveBeenCalled())
