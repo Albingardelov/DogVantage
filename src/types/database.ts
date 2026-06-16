@@ -605,16 +605,19 @@ export type Database = {
       user_settings: {
         Row: {
           active_dog_id: string | null
+          locale: string
           updated_at: string
           user_id: string
         }
         Insert: {
           active_dog_id?: string | null
+          locale?: string
           updated_at?: string
           user_id: string
         }
         Update: {
           active_dog_id?: string | null
+          locale?: string
           updated_at?: string
           user_id?: string
         }
