@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { apiFetch } from '@/lib/api/fetch'
 import { MicroLessonResponseSchema } from '@/types/api/schemas'
 import type { z } from 'zod'
@@ -17,6 +18,7 @@ function todayKey(dogId: string): string {
 }
 
 export default function MicroLessonCard({ dogId }: { dogId: string }) {
+  const { i18n } = useTranslation()
   const [lesson, setLesson] = useState<MicroLesson | null>(null)
   const [dismissed, setDismissed] = useState(true)
 
@@ -31,7 +33,7 @@ export default function MicroLessonCard({ dogId }: { dogId: string }) {
   useEffect(() => {
     if (dismissed) return
     let cancelled = false
-    apiFetch(`/api/training/micro-lesson?dogId=${encodeURIComponent(dogId)}`, MicroLessonResponseSchema)
+    apiFetch(`/api/training/micro-lesson?dogId=${encodeURIComponent(dogId)}&locale=${encodeURIComponent(i18n.language)}`, MicroLessonResponseSchema)
       .then((res) => {
         if (!cancelled) setLesson(res.lesson)
       })
@@ -41,7 +43,7 @@ export default function MicroLessonCard({ dogId }: { dogId: string }) {
     return () => {
       cancelled = true
     }
-  }, [dogId, dismissed])
+  }, [dogId, dismissed, i18n.language])
 
   if (dismissed || !lesson) return null
 

@@ -1,5 +1,25 @@
 import { describe, it, expect } from 'vitest'
-import { detectHealthIssue, detectBehaviorEmergency, detectSecretExposure } from './safety-guards'
+import {
+  detectHealthIssue,
+  detectBehaviorEmergency,
+  detectSecretExposure,
+  vetResponse,
+  behaviorResponse,
+} from './safety-guards'
+
+describe('localized safety responses', () => {
+  it('vetResponse is Swedish for sv and English for en', () => {
+    expect(vetResponse('sv').content).toContain('veterinär')
+    expect(vetResponse('en').content).toContain('veterinarian')
+  })
+  it('behaviorResponse is Swedish for sv and English for en', () => {
+    expect(behaviorResponse('sv').content).toContain('beteendekonsulent')
+    expect(behaviorResponse('en').content).toContain('behaviour consultant')
+  })
+  it('falls back to English for de', () => {
+    expect(vetResponse('de').content).toContain('veterinarian')
+  })
+})
 
 describe('detectHealthIssue', () => {
   it('flags vet keywords', () => {

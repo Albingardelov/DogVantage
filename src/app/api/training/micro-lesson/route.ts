@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { withAuthAndDog } from '@/lib/api/with-auth'
 import { getSupabaseAdmin } from '@/lib/supabase/client'
 import { getMicroLesson } from '@/lib/ai/doc-learning'
+import { isSupportedLocale, DEFAULT_LOCALE } from '@/i18n/config'
 import { getAgeInWeeks, getLifeStage } from '@/lib/dog/age'
 import { rankWeakestExercises, pickMicroLessonExercise, type ExerciseMetricRow } from '@/lib/learning/micro-lesson'
 import { listRecentMicroQuizExercises } from '@/lib/supabase/learning-progress'
@@ -41,7 +42,10 @@ export async function GET(req: NextRequest) {
     const exerciseId = pickMicroLessonExercise(ranked, fallback, new Set(completedIds))
     if (!exerciseId) return NextResponse.json({ lesson: null })
 
-    const lesson = await getMicroLesson(breed, lifeStage, exerciseId)
+    const localeParam = req.nextUrl.searchParams.get('locale')
+    const locale = isSupportedLocale(localeParam) ? localeParam : DEFAULT_LOCALE
+
+    const lesson = await getMicroLesson(breed, lifeStage, exerciseId, locale)
     return NextResponse.json({ lesson })
   })
 }

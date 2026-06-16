@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { ChatMessage, TrainingSourceRef } from '@/types'
 import { IconPaw, IconSend } from '@/components/icons'
 import { apiFetch, ApiError } from '@/lib/api/fetch'
@@ -19,6 +20,7 @@ const GREETING: ChatMessage = {
 }
 
 export default function ChatInterface({ trainingWeek, initialQuestion, dogId }: Props) {
+  const { i18n } = useTranslation()
   const [messages, setMessages] = useState<ChatMessage[]>([GREETING])
   const [historyLoaded, setHistoryLoaded] = useState(false)
   const [hasHistory, setHasHistory] = useState(false)
@@ -68,7 +70,7 @@ export default function ChatInterface({ trainingWeek, initialQuestion, dogId }: 
       const data = await apiFetch('/api/chat', TrainingResultSchema, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, dogId }),
+        body: JSON.stringify({ query, dogId, locale: i18n.language }),
       })
       setMessages((prev) => [
         ...prev,
