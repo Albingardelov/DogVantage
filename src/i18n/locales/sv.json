@@ -15,8 +15,10 @@
     "calendar": "Kalender",
     "learn": "Guider",
     "chat": "Chatt",
+    "skills": "Färdigheter",
     "profile": "Profil",
-    "logOut": "Logga ut"
+    "logOut": "Logga ut",
+    "ariaLabel": "Huvudnavigering"
   },
   "billing": {
     "title": "Prenumeration",

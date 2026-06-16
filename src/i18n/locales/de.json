@@ -15,8 +15,10 @@
     "calendar": "Kalender",
     "learn": "Leitfäden",
     "chat": "Chat",
+    "skills": "Fähigkeiten",
     "profile": "Profil",
-    "logOut": "Abmelden"
+    "logOut": "Abmelden",
+    "ariaLabel": "Hauptnavigation"
   },
   "billing": {
     "title": "Abonnement",
