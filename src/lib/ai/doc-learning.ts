@@ -5,6 +5,8 @@ import { getExerciseSpec } from '@/lib/training/exercise-specs'
 import { exerciseLabel } from '@/lib/training/exercise-label'
 import { retrieveDocumentChunks, formatChunksForPrompt } from '@/lib/learning/doc-retrieval'
 import { topicForExerciseId, type LifeStageFilter, type ChunkTopic } from '@/lib/learning/chunk-metadata'
+import { languageDirective } from '@/i18n/language-directive'
+import type { Locale } from '@/i18n/config'
 import type { Breed, TrainingSourceRef } from '@/types'
 
 // Behaviour-emergency / clinical welfare topics must never ground a daily
@@ -103,13 +105,22 @@ export async function getExerciseDocContext(
 
 // ─── Feature 2: Daily micro-lesson ────────────────────────────────────────────
 
+export function microLessonCacheKey(locale: Locale, breed: Breed, lifeStage: string, exerciseId: string): string {
+  return `mlesson_v2_${locale}_${breed}_${lifeStage}_${exerciseId}`
+}
+
+export function struggleAdviceCacheKey(locale: Locale, breed: Breed, exerciseId: string): string {
+  return `coach_v2_${locale}_${breed}_${exerciseId}`
+}
+
 export async function getMicroLesson(
   breed: Breed,
   lifeStage: string,
   exerciseId: string,
+  locale: Locale,
 ): Promise<MicroLesson | null> {
   const label = exerciseLabel(exerciseId)
-  const cacheKey = `mlesson_v1_${breed}_${lifeStage}_${exerciseId}`
+  const cacheKey = microLessonCacheKey(locale, breed, lifeStage, exerciseId)
   const cached = await readCache<MicroLesson>(cacheKey)
   if (cached) return cached
 
@@ -124,7 +135,7 @@ export async function getMicroLesson(
     {
       role: 'system',
       content: [
-        `Du är en hundträningslärare. Skriv en mikrolektion på svenska om "${label}" för en ${breed} (${lifeStage}).`,
+        `Du är en hundträningslärare. ${languageDirective(locale)} Skriv en mikrolektion om "${label}" för en ${breed} (${lifeStage}).`,
         'Basera dig ENDAST på källdokumenten nedan. Nämn källnamnet i texten.',
         '60–90 sekunders läsning (100–160 ord). Konkret och praktiskt, ingen utfyllnad.',
         'Returnera JSON: {"title":"kort rubrik max 8 ord","body":"lektionstexten"}',
@@ -154,9 +165,10 @@ export async function getMicroLesson(
 export async function getStruggleAdvice(
   breed: Breed,
   exerciseId: string,
+  locale: Locale,
 ): Promise<CoachTip | null> {
   const label = exerciseLabel(exerciseId)
-  const cacheKey = `coach_v1_${breed}_${exerciseId}`
+  const cacheKey = struggleAdviceCacheKey(locale, breed, exerciseId)
   const cached = await readCache<CoachTip>(cacheKey)
   if (cached) return cached
 
@@ -181,7 +193,7 @@ export async function getStruggleAdvice(
       role: 'system',
       content: [
         `Du är en hundtränarcoach. Föraren har precis loggat ett pass där hunden hade låg träffsäkerhet på "${label}" (${breed}).`,
-        'Skriv 2–3 meningar på svenska: varför det troligen händer och EN konkret justering till nästa pass.',
+        `${languageDirective(locale)} Skriv 2–3 meningar: varför det troligen händer och EN konkret justering till nästa pass.`,
         'Var varm men rak. Nämn källnamnet om du använder källdokument. Inga generella plattityder.',
         'Returnera JSON: {"advice":"texten"}',
         troubleshooting,
