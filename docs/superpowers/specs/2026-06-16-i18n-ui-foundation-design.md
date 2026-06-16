@@ -40,39 +40,39 @@ Ren modul utan Next/Supabase/React-Native-import:
 - `src/i18n/locales/{sv,en,de}.json` — befintliga kataloger (oförändrade).
 - `src/i18n/config.ts` — `SUPPORTED_LOCALES = ['sv','en','de'] as const`, `DEFAULT_LOCALE = 'sv'`, `FALLBACK_LOCALE = 'en'`, typ `Locale`.
 - `src/i18n/messages.ts` — importerar de tre katalogerna och exporterar `resources` i i18next-format.
-- `src/i18n/create-instance.ts` — `createI18nInstance(locale: Locale)` som skapar en isolerad i18next-instans (för per-request-bruk på servern och för klient-provider). Inga globala sidoeffekter.
+- `src/i18n/create-instance.ts` — `createI18nInstance(locale: Locale)` som skapar en isolerad, fristående i18next-instans (används av klient-providern nu; samma factory återanvänds av RN/servern senare). Inga globala sidoeffekter.
 
 Denna modul är det som senare flyttas till `packages/core/i18n`.
 
-### Web-integration (Next 16 App Router)
-- **Server (RSC):** `src/i18n/server.ts` — `getT(locale)` skapar en per-request-instans via `createI18nInstance` och returnerar `t`. Ingen delad muterbar global (säkert under concurrent requests).
-- **Klient:** `src/i18n/I18nProvider.tsx` (`'use client'`) — tar `locale` + initierar en klient-i18next-instans och wrappar `I18nextProvider`. Monteras i `src/app/layout.tsx` med upplöst locale. Klientkomponenter använder `useTranslation()` från react-i18next.
-
-> Next 16-specifik integration (RSC + per-request-instans, hur `layout.tsx` får locale serverside) verifieras mot `node_modules/next/dist/docs/` i implementationsplanen innan kod skrivs.
+### Web-integration (Next 16 App Router) — klient-only för Fas 1
+Alla vyer vi översätter denna fas (`dashboard`, `chat`, `calendar`, `learn`, `profile`, `BottomNav`, billing) är **redan `'use client'`**, och appen wrappar allt i en befintlig klient-`AppProviders`. Därför räcker en **klient-side provider** — ingen server-RSC-/per-request-maskineri behövs (det var den flaggade risken; den utgår).
+- `src/i18n/I18nProvider.tsx` (`'use client'`) — initierar en klient-i18next-instans via `createI18nInstance(resolveLocale(...))` och wrappar `I18nextProvider`. Monteras i `src/components/AppProviders.tsx` runt resten. Klientkomponenter använder `useTranslation()` från react-i18next.
+- En server-`getT(locale)` för server-komponenter byggs **först när en server-komponent faktiskt behöver översättning** (senare fas) — YAGNI nu.
+- `<html lang="sv">` i root-layouten lämnas oförändrad i Fas 1 (server-komponent som inte känner klientens locale); kan sättas dynamiskt senare. Påverkar inte synliga strängar.
 
 ### Locale-upplösning — `src/i18n/resolve-locale.ts`
 Plattformsoberoende ren funktion `resolveLocale(inputs): Locale` med ordning:
-1. `profile.locale` om inloggad och satt
+1. `user_settings.locale` om inloggad och satt (hämtas klient-side)
 2. enhetscache (web: `localStorage['dv.locale']`; RN: `AsyncStorage` senare)
 3. enhetsspråk (web: `navigator.language`; RN: `expo-localization` senare) om det matchar `SUPPORTED_LOCALES`
 4. `FALLBACK_LOCALE` (`en`)
 
 `DEFAULT_LOCALE` (`sv`) och `FALLBACK_LOCALE` (`en`) är inte i konflikt: `sv` är källspråket och kolumn-defaulten (bevarar nuvarande beteende för befintliga svenska användare, som alltid träffar steg 1), medan `en` bara används i steg 4 för en **anonym** besökare vars enhetsspråk inte stöds — det internationellt mest universella valet.
 
-Plattformsspecifika läsare (localStorage / cookie för SSR / AsyncStorage) injiceras in i funktionen — själva funktionen är ren och delbar. På web speglas valt språk även till en cookie (`dv.locale`) **enbart som SSR-render-hint** så servern kan rendera rätt språk vid första laddning; sanningskällan förblir `profile.locale`.
+Plattformsspecifika läsare (localStorage / AsyncStorage) injiceras in i funktionen — själva funktionen är ren och delbar. Ingen cookie behövs eftersom renderingen är klient-side i Fas 1; sanningskällan är `user_settings.locale`, med enhetscachen som snabb lokal spegel.
 
 ## Datamodell
 
-Supabase-migration `026_profile_locale.sql`:
+Locale är per **användare**. Appen har ingen `profiles`-tabell men har en `user_settings`-tabell (kolumner idag: `user_id`, `active_dog_id`, `updated_at`). Migration `026_user_settings_locale.sql`:
 ```sql
-alter table profiles add column if not exists locale text not null default 'sv';
+alter table public.user_settings add column if not exists locale text not null default 'sv';
 ```
-RLS oförändrad (användaren äger redan sin profilrad). Värdet begränsas i applikationslagret till `SUPPORTED_LOCALES`.
+RLS oförändrad (raden ägs redan av användaren). Värdet begränsas i applikationslagret till `SUPPORTED_LOCALES`.
 
 ## Språkväljare
 
 - En kontroll i Profil-vyn (`src/app/profile`): tre val (Svenska / English / Deutsch).
-- Vid byte: PATCH till profil-API:t som uppdaterar `profiles.locale` (validerar mot `SUPPORTED_LOCALES`), uppdaterar enhetscache + cookie, och byter språk i klient-instansen direkt (`i18n.changeLanguage`).
+- Vid byte: `PATCH /api/account` (withAuth) uppdaterar `user_settings.locale` (validerar mot `SUPPORTED_LOCALES`), uppdaterar enhetscache (`localStorage`), och byter språk i klient-instansen direkt (`i18n.changeLanguage`).
 - Använder `t('profile.*')`-nycklar (några nya nycklar för väljaren läggs till i alla tre katalogerna).
 
 ## Felhantering
@@ -90,11 +90,11 @@ RLS oförändrad (användaren äger redan sin profilrad). Värdet begränsas i a
 
 ## Filer som berörs (preliminärt)
 
-- `src/i18n/config.ts`, `messages.ts`, `create-instance.ts`, `server.ts`, `resolve-locale.ts`, `I18nProvider.tsx` (nya)
-- `src/i18n/locales/{sv,en,de}.json` (nya nycklar för språkväljaren)
-- `src/app/layout.tsx` (montera provider med upplöst locale)
-- `src/app/profile/*` (språkväljare)
-- profil-API-route (PATCH `locale`)
-- `supabase/migrations/026_profile_locale.sql`
+- `src/i18n/config.ts`, `messages.ts`, `create-instance.ts`, `resolve-locale.ts`, `I18nProvider.tsx` (nya)
+- `src/i18n/locales/{sv,en,de}.json` (nya nycklar för språkväljaren; `nav.skills` saknas och läggs till)
+- `src/components/AppProviders.tsx` (montera `I18nProvider` runt befintliga providers)
+- `src/app/profile/page.tsx` (språkväljare)
+- `src/app/api/account/route.ts` (ny `PATCH` för `locale`)
+- `supabase/migrations/026_user_settings_locale.sql`
 - `package.json` (`i18next`, `react-i18next`)
 - De UI-vyer vars strängar täcks av de 97 nycklarna (nav/billing/dashboard/profile/chat/calendar/learn) — hårdkodad svenska → `t()`
