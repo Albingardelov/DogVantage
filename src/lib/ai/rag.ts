@@ -5,9 +5,11 @@ import { formatBreedProfileShort, formatCurrentPhaseShort } from './breed-profil
 import {
   detectHealthIssue,
   detectBehaviorEmergency,
-  VET_RESPONSE,
-  BEHAVIOR_RESPONSE,
+  vetResponse,
+  behaviorResponse,
 } from './safety-guards'
+import { languageDirective } from '@/i18n/language-directive'
+import { DEFAULT_LOCALE, type Locale } from '@/i18n/config'
 import type { Breed, ChunkMatch, TrainingResult, TrainingSourceRef } from '@/types'
 
 const MIN_DOCUMENT_SIMILARITY = 0.72
@@ -108,6 +110,7 @@ export interface ChatHistoryEntry {
 export interface QueryRAGOptions {
   history?: ChatHistoryEntry[]
   dogStateContext?: string | null
+  locale?: Locale
 }
 
 // ─── Main RAG query ───────────────────────────────────────────────────────────
@@ -120,12 +123,13 @@ export async function queryRAG(
   onboardingContext?: string,
   opts: QueryRAGOptions = {}
 ): Promise<TrainingResult> {
-  if (detectHealthIssue(query)) return VET_RESPONSE
+  const locale = opts.locale ?? DEFAULT_LOCALE
+  if (detectHealthIssue(query)) return vetResponse(locale)
   // Behaviour-emergency check: short-circuit if either the query OR the
   // owner-supplied profile context (ownerNotes / problemNotes baked into
   // onboardingContext) describes a case that needs a professional.
   if (detectBehaviorEmergency(query) || detectBehaviorEmergency(onboardingContext)) {
-    return BEHAVIOR_RESPONSE
+    return behaviorResponse(locale)
   }
 
   const history = (opts.history ?? []).filter(
@@ -204,7 +208,7 @@ export async function queryRAG(
 ${breedProfile}
 ${phaseInfo}
 ${documentContext ? `\n=== KÄLLDOKUMENT ===\n${documentContext}\n` : ''}${onboardingSection}${dogStateSection}${metricsSection}${logsSection}
-Regler: svara på svenska, anpassa till hundens ålder i veckor. ${lengthRule} ${responseFormat} Nämn källnamn om KÄLLDOKUMENT finns — annars påstå inte att du citerar ett dokument.`
+Regler: ${languageDirective(locale)} Anpassa till hundens ålder i veckor. ${lengthRule} ${responseFormat} ${documentContext ? 'Nämn källnamn om KÄLLDOKUMENT finns — annars påstå inte att du citerar ett dokument.' : 'Påstå inte att du citerar ett dokument.'}`
 
   const completion = await getGroqClient().chat.completions.create({
     model: GROQ_MODEL,
