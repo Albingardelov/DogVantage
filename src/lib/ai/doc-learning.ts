@@ -4,8 +4,15 @@ import { getSupabaseAdmin } from '@/lib/supabase/client'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
 import { exerciseLabel } from '@/lib/training/exercise-label'
 import { retrieveDocumentChunks, formatChunksForPrompt } from '@/lib/learning/doc-retrieval'
-import { topicForExerciseId, type LifeStageFilter } from '@/lib/learning/chunk-metadata'
+import { topicForExerciseId, type LifeStageFilter, type ChunkTopic } from '@/lib/learning/chunk-metadata'
 import type { Breed, TrainingSourceRef } from '@/types'
+
+// Behaviour-emergency / clinical welfare topics must never ground a daily
+// training schedule — they describe problems that need professional help, not
+// a rep to run today. Filtered out of week-plan grounding (see getExerciseDocContext).
+const SCHEDULE_EXCLUDED_TOPICS = new Set<ChunkTopic>([
+  'separation', 'fear', 'resource_guarding', 'senior', 'body_language',
+])
 
 // Proactive learning features built on the document knowledge base:
 // - "Läs mer" source links per exercise
@@ -49,6 +56,49 @@ export async function getExerciseSources(
   const sources = chunksToSourceRefs(chunks).slice(0, 2)
   await writeCache(cacheKey, 'exercise_sources', sources)
   return sources
+}
+
+// ─── Exercise-scoped document grounding for the weekly schedule ───────────────
+
+export interface ExerciseDocContext {
+  /** Formatted source chunks for prompt grounding, '' when nothing relevant. */
+  context: string
+  /** Citations to surface in the UI ("Läs mer"). */
+  sources: TrainingSourceRef[]
+}
+
+/**
+ * Retrieve topic- and life-stage-filtered document chunks for a single exercise.
+ * Used to ground week-plan descriptions and attach "read more" sources per
+ * exercise. Cached globally per (breed, exercise, lifeStage) — content is
+ * user-independent, so cost is one embed per unique key, shared across users.
+ *
+ * Safety: applies a similarity floor (via retrieveDocumentChunks) and drops any
+ * behaviour-emergency / clinical topics so a schedule never grounds itself in
+ * content that calls for a professional referral.
+ */
+export async function getExerciseDocContext(
+  breed: Breed,
+  exerciseId: string,
+  lifeStage: LifeStageFilter,
+): Promise<ExerciseDocContext> {
+  const cacheKey = `exdoc_v1_${breed}_${exerciseId}_${lifeStage}`
+  const cached = await readCache<ExerciseDocContext>(cacheKey)
+  if (cached) return cached
+
+  const retrieved = await retrieveDocumentChunks(breed, retrievalQuery(exerciseId), 4, {
+    topic: topicForExerciseId(exerciseId),
+    lifeStage,
+  })
+  const chunks = retrieved.filter(
+    (c) => !c.topic || !SCHEDULE_EXCLUDED_TOPICS.has(c.topic as ChunkTopic),
+  )
+  const result: ExerciseDocContext = {
+    context: chunks.length > 0 ? formatChunksForPrompt(chunks.slice(0, 2)) : '',
+    sources: chunksToSourceRefs(chunks).slice(0, 2),
+  }
+  await writeCache(cacheKey, 'exercise_doc_context', result)
+  return result
 }
 
 // ─── Feature 2: Daily micro-lesson ────────────────────────────────────────────

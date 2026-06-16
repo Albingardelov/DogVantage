@@ -1,11 +1,12 @@
 import { AI_TIMEOUTS, getGroqClient, GROQ_MODEL } from './client'
-import { embedText } from './embed'
-import { searchBreedChunks } from '@/lib/supabase/breed-chunks'
-import type { Breed, WeekPlan } from '@/types'
+import type { TrainingSourceRef, WeekPlan } from '@/types'
 import { buildWeekPromptParts } from './week-plan-prompt'
 import type { WeekPlanInput } from '@/lib/training/week-context'
 import { buildDeterministicWeekPlan } from '@/lib/training/deterministic-week-planner'
 import { validateWeekPlan } from '@/lib/training/week-plan-validator'
+import { getExerciseDocContext } from './doc-learning'
+import { exerciseLabel } from '@/lib/training/exercise-label'
+import { getLifeStage } from '@/lib/dog/age'
 import { trackTelemetry } from '@/lib/telemetry'
 
 // Bump this when plan generation logic changes significantly — forces cache invalidation
@@ -17,18 +18,30 @@ export async function generateWeekPlan(input: WeekPlanInput): Promise<WeekPlan> 
   const deterministic = buildDeterministicWeekPlan(input)
   const fallbackPlan = deterministic.plan
 
-  const { breed, trainingWeek } = input
-  let chunks: import('@/types').ChunkMatch[] = []
-  try {
-    const embedding = await embedText(`träning programvecka ${trainingWeek} ${breed}`)
-    chunks = await searchBreedChunks(embedding, breed, 3)
-  } catch {
-    // Continue without RAG chunks if embedding fails
-  }
+  const { breed } = input
 
-  const documentContext = chunks.length > 0
-    ? chunks.map((c) => `${c.content}\n[Källa: ${c.source}]`).join('\n\n')
-    : ''
+  // Per-exercise document grounding: retrieve topic- and life-stage-filtered
+  // chunks for each exercise the deterministic planner actually scheduled.
+  // Replaces the old generic 3-chunk query — better targeted, similarity-gated,
+  // and clinical/behaviour-emergency topics are excluded (see getExerciseDocContext).
+  // Each lookup is globally cached, so this is cheap once warm.
+  const lifeStage = getLifeStage(input.ageWeeks)
+  const uniqueExerciseIds = [
+    ...new Set(fallbackPlan.days.flatMap((day) => day.exercises?.map((ex) => ex.id) ?? [])),
+  ]
+  const docContexts = await Promise.all(
+    uniqueExerciseIds.map(async (id) => ({
+      id,
+      doc: await getExerciseDocContext(breed, id, lifeStage),
+    })),
+  )
+  const sourcesByExercise = new Map<string, TrainingSourceRef[]>()
+  const contextBlocks: string[] = []
+  for (const { id, doc } of docContexts) {
+    if (doc.sources.length > 0) sourcesByExercise.set(id, doc.sources)
+    if (doc.context) contextBlocks.push(`# ${exerciseLabel(id)}\n${doc.context}`)
+  }
+  const documentContext = contextBlocks.join('\n\n')
   const { systemPrompt } = buildWeekPromptParts({
     ...input,
     documentContext,
@@ -49,6 +62,8 @@ export async function generateWeekPlan(input: WeekPlanInput): Promise<WeekPlan> 
             'Behåll reps oförändrat.',
             'Returnera JSON i formatet {"descriptions":[{"day":"Måndag","id":"inkallning","desc":"..."}]}',
             'Desc ska vara kort svenska, konkret och förenlig med progression/säkerhetsregler.',
+            'Behåll riktningen: börjar desc med "Lättare", "Höj" eller "Håll", behåll den innebörden.',
+            'Använd KÄLLDOKUMENT för konkreta detaljer när de matchar övningen.',
           ].join('\n'),
         },
         {
@@ -74,7 +89,7 @@ export async function generateWeekPlan(input: WeekPlanInput): Promise<WeekPlan> 
       trainingWeek: input.trainingWeek,
       error: err instanceof Error ? err.message : String(err),
     })
-    return fallbackPlan
+    return attachSources(fallbackPlan, sourcesByExercise)
   }
   const plan = applyDescriptionsFromAI(raw, fallbackPlan)
   const validation = validateWeekPlan(plan, input, input.progressionDecisions ?? [])
@@ -90,9 +105,25 @@ export async function generateWeekPlan(input: WeekPlanInput): Promise<WeekPlan> 
   })
   if (!validation.ok) {
     console.warn('[generateWeekPlan] explanation output failed validation, using deterministic fallback:', validation.reasons.join(' | '))
-    return fallbackPlan
+    return attachSources(fallbackPlan, sourcesByExercise)
   }
-  return plan
+  return attachSources(plan, sourcesByExercise)
+}
+
+function attachSources(
+  plan: WeekPlan,
+  sourcesByExercise: Map<string, TrainingSourceRef[]>,
+): WeekPlan {
+  if (sourcesByExercise.size === 0) return plan
+  return {
+    days: plan.days.map((day) => ({
+      ...day,
+      exercises: day.exercises?.map((exercise) => {
+        const sources = sourcesByExercise.get(exercise.id)
+        return sources && sources.length > 0 ? { ...exercise, sources } : exercise
+      }),
+    })),
+  }
 }
 
 function summarizeViolations(

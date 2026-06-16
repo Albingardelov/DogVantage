@@ -46,6 +46,54 @@ describe('buildDeterministicWeekPlan', () => {
     expect(inkallning?.desc).toMatch(/Lättare idag/i)
   })
 
+  it('grounds desc in the dog actual criteria rung, not the first ladder step', () => {
+    const input = makeInput({
+      priorityExercises: ['inkallning'],
+      progressionDecisions: [
+        {
+          exercise_id: 'inkallning',
+          criteria_level_id: 'park_low',
+          decision: 'hold',
+          attempts: 14,
+          success_rate: 0.7,
+          reason: 'Hold test',
+        },
+      ],
+    })
+
+    const { plan } = buildDeterministicWeekPlan(input)
+    const inkallning = plan.days
+      .flatMap((day) => day.exercises ?? [])
+      .find((exercise) => exercise.id === 'inkallning')
+
+    expect(inkallning?.desc).toContain('Korta avstånd')
+    expect(inkallning?.desc).not.toContain('redan är nära')
+  })
+
+  it('regress steps one rung below the current criteria level', () => {
+    const input = makeInput({
+      priorityExercises: ['inkallning'],
+      progressionDecisions: [
+        {
+          exercise_id: 'inkallning',
+          criteria_level_id: 'park_low',
+          decision: 'regress',
+          attempts: 14,
+          success_rate: 0.42,
+          reason: 'Regress test',
+        },
+      ],
+    })
+
+    const { plan } = buildDeterministicWeekPlan(input)
+    const inkallning = plan.days
+      .flatMap((day) => day.exercises ?? [])
+      .find((exercise) => exercise.id === 'inkallning')
+
+    expect(inkallning?.desc).toMatch(/Lättare idag/i)
+    expect(inkallning?.desc).toContain('tom gård')
+  })
+
   it('validator flags a bad plan', () => {
     const input = makeInput()
     const invalidPlan = {
