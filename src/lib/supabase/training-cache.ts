@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from './client'
 import type { TrainingResult, Breed, WeekPlan } from '@/types'
+import { type Locale } from '@/i18n/config'
 import { getLifeStage } from '@/lib/dog/age'
 import { TrainingResultSchema, WeekPlanSchema } from '@/types/api/schemas'
 
@@ -144,26 +145,27 @@ export async function getCachedWeekPlan(
   return parsed.data
 }
 
-const CHAT_CACHE_VERSION = 'v1'
+const CHAT_CACHE_VERSION = 'v2'
 
 function normalizeChatQuery(query: string): string {
   return query.trim().toLowerCase().replace(/\s+/g, ' ').replace(/[?!.,;:]/g, '')
 }
 
-function chatCacheKey(query: string, breed: Breed, ageWeeks?: number): string {
-  const hash = shortHash(`${normalizeChatQuery(query)}|${breed}|${ageBucket(ageWeeks)}`)
+export function chatCacheKey(query: string, breed: Breed, locale: Locale, ageWeeks?: number): string {
+  const hash = shortHash(`${normalizeChatQuery(query)}|${breed}|${locale}|${ageBucket(ageWeeks)}`)
   return `chatcache_${CHAT_CACHE_VERSION}_${hash}`
 }
 
 export async function getCachedChat(
   query: string,
   breed: Breed,
+  locale: Locale,
   ageWeeks?: number,
 ): Promise<TrainingResult | null> {
   const { data, error } = await getSupabaseAdmin()
     .from('training_cache')
     .select('content')
-    .eq('breed', chatCacheKey(query, breed, ageWeeks))
+    .eq('breed', chatCacheKey(query, breed, locale, ageWeeks))
     .eq('week_number', 0)
     .single()
 
@@ -184,13 +186,14 @@ export async function getCachedChat(
 export async function setCachedChat(
   query: string,
   breed: Breed,
+  locale: Locale,
   result: TrainingResult,
   ageWeeks?: number,
 ): Promise<void> {
   const { error } = await getSupabaseAdmin()
     .from('training_cache')
     .upsert({
-      breed: chatCacheKey(query, breed, ageWeeks),
+      breed: chatCacheKey(query, breed, locale, ageWeeks),
       week_number: 0,
       content: JSON.stringify(result),
       source: 'chat',
@@ -244,6 +247,7 @@ export async function setCachedWeekPlan(
 export async function touchCacheEntry(
   query: string,
   breed: Breed,
+  locale: Locale,
   ageWeeks?: number,
 ): Promise<void> {
   await ((getSupabaseAdmin().from('training_cache') as unknown as {
@@ -254,6 +258,6 @@ export async function touchCacheEntry(
     }
   })
     .update({ last_accessed_at: new Date().toISOString() })
-    .eq('breed', chatCacheKey(query, breed, ageWeeks))
+    .eq('breed', chatCacheKey(query, breed, locale, ageWeeks))
     .eq('week_number', 0))
 }
