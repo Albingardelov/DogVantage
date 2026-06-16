@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { withAuthAndDog } from '@/lib/api/with-auth'
 import { apiError } from '@/lib/api/errors'
 import { getStruggleAdvice, type CoachTip } from '@/lib/ai/doc-learning'
+import { isSupportedLocale, DEFAULT_LOCALE } from '@/i18n/config'
 import type { Json } from '@/types/database'
 import type { Breed, QuickRating, ExerciseSummary } from '@/types'
 
@@ -37,6 +38,7 @@ export async function POST(req: NextRequest) {
       handler_reading?: number
       notes?: string
       exercises?: ExerciseSummary[]
+      locale?: string
     }
 
     const { breed, week_number, quick_rating, focus, obedience,
@@ -76,7 +78,8 @@ export async function POST(req: NextRequest) {
     let coachTip: CoachTip | null = null
     const struggling = findStrugglingExercise(exercises)
     if (struggling) {
-      coachTip = await getStruggleAdvice(dog.breed as Breed, struggling.id).catch(() => null)
+      const locale = isSupportedLocale(body.locale) ? body.locale : DEFAULT_LOCALE
+      coachTip = await getStruggleAdvice(dog.breed as Breed, struggling.id, locale).catch(() => null)
     }
 
     return NextResponse.json({ ...data, coachTip }, { status: 201 })

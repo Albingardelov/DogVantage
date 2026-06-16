@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { IconCheckCircle, IconConfetti, IconMedal, RatingIcon } from '@/components/icons'
 import { CoachTipSchema } from '@/types/api/schemas'
 import type { z } from 'zod'
@@ -105,6 +106,7 @@ function computeHeroStats(exercises?: ExerciseSummary[]) {
 }
 
 export default function SessionLogForm({ dogId, weekNumber, exercises, onSaved, onCancel }: Props) {
+  const { i18n } = useTranslation()
   const [rating, setRating] = useState<QuickRating | null>(null)
   const [focus, setFocus] = useState(3)
   const [obedience, setObedience] = useState(3)
@@ -148,6 +150,7 @@ export default function SessionLogForm({ dogId, weekNumber, exercises, onSaved, 
           handler_reading: handlerReading,
           notes: combinedNotes || undefined,
           exercises: exercises && exercises.length > 0 ? exercises : undefined,
+          locale: i18n.language,
         }),
       })
 
