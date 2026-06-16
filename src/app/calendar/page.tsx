@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useRouter } from 'next/navigation'
 import ProfileGuard from '@/components/ProfileGuard'
 import BottomNav from '@/components/BottomNav'
@@ -109,6 +110,7 @@ function AgendaDay({
   zone?: PuppyZone
   onClick?: () => void
 }) {
+  const { t } = useTranslation()
   const d = new Date(dateStr + 'T12:00:00')
   const dayName = WEEKDAY_NAMES[d.getDay()]
   const dateLabel = `${d.getDate()} ${MONTH_NAMES_SHORT[d.getMonth()]}`
@@ -120,7 +122,7 @@ function AgendaDay({
     return (
       <div className={styles.restDay}>
         <span className={styles.restDayText}>{dayName} {dateLabel}</span>
-        <span className={styles.restBadge}>Vila</span>
+        <span className={styles.restBadge}>{t('calendar.restDay')}</span>
       </div>
     )
   }
