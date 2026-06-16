@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import styles from './Paywall.module.css'
 
 async function startCheckout(tier: 'basic' | 'pro', interval: 'month' | 'year' = 'month'): Promise<string> {
@@ -17,6 +18,7 @@ async function startCheckout(tier: 'basic' | 'pro', interval: 'month' | 'year' =
 }
 
 export function Paywall() {
+  const { t } = useTranslation()
   const [loading, setLoading] = useState<'basic' | 'pro_month' | 'pro_year' | null>(null)
 
   async function handleCheckout(tier: 'basic' | 'pro', interval: 'month' | 'year' = 'month') {
@@ -26,7 +28,7 @@ export function Paywall() {
       const url = await startCheckout(tier, interval)
       window.location.href = url
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Kunde inte starta checkout'
+      const message = err instanceof Error ? err.message : t('billing.checkoutStartError')
       alert(message)
       setLoading(null)
     }
@@ -35,39 +37,39 @@ export function Paywall() {
   return (
     <main className={styles.main}>
       <section className={styles.hero}>
-        <h1>Starta DogVantage</h1>
-        <p>Välj en plan för att fortsätta med veckoplan, loggning och personlig träning.</p>
+        <h1>{t('billing.paywallTitle')}</h1>
+        <p>{t('billing.paywallSubtitle')}</p>
       </section>
 
       <section className={styles.cards}>
         <article className={styles.card}>
-          <h2>Basic</h2>
-          <p className={styles.price}>39 kr/mån</p>
+          <h2>{t('billing.basic')}</h2>
+          <p className={styles.price}>{t('billing.priceBasicMonthly')}</p>
           <ul>
-            <li>Veckoplan</li>
-            <li>Historik & kalender</li>
-            <li>Guidebibliotek</li>
+            <li>{t('billing.features.weeklyPlan')}</li>
+            <li>{t('billing.features.logsAndCalendar')}</li>
+            <li>{t('billing.features.learnLibrary')}</li>
           </ul>
           <button type="button" onClick={() => handleCheckout('basic')} disabled={loading !== null}>
-            {loading === 'basic' ? 'Öppnar checkout…' : 'Starta Basic 39 kr'}
+            {loading === 'basic' ? t('billing.checkoutOpening') : t('billing.startBasic')}
           </button>
         </article>
 
         <article className={`${styles.card} ${styles.cardPro}`}>
-          <h2>Pro</h2>
-          <p className={styles.price}>79 kr/mån</p>
+          <h2>{t('billing.pro')}</h2>
+          <p className={styles.price}>{t('billing.priceProMonthly')}</p>
           <p className={styles.priceAlt}>eller 599 kr/år (spara 37%)</p>
           <ul>
             <li>Allt i Basic</li>
-            <li>AI-chat</li>
-            <li>Flera hundar</li>
-            <li>Egna AI-övningar</li>
+            <li>{t('billing.features.aiChat')}</li>
+            <li>{t('billing.features.multipleDogs')}</li>
+            <li>{t('billing.features.customExercises')}</li>
           </ul>
           <button type="button" onClick={() => handleCheckout('pro', 'month')} disabled={loading !== null}>
-            {loading === 'pro_month' ? 'Öppnar checkout…' : 'Starta Pro 79 kr/mån'}
+            {loading === 'pro_month' ? t('billing.checkoutOpening') : t('billing.startPro')}
           </button>
           <button type="button" className={styles.secondaryBtn} onClick={() => handleCheckout('pro', 'year')} disabled={loading !== null}>
-            {loading === 'pro_year' ? 'Öppnar checkout…' : 'Starta Pro 599 kr/år'}
+            {loading === 'pro_year' ? t('billing.checkoutOpening') : 'Starta Pro 599 kr/år'}
           </button>
         </article>
       </section>
