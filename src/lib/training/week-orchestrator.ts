@@ -16,7 +16,8 @@ import { isGoal } from '@/types/dog'
 import { isValidBreed } from '@/lib/breeds/registry'
 import { getBehaviorContextPayloadFromDb } from '@/lib/dog/build-behavior-context'
 import { householdPetNotes, HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'
-import { detectBehaviorEmergency, BEHAVIOR_RESPONSE } from '@/lib/ai/safety-guards'
+import { detectBehaviorEmergency, behaviorResponse } from '@/lib/ai/safety-guards'
+import { DEFAULT_LOCALE } from '@/i18n/config'
 import { getRecentLogs, formatLogsForPrompt } from '@/lib/supabase/session-logs'
 import { getActiveCustomExercises } from '@/lib/supabase/custom-exercises'
 import { currentIsoWeek, type WeeklyFocusArea } from '@/lib/training/weekly-focus'
@@ -131,7 +132,7 @@ export async function buildWeekContextFromRequest(
   )
   const baseOnboardingContext = buildOnboardingContext(p, pets, serverBehaviorContext)
   if (detectBehaviorEmergency(baseOnboardingContext)) {
-    throw new BehaviorEmergencyError(BEHAVIOR_RESPONSE.content)
+    throw new BehaviorEmergencyError(behaviorResponse(DEFAULT_LOCALE).content)
   }
 
   const isoWeek = currentIsoWeek()

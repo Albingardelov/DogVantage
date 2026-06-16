@@ -1,4 +1,5 @@
 import type { TrainingResult } from '@/types'
+import type { Locale } from '@/i18n/config'
 
 /**
  * Safety guards — keyword filters that short-circuit AI training advice
@@ -17,12 +18,25 @@ const VET_KEYWORDS = [
   'feber', 'sår', 'svullen',
 ]
 
-export const VET_RESPONSE: TrainingResult = {
-  content:
-    'Det verkar handla om ett hälsoproblem. DogVantage ger inte medicinska råd — kontakta din veterinär.',
-  source: '',
-  source_url: '',
-  attributionNote: 'Fast svar vid hälsoindikation — inte från dina dokument.',
+const VET_RESPONSES: Partial<Record<Locale, TrainingResult>> = {
+  sv: {
+    content:
+      'Det verkar handla om ett hälsoproblem. DogVantage ger inte medicinska råd — kontakta din veterinär.',
+    source: '',
+    source_url: '',
+    attributionNote: 'Fast svar vid hälsoindikation — inte från dina dokument.',
+  },
+  en: {
+    content:
+      'This sounds like a health issue. DogVantage does not give medical advice — please contact your veterinarian.',
+    source: '',
+    source_url: '',
+    attributionNote: 'Fixed response for a health indication — not from your documents.',
+  },
+}
+
+export function vetResponse(locale: Locale): TrainingResult {
+  return VET_RESPONSES[locale] ?? VET_RESPONSES.en!
 }
 
 export function detectHealthIssue(text: string): boolean {
@@ -55,18 +69,36 @@ const BEHAVIOR_REFERRAL_KEYWORDS = [
   'fruktan-aggression', 'rädsla för folk',
 ]
 
-export const BEHAVIOR_RESPONSE: TrainingResult = {
-  content:
-    'Det du beskriver låter som ett beteendeproblem som ligger utanför det DogVantage kan hjälpa med säkert. ' +
-    'Bett, morrning, resursförsvar och panik är inte träningsfel — det är signaler som behöver bedömas av en certifierad beteendekonsulent som kan möta er fysiskt och bygga ett individanpassat program.\n\n' +
-    'Hitta hjälp via:\n' +
-    '• SBBK — Sveriges Bästa Beteendekonsulter (sbbk.se)\n' +
-    '• IAABC — internationell organisation med certifierade konsulter (iaabc.org)\n' +
-    '• Din veterinär kan också remittera till en beteendeveterinär.\n\n' +
-    'Fortsätt gärna träna grundlydnad och vardagliga moment i appen, men prioritera professionell hjälp för det beskrivna beteendet.',
-  source: '',
-  source_url: '',
-  attributionNote: 'Fast svar vid beteende-emergency — inte från dina dokument.',
+const BEHAVIOR_RESPONSES: Partial<Record<Locale, TrainingResult>> = {
+  sv: {
+    content:
+      'Det du beskriver låter som ett beteendeproblem som ligger utanför det DogVantage kan hjälpa med säkert. ' +
+      'Bett, morrning, resursförsvar och panik är inte träningsfel — det är signaler som behöver bedömas av en certifierad beteendekonsulent som kan möta er fysiskt och bygga ett individanpassat program.\n\n' +
+      'Hitta hjälp via:\n' +
+      '• SBBK — Sveriges Bästa Beteendekonsulter (sbbk.se)\n' +
+      '• IAABC — internationell organisation med certifierade konsulter (iaabc.org)\n' +
+      '• Din veterinär kan också remittera till en beteendeveterinär.\n\n' +
+      'Fortsätt gärna träna grundlydnad och vardagliga moment i appen, men prioritera professionell hjälp för det beskrivna beteendet.',
+    source: '',
+    source_url: '',
+    attributionNote: 'Fast svar vid beteende-emergency — inte från dina dokument.',
+  },
+  en: {
+    content:
+      'What you are describing sounds like a behaviour problem that is outside what DogVantage can safely help with. ' +
+      'Biting, growling, resource guarding and panic are not training mistakes — they are signals that need to be assessed by a certified behaviour consultant who can meet you in person and build an individual programme.\n\n' +
+      'Find help via:\n' +
+      '• IAABC — international organisation of certified consultants (iaabc.org)\n' +
+      '• Your veterinarian can also refer you to a veterinary behaviourist.\n\n' +
+      'Please keep training basic obedience and everyday skills in the app, but prioritise professional help for the behaviour described.',
+    source: '',
+    source_url: '',
+    attributionNote: 'Fixed response for a behaviour emergency — not from your documents.',
+  },
+}
+
+export function behaviorResponse(locale: Locale): TrainingResult {
+  return BEHAVIOR_RESPONSES[locale] ?? BEHAVIOR_RESPONSES.en!
 }
 
 export function detectBehaviorEmergency(text: string | null | undefined): boolean {
