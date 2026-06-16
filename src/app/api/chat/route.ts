@@ -9,6 +9,7 @@ import { getMetrics } from '@/lib/supabase/daily-exercise-metrics'
 import { getCachedChat, setCachedChat, touchCacheEntry } from '@/lib/supabase/training-cache'
 import { incrementChatCount, DAILY_CHAT_LIMIT } from '@/lib/supabase/chat-usage'
 import { detectSecretExposure } from '@/lib/ai/safety-guards'
+import { isSupportedLocale, DEFAULT_LOCALE } from '@/i18n/config'
 import { getAgeInWeeks } from '@/lib/dog/age'
 import { getBehaviorContextPayloadFromDb } from '@/lib/dog/build-behavior-context'
 import { extractChatTopic } from '@/lib/dog/chat-topics'
@@ -61,10 +62,9 @@ async function persistExchange(
 export async function POST(req: NextRequest) {
   try {
     return withAuthAndDog(req, async ({ user, dog, supabase }) => {
-      const { query } = await req.json() as {
-        query: string
-      }
-
+      const body = await req.json() as { query?: string; locale?: string }
+      const query = body.query
+      const locale = isSupportedLocale(body.locale) ? body.locale : DEFAULT_LOCALE
       if (!query) {
         return NextResponse.json({ error: 'query required' }, { status: 400 })
       }
@@ -127,7 +127,7 @@ export async function POST(req: NextRequest) {
             .then((metrics) => formatMetricsForPrompt(metrics))
             .catch(() => [])
           : Promise.resolve([]),
-        getCachedChat(query, breed, ageWeeks).catch(() => null),
+        getCachedChat(query, breed, locale, ageWeeks).catch(() => null),
         getChatMessages(supabase, dog.id, PROMPT_HISTORY_LIMIT).catch(() => []),
         getDogState(dog.id)
           .then((state) => formatDogStateForPrompt(state))
@@ -148,7 +148,7 @@ export async function POST(req: NextRequest) {
       if (!isPersonalized) {
         if (cached) {
           // LRU touch can run in the background.
-          void touchCacheEntry(query, breed, ageWeeks).catch(() => {})
+          void touchCacheEntry(query, breed, locale, ageWeeks).catch(() => {})
           await persistExchange(supabase, dog.id, query, cached.content)
           return NextResponse.json(cached)
         }
@@ -169,13 +169,14 @@ export async function POST(req: NextRequest) {
       const result = await queryRAG(query, breed, logStrings, ageWeeks, metricsStrings, chatContext, {
         history,
         dogStateContext,
+        locale,
       })
 
       await persistExchange(supabase, dog.id, query, result.content)
 
       if (!isPersonalized) {
         try {
-          await setCachedChat(query, breed, result, ageWeeks)
+          await setCachedChat(query, breed, locale, result, ageWeeks)
         } catch (err) {
           console.error('[/api/chat] cache write failed', err)
         }
