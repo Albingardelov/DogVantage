@@ -1,5 +1,5 @@
 import type { TrainingResult } from '@/types'
-import type { Locale } from '@/i18n/config'
+import { FALLBACK_LOCALE, type Locale } from '@/i18n/config'
 
 /**
  * Safety guards — keyword filters that short-circuit AI training advice
@@ -36,7 +36,7 @@ const VET_RESPONSES: Partial<Record<Locale, TrainingResult>> = {
 }
 
 export function vetResponse(locale: Locale): TrainingResult {
-  return VET_RESPONSES[locale] ?? VET_RESPONSES.en!
+  return VET_RESPONSES[locale] ?? VET_RESPONSES[FALLBACK_LOCALE]!
 }
 
 export function detectHealthIssue(text: string): boolean {
@@ -98,7 +98,7 @@ const BEHAVIOR_RESPONSES: Partial<Record<Locale, TrainingResult>> = {
 }
 
 export function behaviorResponse(locale: Locale): TrainingResult {
-  return BEHAVIOR_RESPONSES[locale] ?? BEHAVIOR_RESPONSES.en!
+  return BEHAVIOR_RESPONSES[locale] ?? BEHAVIOR_RESPONSES[FALLBACK_LOCALE]!
 }
 
 export function detectBehaviorEmergency(text: string | null | undefined): boolean {
