@@ -1,4 +1,5 @@
 import type { Breed } from './dog'
+import type { TrainingSourceRef } from './chat'
 
 export type LatencyBucket = 'lt1s' | '1to3s' | 'gt3s'
 
@@ -42,6 +43,8 @@ export interface Exercise {
   label: string
   desc: string
   reps: number
+  /** Optional document citations grounding this exercise (filled at plan generation). */
+  sources?: TrainingSourceRef[]
 }
 
 export interface DayPlan {

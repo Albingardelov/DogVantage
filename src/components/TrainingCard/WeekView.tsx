@@ -56,6 +56,28 @@ export default function WeekView({ plan, onClose, getReasonBadges }: Props) {
                       <li key={ex.id} className={styles.exerciseItem}>
                         <span className={styles.exerciseName}>{ex.label}</span>
                         <span className={styles.exerciseMeta}>{ex.reps}× · {ex.desc}</span>
+                        {ex.sources && ex.sources.length > 0 && (
+                          <div className={styles.sourceRow}>
+                            <span className={styles.sourceLabel}>Läs mer:</span>
+                            {ex.sources.map((source, i) =>
+                              source.source_url ? (
+                                <a
+                                  key={`${ex.id}-src-${i}`}
+                                  href={source.source_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={styles.sourceLink}
+                                >
+                                  {source.source}
+                                </a>
+                              ) : (
+                                <span key={`${ex.id}-src-${i}`} className={styles.sourceText}>
+                                  {source.source}
+                                </span>
+                              ),
+                            )}
+                          </div>
+                        )}
                         {getReasonBadges && (
                           <div className={styles.reasonRow}>
                             {getReasonBadges(ex.id).map((badge) => (

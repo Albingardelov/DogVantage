@@ -20,6 +20,7 @@ export const ExerciseSchema = z.object({
   label: z.string(),
   desc: z.string(),
   reps: z.number().default(3),
+  sources: z.array(TrainingSourceRefSchema).optional(),
 })
 
 export const DayPlanSchema = z.object({

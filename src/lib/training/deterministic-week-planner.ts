@@ -24,6 +24,7 @@ export function buildDeterministicWeekPlan(input: WeekPlanInput): DeterministicW
   const allowedSet = resolveAllowedExerciseIds(input)
   const isReactive = Boolean(input.isReactive)
   const progressionMap = buildProgressionMap(input.progressionDecisions ?? [])
+  const criteriaByExercise = buildCriteriaMap(input.progressionDecisions ?? [])
   const prioritySet = new Set(input.priorityExercises ?? [])
   const goalSet = new Set((input.goals ?? []).flatMap((g) => GOAL_EXERCISE_IDS[g] ?? []))
   const focusSet = new Set(focusExerciseIds(input.weeklyFocus ?? []))
@@ -54,6 +55,7 @@ export function buildDeterministicWeekPlan(input: WeekPlanInput): DeterministicW
       goalSet,
       focusSet,
       customLabels,
+      criteriaByExercise,
       isReactive,
       calmOnly,
       forceLat: mustForceLat || (isReactive && latDaysUsed < 2 && idx === trainingDayIndexes[0]),
@@ -92,6 +94,19 @@ function buildProgressionMap(decisions: ExerciseProgressionDecision[]): Progress
   return map
 }
 
+// Same precedence as buildProgressionMap (regress wins) so the criteria rung
+// stays paired with the decision chosen for the same exercise.
+function buildCriteriaMap(decisions: ExerciseProgressionDecision[]): Map<string, string | null> {
+  const chosen = new Map<string, ExerciseProgressionDecision>()
+  for (const decision of decisions) {
+    const existing = chosen.get(decision.exercise_id)
+    if (!existing || decision.decision === 'regress') {
+      chosen.set(decision.exercise_id, decision)
+    }
+  }
+  return new Map([...chosen].map(([id, decision]) => [id, decision.criteria_level_id]))
+}
+
 interface PickCtx {
   allowedSet: Set<string>
   weeklyUsage: Map<string, number>
@@ -100,6 +115,7 @@ interface PickCtx {
   goalSet: Set<string>
   focusSet: Set<string>
   customLabels: Map<string, string>
+  criteriaByExercise: Map<string, string | null>
   isReactive: boolean
   calmOnly: boolean
   forceLat: boolean
@@ -158,10 +174,11 @@ function toExercise(id: string, ctx: PickCtx): Exercise {
   const spec = getExerciseSpec(id)
   const label = ctx.customLabels.get(id) ?? exerciseLabel(id)
   const decision = ctx.progressionMap.get(id) ?? 'hold'
+  const currentLevelId = ctx.criteriaByExercise.get(id) ?? null
   return {
     id,
     label,
-    desc: explanationForDecision(spec, decision),
+    desc: explanationForDecision(spec, decision, currentLevelId),
     reps: decision === 'regress' ? 2 : decision === 'advance' ? 4 : 3,
   }
 }
@@ -169,8 +186,17 @@ function toExercise(id: string, ctx: PickCtx): Exercise {
 function explanationForDecision(
   spec: ReturnType<typeof getExerciseSpec>,
   decision: ExerciseProgressionDecision['decision'],
+  currentLevelId: string | null,
 ): string {
-  const base = spec?.ladder[0]?.criteria ?? 'Korta reps med hög belöning'
+  const ladder = spec?.ladder ?? []
+  const foundIdx = currentLevelId ? ladder.findIndex((rung) => rung.id === currentLevelId) : 0
+  const currentIdx = foundIdx < 0 ? 0 : foundIdx
+  const targetIdx = decision === 'advance'
+    ? Math.min(currentIdx + 1, ladder.length - 1)
+    : decision === 'regress'
+      ? Math.max(currentIdx - 1, 0)
+      : currentIdx
+  const base = ladder[targetIdx]?.criteria ?? 'Korta reps med hög belöning'
   if (decision === 'regress') return `Lättare idag: ${base}`.slice(0, 120)
   if (decision === 'advance') return `Höj ett steg om stabilt: ${base}`.slice(0, 120)
   return `Håll nivån stabilt: ${base}`.slice(0, 120)
