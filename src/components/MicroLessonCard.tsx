@@ -33,7 +33,7 @@ export default function MicroLessonCard({ dogId }: { dogId: string }) {
   useEffect(() => {
     if (dismissed) return
     let cancelled = false
-    apiFetch(`/api/training/micro-lesson?dogId=${encodeURIComponent(dogId)}&locale=${i18n.language}`, MicroLessonResponseSchema)
+    apiFetch(`/api/training/micro-lesson?dogId=${encodeURIComponent(dogId)}&locale=${encodeURIComponent(i18n.language)}`, MicroLessonResponseSchema)
       .then((res) => {
         if (!cancelled) setLesson(res.lesson)
       })
