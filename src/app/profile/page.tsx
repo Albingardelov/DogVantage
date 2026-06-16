@@ -29,6 +29,7 @@ import CustomExerciseList from '@/components/CustomExerciseList'
 import { FeatureGate } from '@/components/billing/FeatureGate'
 import { useSubscription } from '@/lib/billing/subscription-context'
 import { ManageSubscription } from '@/components/billing/ManageSubscription'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 
 export default function ProfilePage() {
   return (
@@ -622,6 +623,8 @@ function ProfileView() {
             Spara ändringar
           </button>
         )}
+
+        <LanguageSwitcher />
 
         <div className={styles.section}>
           <span className={styles.sectionTitle}>Dataskydd</span>
