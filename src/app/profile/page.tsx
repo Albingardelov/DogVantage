@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import ProfileGuard from '@/components/ProfileGuard'
@@ -40,6 +41,7 @@ export default function ProfilePage() {
 }
 
 function ProfileView() {
+  const { t } = useTranslation()
   const router = useRouter()
   const { activeDog, refreshDogs } = useActiveDog()
   const [profile, setProfile] = useState<DogProfile | null>(null)
@@ -238,7 +240,7 @@ function ProfileView() {
             type="button"
             className={styles.backBtn}
             onClick={() => router.back()}
-            aria-label="Tillbaka"
+            aria-label={t('common.back')}
           >
             <IconCaretLeft size="md" />
           </button>
@@ -269,7 +271,7 @@ function ProfileView() {
 
       <div className={styles.scrollArea}>
         <div className={styles.section}>
-          <span className={styles.sectionTitle}>Träningsmål</span>
+          <span className={styles.sectionTitle}>{t('profile.trainingGoals')}</span>
           <div className={styles.field}>
             <span className={styles.fieldLabel}>Mål (välj ett eller flera)</span>
             <div className={styles.optionList} role="group" aria-label="Mål">
@@ -299,7 +301,7 @@ function ProfileView() {
         </div>
 
         <div className={styles.section}>
-          <span className={styles.sectionTitle}>Träningsinställningar</span>
+          <span className={styles.sectionTitle}>{t('profile.trainingSettings')}</span>
 
           <OptionField
             label="Miljö där ni tränar mest"
@@ -436,7 +438,7 @@ function ProfileView() {
         </div>
 
         <div className={styles.section}>
-          <span className={styles.sectionTitle}>Om hunden</span>
+          <span className={styles.sectionTitle}>{t('profile.aboutDog')}</span>
           <div className={styles.field}>
             <label className={styles.fieldLabel} htmlFor="dog-birthdate">Födelsedag</label>
             <input
@@ -617,30 +619,30 @@ function ProfileView() {
         </div>
 
         {saved ? (
-          <p className={styles.savedMsg}>Sparat!</p>
+          <p className={styles.savedMsg}>{t('profile.saved')}</p>
         ) : (
           <button type="button" className={styles.saveBtn} onClick={handleSave}>
-            Spara ändringar
+            {t('profile.saveChanges')}
           </button>
         )}
 
         <LanguageSwitcher />
 
         <div className={styles.section}>
-          <span className={styles.sectionTitle}>Dataskydd</span>
+          <span className={styles.sectionTitle}>{t('profile.dataProtection')}</span>
           <button
             type="button"
             className={styles.linkBtn}
             onClick={() => router.push('/privacy')}
           >
-            Integritetspolicy
+            {t('profile.privacyPolicy')}
           </button>
           <button
             type="button"
             className={styles.dangerBtn}
             onClick={() => setShowDeleteConfirm(true)}
           >
-            Radera mitt konto
+            {t('profile.deleteAccount')}
           </button>
         </div>
 
@@ -656,7 +658,7 @@ function ProfileView() {
                 onClick={handleDeleteAccount}
                 disabled={deleting}
               >
-                {deleting ? 'Raderar…' : 'Ja, radera mitt konto'}
+                {deleting ? 'Raderar…' : t('profile.deleteConfirmAction')}
               </button>
               <button
                 type="button"
@@ -664,7 +666,7 @@ function ProfileView() {
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={deleting}
               >
-                Avbryt
+                {t('common.cancel')}
               </button>
             </div>
           </div>

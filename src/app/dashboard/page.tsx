@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import ProfileGuard from '@/components/ProfileGuard'
@@ -44,12 +45,12 @@ export default function DashboardPage() {
   )
 }
 
-function getGreeting(): string {
+function getGreetingKey(): 'night' | 'morning' | 'day' | 'evening' {
   const hour = new Date().getHours()
-  if (hour < 5) return 'God natt!'
-  if (hour < 11) return 'God morgon!'
-  if (hour < 17) return 'God dag!'
-  return 'God kväll!'
+  if (hour < 5) return 'night'
+  if (hour < 11) return 'morning'
+  if (hour < 17) return 'day'
+  return 'evening'
 }
 
 function PhaseRing({ pct }: { pct: number }) {
@@ -207,6 +208,7 @@ function getAgeAlert(ageWeeks: number): AgeAlert | null {
 }
 
 function Dashboard() {
+  const { t } = useTranslation()
   const router = useRouter()
   const searchParams = useSearchParams()
   const { activeDog: profile } = useActiveDog()
@@ -375,7 +377,7 @@ function Dashboard() {
           </button>
 
           <div className={styles.idText}>
-            <span className={styles.greeting}>{getGreeting()}</span>
+            <span className={styles.greeting}>{t(`dashboard.greeting.${getGreetingKey()}`)}</span>
             <DogSwitcher onAddDog={() => {
               if (subscription.tier === 'pro' && subscription.isActive) setShowAddDog(true)
               else router.push('/profile?section=billing')
@@ -415,7 +417,7 @@ function Dashboard() {
 
             <Link href="/calendar" className={styles.weekLink}>
               <span className={styles.weekLeft}>
-                <IconCalendar size="sm" /> Programvecka {trainingWeek} · v. {phaseInfo.weekRange}
+                <IconCalendar size="sm" /> {t('dashboard.programWeek', { week: trainingWeek })} · v. {phaseInfo.weekRange}
               </span>
               <IconCaretRight size="sm" />
             </Link>
@@ -612,11 +614,11 @@ function Dashboard() {
             <StatCard
               label="Träningsdagar"
               value={weekStats === null ? '…' : String(weekStats.count)}
-              sub="denna vecka"
+              sub={t('dashboard.thisWeek')}
               tone="primary"
             />
             <StatCard
-              label="Snittbetyg"
+              label={t('dashboard.averageScore')}
               value={
                 weekStats === null
                   ? '…'
@@ -637,7 +639,7 @@ function Dashboard() {
             type="button"
           >
             <IconPencil size="md" className={styles.logCtaIcon} />
-            <span>Logga pass manuellt</span>
+            <span>{t('dashboard.logSession')}</span>
           </button>
         ) : (
           profile?.id && (
