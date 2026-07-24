@@ -65,7 +65,13 @@ export default function ExerciseGuideSheet({
       guide?.successLooksLike ? `Lyckad rep: ${guide.successLooksLike}` : null,
       levelLabel ? `Kriterienivå: ${levelLabel}.` : null,
       rate != null ? `Resultat idag: ${rate}% (${metrics?.success_count ?? 0}/${attempts}).` : null,
-      metrics?.latency_bucket ? `Latens: ${metrics.latency_bucket}.` : null,
+      metrics?.latency_bucket
+        ? `Svarstid: ${
+            ({ lt1s: 'under 1 sek', '1to3s': '1–3 sek', gt3s: 'över 3 sek' } as const)[
+              metrics.latency_bucket
+            ]
+          }.`
+        : null,
       'Ge mig en konkret plan för nästa 5 försök: setup, exakt timing för belöning, och när jag ska sänka/höja kriteriet.',
     ].filter(Boolean)
     return bits.join(' ')
