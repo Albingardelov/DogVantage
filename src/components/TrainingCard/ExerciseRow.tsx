@@ -296,7 +296,7 @@ export default function ExerciseRow({
           )}
           {isNew && spec?.guide?.steps?.[0] && (
             <p className={styles.firstStep}>
-              <strong>Så gör du:</strong> {spec.guide.steps[0]}
+              <strong>Så gör du:</strong> {spec.guide.steps[0].how}
             </p>
           )}
           {sources.length > 0 && (

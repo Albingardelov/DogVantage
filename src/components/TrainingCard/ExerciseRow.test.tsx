@@ -10,11 +10,17 @@ const spec: ExerciseSpec = {
   ladder: [{ id: 'home_low', label: 'Hemma, låg störning', criteria: 'Inomhus' }],
   troubleshooting: [],
   guide: {
-    setup: ['Ha godis i hand'],
-    steps: ['Locka rumpan ner, markera, belöna'],
-    logging: [],
-    commonMistakes: [],
-    stopRules: [],
+    todaySummary: 'Idag lär ni sitt med locking.',
+    setup: ['Ha godis i hand', 'Träna inne utan störning'],
+    steps: [
+      { how: 'Locka rumpan ner, markera, belöna', why: 'Hunden förstår vad som ger belöning.' },
+      { how: 'Vänta en sekund i sitt innan belöning', why: 'Bygger lite stadga utan att pressa.' },
+      { how: 'Ge fri med glad ton', why: 'Sitt får ett tydligt slut.' },
+      { how: 'Gör 3–5 reps och avsluta', why: 'Korta pass sitter bättre än långa.' },
+    ],
+    successLooksLike: 'Rumpan i marken på första försöket, utan att du tjatar.',
+    whenItFails: ['Gå tillbaka till locking utan signal.', 'Byt till godare belöning.'],
+    wrapUp: ['Avsluta efter en lyckad rep.'],
   },
 }
 
