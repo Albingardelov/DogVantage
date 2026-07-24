@@ -1,8 +1,27 @@
-import type { GuideStep, HandlerGuide } from './exercise-specs'
+import type { GuideStep, GuideVariant, HandlerGuide } from './exercise-specs'
 
 function asStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) return []
   return value.filter((item): item is string => typeof item === 'string')
+}
+
+function normalizeVariants(raw: unknown): GuideVariant[] | undefined {
+  if (!Array.isArray(raw)) return undefined
+  const variants = raw
+    .map((item) => {
+      if (!item || typeof item !== 'object') return null
+      const v = item as Record<string, unknown>
+      if (typeof v.id !== 'string' || typeof v.label !== 'string') return null
+      return {
+        id: v.id,
+        label: v.label,
+        whenToUse: typeof v.whenToUse === 'string' ? v.whenToUse : '',
+        how: asStringArray(v.how),
+        why: typeof v.why === 'string' ? v.why : '',
+      }
+    })
+    .filter((v): v is GuideVariant => v !== null)
+  return variants.length > 0 ? variants : undefined
 }
 
 function normalizeSteps(raw: unknown): GuideStep[] {
@@ -54,5 +73,6 @@ export function normalizeHandlerGuide(
     successLooksLike,
     whenItFails,
     wrapUp,
+    variants: normalizeVariants(g.variants),
   }
 }

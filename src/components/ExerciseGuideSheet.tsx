@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
 import type { ExerciseSpec } from '@/lib/training/exercise-specs'
@@ -41,6 +41,7 @@ export default function ExerciseGuideSheet({
   customSpecs?: Record<string, ExerciseSpec>
 }) {
   const router = useRouter()
+  const [showVariants, setShowVariants] = useState(false)
   const spec = customSpecs?.[exerciseId] ?? getExerciseSpec(exerciseId)
   const guide = useMemo(
     () =>
@@ -54,18 +55,21 @@ export default function ExerciseGuideSheet({
   )
 
   const coachQuestion = useMemo(() => {
+    const label = exerciseLabel ?? prettyLabel(exerciseId)
     const attempts = (metrics?.success_count ?? 0) + (metrics?.fail_count ?? 0)
     const rate = attempts > 0 ? Math.round(((metrics?.success_count ?? 0) / attempts) * 100) : null
+    const levelLabel = spec?.ladder.find((r) => r.id === metrics?.criteria_level_id)?.label
     const bits = [
-      `Jag tränar övningen "${exerciseId}".`,
+      `Jag tränar övningen "${label}".`,
       spec?.definition ? `Målet är: ${spec.definition}` : null,
-      metrics?.criteria_level_id ? `Kriterienivå: ${metrics.criteria_level_id}.` : null,
+      guide?.successLooksLike ? `Lyckad rep: ${guide.successLooksLike}` : null,
+      levelLabel ? `Kriterienivå: ${levelLabel}.` : null,
       rate != null ? `Resultat idag: ${rate}% (${metrics?.success_count ?? 0}/${attempts}).` : null,
       metrics?.latency_bucket ? `Latens: ${metrics.latency_bucket}.` : null,
       'Ge mig en konkret plan för nästa 5 försök: setup, exakt timing för belöning, och när jag ska sänka/höja kriteriet.',
     ].filter(Boolean)
     return bits.join(' ')
-  }, [exerciseId, metrics, spec?.definition])
+  }, [exerciseId, exerciseLabel, guide?.successLooksLike, metrics, spec?.definition, spec?.ladder])
 
   if (!spec) return null
 
@@ -81,23 +85,62 @@ export default function ExerciseGuideSheet({
           </button>
         </div>
 
-        <div className={styles.definition}>
-          <strong>Lyckad rep:</strong> {spec.definition}
-        </div>
-
-        {guide && (
+        {guide ? (
           <>
-            <div className={styles.definition}>{guide.todaySummary}</div>
+            <div className={styles.summary}>{guide.todaySummary}</div>
             <Section title="Setup" items={guide.setup} />
-            <Section title="Steg-för-steg (förare)" items={guide.steps.map((s) => s.how)} />
-            <Section title="Lyckad rep" items={[guide.successLooksLike]} />
-            <Section title="När det strular" items={guide.whenItFails} />
-            <Section title="Avsluta passet" items={guide.wrapUp} />
+            <section className={styles.section}>
+              <div className={styles.sectionTitle}>Gör så här</div>
+              <ol className={styles.steps}>
+                {guide.steps.map((step) => (
+                  <li key={step.how}>
+                    <div className={styles.stepHow}>{step.how}</div>
+                    {step.why ? <div className={styles.stepWhy}>{step.why}</div> : null}
+                  </li>
+                ))}
+              </ol>
+            </section>
+            <section className={styles.section}>
+              <div className={styles.sectionTitle}>Så vet du att det funkar</div>
+              <p className={styles.successText}>{guide.successLooksLike}</p>
+            </section>
+            <Section title="Om det inte funkar" items={guide.whenItFails} />
+            <Section title="Avsluta" items={guide.wrapUp} />
+            {guide.variants && guide.variants.length > 0 && (
+              <>
+                <button
+                  type="button"
+                  className={styles.variantsToggle}
+                  onClick={() => setShowVariants((v) => !v)}
+                  aria-expanded={showVariants}
+                >
+                  Det går inte
+                </button>
+                {showVariants && (
+                  <div className={styles.variantsPanel}>
+                    {guide.variants.map((variant) => (
+                      <div key={variant.id} className={styles.variantCard}>
+                        <div className={styles.variantLabel}>{variant.label}</div>
+                        {variant.whenToUse ? (
+                          <p className={styles.variantWhen}>{variant.whenToUse}</p>
+                        ) : null}
+                        {variant.how.length > 0 && (
+                          <ul className={styles.list}>
+                            {variant.how.map((item) => (
+                              <li key={item}>{item}</li>
+                            ))}
+                          </ul>
+                        )}
+                        {variant.why ? <p className={styles.variantWhy}>{variant.why}</p> : null}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
           </>
-        )}
-
-        {!guide && (
-          <div className={styles.definition}>
+        ) : (
+          <div className={styles.summary}>
             Den här övningen saknar ännu en full guide. Använd definitionen + troubleshooting och tryck “Förklara mer”.
           </div>
         )}
@@ -159,4 +202,3 @@ function prettyLabel(id: string): string {
   }
   return map[id] ?? id
 }
-
