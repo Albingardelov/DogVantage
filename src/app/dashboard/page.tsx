@@ -13,6 +13,7 @@ import BottomNav from '@/components/BottomNav'
 import LearningChecklistCard from '@/components/LearningChecklistCard'
 import MicroLessonCard from '@/components/MicroLessonCard'
 import InsightCard from '@/components/InsightCard/InsightCard'
+import TrainingProjectCard from '@/components/TrainingProjectCard/TrainingProjectCard'
 import DogSwitcher from '@/components/DogSwitcher'
 import AddDogModal from '@/components/AddDogModal'
 import StreakBadge from '@/components/StreakBadge'
@@ -225,6 +226,8 @@ function Dashboard() {
   const [heatState, setHeatState] = useState<{ isInHeat: boolean; skenfasActive: boolean } | null>(null)
   const [streak, setStreak] = useState<number | null>(null)
   const [progressionHints, setProgressionHints] = useState<ProgressionHint[]>([])
+  // Bumpas när träningsprojektet ändras så att TrainingCard hämtar om veckoplanen.
+  const [projectVersion, setProjectVersion] = useState(0)
 
   const ageWeeks = profile ? Math.max(1, getAgeInWeeks(profile.birthdate)) : 0
   const homecomeDate = profile?.onboarding?.homecomeDate
@@ -432,6 +435,13 @@ function Dashboard() {
       </header>
 
       <div className={styles.scrollArea}>
+        {profile?.id && !beforeHomecoming && !isPuppyMode(ageWeeks) && (
+          <TrainingProjectCard
+            dogId={profile.id}
+            onChanged={() => setProjectVersion((v) => v + 1)}
+          />
+        )}
+
         <button
           className={styles.logCta}
           onClick={() => {
@@ -563,6 +573,7 @@ function Dashboard() {
               />
             ) : (
               <TrainingCard
+              key={projectVersion}
               trainingWeek={trainingWeek}
               ageWeeks={ageWeeks}
               breed={profile.breed}

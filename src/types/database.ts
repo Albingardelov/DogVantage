@@ -602,6 +602,73 @@ export type Database = {
           },
         ]
       }
+      training_projects: {
+        Row: {
+          id: string
+          dog_id: string
+          protocol_id: string
+          status: string
+          started_at: string
+          ended_at: string | null
+        }
+        Insert: {
+          id?: string
+          dog_id: string
+          protocol_id: string
+          status?: string
+          started_at?: string
+          ended_at?: string | null
+        }
+        Update: {
+          id?: string
+          dog_id?: string
+          protocol_id?: string
+          status?: string
+          started_at?: string
+          ended_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_projects_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dog_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exercise_skips: {
+        Row: {
+          id: number
+          dog_id: string
+          exercise_id: string
+          date: string
+          created_at: string
+        }
+        Insert: {
+          id?: never
+          dog_id: string
+          exercise_id: string
+          date: string
+          created_at?: string
+        }
+        Update: {
+          id?: never
+          dog_id?: string
+          exercise_id?: string
+          date?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_skips_dog_id_fkey"
+            columns: ["dog_id"]
+            isOneToOne: false
+            referencedRelation: "dog_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_settings: {
         Row: {
           active_dog_id: string | null

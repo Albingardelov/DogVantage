@@ -6,6 +6,7 @@ import type {
   HouseholdPet,
 } from '@/types/dog'
 import type { WeeklyFocusArea } from '@/lib/training/weekly-focus'
+import type { ActiveProjectInput } from '@/lib/training/training-projects'
 import type { LifeStage } from '@/lib/dog/age'
 
 export interface WeekPlanContext {
@@ -25,6 +26,8 @@ export interface WeekPlanContext {
   isInHeat: boolean
   skenfasActive: boolean
   progressionRule: string | null
+  project: ActiveProjectInput | null
+  recentSkips: Record<string, number>
   isReactive: boolean
   hasCats: boolean
   hasOutdoorCats: boolean

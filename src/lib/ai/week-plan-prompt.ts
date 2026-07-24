@@ -15,8 +15,11 @@ export function buildWeekPromptParts(input: WeekPlanInput & { documentContext?: 
   const petIds = ctx.householdPets.length > 0 ? ['socialisering', 'impulskontroll', 'fokus', 'plats'] : []
   const focusIds = ctx.weeklyFocus.length > 0 ? focusExerciseIds(ctx.weeklyFocus) : []
   const priorityIds = ctx.priorityExercises.length > 0 ? ctx.priorityExercises : []
+  const projectIds = ctx.project
+    ? [ctx.project.primaryExerciseId, ...ctx.project.supportExerciseIds]
+    : []
   const reactiveIds = ctx.isReactive ? REACTIVE_EXERCISES : []
-  const allowedIds = [...new Set([...breedIds, ...goalIds, ...petIds, ...focusIds, ...priorityIds, ...reactiveIds])]
+  const allowedIds = [...new Set([...breedIds, ...goalIds, ...petIds, ...focusIds, ...priorityIds, ...projectIds, ...reactiveIds])]
 
   const goalContext = ctx.goals.length > 0
     ? `\nÄgarens mål: ${ctx.goals.map((g) => GOAL_LABELS[g]).join(', ')}. Anpassa övningsvalet efter dessa mål.\n`
@@ -56,7 +59,7 @@ Regler:
 - Träningsdagar: 2–3 exercises, reps 1–5
 - id lowercase, inga mellanslag; tillåtna id: ${[...allowedIds, ...customIds].join(', ')}
 - desc max 12 ord på svenska, inkludera hur länge
-- VARIATION: samma id max 2 gånger per vecka — sprid ut övningarna, undvik att upprepa samma kombination två dagar i rad
+- VARIATION: samma id max 2 gånger per vecka — sprid ut övningarna, undvik att upprepa samma kombination två dagar i rad${ctx.project ? ` (undantag: ${ctx.project.primaryExerciseId} som ingår i det aktiva träningsprojektet och tränas varje träningsdag)` : ''}
 - FRI-SIGNAL: varje dag som innehåller sitt, ligg, stanna eller plats MÅSTE också innehålla fri (id: fri) som sista eller näst sista exercise — de tränas alltid ihop
 - Programvecka ${input.trainingWeek}; anpassa övningar till rasens egenskaper${idRules ? `\n- ${idRules.replace(/\n/g, '\n- ')}` : ''}`
 

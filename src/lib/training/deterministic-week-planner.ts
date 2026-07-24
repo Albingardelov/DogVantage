@@ -28,6 +28,9 @@ export function buildDeterministicWeekPlan(input: WeekPlanInput): DeterministicW
   const prioritySet = new Set(input.priorityExercises ?? [])
   const goalSet = new Set((input.goals ?? []).flatMap((g) => GOAL_EXERCISE_IDS[g] ?? []))
   const focusSet = new Set(focusExerciseIds(input.weeklyFocus ?? []))
+  const projectPrimary = input.project?.primaryExerciseId ?? null
+  const projectSupportSet = new Set(input.project?.supportExerciseIds ?? [])
+  const skipCounts = new Map(Object.entries(input.recentSkips ?? {}))
   const customLabels = new Map((input.customExercises ?? []).map((item) => [item.exercise_id, item.label]))
   const weeklyUsage = new Map<string, number>()
   let latDaysUsed = 0
@@ -54,6 +57,9 @@ export function buildDeterministicWeekPlan(input: WeekPlanInput): DeterministicW
       prioritySet,
       goalSet,
       focusSet,
+      projectPrimary,
+      projectSupportSet,
+      skipCounts,
       customLabels,
       criteriaByExercise,
       isReactive,
@@ -77,11 +83,14 @@ function resolveAllowedExerciseIds(input: WeekPlanInput): Set<string> {
   const goalIds = (input.goals ?? []).flatMap((g) => GOAL_EXERCISE_IDS[g] ?? [])
   const focusIds = focusExerciseIds(input.weeklyFocus ?? [])
   const priorityIds = input.priorityExercises ?? []
+  const projectIds = input.project
+    ? [input.project.primaryExerciseId, ...input.project.supportExerciseIds]
+    : []
   const customIds = (input.customExercises ?? []).map((exercise) => exercise.exercise_id)
   const reactiveIds = input.isReactive
     ? ['lat']
     : []
-  return new Set([...breedIds, ...goalIds, ...focusIds, ...priorityIds, ...customIds, ...reactiveIds])
+  return new Set([...breedIds, ...goalIds, ...focusIds, ...priorityIds, ...projectIds, ...customIds, ...reactiveIds])
 }
 
 function buildProgressionMap(decisions: ExerciseProgressionDecision[]): ProgressionByExercise {
@@ -114,6 +123,9 @@ interface PickCtx {
   prioritySet: Set<string>
   goalSet: Set<string>
   focusSet: Set<string>
+  projectPrimary: string | null
+  projectSupportSet: Set<string>
+  skipCounts: Map<string, number>
   customLabels: Map<string, string>
   criteriaByExercise: Map<string, string | null>
   isReactive: boolean
@@ -132,6 +144,20 @@ function pickExercisesForDay(ctx: PickCtx): Exercise[] {
     selected.push(toExercise('lat', ctx))
     selectedIds.add('lat')
     ctx.weeklyUsage.set('lat', (ctx.weeklyUsage.get('lat') ?? 0) + 1)
+  }
+
+  // Projektets primärövning tränas varje träningsdag som mikropass —
+  // medvetet undantag från variationsregeln (2×/vecka). Lugna dagar efter
+  // LAT respekteras dock alltid.
+  if (
+    ctx.projectPrimary &&
+    ctx.allowedSet.has(ctx.projectPrimary) &&
+    !selectedIds.has(ctx.projectPrimary) &&
+    (!ctx.calmOnly || CALM_REACTIVE_EXERCISES.has(ctx.projectPrimary))
+  ) {
+    selected.push(toExercise(ctx.projectPrimary, ctx))
+    selectedIds.add(ctx.projectPrimary)
+    ctx.weeklyUsage.set(ctx.projectPrimary, (ctx.weeklyUsage.get(ctx.projectPrimary) ?? 0) + 1)
   }
 
   for (const id of candidates) {
@@ -158,6 +184,8 @@ function pickExercisesForDay(ctx: PickCtx): Exercise[] {
 
 function scoreExercise(id: string, ctx: PickCtx): number {
   let score = 0
+  if (id === ctx.projectPrimary) score += 200
+  if (ctx.projectSupportSet.has(id)) score += 90
   if (ctx.prioritySet.has(id)) score += 120
   if (ctx.focusSet.has(id)) score += 70
   if (ctx.goalSet.has(id)) score += 40
@@ -166,6 +194,10 @@ function scoreExercise(id: string, ctx: PickCtx): number {
   if (decision === 'advance') score += 30
   if (decision === 'hold') score += 20
   if (ctx.isReactive && REACTIVE_EXERCISE_IDS.has(id)) score += 80
+  const isProjectExercise = id === ctx.projectPrimary || ctx.projectSupportSet.has(id)
+  if (!isProjectExercise) {
+    score -= 35 * Math.min(ctx.skipCounts.get(id) ?? 0, 2)
+  }
   score += 10 - (ctx.weeklyUsage.get(id) ?? 0) * 5
   return score
 }

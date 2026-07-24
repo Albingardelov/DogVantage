@@ -72,6 +72,9 @@ export default function TrainingCard(props: Props) {
   const [priorityExerciseIds, setPriorityExerciseIds] = useState<string[]>([])
   const [regressExerciseIds, setRegressExerciseIds] = useState<string[]>([])
   const [regressReasonByExercise, setRegressReasonByExercise] = useState<Record<string, string>>({})
+  const [projectLabel, setProjectLabel] = useState<string | null>(null)
+  const [projectPrimaryId, setProjectPrimaryId] = useState<string | null>(null)
+  const [projectExerciseIds, setProjectExerciseIds] = useState<string[]>([])
 
   const weekFocusCopy = useMemo(
     () => buildWeekFocusCopy({ breed, ageWeeks, trainingWeek, goals }),
@@ -115,9 +118,19 @@ export default function TrainingCard(props: Props) {
   const focusExerciseSet = useMemo(() => new Set(focusExerciseIds(focusAreas)), [focusAreas])
   const priorityExerciseSet = useMemo(() => new Set(priorityExerciseIds), [priorityExerciseIds])
   const regressExerciseSet = useMemo(() => new Set(regressExerciseIds), [regressExerciseIds])
+  const projectExerciseSet = useMemo(() => new Set(projectExerciseIds), [projectExerciseIds])
 
   const reasonBadgesForExercise = useCallback((exerciseId: string) => {
     const badges: Array<{ label: string; tone: 'priority' | 'focus' | 'weak'; detail?: string }> = []
+    if (projectExerciseSet.has(exerciseId)) {
+      badges.push({
+        label: 'Projekt',
+        tone: 'priority',
+        detail: projectLabel
+          ? `Del av ditt aktiva träningsprojekt: ${projectLabel}.${exerciseId === projectPrimaryId ? ' Tränas varje träningsdag som kort mikropass.' : ''}`
+          : 'Del av ditt aktiva träningsprojekt.',
+      })
+    }
     if (priorityExerciseSet.has(exerciseId)) {
       badges.push({
         label: 'Prioriterad',
@@ -140,19 +153,28 @@ export default function TrainingCard(props: Props) {
       })
     }
     return badges
-  }, [focusExerciseSet, priorityExerciseSet, regressExerciseSet, regressReasonByExercise])
+  }, [focusExerciseSet, priorityExerciseSet, regressExerciseSet, regressReasonByExercise, projectExerciseSet, projectLabel, projectPrimaryId])
 
   const refreshPlanningSignals = useCallback(async () => {
     if (!dogId || !breed) return
     try {
-      const [focusRes, progressionRes] = await Promise.all([
+      const [focusRes, progressionRes, projectRes] = await Promise.all([
         fetch(`/api/training/focus?dogId=${encodeURIComponent(dogId)}`),
         fetch(`/api/training/progression?dogId=${encodeURIComponent(dogId)}`),
+        fetch(`/api/training/project?dogId=${encodeURIComponent(dogId)}`),
       ])
       if (focusRes.ok) {
         const focusBody = await focusRes.json() as { areas?: WeeklyFocusArea[]; exerciseIds?: string[] }
         setFocusAreas(focusBody.areas ?? [])
         setPriorityExerciseIds(focusBody.exerciseIds ?? [])
+      }
+      if (projectRes.ok) {
+        const projectBody = await projectRes.json() as {
+          project?: { label: string; primaryExerciseId: string; exerciseIds: string[] } | null
+        }
+        setProjectLabel(projectBody.project?.label ?? null)
+        setProjectPrimaryId(projectBody.project?.primaryExerciseId ?? null)
+        setProjectExerciseIds(projectBody.project?.exerciseIds ?? [])
       }
       if (progressionRes.ok) {
         const progressionBody = await progressionRes.json() as { decisions?: Array<{ exerciseId: string; decision: 'advance' | 'hold' | 'regress'; reason: string }> }
@@ -217,6 +239,14 @@ export default function TrainingCard(props: Props) {
     const spec = customSpecs[pickId] ?? getExerciseSpec(pickId)
     const baseExercise = (todayPlan?.exercises ?? [])[originalIdx]
     const reps = baseExercise?.reps ?? 3
+    // Bortvalet är en planeringssignal: nedviktas i kommande veckoplaner.
+    if (baseExercise?.id) {
+      fetch('/api/training/skips', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dogId, exerciseId: baseExercise.id }),
+      }).catch(() => {})
+    }
     const replacement: Exercise = {
       id: pickId,
       label: FOCUS_EXERCISE_LABELS[pickId] ?? spec?.exerciseId ?? pickId,

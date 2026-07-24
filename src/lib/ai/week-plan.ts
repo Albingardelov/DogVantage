@@ -10,7 +10,7 @@ import { getLifeStage } from '@/lib/dog/age'
 import { trackTelemetry } from '@/lib/telemetry'
 
 // Bump this when plan generation logic changes significantly — forces cache invalidation
-export const PLAN_VERSION = 'v9'
+export const PLAN_VERSION = 'v10'
 
 export { parseWeekPlan } from './week-plan-parse'
 

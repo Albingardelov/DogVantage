@@ -88,8 +88,13 @@ export function validateWeekPlan(
     if (needsFri && !hasFri) pushViolation('missing_fri_pairing', `Day ${day.day} requires fri when obedience exercises are present`)
   }
 
+  // Projektets primärövning har medveten dispens från variationsregeln —
+  // den tränas som dagligt mikropass när ett projekt är aktivt.
+  const projectPrimary = input.project?.primaryExerciseId ?? null
   for (const [id, count] of usage.entries()) {
-    if (count > 2) pushViolation('exercise_repetition_limit', `Exercise ${id} appears too many times (${count})`)
+    if (count > 2 && id !== projectPrimary) {
+      pushViolation('exercise_repetition_limit', `Exercise ${id} appears too many times (${count})`)
+    }
   }
 
   if (input.isReactive) {
@@ -114,9 +119,12 @@ function allowedExerciseSet(input: WeekPlanInput): Set<string> {
   const goalIds = (input.goals ?? []).flatMap((goal) => GOAL_EXERCISE_IDS[goal] ?? [])
   const focusIds = focusExerciseIds(input.weeklyFocus ?? [])
   const priorityIds = input.priorityExercises ?? []
+  const projectIds = input.project
+    ? [input.project.primaryExerciseId, ...input.project.supportExerciseIds]
+    : []
   const customIds = (input.customExercises ?? []).map((item) => item.exercise_id)
   const reactiveIds = input.isReactive
     ? ['lat']
     : []
-  return new Set([...breedIds, ...goalIds, ...focusIds, ...priorityIds, ...customIds, ...reactiveIds])
+  return new Set([...breedIds, ...goalIds, ...focusIds, ...priorityIds, ...projectIds, ...customIds, ...reactiveIds])
 }

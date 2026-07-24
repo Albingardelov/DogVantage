@@ -7,6 +7,7 @@ import type {
   TrainingGoal,
 } from '@/types/dog'
 import type { WeeklyFocusArea } from '@/lib/training/weekly-focus'
+import type { ActiveProjectInput } from '@/lib/training/training-projects'
 import type { WeekPlanContext } from './rules'
 import type { ExerciseProgressionDecision } from '@/lib/training/progression-rules'
 
@@ -28,6 +29,10 @@ export interface WeekPlanInput {
   progressionRule?: string | null
   progressionDecisions?: ExerciseProgressionDecision[]
   isReactive?: boolean
+  /** Aktivt träningsprojekt — dominerar veckoplanen när det finns. */
+  project?: ActiveProjectInput
+  /** Nyligen bortvalda övningar (exercise_id → antal) — nedviktas i planen. */
+  recentSkips?: Record<string, number>
 }
 
 export function buildWeekContext(input: WeekPlanInput): WeekPlanContext {
@@ -63,6 +68,8 @@ export function buildWeekContext(input: WeekPlanInput): WeekPlanContext {
     isInHeat: Boolean(input.isInHeat),
     skenfasActive: Boolean(input.skenfasActive),
     progressionRule: input.progressionRule ?? null,
+    project: input.project ?? null,
+    recentSkips: input.recentSkips ?? {},
     isReactive: typeof input.isReactive === 'boolean'
       ? input.isReactive
       : detectReactive(input.onboardingContext),

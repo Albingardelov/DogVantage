@@ -26,6 +26,7 @@ export default function ChatInterface({ trainingWeek, initialQuestion, dogId }: 
   const [hasHistory, setHasHistory] = useState(false)
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [startingProject, setStartingProject] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const didAutoSendRef = useRef(false)
@@ -79,6 +80,7 @@ export default function ChatInterface({ trainingWeek, initialQuestion, dogId }: 
           content: data.content,
           sources: data.sources,
           attributionNote: data.attributionNote,
+          suggestedProject: data.suggestedProject,
         },
       ])
     } catch (err) {
@@ -100,6 +102,30 @@ export default function ChatInterface({ trainingWeek, initialQuestion, dogId }: 
     if (loading) return
     setMessages((prev) => prev.filter((_, i) => i !== index))
     send(query, { isRetry: true })
+  }
+
+  async function startProject(index: number, protocolId: string, label: string) {
+    if (startingProject) return
+    setStartingProject(true)
+    try {
+      const res = await fetch('/api/training/project', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dogId, protocolId }),
+      })
+      if (!res.ok) throw new Error('project start failed')
+      setMessages((prev) => [
+        ...prev.map((m, i) => (i === index ? { ...m, suggestedProject: undefined } : m)),
+        {
+          role: 'model' as const,
+          content: `Klart! "${label}" är nu ditt aktiva träningsprojekt. Veckoschemat byggs om runt det — du ser projektet och nästa steg på din översikt.`,
+        },
+      ])
+    } catch (e) {
+      console.error('[chat project start]', e)
+    } finally {
+      setStartingProject(false)
+    }
   }
 
   useEffect(() => {
@@ -158,6 +184,22 @@ export default function ChatInterface({ trainingWeek, initialQuestion, dogId }: 
                   >
                     Försök igen
                   </button>
+                )}
+                {m.suggestedProject && (
+                  <div className={styles.projectSuggestion}>
+                    <p className={styles.projectSuggestionText}>
+                      Vill du göra <strong>{m.suggestedProject.label}</strong> till ditt aktiva
+                      träningsprojekt? Då byggs veckoschemat om runt det och du tränar mot målet varje dag.
+                    </p>
+                    <button
+                      type="button"
+                      className={styles.projectSuggestionBtn}
+                      onClick={() => startProject(i, m.suggestedProject!.protocolId, m.suggestedProject!.label)}
+                      disabled={startingProject}
+                    >
+                      Starta projektet
+                    </button>
+                  </div>
                 )}
                 {(m.sources && m.sources.length > 0) || m.attributionNote ? (
                   <aside className={styles.citationBlock} aria-label="Källor och förklaring">

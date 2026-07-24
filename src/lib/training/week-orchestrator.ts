@@ -36,6 +36,9 @@ import {
 } from '@/lib/supabase/progression-decision-log'
 import { getRecentQuizStats } from '@/lib/supabase/learning-progress'
 import { getRecentChatTopics } from '@/lib/supabase/chat-topics'
+import { getActiveProject } from '@/lib/supabase/training-projects'
+import { getRecentSkipCounts } from '@/lib/supabase/exercise-skips'
+import { TRAINING_PROTOCOLS, toProjectInput, type ActiveProjectInput } from '@/lib/training/training-projects'
 import { getHomecomeWeekPlan } from '@/lib/training/homecoming-plan'
 import { generateWeekPlan, PLAN_VERSION } from '@/lib/ai/week-plan'
 import { buildDeterministicWeekPlan } from '@/lib/training/deterministic-week-planner'
@@ -81,6 +84,7 @@ export interface WeekOrchestratorContext {
   customIds: string[]
   focusAreas: WeeklyFocusArea[]
   priorityExercises: string[]
+  project: ActiveProjectInput | null
   isHomecomeWeek: boolean
   hasCats: boolean
 }
@@ -145,10 +149,12 @@ export async function buildWeekContextFromRequest(
 
   const sevenDaysAgoIso = `${sevenDaysAgo}T00:00:00Z`
 
-  const [recentLogs, customRows, weeklyPrefs, activeHeat, lastEnded, recentMetrics, recentSessions] = await Promise.all([
+  const [recentLogs, customRows, weeklyPrefs, activeProjectRow, recentSkips, activeHeat, lastEnded, recentMetrics, recentSessions] = await Promise.all([
     getRecentLogs(dog.id, trainingWeek, 3).catch(() => []),
     getActiveCustomExercises(dog.id).catch(() => []),
     getWeeklyFocusPreferences(dog.id, isoWeek).catch(() => ({ areas: [], priorityExerciseIds: [] })),
+    getActiveProject(dog.id).catch(() => null),
+    getRecentSkipCounts(dog.id).catch(() => ({} as Record<string, number>)),
     needsHeatData ? getActiveHeatCycle(dog.id).catch(() => null) : Promise.resolve(null),
     needsHeatData ? getLastEndedHeatCycle(dog.id).catch(() => null) : Promise.resolve(null),
     (async (): Promise<ProgressionMetricRow[]> => {
@@ -276,7 +282,12 @@ export async function buildWeekContextFromRequest(
   )
   const focusAreas = weeklyPrefs.areas
   const priorityExercises = weeklyPrefs.priorityExerciseIds
-  const cacheKey = performanceSummary || focusAreas.length > 0 || priorityExercises.length > 0 ? isoWeekKey() : undefined
+  const activeProtocol = activeProjectRow ? TRAINING_PROTOCOLS[activeProjectRow.protocol_id] : undefined
+  const project = activeProtocol ? toProjectInput(activeProtocol) : null
+  const hasSkips = Object.keys(recentSkips).length > 0
+  const cacheKey = performanceSummary || focusAreas.length > 0 || priorityExercises.length > 0 || project || hasSkips
+    ? isoWeekKey()
+    : undefined
   const customIds = customExercises.map((e: { exercise_id: string; label: string }) => e.exercise_id)
   const isHomecomeWeek = trainingWeek === 1 && typeof ageWeeks === 'number' && ageWeeks < 14
   const hasCats = pets.some((pet) => pet === 'cats_indoor' || pet === 'cats_outdoor')
@@ -300,6 +311,8 @@ export async function buildWeekContextFromRequest(
       progressionRule,
       progressionDecisions,
       isReactive: isReactiveProfile,
+      project: project ?? undefined,
+      recentSkips,
     },
     breed,
     trainingWeek,
@@ -311,6 +324,7 @@ export async function buildWeekContextFromRequest(
     customIds,
     focusAreas,
     priorityExercises,
+    project,
     isHomecomeWeek,
     hasCats,
   }
@@ -330,6 +344,7 @@ export async function getOrGenerateWeekPlan(ctx: WeekOrchestratorContext): Promi
     planVersion: PLAN_VERSION,
     hasFocusAreas: ctx.focusAreas.length > 0,
     hasPriorities: ctx.priorityExercises.length > 0,
+    hasProject: Boolean(ctx.project),
     hasProgressionRule: Boolean(ctx.input.progressionRule),
     cacheScope: ctx.cacheKey ?? null,
   }
@@ -383,6 +398,7 @@ export async function getOrGenerateWeekPlan(ctx: WeekOrchestratorContext): Promi
       ctx.focusAreas,
       ctx.priorityExercises,
       ctx.input.progressionRule,
+      ctx.project?.protocolId,
     ).catch((e) => {
       console.error('[GET /api/training/week] cache write failed:', e)
       trackTelemetry('week-plan-api', {
@@ -413,6 +429,7 @@ async function readCachedPlan(ctx: WeekOrchestratorContext): Promise<WeekPlan | 
       ctx.focusAreas,
       ctx.priorityExercises,
       ctx.input.progressionRule,
+      ctx.project?.protocolId,
     )
   } catch (e) {
     console.error('[GET /api/training/week] cache read failed:', e)
