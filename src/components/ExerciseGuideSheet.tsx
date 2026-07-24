@@ -76,11 +76,12 @@ export default function ExerciseGuideSheet({
 
         {spec.guide && (
           <>
+            <div className={styles.definition}>{spec.guide.todaySummary}</div>
             <Section title="Setup" items={spec.guide.setup} />
-            <Section title="Steg-för-steg (förare)" items={spec.guide.steps} />
-            <Section title="Hur du loggar i appen" items={spec.guide.logging} />
-            <Section title="Vanliga fel" items={spec.guide.commonMistakes} />
-            <Section title="Stop-regler" items={spec.guide.stopRules} />
+            <Section title="Steg-för-steg (förare)" items={spec.guide.steps.map((s) => s.how)} />
+            <Section title="Lyckad rep" items={[spec.guide.successLooksLike]} />
+            <Section title="När det strular" items={spec.guide.whenItFails} />
+            <Section title="Avsluta passet" items={spec.guide.wrapUp} />
           </>
         )}
 
