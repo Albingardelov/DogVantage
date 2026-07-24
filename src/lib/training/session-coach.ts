@@ -36,11 +36,11 @@ const ADVANCE_THRESHOLD = 0.8
 const REGRESS_THRESHOLD = 0.6
 const MAX_ADVANCE_THRESHOLD = 0.9
 
-const GUIDE_FAIL_VARIANT_HINT =
-  'Öppna guiden och tryck "Det går inte" om du vill byta grepp.'
+const GUIDE_FAIL_HINT =
+  'Öppna guiden och läs "Om det inte funkar" för konkreta grepp — eller tryck "Det går inte" om knappen syns och du vill byta variant.'
 
 function withGuideFailHint(message: string): string {
-  return `${message} ${GUIDE_FAIL_VARIANT_HINT}`
+  return `${message} ${GUIDE_FAIL_HINT}`
 }
 
 export function advanceGuard(
