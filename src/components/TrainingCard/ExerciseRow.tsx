@@ -21,6 +21,7 @@ import { isPuppy as isPuppyAge } from '@/lib/dog/age'
 import { buildCoachAction, latencyMeaning, type SessionGuard } from '@/lib/training/session-coach'
 import type { ExerciseMaturity } from './maturity'
 import { topBadge } from './badges'
+import { normalizeHandlerGuide } from '@/lib/training/normalize-handler-guide'
 
 interface Props {
   exercise: Exercise
@@ -174,6 +175,15 @@ export default function ExerciseRow({
   const currentLevelCriteria = activeLevel?.criteria ?? null
 
   const isNew = maturity === 'new'
+  const previewGuide =
+    spec?.guide != null
+      ? normalizeHandlerGuide(spec.guide, {
+          definition: spec.definition,
+          troubleshooting: spec.troubleshooting,
+        })
+      : null
+  const firstStepPreview =
+    previewGuide?.steps?.[0]?.how ?? previewGuide?.todaySummary ?? null
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [badgeOpen, setBadgeOpen] = useState(false)
   const badge = topBadge(reasonBadges)
@@ -294,9 +304,9 @@ export default function ExerciseRow({
               <strong>Dagens kriterium:</strong> {currentLevelCriteria}
             </p>
           )}
-          {isNew && spec?.guide?.steps?.[0] && (
+          {isNew && firstStepPreview && (
             <p className={styles.firstStep}>
-              <strong>Så gör du:</strong> {spec.guide.steps[0].how}
+              <strong>Så gör du:</strong> {firstStepPreview}
             </p>
           )}
           {sources.length > 0 && (
