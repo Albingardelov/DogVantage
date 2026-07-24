@@ -4,6 +4,12 @@ import { EXERCISE_SPECS } from './exercise-specs'
 describe('HandlerGuide quality gate', () => {
   const entries = Object.values(EXERCISE_SPECS).filter((s) => s.guide)
 
+  it('every EXERCISE_SPECS entry has a HandlerGuide', () => {
+    for (const spec of Object.values(EXERCISE_SPECS)) {
+      expect(spec.guide, spec.exerciseId).toBeTruthy()
+    }
+  })
+
   it('every guided exercise uses the new HandlerGuide shape', () => {
     expect(entries.length).toBeGreaterThan(10)
     for (const spec of entries) {

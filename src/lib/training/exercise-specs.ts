@@ -625,10 +625,22 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
         'Bestäm signal: 1 pip eller ett ord. Använd samma varje gång.',
       ],
       steps: [
-        { how: 'När hunden rör sig långsamt: ge stopsignal en gång.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Så fort hunden bromsar/stannar → kasta belöning vid hundens fötter.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Upprepa 3–5 reps med pauser.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Öka först avstånd ELLER störning (inte båda).', why: 'Så här byggs beteendet steg för steg.' },
+        {
+          how: 'När hunden rör sig långsamt: ge stopsignal en gång.',
+          why: 'En signal som alltid betyder samma sak lär hunden bromsa på första försöket — inte efter tjat.',
+        },
+        {
+          how: 'Så fort hunden bromsar/stannar → kasta belöning vid hundens fötter.',
+          why: 'Belöning på plats gör stoppet mer värt än att springa vidare — du behöver inte dra in hunden.',
+        },
+        {
+          how: 'Upprepa 3–5 reps med pauser.',
+          why: 'Korta serier håller hunden skarp utan att den börjar gissa eller bli hetsig.',
+        },
+        {
+          how: 'Öka först avstånd ELLER störning (inte båda).',
+          why: 'Ett kriterium i taget gör det tydligt vad som fungerar — och var ni ska backa om det fallerar.',
+        },
       ],
       successLooksLike: 'Lyckad rep när hunden bromsar/stannar direkt på signal (1 pip/ord) och kan belönas där den är.',
       whenItFails: [
@@ -667,10 +679,22 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
         'Ha belöning redo och jobba i korta set (10–20 sek).',
       ],
       steps: [
-        { how: 'Presentera triggern kort (t.ex. visa mat i handen).', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Belöna direkt när hunden väljer lugn/avvaktande (titta bort, stillhet).', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Öka triggern lite (närmare, längre tid, mer rörelse) först när det är stabilt.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Avsluta medan hunden fortfarande klarar det.', why: 'Så här byggs beteendet steg för steg.' },
+        {
+          how: 'Presentera triggern kort (t.ex. visa mat i handen).',
+          why: 'En svag trigger gör det lätt att belöna rätt val — innan hunden hinner kasta sig.',
+        },
+        {
+          how: 'Belöna direkt när hunden väljer lugn/avvaktande (titta bort, stillhet).',
+          why: 'Du betalar för stillhet, inte bara avsaknad av fel — då väljer hunden lugnt oftare.',
+        },
+        {
+          how: 'Öka triggern lite (närmare, längre tid, mer rörelse) först när det är stabilt.',
+          why: 'Gradvis svårare gör att hunden lär sig hålla sig kall även när det frestar mer.',
+        },
+        {
+          how: 'Avsluta medan hunden fortfarande klarar det.',
+          why: 'Slutar du i framgång minns hunden att det gick — inte att det blev för svårt.',
+        },
       ],
       successLooksLike: 'Lyckad rep när hunden kan vara still/avvaktande trots trigger (rörelse/doft) tills frikommando.',
       whenItFails: [
@@ -705,10 +729,22 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
         'Ha belöning redo och börja i lätt miljö.',
       ],
       steps: [
-        { how: 'Var still/neutral. Vänta på att hunden tittar mot dig → belöna.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'När hunden fattar: rör dig lite (1–2 steg) och belöna check-in igen.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Flytta gradvis till lätt ute-miljö och belöna varje check-in i början.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Avsluta efter några lyckade reps (korta pass).', why: 'Så här byggs beteendet steg för steg.' },
+        {
+          how: 'Var still/neutral. Vänta på att hunden tittar mot dig → belöna.',
+          why: 'Du betalar för att hunden väljer dig — utan att du behöver ropa och bli bakgrundsbrus.',
+        },
+        {
+          how: 'När hunden fattar: rör dig lite (1–2 steg) och belöna check-in igen.',
+          why: 'Rörelse gör check-in svårare och mer värdefullt på riktiga promenader.',
+        },
+        {
+          how: 'Flytta gradvis till lätt ute-miljö och belöna varje check-in i början.',
+          why: 'Hög belöningsfrekvens ute bygger vanan innan världen tar över helt.',
+        },
+        {
+          how: 'Avsluta efter några lyckade reps (korta pass).',
+          why: 'Korta pass håller check-ins snabba och glada — inte en sista ansträngning som misslyckas.',
+        },
       ],
       successLooksLike: 'Lyckad rep när hunden självmant återorienterar (blick/kom-in) till dig utan att du ropar.',
       whenItFails: [
@@ -744,10 +780,22 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
         'Ute: använd långlina om du behöver säkerhet/kontroll.',
       ],
       steps: [
-        { how: 'Säg “sök” och låt hunden nosa i 10–20 sek.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Säg “klart” och belöna när hunden vänder upp mot dig/kommer in.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Pausa 10–20 sek och upprepa.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Öka svårighet långsamt (störning, större yta, längre tid) en sak i taget.', why: 'Så här byggs beteendet steg för steg.' },
+        {
+          how: 'Säg “sök” och låt hunden nosa i 10–20 sek.',
+          why: 'Nosjobb är naturligt belönande — du ger hunden rätt att nosa men sätter en tydlig ram.',
+        },
+        {
+          how: 'Säg “klart” och belöna när hunden vänder upp mot dig/kommer in.',
+          why: 'Avslut på signal lär att du kan avbryta sök utan konflikt — viktigt på promenaden.',
+        },
+        {
+          how: 'Pausa 10–20 sek och upprepa.',
+          why: 'Pauser förhindrar att hunden går upp i varv och glömmer att kolla in.',
+        },
+        {
+          how: 'Öka svårighet långsamt (störning, större yta, längre tid) en sak i taget.',
+          why: 'Ett steg i taget håller söket kontrollerat även när miljön blir mer spännande.',
+        },
       ],
       successLooksLike: 'Lyckad rep när hunden söker/nosar men håller kontakt och kan avbryta/komma in vid signal.',
       whenItFails: [
@@ -967,10 +1015,22 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
         'Ha belöning redo för utbyte.',
       ],
       steps: [
-        { how: 'Visa objektet, kasta 0,5–1 meter.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Uppmuntra med glad röst när hunden tar det.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Backa 1–2 steg → hunden kommer naturligt mot dig.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Byt objektet mot belöning ("lämna").', why: 'Så här byggs beteendet steg för steg.' },
+        {
+          how: 'Visa objektet, kasta 0,5–1 meter.',
+          why: 'Kort kast gör det lätt att lyckas hela vägen — hämta, bära, lämna — redan första passet.',
+        },
+        {
+          how: 'Uppmuntra med glad röst när hunden tar det.',
+          why: 'Glad röst gör dig till målet — hunden kommer tillbaka till dig, inte bara till leksaken.',
+        },
+        {
+          how: 'Backa 1–2 steg → hunden kommer naturligt mot dig.',
+          why: 'Att backa drar hunden mot dig utan jakt — leverans blir naturligt nästa steg.',
+        },
+        {
+          how: 'Byt objektet mot belöning ("lämna").',
+          why: 'Utbyte lär att släppa ger något bättre — så slipper du tigga om dummy i munnen.',
+        },
       ],
       successLooksLike: 'Lyckad rep när hunden hämtar objektet, bär det tillbaka mjukt och lämnar det i handen.',
       whenItFails: [
@@ -1007,10 +1067,22 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
         'Kliv gärna i vattnet själv — hunden följer ofta.',
       ],
       steps: [
-        { how: 'Låt hunden sniffa och utforska kanten. Belöna nyfikenhet.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Kasta belöning/leksak nära kanten i vattnet.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Öka gradvis djupet och kastet när hunden är trygg.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Avsluta alltid innan hunden är trött/kall.', why: 'Så här byggs beteendet steg för steg.' },
+        {
+          how: 'Låt hunden sniffa och utforska kanten. Belöna nyfikenhet.',
+          why: 'Belöna närvaro vid vattnet bygger trygghet — utan att du behöver putta eller dra.',
+        },
+        {
+          how: 'Kasta belöning/leksak nära kanten i vattnet.',
+          why: 'Lek vid kanten gör vatten roligt innan djupet ens blir ett tema.',
+        },
+        {
+          how: 'Öka gradvis djupet och kastet när hunden är trygg.',
+          why: 'Små steg låter hunden välja själv — tvång skapar rädsla som tar månader att reparera.',
+        },
+        {
+          how: 'Avsluta alltid innan hunden är trött/kall.',
+          why: 'Positivt sista minne gör nästa vattenbesök lättare — inte ett minne av obehag.',
+        },
       ],
       successLooksLike: 'Lyckad rep när hunden frivilligt kliver/simmar in i vatten på uppmuntran.',
       whenItFails: [
@@ -1047,10 +1119,22 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
         'Korta pass, ren grundträning av eye/flank/stop — inte boskapskontakt.',
       ],
       steps: [
-        { how: 'Rör dig runt objektet och belöna hunden för att följa i kontrollerat tempo.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Introducera "eye": peka mot objektet → belöna när hunden låser blicken.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Lägg till en kort flanksida (halv cirkel) på signal.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Avbryt med stoppsignal eller "här" och belöna lydig avslutning.', why: 'Så här byggs beteendet steg för steg.' },
+        {
+          how: 'Rör dig runt objektet och belöna hunden för att följa i kontrollerat tempo.',
+          why: 'Kontrollerad rörelse runt bytet lär att du styr tempot — inte bara instinkten.',
+        },
+        {
+          how: 'Introducera "eye": peka mot objektet → belöna när hunden låser blicken.',
+          why: 'Eye ger hunden ett tydligt jobb — fokus som du kan belöna och avbryta.',
+        },
+        {
+          how: 'Lägg till en kort flanksida (halv cirkel) på signal.',
+          why: 'Flank bygger riktad rörelse du kan styra — grunden innan riktiga djur ens kommer in.',
+        },
+        {
+          how: 'Avbryt med stoppsignal eller "här" och belöna lydig avslutning.',
+          why: 'Stopp på signal gör vallning användbar — inte bara okontrollerad jakt.',
+        },
       ],
       successLooksLike: 'Lyckad rep när hunden visar kontrollerat vallningsbeteende (eye, crouch, flank) och kan avbryta/komma in på signal.',
       whenItFails: [
@@ -1088,10 +1172,22 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
         'Sätt upp en tydlig "sök"-signal.',
       ],
       steps: [
-        { how: 'Placera belöning i en av 3 boxar. Låt hunden se dig (intro-fas).', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Säg "sök" och låt hunden hitta. Belöna generöst direkt.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Öka antal boxar och döm belöningen bättre.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Byt till doftpinne (t.ex. birch) när hunden förstår spelet.', why: 'Så här byggs beteendet steg för steg.' },
+        {
+          how: 'Placera belöning i en av 3 boxar. Låt hunden se dig (intro-fas).',
+          why: 'Synlig start gör spelet begripligt — hunden förstår att nos leder till fynd.',
+        },
+        {
+          how: 'Säg "sök" och låt hunden hitta. Belöna generöst direkt.',
+          why: 'Jackpot vid rätt box gör sök mer värt än att gissa slumpmässigt.',
+        },
+        {
+          how: 'Öka antal boxar och göm belöningen bättre.',
+          why: 'Svårare gömmor bygger systematiskt sök — inte bara tur.',
+        },
+        {
+          how: 'Byt till doftpinne (t.ex. birch) när hunden förstår spelet.',
+          why: 'Doft istället för synlig mat gör nosework till en riktig färdighet hemma och ute.',
+        },
       ],
       successLooksLike: 'Lyckad rep när hunden hittar gömd doft/belöning och indikerar platsen tydligt (sitter/pöser/pekar).',
       whenItFails: [
@@ -1317,10 +1413,22 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
         'Notera tider: när valpen åt, sov, lekte, kissade — så ser du mönstret.',
       ],
       steps: [
-        { how: 'Vakna valpen? → bär den ut direkt (inte gå — de kissar i trappan).', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Stå stilla utomhus, säg en mjuk signal ("kissa", "bajs"). Vänta upp till 2 min.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'I sekunden hunden börjar lätta sig: säg "ja!" mjukt. När den är klar — belöna direkt på plats med 2–3 godis.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Sen 1–2 minuter lek/utforska som extra belöning innan ni går in.', why: 'Så här byggs beteendet steg för steg.' },
+        {
+          how: 'Vakna valpen? → bär den ut direkt (inte gå — de kissar i trappan).',
+          why: 'Valpar hinner inte hålla sig — bära ut ger chansen innan olyckan händer inne.',
+        },
+        {
+          how: 'Stå stilla utomhus, säg en mjuk signal ("kissa", "bajs"). Vänta upp till 2 min.',
+          why: 'Stillhet och samma ord hjälper kroppen koppla platsen till toalett — inte bara promenad.',
+        },
+        {
+          how: 'I sekunden hunden börjar lätta sig: säg "ja!" mjukt. När den är klar — belöna direkt på plats med 2–3 godis.',
+          why: 'Belöning på plats (inte inne efteråt) lär att rätt ställe ger fest — inte bara att gå in igen.',
+        },
+        {
+          how: 'Sen 1–2 minuter lek/utforska som extra belöning innan ni går in.',
+          why: 'Lek efteråt gör ute-turen värd mer — så väntar hunden gärna tills den är klar.',
+        },
       ],
       successLooksLike: 'Lyckad rep = hunden kissar/bajsar utomhus (eller på avsedd plats) inom 2 minuter efter att du tagit ut den. Belöna direkt på plats.',
       whenItFails: [
@@ -1357,10 +1465,22 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
         'Identifiera valpens överstimulerings-fönster — ofta sen kväll efter en lång dag.',
       ],
       steps: [
-        { how: 'Valp biter mjukt (lek-bett): säg "Aj!" om det blir hårdare, fortsätt om det är mjukt.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Valp biter hårt: säg "Aj!" mjukt + frys helt (ingen rörelse i 3 sek). När den släpper → erbjud leksak.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Valpen tar leksaken → 30 sek lek med leksaken som belöning för rätt val.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Valpen biter igen efter 1–2 reps → leken är slut. Res dig, gå ifrån 30 sek. Återvänd lugnt och starta om eller lägg valpen i vila.', why: 'Så här byggs beteendet steg för steg.' },
+        {
+          how: 'Valp biter mjukt (lek-bett): säg "Aj!" om det blir hårdare, fortsätt om det är mjukt.',
+          why: 'Du sätter gränsen tidigt — valpen lär skillnad mellan lek och för hårt utan drama.',
+        },
+        {
+          how: 'Valp biter hårt: säg "Aj!" mjukt + frys helt (ingen rörelse i 3 sek). När den släpper → erbjud leksak.',
+          why: 'Frysning + alternativ lär att släppa handen öppnar rolig lek — inte mer bett.',
+        },
+        {
+          how: 'Valpen tar leksaken → 30 sek lek med leksaken som belöning för rätt val.',
+          why: 'Belöna rätt val gör tugg mer attraktivt än fingrar och ärmar.',
+        },
+        {
+          how: 'Valpen biter igen efter 1–2 reps → leken är slut. Res dig, gå ifrån 30 sek. Återvänd lugnt och starta om eller lägg valpen i vila.',
+          why: 'Konsekvent konsekvens lär att hårt bett tar bort uppmärksamhet — inte mer lek.',
+        },
       ],
       successLooksLike: 'Lyckad rep = valpen släpper handen/kläderna inom 2 sekunder efter ditt feedback-ljud, ELLER väljer ett godkänt alternativ (leksak, tugg) av sig själv.',
       whenItFails: [
@@ -1399,10 +1519,22 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
         'Aldrig som straff — buren ska vara en bra plats, inte en "time-out"-cell.',
       ],
       steps: [
-        { how: 'Dag 1–3: dörr öppen, mata hunden i buren, kasta in godis när den går nära.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Dag 4–7: stäng dörren medan den äter, öppna innan klar. 5 sek → 30 sek → 1 min.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Vecka 2: hunden går in på signal ("plats"/"in"). Stängd dörr 5–15 min medan du är i rummet.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Vecka 3+: bygg upp tid + du går ifrån. Aldrig släppa ut när den skäller — vänta tystnad (även 5 sek räcker) först.', why: 'Så här byggs beteendet steg för steg.' },
+        {
+          how: 'Dag 1–3: dörr öppen, mata hunden i buren, kasta in godis när den går nära.',
+          why: 'Buren blir platsen där bra saker händer — innan stängd dörr ens blir ett tema.',
+        },
+        {
+          how: 'Dag 4–7: stäng dörren medan den äter, öppna innan klar. 5 sek → 30 sek → 1 min.',
+          why: 'Kort stängning under måltid gör dörren harmlös — hunden hinner inte stressa upp.',
+        },
+        {
+          how: 'Vecka 2: hunden går in på signal ("plats"/"in"). Stängd dörr 5–15 min medan du är i rummet.',
+          why: 'Du i närheten gör duration trygg innan ensamhet ens testas.',
+        },
+        {
+          how: 'Vecka 3+: bygg upp tid + du går ifrån. Aldrig släppa ut när den skäller — vänta tystnad (även 5 sek räcker) först.',
+          why: 'Släpp vid tystnad lär att lugn öppnar dörren — skällning förlänger bara väntan.',
+        },
       ],
       successLooksLike: 'Lyckad rep = hunden går frivilligt in i sin bur/box och stannar lugnt under den tid du tränar (start: 10 sek, mål: 1 timme tyst vila).',
       whenItFails: [
@@ -1441,10 +1573,22 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
         'Aldrig stort avsked eller stor hälsning. Lämna och kom hem neutralt.',
       ],
       steps: [
-        { how: 'Sätt på morgonrock + skor (avskedscues) — gå INTE. Sätt dig igen. Upprepa till hunden inte längre reagerar på cues.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Gå ut genom dörren — kom tillbaka direkt (5 sek). Belöna när hunden är lugn.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Bygg duration: 30 sek → 1 min → 2 min → 5 min → 15 min → 30 min. Hoppa aldrig över steg.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Variera tider — så hunden inte räknar minuter. Ibland 5 min, ibland 30, ibland 2 h.', why: 'Så här byggs beteendet steg för steg.' },
+        {
+          how: 'Sätt på morgonrock + skor (avskedscues) — gå INTE. Sätt dig igen. Upprepa till hunden inte längre reagerar på cues.',
+          why: 'Avskedscues blir tråkiga när inget händer — så startar inte paniken redan vid skorna.',
+        },
+        {
+          how: 'Gå ut genom dörren — kom tillbaka direkt (5 sek). Belöna när hunden är lugn.',
+          why: 'Mikro-separation bevisar att du alltid kommer tillbaka — innan minuterna ens räknas.',
+        },
+        {
+          how: 'Bygg duration: 30 sek → 1 min → 2 min → 5 min → 15 min → 30 min. Hoppa aldrig över steg.',
+          why: 'Gradvis tid håller hunden under tröskeln — ett hopp för långt skapar panik som saboterar veckor av träning.',
+        },
+        {
+          how: 'Variera tider — så hunden inte räknar minuter. Ibland 5 min, ibland 30, ibland 2 h.',
+          why: 'Oregelbundna avstånd gör att hunden inte kan räkna ner till panik — den lär sig bara att du kommer tillbaka.',
+        },
       ],
       successLooksLike: 'Lyckad rep = hunden är lugn (ingen skall, gnyl, panik) under hela den tid du är borta. Bygger upp från 30 sek till flera timmar.',
       whenItFails: [
@@ -1483,10 +1627,22 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
         'Träna med fasta triggers (du parkerar nära en hundpark t.ex.) innan rörliga möten.',
       ],
       steps: [
-        { how: 'Stå på working distance från triggern, vid sidan av en bil eller buske om hunden behöver visuell skydd.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Vänta. När hunden tittar på triggern → markera DIREKT (inom 0,5 sek).', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Belöna nära ditt ben, så hunden vänder mot dig för att äta. Detta är "automatic check-in" — det vi tränar.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Upprepa 5–10 reps. Sluta INNAN hunden tröttnar eller börjar fixera. Avsluta passet med en lugn promenad bort från triggern.', why: 'Så här byggs beteendet steg för steg.' },
+        {
+          how: 'Stå på working distance från triggern, vid sidan av en bil eller buske om hunden behöver visuell skydd.',
+          why: 'Rätt avstånd gör att hunden kan titta utan att gå över tröskeln — där godis slutar funka.',
+        },
+        {
+          how: 'Vänta. När hunden tittar på triggern → markera DIREKT (inom 0,5 sek).',
+          why: 'Snabb markering fångar just den korta blicken — innan fixering tar över.',
+        },
+        {
+          how: 'Belöna nära ditt ben, så hunden vänder mot dig för att äta.',
+          why: 'Godis vid dig gör att blick på trigger automatiskt leder till check-in — det är hela poängen med LAT.',
+        },
+        {
+          how: 'Upprepa 5–10 reps. Sluta INNAN hunden tröttnar eller börjar fixera. Avsluta passet med en lugn promenad bort från triggern.',
+          why: 'Sluta tidigt håller träningen under tröskeln — en fixerad hund lär sig fel saker.',
+        },
       ],
       successLooksLike: 'Lyckad rep = hunden tittar på triggern (max 1 sekund), vänder sig sedan mot dig av sig själv, och tar belöning lugnt. Allt händer under threshold — ingen skällning, ingen fixering.',
       whenItFails: [
