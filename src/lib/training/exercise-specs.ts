@@ -128,7 +128,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Byt miljö till enklare och bygg upp igen.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni tränar hunden kan gå med slakt koppel i några steg och återvända till dig för belöning.',
+      todaySummary: 'Idag tränar ni slakt koppel i korta bitar och belönar när hunden återvänder till din sida.',
       setup: [
         'Ha 10–20 små belöningar redo i fickan.',
         'Starta i lätt miljö (inne/uppfart) innan du går ut i “svårt”.',
@@ -168,7 +168,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Byt till lugnare miljö och lägre intensitet.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni tränar hunden är lugn och frivilligt låter dig hantera (tassar/mun/borste) i korta microsteg.',
+      todaySummary: 'Idag tränar ni frivillig, lugn hantering i korta microsteg — tassar, mun och borste.',
       setup: [
         'Välj en lugn plats (soffa/golv) och ha många små belöningar.',
         'Målet är “frivilligt och lugnt”, inte att “bli klar”.',
@@ -213,7 +213,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Kort latens (<1–3s) utan att du “tjatar” med flera signaler.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni tränar hunden vänder mot dig direkt och kommer hela vägen in (minst 80% i den här miljön).',
+      todaySummary: 'Idag tränar ni att hunden vänder direkt och kommer hela vägen in (minst 80% i den här miljön).',
       setup: [
         'Träna i säker miljö (inne/inhägnat). Ute: använd långlina vid behov.',
         'Ha belöning som är bättre än omgivningen (särskilt ute).',
@@ -254,7 +254,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Säg namnet bara en gång; annars sänk kriteriet istället för att upprepa.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni tränar hunden vänder blicken mot dig inom 1–3 sek efter namnet.',
+      todaySummary: 'Idag tränar ni att hunden vänder blicken mot dig inom 1–3 sek efter namnet.',
       setup: [
         'Ha 10 små belöningar i handen/fickan.',
         'Börja när hunden är relativt lugn (inte mitt i lek/uppvarvning).',
@@ -294,7 +294,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Om hunden studsar: byt till lugnare belöning eller belöna lägre/närmare.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni tränar rumpan är i marken inom 1–3 sek och hunden stannar kvar tills du belönar.',
+      todaySummary: 'Idag tränar ni sitt: rumpan i marken inom 1–3 sek och hunden stannar kvar tills du belönar.',
       setup: [
         'Ha 10 små belöningar redo.',
         'Träna i lugn miljö först. Byt plats först när det är stabilt.',
@@ -334,7 +334,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Gör passet kort: 3–5 reps och avsluta.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni tränar hunden lägger sig ner (bröst/armbågar i marken) inom 1–3 sek.',
+      todaySummary: 'Idag tränar ni ligg — bröst och armbågar i marken inom 1–3 sek.',
       setup: [
         'Välj ett skönt underlag (matta) i början.',
         'Ha belöningar redo och håll passen korta.',
@@ -373,7 +373,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Om hunden följer: minska dina rörelser och bygg upp igen.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni tränar hunden håller positionen (sitt/ligg/stå) tills frikommando eller belöning.',
+      todaySummary: 'Idag tränar ni att hunden håller positionen (sitt/ligg/stå) tills frikommando eller belöning.',
       setup: [
         'Välj en position (sitt eller ligg) och träna bara en sak: duration eller avstånd.',
         'Ha belöningen redo så du kan belöna innan hunden bryter.',
@@ -411,7 +411,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Undvik att upprepa signalen – sänk kriteriet istället.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni tränar hunden bromsar/stannar direkt på signal (1 pip/ord) och kan belönas där den är.',
+      todaySummary: 'Idag tränar ni att hunden bromsar direkt på signal och kan belönas där den är.',
       setup: [
         'Börja nära (0–1 m) i lugn miljö.',
         'Ha belöningar som kan “levereras på plats” (kasta/rulla godis).',
@@ -454,7 +454,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Hunden kan avvakta med kort latens i två miljöer på samma nivå.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni tränar hunden kan vara still/avvaktande trots trigger (rörelse/doft) tills frikommando.',
+      todaySummary: 'Idag tränar ni stillhet och avvaktande trots trigger tills frikommando.',
       setup: [
         'Välj en tydlig trigger (mat, leksak, rörelse) och gör den “svag” först.',
         'Ha belöning redo och jobba i korta set (10–20 sek).',
@@ -492,7 +492,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Belöna orientering när hunden fortfarande är “kontaktbar”, inte när den redan drar.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni tränar hunden självmant återorienterar (blick/kom-in) till dig utan att du ropar.',
+      todaySummary: 'Idag tränar ni spontana check-ins — hunden återorienterar till dig utan att du ropar.',
       setup: [
         'Målet är spontana check-ins. Inga kommandon i början.',
         'Ha belöning redo och börja i lätt miljö.',
@@ -530,7 +530,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Byt belöning (mer värde) när miljön blir svårare.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni tränar hunden söker/nosar men håller kontakt och kan avbryta/komma in vid signal.',
+      todaySummary: 'Idag tränar ni kontrollerat sök: nosar, håller kontakt och kommer in på signal.',
       setup: [
         'Välj ett enkelt sök: 3–5 godisbitar i gräs eller en lätt gömma inne.',
         'Ha en tydlig avslutssignal (“klart”) och belöna avslut.',
@@ -569,7 +569,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Korta set och fler pauser.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni tränar hunden kan avstå eller vänta trots trigger, utan att stressa upp.',
+      todaySummary: 'Idag tränar ni avstående och väntan trots trigger, utan att stressa upp.',
       setup: [
         'Välj en enkel trigger (mat i hand, skål, leksak).',
         'Ha en tydlig “fri”-signal som betyder att hunden får ta/agera.',
@@ -607,7 +607,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Tvinga aldrig — låt hunden välja avstånd.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni tränar hunden exponeras för ett nytt stimuli (ljud, yta, människa, djur) och förblir lugn och nyfiken utan stress.',
+      todaySummary: 'Idag exponerar ni hunden för nytt stimuli och belönar lugn, nyfiken utforskning.',
       setup: [
         'Välj ett nytt stimuli per session.',
         'Ha hög-värde belöning redo.',
@@ -647,7 +647,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Träna "fokus" vid lugnare tillfällen och bygg upp association.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni tränar hunden håller ögonkontakt med föraren i minst 2 sekunder trots distraktion.',
+      todaySummary: 'Idag tränar ni ögonkontakt i minst 2 sekunder trots distraktion.',
       setup: [
         'Stå still. Ha belöning gömd i handen bakom ryggen.',
         'Vänta på spontan ögonkontakt — belöna.',
@@ -686,7 +686,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Om hunden tappar det tidigt: belöna för kortare bärning och bygg upp.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni tränar hunden hämtar objektet, bär det tillbaka mjukt och lämnar det i handen.',
+      todaySummary: 'Idag tränar ni hämtning, mjukt bärande och leverans i handen.',
       setup: [
         'Välj ett objekt hunden gillar (mjukt dummy, leksak).',
         'Träna inne i kort korridor eller liten yta.',
@@ -726,7 +726,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Om hunden är rädd: gå tillbaka till pöl/kanten och belöna närvaro.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni tränar hunden frivilligt kliver/simmar in i vatten på uppmuntran.',
+      todaySummary: 'Idag tränar ni frivilligt vattenarbete — kliva eller simma in på uppmuntran.',
       setup: [
         'Välj stillastående, grunt vatten (strand/bäck) i lugn miljö.',
         'Ha hög-värde belöning och leksak redo.',
@@ -766,7 +766,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Korta pass (3–5 min) — vallning är mentalt och fysiskt intensivt.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni tränar hunden visar kontrollerat vallningsbeteende (eye, crouch, flank) och kan avbryta/komma in på signal.',
+      todaySummary: 'Idag tränar ni kontrollerad vallning (eye, flank) med avbrott på signal.',
       setup: [
         'Träna alltid utan boskap här i appen — använd boll, kon eller skateboard som "byte". Live-djur kräver instruktör på plats (vallningsklubb, Svenska Brukshundklubbens vallningskurs).',
         'Ha stoppsignal säkert inlärd INNAN du introducerar rörliga triggers.',
@@ -807,7 +807,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Korta pass (3–5 sök) och avsluta med en lätt vinst.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni tränar hunden hittar gömd doft/belöning och indikerar platsen tydligt (sitter/pöser/pekar).',
+      todaySummary: 'Idag tränar ni att hitta gömd doft och indikera platsen tydligt.',
       setup: [
         'Börja med mat-doft (godis i box) — inte nödvändigt med specifik doft.',
         'Starta med 1 box utan lock, bygg upp till stängda boxar.',
@@ -847,7 +847,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Fri är en belöning — ge det med glad ton och låt hunden njuta av friheten.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni tränar hunden håller ett beteende (sitt/ligg/stanna/plats) tills "fri" ges — och inte bryter utan signal.',
+      todaySummary: 'Idag tränar ni att hunden håller beteende tills "fri" ges — utan att bryta själv.',
       setup: [
         'Välj ett konsekvent ord: "fri", "ok" — och håll det.',
         'Träna alltid fri i kombination med ett annat beteende (sitt, ligg, stanna, plats).',
@@ -886,7 +886,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Blanda in korta fotsteg-sekvenser i vanliga promenader.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni tränar hunden går i fotsteg (vänster sida, axeln vid ditt knä) i 3–5 steg med blickkontakt.',
+      todaySummary: 'Idag tränar ni fotsteg vid vänster sida i 3–5 steg med blickkontakt.',
       setup: [
         'Ha belöning i vänster hand eller ficka — inte framför hunden.',
         'Börja inne med låg distraktion.',
@@ -927,7 +927,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Bygg upp durationen i väldigt små steg — 1s, 3s, 5s, 10s.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni tränar hunden självmant går till sin matta, lägger sig och väntar tills fri-signal ges.',
+      todaySummary: 'Idag tränar ni att hunden går till mattan, lägger sig och väntar tills fri-signal.',
       setup: [
         'Välj en specifik matta/plats — hunden kopplar tydligt objekt till beteendet.',
         'Lägg mattan synlig men inte mitt i vägen.',
@@ -969,7 +969,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Straffa aldrig olyckor — torka upp neutralt med enzymatisk rengöring (ta bort doft helt).',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni hunden kissar/bajsar utomhus (eller på avsedd plats) inom 2 minuter efter att du tagit ut den.',
+      todaySummary: 'Idag tränar ni utomhusrastning — kiss/bajs på avsedd plats inom 2 minuter efter att ni gått ut.',
       setup: [
         'Bestäm en fast rastningsplats utomhus de första veckorna — samma doft hjälper igångsättning.',
         'Ha godis i fickan redan när du sätter på kopplet — du måste belöna inom 1 sekund.',
@@ -1009,7 +1009,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Bett mot barn → barn ska aldrig vara primär bettmål. Separera fysiskt och bygg upp lugna interaktioner från valpens vila-läge.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni valpen släpper handen/kläderna inom 2 sekunder efter ditt feedback-ljud, ELLER väljer ett godkänt alternativ (leksak, tugg) av sig själv.',
+      todaySummary: 'Idag tränar ni att valpen släpper handen snabbt eller väljer godkänt tuggalternativ.',
       setup: [
         'Ha alltid 2–3 godkända tuggleksaker tillgängliga (kong, raggsocka med knut, gummi-tugg).',
         'Bestäm en tydlig regel: vid hårt bett slutar leken — alla i hushållet följer samma regel.',
@@ -1050,7 +1050,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Hunden går in men panikar när dörren stängs → öppna direkt, ingen press. Träna värdefulla saker (kong med kyld leverpate) i öppen bur tills den älskar platsen.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni hunden går frivilligt in i sin bur/box och stannar lugnt under den tid du tränar (start: 10 sek, mål: 1 timme tyst vila).',
+      todaySummary: 'Idag tränar ni frivillig burträning — gå in och vila lugnt (börja med 10 sek).',
       setup: [
         'Bur i passande storlek — hunden ska kunna stå, vända sig och ligga utsträckt. Inte större (för stor = de kissar i ena hörnet).',
         'Mjuk filt + 1–2 favorittuggleksaker. Aldrig täcke som kan kvävas.',
@@ -1092,7 +1092,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Skäller bara mot grannar eller ljud → inte separationsångest. Trygga miljön (vita-brus, gardiner) istället.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni hunden är lugn (ingen skall, gnyl, panik) under hela den tid du är borta.',
+      todaySummary: 'Idag tränar ni ensamhet: hunden ska vara lugn utan skall, gnyl eller panik medan du är borta.',
       setup: [
         'Tröttkör hunden fysiskt + mentalt INNAN du tränar ensamhet — en sömnig hund klarar mer.',
         'Lämna en fryst kong eller långtuggande gott (utan att hunden hinner äta upp på 1 min).',
@@ -1134,7 +1134,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Hunden skäller redan när du tagit fram godiset (förväntan-skäll) → byt rutin: ut till trigger-zon, sätt dig 5 min, vänta tills hunden är lugn innan godis.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni hunden tittar på triggern (max 1 sekund), vänder sig sedan mot dig av sig själv, och tar belöning lugnt.',
+      todaySummary: 'Idag tränar ni LAT: kort blick på trigger, sedan vända mot dig och ta belöning lugnt.',
       setup: [
         'Identifiera DIN hunds working distance i förväg (en lugn promenad utan trigger-pass) — det avståndet där den ser triggern men fortfarande kan engagera sig.',
         'High-value belöningar (korv, lever, ost) ENBART för LAT — inte vanligt godis.',
