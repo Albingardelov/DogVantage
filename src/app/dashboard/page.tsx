@@ -435,7 +435,7 @@ function Dashboard() {
       </header>
 
       <div className={styles.scrollArea}>
-        {profile?.id && !beforeHomecoming && !isPuppyMode(ageWeeks) && (
+        {profile?.id && !beforeHomecoming && (
           <TrainingProjectCard
             dogId={profile.id}
             onChanged={() => setProjectVersion((v) => v + 1)}
