@@ -26,6 +26,8 @@ function baseContext(overrides: Partial<WeekPlanContext> = {}): WeekPlanContext 
     isInHeat: false,
     skenfasActive: false,
     progressionRule: null,
+    project: null,
+    recentSkips: {},
     isReactive: false,
     hasCats: false,
     hasOutdoorCats: false,

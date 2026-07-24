@@ -13,6 +13,10 @@ export const TrainingResultSchema = z.object({
   source_url: z.string().optional().default(''),
   sources: z.array(TrainingSourceRefSchema).optional(),
   attributionNote: z.string().optional(),
+  suggestedProject: z.object({
+    protocolId: z.string(),
+    label: z.string(),
+  }).optional(),
 })
 
 export const ExerciseSchema = z.object({

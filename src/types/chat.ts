@@ -19,4 +19,6 @@ export interface ChatMessage {
   sources?: TrainingSourceRef[]
   attributionNote?: string
   retryQuery?: string
+  /** Förslag att starta ett träningsprojekt utifrån frågans ämne. */
+  suggestedProject?: { protocolId: string; label: string }
 }

@@ -15,6 +15,8 @@ import { getBehaviorContextPayloadFromDb } from '@/lib/dog/build-behavior-contex
 import { extractChatTopic } from '@/lib/dog/chat-topics'
 import { summarizeDogTimeline } from '@/lib/dog/timeline'
 import { logChatTopic, getRecentChatTopics } from '@/lib/supabase/chat-topics'
+import { getActiveProject } from '@/lib/supabase/training-projects'
+import { PROTOCOL_BY_CHAT_TOPIC, TRAINING_PROTOCOLS } from '@/lib/training/training-projects'
 import { getCheckIns } from '@/lib/supabase/daily-check-ins'
 import { getChatMessages, appendChatExchange } from '@/lib/supabase/chat-messages'
 import { getDogState } from '@/lib/supabase/dog-state'
@@ -45,6 +47,27 @@ function formatMetricsForPrompt(metrics: Record<string, import('@/types').DailyE
 
 const PROMPT_HISTORY_LIMIT = 8
 const HISTORY_CHAR_LIMIT = 1000
+
+/**
+ * Stänger loopen chatt → plan: matchar frågan ett startbart träningsprojekt
+ * som inte redan är aktivt, föreslås det synligt i chatten.
+ */
+async function suggestProjectForQuery(
+  dogId: string,
+  query: string,
+): Promise<{ protocolId: string; label: string } | null> {
+  const topic = extractChatTopic(query)
+  const protocolId = topic ? PROTOCOL_BY_CHAT_TOPIC[topic] : undefined
+  if (!protocolId) return null
+  const protocol = TRAINING_PROTOCOLS[protocolId]
+  try {
+    const active = await getActiveProject(dogId)
+    if (active?.protocol_id === protocolId) return null
+  } catch {
+    return null
+  }
+  return { protocolId, label: protocol.label }
+}
 
 async function persistExchange(
   supabase: SupabaseClient<Database>,
@@ -150,7 +173,8 @@ export async function POST(req: NextRequest) {
           // LRU touch can run in the background.
           void touchCacheEntry(query, breed, locale, ageWeeks).catch(() => {})
           await persistExchange(supabase, dog.id, query, cached.content)
-          return NextResponse.json(cached)
+          const suggestedProject = await suggestProjectForQuery(dog.id, query)
+          return NextResponse.json(suggestedProject ? { ...cached, suggestedProject } : cached)
         }
       }
 
@@ -189,7 +213,8 @@ export async function POST(req: NextRequest) {
         })
       }
 
-      return NextResponse.json(result)
+      const suggestedProject = await suggestProjectForQuery(dog.id, query)
+      return NextResponse.json(suggestedProject ? { ...result, suggestedProject } : result)
     })
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
