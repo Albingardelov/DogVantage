@@ -128,27 +128,61 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Byt miljö till enklare och bygg upp igen.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni slakt koppel i korta bitar och belönar när hunden återvänder till din sida.',
+      todaySummary: 'Idag tränar ni slakt koppel i korta bitar — belöna vid din sida, vänd när linan sträcks.',
       setup: [
-        'Ha 10–20 små belöningar redo i fickan.',
-        'Starta i lätt miljö (inne/uppfart) innan du går ut i “svårt”.',
-        'Målet är slakt koppel i korta bitar, inte lång promenad.',
+        'Ha 15–20 små bitar godis i fickan, lätta att ta fram snabbt.',
+        'Börja inne eller på uppfarten — inte på en stökig gata först.',
+        'Målet är mikro-reps med slakt koppel, inte en lång promenad.',
       ],
       steps: [
-        { how: 'Stå still. Vänta 1 sekund på att hunden vänder mot dig → belöna vid din sida.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Gå 1–2 steg. Om kopplet är slakt → belöna direkt.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Om kopplet sträcks → vänd lugnt bort/byt riktning. Belöna när hunden följer och kopplet slakar.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Gör 5–10 “mikro-reps” och ta paus.', why: 'Så här byggs beteendet steg för steg.' },
+        {
+          how: 'Stå still. Vänta tills hunden vänder mot dig eller står vid din sida → belöna lågt vid ditt ben.',
+          why: 'Hunden lär sig att din sida är där jackpoten finns, innan ni ens börjar gå.',
+        },
+        {
+          how: 'Gå 1–2 steg. Är kopplet slakt? Belöna direkt vid sidan. Upprepa.',
+          why: 'Korta lyckade bitar bygger “gå bredvid = belöning” utan att kräva hela kvarteret.',
+        },
+        {
+          how: 'Sträcks kopplet? Säg inget. Vänd lugnt 180° och gå åt andra hållet. Belöna när hunden följer och linan slakar.',
+          why: 'Vändningen gör dig intressant igen — utan att du tjatar eller rycker i linan.',
+        },
+        {
+          how: 'Gör 5–10 sådana mikro-reps, ta paus, avsluta efter en tydlig lyckad bit.',
+          why: 'Korta pass håller kvaliteten hög innan hunden tröttnar eller miljön tar över.',
+        },
       ],
-      successLooksLike: 'Lyckad rep när hunden kan gå med slakt koppel i några steg och återvända till dig för belöning.',
+      successLooksLike: 'Hunden går några steg med slakt koppel och återvänder till din sida för belöning utan att du drar.',
       whenItFails: [
-        'Belöna tätare och minska förväntningarna (kortare sträckor).',
-        'Byt till bättre belöning utomhus.',
-        'Byt miljö till enklare och bygg upp igen.',
+        'Belöna tätare — nästan varje steg — och håll sträckorna kortare.',
+        'Byt till godare belöning ute, eller gå tillbaka inne/uppfart en stund.',
+        'Om hunden inte tar godis ute: miljön är för svår. Flytta till enklare plats.',
       ],
       wrapUp: [
-        'Två miss i rad → sänk kriteriet (kortare sträcka/lättare miljö) och avsluta efter 1 lyckad.',
-        'Om hunden inte tar belöning ute → gå in/byt till enklare miljö.',
+        'Två miss i rad → kortare sträcka, en lyckad, och avsluta där.',
+        'Sluta medan kopplet fortfarande är mestadels slakt — inte mitt i ett långt drag.',
+      ],
+      variants: [
+        {
+          id: 'treat_magnet',
+          label: 'Godismagnet vid höften',
+          whenToUse: 'När hunden drar framåt konstant och aldrig tittar in mot dig.',
+          how: [
+            'Håll en synlig belöning vid vänster höft medan ni går 2–3 steg.',
+            'Belöna från den handen bara när nosen är vid din sida.',
+          ],
+          why: 'Gör dig till magneten i stället för världen framför — utan att rycka i kopplet.',
+        },
+        {
+          id: 'tree_reset',
+          label: 'Stopp vid träd / stolpe',
+          whenToUse: 'När gatan är för svår men ni måste vara ute.',
+          how: [
+            'Gå till närmaste träd/stolpe. Stå still tills kopplet slakar.',
+            'Belöna lugn vid sidan, ta 3 steg, upprepa.',
+          ],
+          why: 'Bryter drag-spiralen och ger hunden en klar “reset” utan konflikt.',
+        },
       ],
     }
   }),
@@ -213,28 +247,61 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Kort latens (<1–3s) utan att du “tjatar” med flera signaler.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni att hunden vänder direkt och kommer hela vägen in (minst 80% i den här miljön).',
+      todaySummary: 'Idag bygger ni en glad inkallning: hunden vänder och springer hela vägen in till dig.',
       setup: [
-        'Träna i säker miljö (inne/inhägnat). Ute: använd långlina vid behov.',
-        'Ha belöning som är bättre än omgivningen (särskilt ute).',
-        'Säg signalen en gång. Om du behöver “tjata” är kriteriet för svårt.',
+        'Börja inne eller i inhägnad trädgård — ingen trafik, inga andra hundar.',
+        'Ha belöning som är bättre än omgivningen (extra god mat eller favoritleksak).',
+        'Planera 3–5 minuter. Hellre korta lyckade reps än långt tjat.',
       ],
       steps: [
-        { how: 'Säg hundens namn → när hunden tittar: säg inkallningssignal (“kom”) och backa 1–2 steg.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Belöna direkt när hunden vänder, och igen när den når dig (om du vill bygga fart).', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Släpp hunden igen (“fri”) så inkallning inte betyder “kul tar slut”.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Gör 3–5 reps, pausa, avsluta i framgång.', why: 'Så här byggs beteendet steg för steg.' },
+        {
+          how: 'Stå några steg ifrån. Säg namnet en gång. När hunden tittar: säg er inkallningssignal (“kom”) och backa två steg med glad kropp.',
+          why: 'När du rör dig bakåt blir du mer intressant än det hunden höll på med.',
+        },
+        {
+          how: 'I samma ögonblick hunden vänder mot dig: belöna (markör + godis/lek). Belöna igen när nosen når dig.',
+          why: 'Dubbel belöning lär “vänd = jackpot” och “kom in till dig = fest”.',
+        },
+        {
+          how: 'Ge en tydlig fri-signal och låt hunden gå ifrån dig igen i några sekunder.',
+          why: 'Annars lär sig hunden att “kom” betyder att det roliga tar slut — då blir den seg.',
+        },
+        {
+          how: 'Upprepa 3–5 gånger. Avsluta alltid efter en lyckad rep. Säg signalen bara en gång.',
+          why: 'Tjat lär hunden att ignorera dig. Korta pass håller kvaliteten hög.',
+        },
       ],
-      successLooksLike: 'Lyckad rep när hunden vänder mot dig direkt och kommer hela vägen in (minst 80% i den här miljön).',
+      successLooksLike: 'Hunden vänder direkt och kommer hela vägen in på första signalen, utan att du upprepar dig.',
       whenItFails: [
-        'Sänk avstånd och störning (gå en nivå lättare).',
-        'Höj belöningsvärdet (bättre godis/leksak) och belöna snabbare.',
-        'Kör 3 “enkla” reps i rad innan du provar igen.',
-        'Byt miljö (för svårt just här) och gör passet kortare.',
+        'Gå närmare innan du ropar — börja på 1 meter om 3 meter är för svårt.',
+        'Byt till godare belöning eller leksak, och belöna snabbare vid vändningen.',
+        'Gör tre supersmidiga reps inne innan ni går ut igen.',
       ],
       wrapUp: [
-        'Två miss i rad → sänk avstånd/störning direkt och avsluta efter 1 lyckad rep.',
-        'Om latens >3s ute → backa till lättare miljö eller högre belöning.',
+        'Två miss i rad → gå närmare, få en lyckad, och avsluta där.',
+        'Sluta medan hunden fortfarande vill mer — inte när den redan tröttnat.',
+      ],
+      variants: [
+        {
+          id: 'toy_chase',
+          label: 'Leksaksjakt',
+          whenToUse: 'När maten känns platt idag, eller hunden är igång och vill leka.',
+          how: [
+            'Samma korta avstånd och en signal.',
+            'När hunden kommer: 2–5 sek dragkamp eller kasta-lek tätt intill dig.',
+          ],
+          why: 'Byter belöningsvaluta till det som faktiskt motiverar just den här hunden idag.',
+        },
+        {
+          id: 'long_line_release',
+          label: 'Långlina + släpp ut igen',
+          whenToUse: 'När det funkar hemma men ute “hörs inte”, eller frihet vinner över dig.',
+          how: [
+            'Sätt långlina. Kalla en gång. Guidda in vid behov — tjata inte med rösten.',
+            'Belöna vid dig, ge fri, och låt hunden gå ut på linan igen direkt.',
+          ],
+          why: 'Ger lycka utan att “kom” betyder fångenskap, och håller träningen ärlig i svårare miljö.',
+        },
       ],
     }
   }),
@@ -294,26 +361,64 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Om hunden studsar: byt till lugnare belöning eller belöna lägre/närmare.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni sitt: rumpan i marken inom 1–3 sek och hunden stannar kvar tills du belönar.',
+      todaySummary: 'Idag lär ni sitt: locka → fasa ut godiset i handen → lägg på signalen.',
       setup: [
-        'Ha 10 små belöningar redo.',
-        'Träna i lugn miljö först. Byt plats först när det är stabilt.',
+        'Ha 10 små belöningar. En hand för locking, den andra för att ge godiset.',
+        'Träna inne först. Stå framför hunden, inte över den.',
       ],
       steps: [
-        { how: 'Visa lockning (om behövs): för belöningen långsamt upp/över nosen → rumpan hamnar i marken.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Markera precis när rumpan träffar marken → belöna direkt.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Säg signal (“sitt”) precis innan du gör samma handrörelse.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Gör 3–5 reps, pausa, avsluta i framgång.', why: 'Så här byggs beteendet steg för steg.' },
+        {
+          how: 'Håll godis vid nosen. För handen långsamt uppåt/bakåt över huvudet så rumpan sjunker i marken.',
+          why: 'Rätt handrörelse gör sitt till det bekväma valet — utan att du trycker ner rumpan.',
+        },
+        {
+          how: 'I samma ögonblick rumpan träffar golvet: säg “ja!” (eller klick) och ge godiset.',
+          why: 'Timing här avgör om hunden kopplar sitt till belöningen — inte “nosen följer handen”.',
+        },
+        {
+          how: 'Nästa pass: gör samma handrörelse UTAN godis i den handen. Belöna från andra handen när rumpan är ner.',
+          why: 'Så slipper ni fastna i att hunden bara sitter när den luktar mat i handen.',
+        },
+        {
+          how: 'När rörelsen sitter: säg “sitt” först, vänta upp till 2 sek, hjälp med handen bara om det behövs. Belöna snabbt.',
+          why: 'Signalen ska förutsäga beteendet — inte komma efteråt som en efterhandskommentar.',
+        },
+        {
+          how: 'Gör 3–5 reps, ge fri, pausa. Avsluta på en lyckad.',
+          why: 'Korta serier håller rumpan lugn och undviker studs upp-ner.',
+        },
       ],
-      successLooksLike: 'Lyckad rep när rumpan är i marken inom 1–3 sek och hunden stannar kvar tills du belönar.',
+      successLooksLike: 'Rumpan i marken inom 1–3 sekunder på första försöket, och hunden stannar kvar tills du belönar.',
       whenItFails: [
-        'Sänk kriteriet: belöna snabbare (ingen duration).',
-        'Korta passet och gör 3 lätta reps i följd.',
-        'Om hunden studsar: byt till lugnare belöning eller belöna lägre/närmare.',
+        'Belöna snabbare — ingen väntan i sitt ännu.',
+        'Gå tillbaka till locking med godis i handen i tre lätta reps.',
+        'Om hunden studsar upp: belöna lägre (mot golvet) eller byt till lugnare godis.',
       ],
       wrapUp: [
-        'Två miss i rad → backa (locka igen / lättare miljö) och avsluta efter 1 lyckad.',
-        'Om hunden blir uppvarvad: pausa 30–60 sek, gör 1 lätt rep och avsluta.',
+        'Två miss i rad → backa till locking, få en lyckad, och avsluta där.',
+        'Om hunden blir uppvarvad: pausa 30–60 sek, gör en lätt rep och avsluta.',
+      ],
+      variants: [
+        {
+          id: 'capture_sit',
+          label: 'Fånga sitt',
+          whenToUse: 'När locking gör hunden hetsig eller den bara följer handen utan att tänka.',
+          how: [
+            'Vänta. När hunden sätter sig av sig själv → “ja!” och jackpot.',
+            'Lägg på signalen “sitt” precis när den börjar sätta sig själv.',
+          ],
+          why: 'Hunden uppfinner beteendet — ofta lugnare och mer medvetet än ren locking.',
+        },
+        {
+          id: 'wall_sit',
+          label: 'Sitt vid vägg',
+          whenToUse: 'När hunden backar i stället för att sätta sig vid locking.',
+          how: [
+            'Stå med hunden nära en vägg bakom rumpan.',
+            'Locka uppåt — väggen hindrar bakåt, rumpan går ner. Belöna direkt.',
+          ],
+          why: 'Gör sitt till den enda bekväma vägen utan att du trycker på kroppen.',
+        },
       ],
     }
   }),
@@ -927,27 +1032,61 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       'Bygg upp durationen i väldigt små steg — 1s, 3s, 5s, 10s.',
     ],
     guide: {
-      todaySummary: 'Idag tränar ni att hunden går till mattan, lägger sig och väntar tills fri-signal.',
+      todaySummary: 'Idag gör ni mattan magisk: dit går hunden, lägger sig, och väntar på fri.',
       setup: [
-        'Välj en specifik matta/plats — hunden kopplar tydligt objekt till beteendet.',
-        'Lägg mattan synlig men inte mitt i vägen.',
-        'Ha många små belöningar redo — belöna på mattan, inte vid dig.',
+        'En tydlig matta eller bädd — samma varje gång i början.',
+        'Lägg den synlig men inte mitt i trafikstråket hemma.',
+        'Ha många små belöningar. Belöna PÅ mattan, inte när hunden kommer till dig.',
       ],
       steps: [
-        { how: 'Locka/peka mot mattan → belöna direkt när hunden kliver på.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Vänta på att hunden lägger sig (forma om det behövs) → jackpot-belöning på mattan.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Ge "plats"-signalen precis innan hunden rör sig mot mattan.', why: 'Så här byggs beteendet steg för steg.' },
-        { how: 'Öka duration gradvis. Avsluta alltid med tydlig "fri"-signal.', why: 'Så här byggs beteendet steg för steg.' },
+        {
+          how: 'Vänta. När hunden nosar eller trampar på mattan av sig själv → belöna direkt på mattan.',
+          why: 'Mattan ska kännas som jackpot-zonen — utan att du lockar eller tjatar.',
+        },
+        {
+          how: 'När hunden lägger sig på mattan (vänta eller forma mjukt) → stor belöning på mattan.',
+          why: 'Ligg på mattan är målet; belöning vid dig lär fel plats.',
+        },
+        {
+          how: 'När beteendet är frivilligt: säg “plats” precis när hunden börjar gå dit. Belöna på mattan.',
+          why: 'Signalen ska förutsäga något hunden redan kan — inte skapa stress.',
+        },
+        {
+          how: 'Lägg till sekunder: belöna lugn på mattan, öka 1 → 3 → 5 sek. Avsluta alltid med tydlig “fri”.',
+          why: 'Utan fri vet hunden inte när det är slut — och reser sig för tidigt.',
+        },
       ],
-      successLooksLike: 'Lyckad rep när hunden självmant går till sin matta, lägger sig och väntar tills fri-signal ges.',
+      successLooksLike: 'Hunden går till mattan, lägger sig och stannar tills du ger fri — utan att du tjatar.',
       whenItFails: [
-        'Om hunden inte lägger sig: forma ligg på mattan med luringlocket och belöna.',
-        'Om hunden stiger upp tidigt: minska durationen och belöna tätare på mattan.',
-        'Bygg upp durationen i väldigt små steg — 1s, 3s, 5s, 10s.',
+        'Om hunden inte lägger sig: forma ligg på mattan med lätt locking och belöna där.',
+        'Om den reser sig tidigt: belöna tätare på mattan och sänk tiden.',
+        'Bygg sekunder i små steg: 1, 3, 5 — inte direkt 30.',
       ],
       wrapUp: [
-        'Tre missar → gå tillbaka till kortare duration och avsluta på lyckad.',
-        'Om hunden vägrar ligga → träna ligg separat och återkom till plats.',
+        'Tre missar → kortare tid på mattan, en lyckad, fri, och avsluta.',
+        'Vägrar ligga? Träna ligg separat, kom tillbaka till plats imorgon.',
+      ],
+      variants: [
+        {
+          id: 'treat_trail',
+          label: 'Godisslinga till mattan',
+          whenToUse: 'När hunden ignorerar mattan helt.',
+          how: [
+            'Lägg 3–4 godis i en slinga som slutar på mattan.',
+            'När nosen är på mattan: jackpot där. Ta bort slingan när den börjar gå dit själv.',
+          ],
+          why: 'Gör vägen till mattan uppenbar utan att du jagar eller pekar argt.',
+        },
+        {
+          id: 'guest_settle',
+          label: 'Plats när det händer något',
+          whenToUse: 'När mattan funkar i lugn men faller sönder vid dörr/gäster.',
+          how: [
+            'En person knackar eller rör sig i hallen på avstånd.',
+            'Be om plats, belöna tätare på mattan, ge fri innan hunden spricker.',
+          ],
+          why: 'Tränar lugn i verkligheten — men bara när grundspelet redan sitter.',
+        },
       ],
     }
   }),
