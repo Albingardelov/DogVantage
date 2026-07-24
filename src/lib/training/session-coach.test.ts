@@ -57,6 +57,7 @@ describe('buildCoachAction', () => {
     }))
     expect(action?.kind).toBe('stop')
     expect(action?.suggestedLevelId).toBe('home_low')
+    expect(action?.message).toMatch(/Det går inte/)
   })
 
   it('stop at the lowest ladder step has no suggested level', () => {
@@ -106,6 +107,7 @@ describe('buildCoachAction', () => {
     const action = buildCoachAction(input({ successCount: 5, failCount: 5 }))
     expect(action?.kind).toBe('lower')
     expect(action?.suggestedLevelId).toBe('home_low')
+    expect(action?.message).toMatch(/Det går inte/)
   })
 
   it('a positive advanceThresholdDelta raises the bar for raise', () => {

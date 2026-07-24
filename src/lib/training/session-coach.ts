@@ -36,6 +36,13 @@ const ADVANCE_THRESHOLD = 0.8
 const REGRESS_THRESHOLD = 0.6
 const MAX_ADVANCE_THRESHOLD = 0.9
 
+const GUIDE_FAIL_VARIANT_HINT =
+  'Öppna guiden och tryck "Det går inte" om du vill byta grepp.'
+
+function withGuideFailHint(message: string): string {
+  return `${message} ${GUIDE_FAIL_VARIANT_HINT}`
+}
+
 export function advanceGuard(
   guard: SessionGuard,
   patch: Partial<DailyExerciseMetrics>,
@@ -79,8 +86,9 @@ export function buildCoachAction(input: CoachInput): CoachAction | null {
     return {
       kind: 'stop',
       suggestedLevelId: lowerLevelId,
-      message:
+      message: withGuideFailHint(
         'Pausa och backa nivån direkt — avsluta efter en lyckad rep. Om hunden inte tar belöning kan den vara stressad eller över tröskeln: gör lättare eller öka avstånd.',
+      ),
     }
   }
   if (guard.stopTriggered && input.successCount > 0) {
@@ -123,8 +131,9 @@ export function buildCoachAction(input: CoachInput): CoachAction | null {
     return {
       kind: 'lower',
       suggestedLevelId: lowerLevelId,
-      message:
+      message: withGuideFailHint(
         'Träffsäkerheten är under 80 %, så vi sänker ett steg och höjer belöningsvärdet. Det är inte ett misslyckande — under 80 % betyder bara att kraven är för höga just nu.',
+      ),
     }
   }
   return {
