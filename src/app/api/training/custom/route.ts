@@ -11,18 +11,67 @@ import {
 import { getGeminiTextModel, jsonGenConfig } from '@/lib/ai/client'
 import { aiErrorResponse } from '@/lib/ai/errors'
 import { slugify, randomSuffix } from '@/lib/utils/slugify'
-import type { ExerciseSpec } from '@/lib/training/exercise-specs'
+import type {
+  ExerciseSpec,
+  GuideStep,
+  GuideVariant,
+  HandlerGuide,
+} from '@/lib/training/exercise-specs'
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0
+}
+
+function isStringArray(value: unknown, minLength = 1): value is string[] {
+  if (!Array.isArray(value) || value.length < minLength) return false
+  return value.every((item) => isNonEmptyString(item))
+}
+
+function validateGuideStep(value: unknown): value is GuideStep {
+  if (!value || typeof value !== 'object') return false
+  const step = value as Record<string, unknown>
+  return isNonEmptyString(step.how) && isNonEmptyString(step.why)
+}
+
+function validateGuideVariant(value: unknown): value is GuideVariant {
+  if (!value || typeof value !== 'object') return false
+  const variant = value as Record<string, unknown>
+  return (
+    isNonEmptyString(variant.id) &&
+    isNonEmptyString(variant.label) &&
+    isNonEmptyString(variant.whenToUse) &&
+    isStringArray(variant.how) &&
+    isNonEmptyString(variant.why)
+  )
+}
+
+function validateHandlerGuide(value: unknown): value is HandlerGuide {
+  if (!value || typeof value !== 'object') return false
+  const guide = value as Record<string, unknown>
+  if (!isNonEmptyString(guide.todaySummary)) return false
+  if (!isStringArray(guide.setup)) return false
+  if (!Array.isArray(guide.steps) || guide.steps.length < 3) return false
+  if (!guide.steps.every(validateGuideStep)) return false
+  if (!isNonEmptyString(guide.successLooksLike)) return false
+  if (!isStringArray(guide.whenItFails)) return false
+  if (!isStringArray(guide.wrapUp)) return false
+  if (guide.variants !== undefined) {
+    if (!Array.isArray(guide.variants) || guide.variants.length === 0 || guide.variants.length > 2) {
+      return false
+    }
+    if (!guide.variants.every(validateGuideVariant)) return false
+  }
+  return true
+}
 
 function validateCustomExerciseSpec(raw: unknown): (Omit<ExerciseSpec, 'exerciseId'> & { label: string }) | null {
   if (!raw || typeof raw !== 'object') return null
   const r = raw as Record<string, unknown>
-  if (typeof r.label !== 'string' || !r.label.trim()) return null
-  if (typeof r.definition !== 'string' || !r.definition.trim()) return null
+  if (!isNonEmptyString(r.label)) return null
+  if (!isNonEmptyString(r.definition)) return null
   if (!Array.isArray(r.ladder) || r.ladder.length < 2) return null
-  if (!Array.isArray(r.troubleshooting) || r.troubleshooting.length < 1) return null
-  if (!r.guide || typeof r.guide !== 'object') return null
-  const g = r.guide as Record<string, unknown>
-  if (!Array.isArray(g.setup) || !Array.isArray(g.steps) || !Array.isArray(g.logging) || !Array.isArray(g.commonMistakes) || !Array.isArray(g.stopRules)) return null
+  if (!isStringArray(r.troubleshooting)) return null
+  if (!validateHandlerGuide(r.guide)) return null
   return raw as Omit<ExerciseSpec, 'exerciseId'> & { label: string }
 }
 
@@ -33,20 +82,32 @@ Fält:
 - definition: EN mening — vad räknas som en lyckad rep, konkret och mätbart
 - ladder: 2–4 nivåer [{id:snake_case, label, criteria}], sorterat enklast→svårast; id = snake_case utan mellanslag
 - troubleshooting: 3 råd på svenska (array av strängar), konkreta åtgärder om det kör ihop sig
-- guide: objekt med exakt dessa fält (alla arrays, minst 3 poster vardera):
-  - setup: praktiska förberedelser innan passet startar (3–4 punkter)
-  - steps: numrerade steg-för-steg-instruktioner för föraren (4–5 punkter, exakt timing/teknik)
-  - logging: hur man loggar i appen — förklara Lyckad, Miss och Latens (3 punkter)
-  - commonMistakes: vanliga handlermisstag och hur man undviker dem (3–4 punkter)
-  - stopRules: tydliga stopp-kriterier med konkreta trösklar, t.ex. "Tre miss i rad → ..." (1–2 punkter)
+- guide: objekt med exakt dessa fält:
+  - todaySummary: EN mening som börjar med "Idag …" — vad ni tränar och varför det är värt det idag
+  - setup: praktiska förberedelser innan passet startar (2–4 punkter)
+  - steps: 3–5 objekt {how, why} — how = imperativ instruktion (kropp/röst/belöning synlig), why = EN mening om nyttan för ägaren
+  - successLooksLike: EN mening — så ser en lyckad rep ut i praktiken
+  - whenItFails: 1–3 konkreta åtgärder om det kör ihop sig (array av strängar)
+  - wrapUp: 1–2 punkter om när och hur man avslutar passet (array av strängar)
+  - variants (valfritt, max 2): [{id: snake_case, label, whenToUse, how: string[], why}] — alternativa grepp när standardmetoden inte biter
 
 Exempel på rätt detaljnivå (guide.steps):
-["Be om sitt. Vänta 1s. Ge 'fri' med glad ton → uppmuntra att hunden rör sig.",
- "Be om ligg. Vänta 3s. Ge 'fri' → belöna friheten.",
- "Öka väntetiden gradvis: 1s → 3s → 5s → 10s → 30s.",
- "Variera varaktigheten inom passet — ibland kort, ibland lång."]
+[
+  {
+    "how": "Stå några steg ifrån. Säg namnet en gång. När hunden tittar: säg signalen och backa två steg med glad kropp.",
+    "why": "När du rör dig bakåt blir du mer intressant än det hunden höll på med."
+  },
+  {
+    "how": "Belöna i samma ögonblick hunden vänder mot dig, och igen när nosen når dig.",
+    "why": "Dubbel belöning lär att vända mot dig ger jackpot."
+  },
+  {
+    "how": "Ge fri och låt hunden gå ifrån dig igen i några sekunder.",
+    "why": "Annars lär sig hunden att signalen betyder att det roliga tar slut."
+  }
+]
 
-Regler: allt på svenska · konkret och praktiskt, inte vagt · för fysiskt krävande övningar: lägg ålders-/hälsovarning i stopRules`
+Regler: allt på svenska · konkret och praktiskt, inte vagt · för fysiskt krävande övningar: lägg ålders-/hälsovarning i wrapUp`
 
 export async function GET(req: NextRequest) {
   try {
