@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
 import type { ExerciseSpec } from '@/lib/training/exercise-specs'
+import { normalizeHandlerGuide } from '@/lib/training/normalize-handler-guide'
 import type { DailyExerciseMetrics } from '@/types'
 import { IconClose } from '@/components/icons'
 import styles from './ExerciseGuideSheet.module.css'
@@ -41,6 +42,16 @@ export default function ExerciseGuideSheet({
 }) {
   const router = useRouter()
   const spec = customSpecs?.[exerciseId] ?? getExerciseSpec(exerciseId)
+  const guide = useMemo(
+    () =>
+      spec?.guide
+        ? normalizeHandlerGuide(spec.guide, {
+            definition: spec.definition,
+            troubleshooting: spec.troubleshooting,
+          })
+        : null,
+    [spec?.definition, spec?.guide, spec?.troubleshooting],
+  )
 
   const coachQuestion = useMemo(() => {
     const attempts = (metrics?.success_count ?? 0) + (metrics?.fail_count ?? 0)
@@ -74,18 +85,18 @@ export default function ExerciseGuideSheet({
           <strong>Lyckad rep:</strong> {spec.definition}
         </div>
 
-        {spec.guide && (
+        {guide && (
           <>
-            <div className={styles.definition}>{spec.guide.todaySummary}</div>
-            <Section title="Setup" items={spec.guide.setup} />
-            <Section title="Steg-för-steg (förare)" items={spec.guide.steps.map((s) => s.how)} />
-            <Section title="Lyckad rep" items={[spec.guide.successLooksLike]} />
-            <Section title="När det strular" items={spec.guide.whenItFails} />
-            <Section title="Avsluta passet" items={spec.guide.wrapUp} />
+            <div className={styles.definition}>{guide.todaySummary}</div>
+            <Section title="Setup" items={guide.setup} />
+            <Section title="Steg-för-steg (förare)" items={guide.steps.map((s) => s.how)} />
+            <Section title="Lyckad rep" items={[guide.successLooksLike]} />
+            <Section title="När det strular" items={guide.whenItFails} />
+            <Section title="Avsluta passet" items={guide.wrapUp} />
           </>
         )}
 
-        {!spec.guide && (
+        {!guide && (
           <div className={styles.definition}>
             Den här övningen saknar ännu en full guide. Använd definitionen + troubleshooting och tryck “Förklara mer”.
           </div>
