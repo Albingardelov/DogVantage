@@ -10,6 +10,9 @@ import ZoneCheckIn from './ZoneCheckIn'
 import RecoveryCard from './RecoveryCard'
 import styles from './PuppyDayCard.module.css'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
+import { resolveLiveCoach } from '@/lib/training/live-coach'
+import { getLifeStage } from '@/lib/dog/age'
+import { useExerciseSources } from '../TrainingCard/use-exercise-sources'
 import { advanceGuard, EMPTY_GUARD, type SessionGuard } from '@/lib/training/session-coach'
 import { buildExerciseSummaries, emptyMetrics } from '../TrainingCard/exercise-helpers'
 import { usePuppyDay } from './use-puppy-day'
@@ -48,6 +51,25 @@ export default function PuppyDayCard(props: Props) {
 
   const { zone, exercises, progress, metrics, loading, error, saveZone, setProgress, setMetrics } =
     usePuppyDay({ ...props, todayDate })
+
+  const exerciseIds = useMemo(() => exercises.map((e) => e.id), [exercises])
+  const exerciseSources = useExerciseSources(dogId, exerciseIds)
+
+  const checklistItems = useMemo(() => {
+    if (exercises.length === 0) return undefined
+    const focusEx = exercises.find((e) => (progress[e.id] ?? 0) < e.reps) ?? exercises[0]
+    const focusSpec = getExerciseSpec(focusEx.id)
+    if (!focusSpec) return undefined
+    return resolveLiveCoach({
+      spec: focusSpec,
+      levelId: metrics[focusEx.id]?.criteria_level_id ?? null,
+      coachKind: null,
+      exerciseLabel: focusEx.label,
+      exerciseId: focusEx.id,
+      lifeStage: getLifeStage(ageWeeks),
+      sources: exerciseSources[focusEx.id] ?? focusEx.sources,
+    }).checklistItems
+  }, [exercises, progress, metrics, ageWeeks, exerciseSources])
 
   const repsPlanned = useMemo(() => exercises.reduce((s, e) => s + e.reps, 0), [exercises])
   const repsDone = useMemo(
@@ -136,7 +158,12 @@ export default function PuppyDayCard(props: Props) {
           </p>
         )}
 
-        <PreSessionChecklist ageWeeks={ageWeeks} dateKey={todayDate} dogId={dogId} />
+        <PreSessionChecklist
+          ageWeeks={ageWeeks}
+          dateKey={todayDate}
+          dogId={dogId}
+          items={checklistItems}
+        />
 
         <DayProgressBar repsDone={repsDone} repsPlanned={repsPlanned} isRestDay={false} />
 

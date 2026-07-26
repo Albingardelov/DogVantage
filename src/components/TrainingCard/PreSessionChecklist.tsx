@@ -23,9 +23,16 @@ interface Props {
   ageWeeks: number
   dateKey: string
   dogId: string
+  items?: string[]
 }
 
-export default function PreSessionChecklist({ ageWeeks, dateKey, dogId }: Props) {
+const GENERIC_BULLETS = [
+  'Belöning och godbitar inom räckhåll — belöna i rätt ögonblick.',
+  'Lugn plats; stäng bort onödiga störningar om du kan.',
+  'En övning i taget: stabilisera innan du höjer kravet.',
+] as const
+
+export default function PreSessionChecklist({ ageWeeks, dateKey, dogId, items }: Props) {
   const [ready, setReady] = useState(false)
   const [dismissed, setDismissed] = useState(false)
 
@@ -49,16 +56,20 @@ export default function PreSessionChecklist({ ageWeeks, dateKey, dogId }: Props)
     setDismissed(true)
   }
 
+  const bullets =
+    items && items.length >= 1
+      ? items
+      : [...GENERIC_BULLETS.slice(0, 2), durationHint(ageWeeks), GENERIC_BULLETS[2]]
+
   return (
     <div className={styles.wrap} role="region" aria-labelledby="pre-session-title">
       <h2 id="pre-session-title" className={styles.title}>
         Före passet
       </h2>
       <ul className={styles.list}>
-        <li>Belöning och godbitar inom räckhåll — belöna i rätt ögonblick.</li>
-        <li>Lugn plats; stäng bort onödiga störningar om du kan.</li>
-        <li>{durationHint(ageWeeks)}</li>
-        <li>En övning i taget: stabilisera innan du höjer kravet.</li>
+        {bullets.map((text) => (
+          <li key={text}>{text}</li>
+        ))}
       </ul>
       <button type="button" className={styles.cta} onClick={acknowledge}>
         Jag är redo att träna
