@@ -415,6 +415,7 @@ export default function TrainingCard(props: Props) {
           exerciseId={guideExerciseId}
           exerciseLabel={todayExercises.find((e) => e.id === guideExerciseId)?.label}
           metrics={metrics[guideExerciseId] ?? null}
+          ageWeeks={ageWeeks}
           onClose={() => setGuideExerciseId(null)}
           customSpecs={customSpecs}
         />

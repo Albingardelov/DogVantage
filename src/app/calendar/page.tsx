@@ -220,6 +220,7 @@ function CalendarView() {
   const todayRef = useRef<HTMLDivElement>(null)
 
   const todayStr = new Date().toISOString().slice(0, 10)
+  const ageWeeks = profile ? Math.max(1, getAgeInWeeks(profile.birthdate)) : undefined
 
   const fetchData = useCallback(async () => {
     if (!profile) return
@@ -372,6 +373,7 @@ function CalendarView() {
         <ExerciseGuideSheet
           exerciseId={guideExercise.id}
           exerciseLabel={guideExercise.label}
+          ageWeeks={ageWeeks}
           onClose={() => setGuideExercise(null)}
         />
       )}

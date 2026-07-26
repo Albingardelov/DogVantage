@@ -181,6 +181,7 @@ export default function PuppyDayCard(props: Props) {
           exerciseId={guideExerciseId}
           exerciseLabel={exercises.find((e) => e.id === guideExerciseId)?.label}
           metrics={metrics[guideExerciseId] ?? null}
+          ageWeeks={ageWeeks}
           onClose={() => setGuideExerciseId(null)}
           customSpecs={{}}
         />

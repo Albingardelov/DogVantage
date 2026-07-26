@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
 import type { ExerciseSpec } from '@/lib/training/exercise-specs'
 import { normalizeHandlerGuide } from '@/lib/training/normalize-handler-guide'
+import { resolveLiveCoach } from '@/lib/training/live-coach'
+import { getLifeStage } from '@/lib/dog/age'
 import type { DailyExerciseMetrics } from '@/types'
 import { IconClose } from '@/components/icons'
 import styles from './ExerciseGuideSheet.module.css'
@@ -33,12 +35,14 @@ export default function ExerciseGuideSheet({
   onClose,
   metrics,
   customSpecs,
+  ageWeeks,
 }: {
   exerciseId: string
   exerciseLabel?: string
   metrics?: DailyExerciseMetrics | null
   onClose: () => void
   customSpecs?: Record<string, ExerciseSpec>
+  ageWeeks?: number
 }) {
   const router = useRouter()
   const [showVariants, setShowVariants] = useState(false)
@@ -54,16 +58,33 @@ export default function ExerciseGuideSheet({
     [spec?.definition, spec?.guide, spec?.troubleshooting],
   )
 
+  const label = exerciseLabel ?? prettyLabel(exerciseId)
+  const live = useMemo(
+    () =>
+      spec
+        ? resolveLiveCoach({
+            spec,
+            levelId: metrics?.criteria_level_id ?? null,
+            coachKind: null,
+            exerciseLabel: label,
+            exerciseId,
+            lifeStage: getLifeStage(ageWeeks),
+          })
+        : null,
+    [ageWeeks, exerciseId, label, metrics?.criteria_level_id, spec],
+  )
+
   const coachQuestion = useMemo(() => {
-    const label = exerciseLabel ?? prettyLabel(exerciseId)
+    if (!live) return ''
     const attempts = (metrics?.success_count ?? 0) + (metrics?.fail_count ?? 0)
     const rate = attempts > 0 ? Math.round(((metrics?.success_count ?? 0) / attempts) * 100) : null
-    const levelLabel = spec?.ladder.find((r) => r.id === metrics?.criteria_level_id)?.label
     const bits = [
       `Jag tränar övningen "${label}".`,
       spec?.definition ? `Målet är: ${spec.definition}` : null,
       guide?.successLooksLike ? `Lyckad rep: ${guide.successLooksLike}` : null,
-      levelLabel ? `Kriterienivå: ${levelLabel}.` : null,
+      live.chatContext.levelLabel ? `Kriterienivå: ${live.chatContext.levelLabel}.` : null,
+      `Ämne: ${live.chatContext.topic}.`,
+      `Livsfas: ${live.chatContext.lifeStage}.`,
       rate != null ? `Resultat idag: ${rate}% (${metrics?.success_count ?? 0}/${attempts}).` : null,
       metrics?.latency_bucket
         ? `Svarstid: ${
@@ -75,7 +96,16 @@ export default function ExerciseGuideSheet({
       'Ge mig en konkret plan för nästa 5 försök: setup, exakt timing för belöning, och när jag ska sänka/höja kriteriet.',
     ].filter(Boolean)
     return bits.join(' ')
-  }, [exerciseId, exerciseLabel, guide?.successLooksLike, metrics, spec?.definition, spec?.ladder])
+  }, [guide?.successLooksLike, label, live, metrics, spec?.definition])
+
+  const chatHref = useMemo(() => {
+    if (!live) return `/chat?question=${encodeURIComponent(coachQuestion)}`
+    return (
+      `/chat?question=${encodeURIComponent(coachQuestion)}` +
+      `&topic=${encodeURIComponent(live.chatContext.topic)}` +
+      `&lifeStage=${encodeURIComponent(live.chatContext.lifeStage)}`
+    )
+  }, [coachQuestion, live])
 
   if (!spec) return null
 
@@ -94,6 +124,20 @@ export default function ExerciseGuideSheet({
         {guide ? (
           <>
             <div className={styles.summary}>{guide.todaySummary}</div>
+            {live?.levelLabel && (
+              <section className={styles.section}>
+                <div className={styles.sectionTitle}>På din nivå</div>
+                <p className={styles.levelCriteria}>
+                  <strong>{live.levelLabel}</strong>
+                  {live.levelCriteria ? ` — ${live.levelCriteria}` : null}
+                </p>
+                {live.focusTips.map((t) => (
+                  <p key={t} className={styles.levelTip}>
+                    {t}
+                  </p>
+                ))}
+              </section>
+            )}
             <Section title="Setup" items={guide.setup} />
             <section className={styles.section}>
               <div className={styles.sectionTitle}>Gör så här</div>
@@ -155,7 +199,7 @@ export default function ExerciseGuideSheet({
           <button
             type="button"
             className={styles.primary}
-            onClick={() => router.push(`/chat?question=${encodeURIComponent(coachQuestion)}`)}
+            onClick={() => router.push(chatHref)}
           >
             Förklara mer (fråga assistenten)
           </button>

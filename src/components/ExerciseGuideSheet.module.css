@@ -83,6 +83,20 @@
   line-height: 1.5;
 }
 
+.levelCriteria {
+  margin: 0 0 6px;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+.levelTip {
+  margin: 0 0 4px;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
 .variantsToggle {
   margin-top: 14px;
   padding: 10px 14px;

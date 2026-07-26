@@ -1,16 +1,18 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import ExerciseGuideSheet from './ExerciseGuideSheet'
 import type { ExerciseSpec } from '@/lib/training/exercise-specs'
 
+const push = vi.fn()
+
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => ({ push }),
 }))
 
 const spec: ExerciseSpec = {
   exerciseId: 'inkallning',
   definition: 'Kommer hela vägen in.',
-  ladder: [{ id: 'home_2m', label: 'Inne 2 m', criteria: '2 m inne' }],
+  ladder: [{ id: 'home_2m', label: 'Inne 2 m', criteria: '2 m inne', tips: ['Stå still.', 'Belöna vid vändning.'] }],
   troubleshooting: [],
   guide: {
     todaySummary: 'Idag bygger ni en glad inkallning på kort avstånd.',
@@ -37,6 +39,10 @@ const spec: ExerciseSpec = {
 }
 
 describe('ExerciseGuideSheet', () => {
+  beforeEach(() => {
+    push.mockClear()
+  })
+
   it('renders how+why steps and hides variants until Det går inte', () => {
     render(
       <ExerciseGuideSheet
@@ -53,7 +59,7 @@ describe('ExerciseGuideSheet', () => {
     expect(screen.getByText('Leksaksjakt')).toBeInTheDocument()
   })
 
-  it('chat CTA uses label not raw exercise id jargon in question', async () => {
+  it('shows På din nivå when metrics include a known level', () => {
     render(
       <ExerciseGuideSheet
         exerciseId="inkallning"
@@ -63,6 +69,29 @@ describe('ExerciseGuideSheet', () => {
         metrics={{ success_count: 2, fail_count: 1, latency_bucket: '1to3s', criteria_level_id: 'home_2m' } as never}
       />,
     )
-    expect(screen.getByRole('button', { name: /Förklara mer/i })).toBeInTheDocument()
+    expect(screen.getByText('På din nivå')).toBeInTheDocument()
+    expect(screen.getByText(/Inne 2 m/)).toBeInTheDocument()
+    expect(screen.getByText(/2 m inne/)).toBeInTheDocument()
+    expect(screen.getByText('Stå still.')).toBeInTheDocument()
+  })
+
+  it('chat CTA passes topic and lifeStage without raw level id in question', () => {
+    render(
+      <ExerciseGuideSheet
+        exerciseId="inkallning"
+        exerciseLabel="Inkallning"
+        ageWeeks={20}
+        onClose={vi.fn()}
+        customSpecs={{ inkallning: spec }}
+        metrics={{ success_count: 2, fail_count: 1, latency_bucket: '1to3s', criteria_level_id: 'home_2m' } as never}
+      />,
+    )
+    fireEvent.click(screen.getByRole('button', { name: /Förklara mer/i }))
+    expect(push).toHaveBeenCalledOnce()
+    const href = push.mock.calls[0][0] as string
+    expect(href).toContain('topic=recall')
+    expect(href).toContain('lifeStage=junior')
+    expect(href).toContain('Inne%202%20m')
+    expect(href).not.toContain('home_2m')
   })
 })
