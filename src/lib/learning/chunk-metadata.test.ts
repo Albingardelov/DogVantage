@@ -17,6 +17,8 @@ describe('topicForExerciseId', () => {
   it('maps exercise ids to topics', () => {
     expect(topicForExerciseId('inkallning')).toBe('recall')
     expect(topicForExerciseId('marker')).toBe('marker')
+    expect(topicForExerciseId('lat')).toBe('fear')
+    expect(topicForExerciseId('koppel')).toBe('leash')
   })
 
   it('maps field work exercise ids to working-dog topics', () => {

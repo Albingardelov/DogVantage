@@ -97,6 +97,14 @@
   line-height: 1.5;
 }
 
+.levelFailTips {
+  margin: 8px 0 0;
+  padding-left: 1.1rem;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: 1.45;
+}
+
 .variantsToggle {
   margin-top: 14px;
   padding: 10px 14px;
