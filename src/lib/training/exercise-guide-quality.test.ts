@@ -35,6 +35,23 @@ describe('HandlerGuide quality gate', () => {
     }
   })
 
+  it('every ladder rung has curated tips and failTips (1–2 each)', () => {
+    for (const spec of Object.values(EXERCISE_SPECS)) {
+      for (const rung of spec.ladder) {
+        expect(rung.tips?.length, `${spec.exerciseId}.${rung.id} tips`).toBeGreaterThanOrEqual(1)
+        expect(rung.tips!.length, `${spec.exerciseId}.${rung.id} tips`).toBeLessThanOrEqual(2)
+        expect(rung.failTips?.length, `${spec.exerciseId}.${rung.id} failTips`).toBeGreaterThanOrEqual(1)
+        expect(rung.failTips!.length, `${spec.exerciseId}.${rung.id} failTips`).toBeLessThanOrEqual(2)
+        const blob = [...rung.tips!, ...rung.failTips!].join(' ')
+        expect(new RegExp(`\\b${rung.id}\\b`).test(blob), `${spec.exerciseId} leaked ${rung.id}`).toBe(false)
+        for (const other of spec.ladder) {
+          if (other.id === rung.id) continue
+          expect(new RegExp(`\\b${other.id}\\b`).test(blob), `${spec.exerciseId} leaked ${other.id}`).toBe(false)
+        }
+      }
+    }
+  })
+
   it('owner-facing guide text does not expose raw ladder ids as prose', () => {
     for (const spec of entries) {
       const blob = JSON.stringify(spec.guide)
