@@ -37,7 +37,7 @@ const REGRESS_THRESHOLD = 0.6
 const MAX_ADVANCE_THRESHOLD = 0.9
 
 const GUIDE_FAIL_HINT =
-  'Öppna guiden och läs "Om det inte funkar" för konkreta grepp — eller tryck "Det går inte" om knappen syns och du vill byta variant.'
+  'Se felsökningen under kortet, eller öppna guiden för mer.'
 
 function withGuideFailHint(message: string): string {
   return `${message} ${GUIDE_FAIL_HINT}`

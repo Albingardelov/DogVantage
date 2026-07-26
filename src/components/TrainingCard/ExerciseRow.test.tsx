@@ -7,7 +7,13 @@ import type { ExerciseSpec } from '@/lib/training/exercise-specs'
 const spec: ExerciseSpec = {
   exerciseId: 'sitt',
   definition: 'Lyckad rep = rumpan i marken.',
-  ladder: [{ id: 'home_low', label: 'Hemma, låg störning', criteria: 'Inomhus' }],
+  ladder: [{
+    id: 'home_low',
+    label: 'Hemma, låg störning',
+    criteria: 'Inomhus',
+    tips: ['Stå still.', 'Belöna i rätt ögonblick.'],
+    failTips: ['Gå närmare.', 'Byt till godare belöning.'],
+  }],
   troubleshooting: [],
   guide: {
     todaySummary: 'Idag lär ni sitt med locking.',
@@ -57,5 +63,39 @@ describe('ExerciseRow maturity', () => {
   it('suppresses the per-row done message when the whole day is complete', () => {
     render(<ExerciseRow {...base} done={3} hasNextExercise={false} dayComplete />)
     expect(screen.queryByText(/Du är klar för idag/)).not.toBeInTheDocument()
+  })
+})
+
+describe('ExerciseRow live coach', () => {
+  it('shows exercise desc instead of spec definition', () => {
+    render(<ExerciseRow {...base} />)
+    expect(screen.getByText('3 reps')).toBeInTheDocument()
+    expect(screen.queryByText('Lyckad rep = rumpan i marken.')).not.toBeInTheDocument()
+  })
+
+  it('shows focus tips from the active ladder rung', () => {
+    render(
+      <ExerciseRow
+        {...base}
+        metrics={{ criteria_level_id: 'home_low', success_count: 0, fail_count: 0 }}
+      />,
+    )
+    expect(screen.getByText('Stå still.')).toBeInTheDocument()
+    expect(screen.getByText('Belöna i rätt ögonblick.')).toBeInTheDocument()
+  })
+
+  it('shows fail tips when coach suggests lowering', () => {
+    render(
+      <ExerciseRow
+        {...base}
+        metrics={{
+          criteria_level_id: 'home_low',
+          success_count: 5,
+          fail_count: 5,
+        }}
+      />,
+    )
+    expect(screen.getByText('Gå närmare.')).toBeInTheDocument()
+    expect(screen.getByText('Byt till godare belöning.')).toBeInTheDocument()
   })
 })

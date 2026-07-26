@@ -17,8 +17,9 @@ import {
 import styles from './ExerciseRow.module.css'
 import type { DailyExerciseMetrics, Exercise, LatencyBucket, TrainingSourceRef } from '@/types'
 import type { ExerciseSpec } from '@/lib/training/exercise-specs'
-import { isPuppy as isPuppyAge } from '@/lib/dog/age'
+import { isPuppy as isPuppyAge, getLifeStage } from '@/lib/dog/age'
 import { buildCoachAction, latencyMeaning, type SessionGuard } from '@/lib/training/session-coach'
+import { resolveLiveCoach } from '@/lib/training/live-coach'
 import type { ExerciseMaturity } from './maturity'
 import { topBadge } from './badges'
 import { normalizeHandlerGuide } from '@/lib/training/normalize-handler-guide'
@@ -198,6 +199,17 @@ export default function ExerciseRow({
     currentLevelId: criteriaLevelId,
     advanceThresholdDelta,
   })
+  const live = spec
+    ? resolveLiveCoach({
+        spec,
+        levelId: criteriaLevelId,
+        coachKind: coach?.kind ?? null,
+        exerciseLabel: exercise.label,
+        exerciseId: exercise.id,
+        lifeStage: getLifeStage(ageWeeks),
+        sources,
+      })
+    : null
   const showTroubleshooting = coach?.kind === 'lower' || coach?.kind === 'stop'
   const suggestedLevel =
     coach?.suggestedLevelId && allowedLevels
@@ -277,8 +289,12 @@ export default function ExerciseRow({
           {badgeOpen && badge?.detail && (
             <p className={styles.badgeHelp}>{badge.detail}</p>
           )}
-          {spec?.definition && (
-            <p className={styles.definitionText}>{spec.definition}</p>
+          {exercise.desc ? (
+            <p className={styles.descText}>{exercise.desc}</p>
+          ) : (
+            spec?.definition && (
+              <p className={styles.definitionText}>{spec.definition}</p>
+            )
           )}
           {allowedLevels && currentLevelLabel && (
             isNew ? (
@@ -303,6 +319,13 @@ export default function ExerciseRow({
             <p className={styles.criteriaText}>
               <strong>Dagens kriterium:</strong> {currentLevelCriteria}
             </p>
+          )}
+          {live && live.focusTips.length > 0 && (
+            <ul className={styles.focusTips}>
+              {live.focusTips.map((t) => (
+                <li key={t}>{t}</li>
+              ))}
+            </ul>
           )}
           {isNew && firstStepPreview && (
             <p className={styles.firstStep}>
@@ -396,6 +419,13 @@ export default function ExerciseRow({
           {showTroubleshooting && <IconWarning size="sm" />}
           <span>{coach.message}</span>
         </div>
+      )}
+      {live?.showFailTips && live.failTips.length > 0 && (
+        <ul className={styles.failTips}>
+          {live.failTips.map((t) => (
+            <li key={t}>{t}</li>
+          ))}
+        </ul>
       )}
       {!isComplete && suggestedLevel && (coach?.kind === 'lower' || coach?.kind === 'stop' || coach?.kind === 'raise') && (
         <button
