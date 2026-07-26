@@ -77,7 +77,12 @@ describe('ExerciseRow live coach', () => {
     render(
       <ExerciseRow
         {...base}
-        metrics={{ criteria_level_id: 'home_low', success_count: 0, fail_count: 0 }}
+        metrics={{
+          criteria_level_id: 'home_low',
+          success_count: 0,
+          fail_count: 0,
+          latency_bucket: null,
+        }}
       />,
     )
     expect(screen.getByText('Stå still.')).toBeInTheDocument()
@@ -92,6 +97,7 @@ describe('ExerciseRow live coach', () => {
           criteria_level_id: 'home_low',
           success_count: 5,
           fail_count: 5,
+          latency_bucket: null,
         }}
       />,
     )
