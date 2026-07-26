@@ -107,7 +107,23 @@ describe('queryRAG', () => {
     expect(vi.mocked(searchBreedChunks)).toHaveBeenCalledWith(
       expect.any(Array),
       'labrador',
-      12
+      12,
+      { topic: undefined, lifeStage: undefined },
+    )
+  })
+
+  it('passes topic and lifeStage filters to chunk search', async () => {
+    const { searchBreedChunks } = await import('@/lib/supabase/breed-chunks')
+    const { queryRAG } = await import('./rag')
+    await queryRAG('Hur hanterar jag valpens rädsla?', 'labrador', [], 12, [], undefined, {
+      topic: 'fear',
+      lifeStage: 'puppy',
+    })
+    expect(vi.mocked(searchBreedChunks)).toHaveBeenCalledWith(
+      expect.any(Array),
+      'labrador',
+      3,
+      { topic: 'fear', lifeStage: 'puppy' },
     )
   })
 

@@ -11,6 +11,8 @@ import styles from './ChatInterface.module.css'
 interface Props {
   trainingWeek: number
   initialQuestion?: string
+  initialTopic?: string
+  initialLifeStage?: string
   dogId: string
 }
 
@@ -19,7 +21,13 @@ const GREETING: ChatMessage = {
   content: 'Hej! Jag är din träningsassistent. För bäst hjälp: skriv övning + hur det gick idag, så får du en konkret plan för nästa reps.',
 }
 
-export default function ChatInterface({ trainingWeek, initialQuestion, dogId }: Props) {
+export default function ChatInterface({
+  trainingWeek,
+  initialQuestion,
+  initialTopic,
+  initialLifeStage,
+  dogId,
+}: Props) {
   const { i18n } = useTranslation()
   const [messages, setMessages] = useState<ChatMessage[]>([GREETING])
   const [historyLoaded, setHistoryLoaded] = useState(false)
@@ -71,7 +79,13 @@ export default function ChatInterface({ trainingWeek, initialQuestion, dogId }: 
       const data = await apiFetch('/api/chat', TrainingResultSchema, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, dogId, locale: i18n.language }),
+        body: JSON.stringify({
+          query,
+          dogId,
+          locale: i18n.language,
+          topic: initialTopic,
+          lifeStage: initialLifeStage,
+        }),
       })
       setMessages((prev) => [
         ...prev,

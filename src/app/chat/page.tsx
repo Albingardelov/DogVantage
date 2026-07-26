@@ -21,6 +21,8 @@ function Chat() {
   const { activeDog: profile } = useActiveDog()
   const searchParams = useSearchParams()
   const initialQuestion = searchParams.get('question') ?? undefined
+  const topic = searchParams.get('topic') ?? undefined
+  const lifeStage = searchParams.get('lifeStage') ?? undefined
 
   const trainingWeek = profile?.trainingWeek ?? 1
   const dogName = profile?.name ?? 'din hund'
@@ -40,6 +42,8 @@ function Chat() {
           <ChatInterface
             trainingWeek={trainingWeek}
             initialQuestion={initialQuestion}
+            initialTopic={topic}
+            initialLifeStage={lifeStage}
             dogId={profile.id}
           />
         </FeatureGate>

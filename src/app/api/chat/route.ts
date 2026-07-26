@@ -21,9 +21,22 @@ import { getCheckIns } from '@/lib/supabase/daily-check-ins'
 import { getChatMessages, appendChatExchange } from '@/lib/supabase/chat-messages'
 import { getDogState } from '@/lib/supabase/dog-state'
 import { formatDogStateForPrompt } from '@/lib/ai/dog-state-context'
+import { CHUNK_TOPICS, type ChunkTopic, type LifeStageFilter } from '@/lib/learning/chunk-metadata'
 import type { ChatHistoryEntry } from '@/lib/ai/rag'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/database'
+
+const LIFE_STAGE_FILTERS = ['puppy', 'junior', 'adolescent', 'adult', 'all'] as const satisfies readonly LifeStageFilter[]
+
+function parseChunkTopic(value: string | undefined): ChunkTopic | undefined {
+  if (!value) return undefined
+  return (CHUNK_TOPICS as readonly string[]).includes(value) ? (value as ChunkTopic) : undefined
+}
+
+function parseLifeStageFilter(value: string | undefined): LifeStageFilter | undefined {
+  if (!value) return undefined
+  return (LIFE_STAGE_FILTERS as readonly string[]).includes(value) ? (value as LifeStageFilter) : undefined
+}
 
 function todayDateString(): string {
   return new Date().toISOString().split('T')[0]
@@ -85,9 +98,16 @@ async function persistExchange(
 export async function POST(req: NextRequest) {
   try {
     return withAuthAndDog(req, async ({ user, dog, supabase }) => {
-      const body = await req.json() as { query?: string; locale?: string }
+      const body = await req.json() as {
+        query?: string
+        locale?: string
+        topic?: string
+        lifeStage?: string
+      }
       const query = body.query
       const locale = isSupportedLocale(body.locale) ? body.locale : DEFAULT_LOCALE
+      const topic = parseChunkTopic(body.topic)
+      const lifeStage = parseLifeStageFilter(body.lifeStage)
       if (!query) {
         return NextResponse.json({ error: 'query required' }, { status: 400 })
       }
@@ -194,6 +214,8 @@ export async function POST(req: NextRequest) {
         history,
         dogStateContext,
         locale,
+        topic,
+        lifeStage,
       })
 
       await persistExchange(supabase, dog.id, query, result.content)
@@ -206,9 +228,9 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      const topic = extractChatTopic(query)
-      if (topic) {
-        void logChatTopic(dog.id, topic).catch(() => {
+      const chatTopic = extractChatTopic(query)
+      if (chatTopic) {
+        void logChatTopic(dog.id, chatTopic).catch(() => {
           // Ämnesloggning är telemetri — får aldrig fälla chatsvaret.
         })
       }

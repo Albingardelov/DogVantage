@@ -10,6 +10,7 @@ import {
 } from './safety-guards'
 import { languageDirective } from '@/i18n/language-directive'
 import { DEFAULT_LOCALE, type Locale } from '@/i18n/config'
+import type { ChunkTopic, LifeStageFilter } from '@/lib/learning/chunk-metadata'
 import type { Breed, ChunkMatch, TrainingResult, TrainingSourceRef } from '@/types'
 
 const MIN_DOCUMENT_SIMILARITY = 0.72
@@ -111,6 +112,8 @@ export interface QueryRAGOptions {
   history?: ChatHistoryEntry[]
   dogStateContext?: string | null
   locale?: Locale
+  topic?: ChunkTopic
+  lifeStage?: LifeStageFilter
 }
 
 // ─── Main RAG query ───────────────────────────────────────────────────────────
@@ -144,7 +147,10 @@ export async function queryRAG(
   let chunks: ChunkMatch[] = []
   try {
     const embedding = await embedText(query)
-    const retrieved = await searchBreedChunks(embedding, breed, retrievalCount)
+    const retrieved = await searchBreedChunks(embedding, breed, retrievalCount, {
+      topic: opts.topic,
+      lifeStage: opts.lifeStage,
+    })
     const ranked = rankChunksForQuery(retrieved, query)
     chunks = ranked.filter(hasReliableSimilarity).slice(0, matchCount)
   } catch {
