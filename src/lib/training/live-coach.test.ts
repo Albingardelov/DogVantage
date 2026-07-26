@@ -79,7 +79,12 @@ describe('resolveLiveCoach', () => {
       exerciseLabel: 'Inkallning',
       exerciseId: 'inkallning',
       lifeStage: 'adult',
-      sources: [{ source: 'Dummybok', source_url: 'https://example.com' }],
+      sources: [{
+        source: 'Dummybok',
+        source_url: 'https://example.com',
+        doc_version: '',
+        page_ref: '',
+      }],
     })
     expect(view.checklistItems.some((i) => i.includes(ink().ladder[0].label))).toBe(true)
     expect(view.checklistItems.some((i) => /Dummybok|Läs mer/i.test(i))).toBe(true)
