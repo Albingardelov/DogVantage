@@ -349,7 +349,8 @@
 .logOverlay {
   position: fixed;
   inset: 0;
-  z-index: 50;
+  /* Above BottomNav (z-index 100) so the save button is not clipped. */
+  z-index: 200;
   background: rgba(28, 25, 23, 0.4);
   display: flex;
   align-items: stretch;

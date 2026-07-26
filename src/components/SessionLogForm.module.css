@@ -3,7 +3,8 @@
   display: flex;
   flex-direction: column;
   gap: 22px;
-  padding-bottom: 16px;
+  /* Extra room so the save button clears the scroll edge / thumb zone. */
+  padding-bottom: 32px;
 }
 
 /* ── Hero summary card ────────────────────────────────────── */
