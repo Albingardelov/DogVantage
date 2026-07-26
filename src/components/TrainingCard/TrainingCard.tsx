@@ -9,6 +9,8 @@ import ExerciseGuideSheet from '@/components/ExerciseGuideSheet'
 import styles from './TrainingCard.module.css'
 import type { Breed, TrainingGoal, TrainingEnvironment, RewardPreference, Exercise, DailyExerciseMetrics, HouseholdPet } from '@/types'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
+import { resolveLiveCoach } from '@/lib/training/live-coach'
+import { getLifeStage } from '@/lib/dog/age'
 import { buildWeekFocusCopy } from '@/lib/training/week-focus-copy'
 import { FOCUS_EXERCISE_LABELS, focusExerciseIds, type WeeklyFocusArea } from '@/lib/training/weekly-focus'
 import WeekFocusPanel from './WeekFocusPanel'
@@ -114,6 +116,23 @@ export default function TrainingCard(props: Props) {
   const allComplete = !loading && todayExercises.length > 0 &&
     todayExercises.every((e) => (progress[e.id] ?? 0) >= e.reps)
   const dayRate = repsDone > 0 && repsPlanned > 0 ? Math.round((repsDone / repsPlanned) * 100) : null
+
+  const checklistItems = useMemo(() => {
+    if (todayExercises.length === 0) return undefined
+    const focusEx =
+      todayExercises.find((e) => (progress[e.id] ?? 0) < e.reps) ?? todayExercises[0]
+    const focusSpec = customSpecs[focusEx.id] ?? getExerciseSpec(focusEx.id)
+    if (!focusSpec) return undefined
+    return resolveLiveCoach({
+      spec: focusSpec,
+      levelId: metrics[focusEx.id]?.criteria_level_id ?? null,
+      coachKind: null,
+      exerciseLabel: focusEx.label,
+      exerciseId: focusEx.id,
+      lifeStage: getLifeStage(ageWeeks),
+      sources: exerciseSources[focusEx.id] ?? focusEx.sources,
+    }).checklistItems
+  }, [todayExercises, progress, customSpecs, metrics, ageWeeks, exerciseSources])
 
   const focusExerciseSet = useMemo(() => new Set(focusExerciseIds(focusAreas)), [focusAreas])
   const priorityExerciseSet = useMemo(() => new Set(priorityExerciseIds), [priorityExerciseIds])
@@ -268,7 +287,12 @@ export default function TrainingCard(props: Props) {
         </div>
 
         {!loading && todayExercises.length > 0 && !todayPlan?.rest && (
-          <PreSessionChecklist ageWeeks={ageWeeks} dateKey={todayDate} dogId={dogId} />
+          <PreSessionChecklist
+            ageWeeks={ageWeeks}
+            dateKey={todayDate}
+            dogId={dogId}
+            items={checklistItems}
+          />
         )}
 
         {!loading && checkInLoaded && !checkIn && !checkInDismissed && !todayPlan?.rest && (
