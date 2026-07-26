@@ -14,6 +14,7 @@ export interface CriteriaLevel {
    */
   criteria: string
   tips?: string[]
+  failTips?: string[]
 }
 
 export interface GuideStep {
