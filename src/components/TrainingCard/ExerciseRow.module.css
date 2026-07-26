@@ -70,6 +70,31 @@
   color: rgba(255, 255, 255, 0.9);
 }
 
+.descText {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.focusTips {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.failTips {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: #fde68a;
+  position: relative;
+  z-index: 2;
+}
+
 /* Criteria chip */
 .criteriaChip {
   margin-top: 8px;
