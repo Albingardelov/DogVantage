@@ -394,6 +394,7 @@ function Assessment() {
         <ExerciseGuideSheet
           exerciseId={guideExerciseId}
           metrics={metrics[guideExerciseId] ?? null}
+          ageWeeks={ageWeeks}
           onClose={() => setGuideExerciseId(null)}
         />
       )}
