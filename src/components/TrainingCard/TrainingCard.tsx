@@ -10,7 +10,7 @@ import styles from './TrainingCard.module.css'
 import type { Breed, TrainingGoal, TrainingEnvironment, RewardPreference, Exercise, DailyExerciseMetrics, HouseholdPet } from '@/types'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
 import { resolveLiveCoach } from '@/lib/training/live-coach'
-import { getLifeStage } from '@/lib/dog/age'
+import { getLifeStage, isPuppy as isPuppyAge } from '@/lib/dog/age'
 import { buildWeekFocusCopy } from '@/lib/training/week-focus-copy'
 import { FOCUS_EXERCISE_LABELS, focusExerciseIds, type WeeklyFocusArea } from '@/lib/training/weekly-focus'
 import WeekFocusPanel from './WeekFocusPanel'
@@ -123,9 +123,15 @@ export default function TrainingCard(props: Props) {
       todayExercises.find((e) => (progress[e.id] ?? 0) < e.reps) ?? todayExercises[0]
     const focusSpec = customSpecs[focusEx.id] ?? getExerciseSpec(focusEx.id)
     if (!focusSpec) return undefined
+    const allowed = isPuppyAge(ageWeeks)
+      ? focusSpec.ladder.slice(0, Math.min(2, focusSpec.ladder.length))
+      : focusSpec.ladder
+    const stored = metrics[focusEx.id]?.criteria_level_id ?? null
+    const levelId =
+      allowed.find((r) => r.id === stored)?.id ?? allowed[0]?.id ?? stored
     return resolveLiveCoach({
       spec: focusSpec,
-      levelId: metrics[focusEx.id]?.criteria_level_id ?? null,
+      levelId,
       coachKind: null,
       exerciseLabel: focusEx.label,
       exerciseId: focusEx.id,

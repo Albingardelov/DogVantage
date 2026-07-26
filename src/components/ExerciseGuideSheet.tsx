@@ -136,6 +136,13 @@ export default function ExerciseGuideSheet({
                     {t}
                   </p>
                 ))}
+                {live.failTips.length > 0 && (
+                  <ul className={styles.levelFailTips}>
+                    {live.failTips.map((t) => (
+                      <li key={t}>{t}</li>
+                    ))}
+                  </ul>
+                )}
               </section>
             )}
             <Section title="Setup" items={guide.setup} />

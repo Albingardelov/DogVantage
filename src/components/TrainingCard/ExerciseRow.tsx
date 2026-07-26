@@ -202,7 +202,7 @@ export default function ExerciseRow({
   const live = spec
     ? resolveLiveCoach({
         spec,
-        levelId: criteriaLevelId,
+        levelId: activeLevel?.id ?? criteriaLevelId,
         coachKind: coach?.kind ?? null,
         exerciseLabel: exercise.label,
         exerciseId: exercise.id,
@@ -418,14 +418,14 @@ export default function ExerciseRow({
         >
           {showTroubleshooting && <IconWarning size="sm" />}
           <span>{coach.message}</span>
+          {live?.showFailTips && live.failTips.length > 0 && (
+            <ul className={styles.failTips}>
+              {live.failTips.map((t) => (
+                <li key={t}>{t}</li>
+              ))}
+            </ul>
+          )}
         </div>
-      )}
-      {live?.showFailTips && live.failTips.length > 0 && (
-        <ul className={styles.failTips}>
-          {live.failTips.map((t) => (
-            <li key={t}>{t}</li>
-          ))}
-        </ul>
       )}
       {!isComplete && suggestedLevel && (coach?.kind === 'lower' || coach?.kind === 'stop' || coach?.kind === 'raise') && (
         <button

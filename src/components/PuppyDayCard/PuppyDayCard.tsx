@@ -60,9 +60,13 @@ export default function PuppyDayCard(props: Props) {
     const focusEx = exercises.find((e) => (progress[e.id] ?? 0) < e.reps) ?? exercises[0]
     const focusSpec = getExerciseSpec(focusEx.id)
     if (!focusSpec) return undefined
+    const allowed = focusSpec.ladder.slice(0, Math.min(2, focusSpec.ladder.length))
+    const stored = metrics[focusEx.id]?.criteria_level_id ?? null
+    const levelId =
+      allowed.find((r) => r.id === stored)?.id ?? allowed[0]?.id ?? stored
     return resolveLiveCoach({
       spec: focusSpec,
-      levelId: metrics[focusEx.id]?.criteria_level_id ?? null,
+      levelId,
       coachKind: null,
       exerciseLabel: focusEx.label,
       exerciseId: focusEx.id,

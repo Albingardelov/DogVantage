@@ -38,6 +38,7 @@ export default function ChatInterface({
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const didAutoSendRef = useRef(false)
+  const applyCtaFiltersRef = useRef(Boolean(initialTopic || initialLifeStage))
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -76,6 +77,8 @@ export default function ChatInterface({
     setLoading(true)
 
     try {
+      const useCtaFilters = applyCtaFiltersRef.current
+      if (useCtaFilters) applyCtaFiltersRef.current = false
       const data = await apiFetch('/api/chat', TrainingResultSchema, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -83,8 +86,9 @@ export default function ChatInterface({
           query,
           dogId,
           locale: i18n.language,
-          topic: initialTopic,
-          lifeStage: initialLifeStage,
+          ...(useCtaFilters
+            ? { topic: initialTopic, lifeStage: initialLifeStage }
+            : {}),
         }),
       })
       setMessages((prev) => [
