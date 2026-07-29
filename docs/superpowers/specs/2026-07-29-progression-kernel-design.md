@@ -156,7 +156,7 @@ Ingen schemaändring. Befintliga `daily_exercise_metrics.criteria_level_id` och 
 Nya: `progression-kernel.test.ts`
 
 - Under min attempts → `hold`
-- Session: 4/5 (80 %) → `advance`; valp 2/3 → `advance` i kernel (session-coach mappar till keep); adult 2/3 → `hold`
+- Session: 4/5 (80 %) → `advance`; valp 3/0 (≥80 %, ≥3 reps) → `advance` i kernel (session-coach mappar till keep); valp/adult 2/3 (~67 %) → `hold`
 - ≤60 % med tillräckliga attempts → `regress`
 - 61–79 % → `hold`
 - Latency push borderline
