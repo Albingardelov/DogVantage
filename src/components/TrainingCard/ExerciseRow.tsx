@@ -204,6 +204,7 @@ export default function ExerciseRow({
         spec,
         levelId: activeLevel?.id ?? criteriaLevelId,
         coachKind: coach?.kind ?? null,
+        consecutiveFails: guard.consecutiveFails,
         exerciseLabel: exercise.label,
         exerciseId: exercise.id,
         lifeStage: getLifeStage(ageWeeks),

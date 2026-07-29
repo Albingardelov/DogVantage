@@ -42,16 +42,31 @@ describe('resolveLiveCoach', () => {
     expect(view.showFailTips).toBe(true)
   })
 
-  it('hides fail tips when coach is keep', () => {
+  it('hides fail tips when coach is keep and no consecutive fails', () => {
     const view = resolveLiveCoach({
       spec: ink(),
       levelId: ink().ladder[0].id,
       coachKind: 'keep',
+      consecutiveFails: 0,
       exerciseLabel: 'Inkallning',
       exerciseId: 'inkallning',
       lifeStage: 'adult',
     })
     expect(view.showFailTips).toBe(false)
+  })
+
+  it('shows fail tips after first consecutive miss even when keep', () => {
+    const view = resolveLiveCoach({
+      spec: ink(),
+      levelId: ink().ladder[0].id,
+      coachKind: 'keep',
+      consecutiveFails: 1,
+      exerciseLabel: 'Inkallning',
+      exerciseId: 'inkallning',
+      lifeStage: 'adult',
+    })
+    expect(view.showFailTips).toBe(true)
+    expect(view.failTips.length).toBeGreaterThan(0)
   })
 
   it('chatContext uses topic + lifeStage and never raw level id as levelLabel', () => {
