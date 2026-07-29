@@ -6,7 +6,6 @@ export type ProgressionHorizon = 'session' | 'week' | 'project'
 export const ADVANCE_THRESHOLD = 0.80
 export const REGRESS_THRESHOLD = 0.60
 export const MAX_ADVANCE_THRESHOLD = 0.90
-export const PUPPY_SESSION_ADVANCE_THRESHOLD = 2 / 3
 
 export function horizonMinAttempts(horizon: ProgressionHorizon, isPuppy = false): number {
   if (horizon === 'session') return isPuppy ? 3 : 5
@@ -50,12 +49,8 @@ export function evaluateRate(input: EvaluateRateInput): EvaluateRateResult {
   const sessionCount = input.sessionCount ?? 1
 
   const adjustedRate = rate + latencyWeight(input.latencyBucket)
-  const baseAdvanceThreshold =
-    input.horizon === 'session' && input.isPuppy
-      ? PUPPY_SESSION_ADVANCE_THRESHOLD
-      : ADVANCE_THRESHOLD
   const advanceThreshold = Math.min(
-    baseAdvanceThreshold + (input.advanceThresholdDelta ?? 0),
+    ADVANCE_THRESHOLD + (input.advanceThresholdDelta ?? 0),
     MAX_ADVANCE_THRESHOLD,
   )
 
