@@ -28,6 +28,7 @@ export interface ResolveLiveCoachInput {
   spec: ExerciseSpec
   levelId: string | null
   coachKind: CoachKind
+  consecutiveFails?: number
   exerciseLabel: string
   exerciseId: string
   lifeStage: LifeStage
@@ -54,7 +55,11 @@ export function resolveLiveCoach(input: ResolveLiveCoachInput): LiveCoachView {
         ? input.spec.guide.whenItFails
         : input.spec.troubleshooting,
   )
-  const showFailTips = input.coachKind === 'lower' || input.coachKind === 'stop'
+  const consecutiveFails = input.consecutiveFails ?? 0
+  const showFailTips =
+    consecutiveFails >= 1 ||
+    input.coachKind === 'lower' ||
+    input.coachKind === 'stop'
   const topic = topicForExerciseId(input.exerciseId)
 
   const checklistItems: string[] = [
