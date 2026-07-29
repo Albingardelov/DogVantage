@@ -1,6 +1,7 @@
 import type { DailyExerciseMetrics, LatencyBucket } from '@/types'
 import { isPuppy as isPuppyAge } from '@/lib/dog/age'
 import type { CriteriaLevel } from '@/lib/training/exercise-specs'
+import { evaluateRate, horizonMinAttempts } from '@/lib/training/progression-kernel'
 
 export interface SessionGuard {
   consecutiveFails: number
@@ -30,11 +31,6 @@ export interface CoachInput {
   currentLevelId: string | null
   advanceThresholdDelta?: number
 }
-
-const MIN_ATTEMPTS_FOR_DECISION = 10
-const ADVANCE_THRESHOLD = 0.8
-const REGRESS_THRESHOLD = 0.6
-const MAX_ADVANCE_THRESHOLD = 0.9
 
 const GUIDE_FAIL_HINT =
   'Se felsökningen under kortet, eller öppna guiden för mer.'
@@ -78,9 +74,10 @@ function stepFrom(
 
 export function buildCoachAction(input: CoachInput): CoachAction | null {
   const { guard, ladder, currentLevelId } = input
-  const attempts = input.successCount + input.failCount
   const isPuppy = isPuppyAge(input.ageWeeks)
   const lowerLevelId = stepFrom(ladder, currentLevelId, -1)
+  const minForSession = horizonMinAttempts('session', isPuppy)
+  const attempts = input.successCount + input.failCount
 
   if (guard.consecutiveFails >= 2 || guard.consecutiveSlow >= 2) {
     return {
@@ -98,21 +95,29 @@ export function buildCoachAction(input: CoachInput): CoachAction | null {
       message: 'Snyggt — ni vände det. Avsluta övningen här, på topp.',
     }
   }
-  if (attempts < MIN_ATTEMPTS_FOR_DECISION) {
+
+  // Hard session override after enough attempts: slow latency → lower
+  // (same timing as pre-kernel: only once min attempts is met)
+  if (attempts >= minForSession && input.latencyBucket === 'gt3s') {
     return {
-      kind: 'keep',
-      suggestedLevelId: null,
-      message: 'Kör fler försök på samma nivå innan du höjer eller sänker kriteriet.',
+      kind: 'lower',
+      suggestedLevelId: lowerLevelId,
+      message: withGuideFailHint(
+        'Svarstiden är över 3 sek — oftast för svårt just nu. Sänk kriteriet ett steg och höj belöningsvärdet.',
+      ),
     }
   }
 
-  const rate = input.successCount / attempts
-  const advanceThreshold = Math.min(
-    ADVANCE_THRESHOLD + (input.advanceThresholdDelta ?? 0),
-    MAX_ADVANCE_THRESHOLD,
-  )
+  const evaluated = evaluateRate({
+    success: input.successCount,
+    fail: input.failCount,
+    latencyBucket: input.latencyBucket,
+    horizon: 'session',
+    isPuppy,
+    advanceThresholdDelta: input.advanceThresholdDelta,
+  })
 
-  if (rate >= advanceThreshold && input.latencyBucket !== 'gt3s' && !isPuppy) {
+  if (evaluated.decision === 'advance' && !isPuppy && input.latencyBucket !== 'gt3s') {
     const raiseLevelId = stepFrom(ladder, currentLevelId, 1)
     if (raiseLevelId) {
       return {
@@ -127,19 +132,24 @@ export function buildCoachAction(input: CoachInput): CoachAction | null {
       message: 'Högsta nivån avklarad — stabilisera och generalisera i nya miljöer.',
     }
   }
-  if (rate <= REGRESS_THRESHOLD || input.latencyBucket === 'gt3s') {
+
+  if (evaluated.decision === 'regress') {
     return {
       kind: 'lower',
       suggestedLevelId: lowerLevelId,
       message: withGuideFailHint(
-        'Träffsäkerheten är under 80 %, så vi sänker ett steg och höjer belöningsvärdet. Det är inte ett misslyckande — under 80 % betyder bara att kraven är för höga just nu.',
+        'Träffsäkerheten är ≤60 %, så vi sänker ett steg och höjer belöningsvärdet. Det är inte ett misslyckande — kraven är för höga just nu.',
       ),
     }
   }
+
   return {
     kind: 'keep',
     suggestedLevelId: null,
-    message: 'Behåll nivån och stabilisera. Målet är ≥80 % lyckade med kort svarstid innan vi höjer — så ska inlärning gå till.',
+    message:
+      evaluated.attempts < minForSession
+        ? 'Kör fler försök på samma nivå innan du höjer eller sänker kriteriet.'
+        : 'Behåll nivån och stabilisera. Målet är ≥80 % lyckade med kort svarstid innan vi höjer — så ska inlärning gå till.',
   }
 }
 
