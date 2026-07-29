@@ -87,11 +87,18 @@ describe('evaluateRate', () => {
     expect(r.rate).toBeCloseTo(0.8)
   })
 
-  it('puppy session min is 3 — kernel advances at 2/3', () => {
+  it('puppy session min is 3 — advances at 3/0 (≥80%)', () => {
+    const r = evaluateRate({
+      success: 3, fail: 0, horizon: 'session', isPuppy: true,
+    })
+    expect(r.decision).toBe('advance')
+  })
+
+  it('puppy holds at 2/3 (~67%) — same 80% rate as adults', () => {
     const r = evaluateRate({
       success: 2, fail: 1, horizon: 'session', isPuppy: true,
     })
-    expect(r.decision).toBe('advance')
+    expect(r.decision).toBe('hold')
   })
 
   it('adult holds at 2/3 on session', () => {
