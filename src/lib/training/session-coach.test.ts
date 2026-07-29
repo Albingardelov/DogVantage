@@ -79,9 +79,15 @@ describe('buildCoachAction', () => {
     expect(action?.suggestedLevelId).toBeNull()
   })
 
-  it('asks for more attempts below 10 attempts', () => {
-    const action = buildCoachAction(input({ successCount: 5, failCount: 1 }))
+  it('asks for more attempts below 5 attempts', () => {
+    const action = buildCoachAction(input({ successCount: 3, failCount: 1 }))
     expect(action?.kind).toBe('keep')
+  })
+
+  it('suggests raise at 4/5 for adult dogs', () => {
+    const action = buildCoachAction(input({ successCount: 4, failCount: 1 }))
+    expect(action?.kind).toBe('raise')
+    expect(action?.suggestedLevelId).toBe('park')
   })
 
   it('suggests raise with next ladder step at >= 80% for adult dogs', () => {
@@ -108,6 +114,27 @@ describe('buildCoachAction', () => {
     expect(action?.kind).toBe('lower')
     expect(action?.suggestedLevelId).toBe('home_low')
     expect(action?.message).toMatch(/felsökningen|guiden/i)
+  })
+
+  it('suggests lower copy mentions 60% not 80%', () => {
+    const action = buildCoachAction(input({ successCount: 3, failCount: 2 }))
+    expect(action?.kind).toBe('lower')
+    expect(action?.message).toMatch(/60\s*%/)
+    expect(action?.message).not.toMatch(/under 80/)
+  })
+
+  it('gt3s latency forces lower even above regress rate (after min attempts)', () => {
+    const action = buildCoachAction(input({
+      successCount: 4, failCount: 1, latencyBucket: 'gt3s',
+    }))
+    expect(action?.kind).toBe('lower')
+  })
+
+  it('gt3s does not force lower before min attempts', () => {
+    const action = buildCoachAction(input({
+      successCount: 2, failCount: 0, latencyBucket: 'gt3s',
+    }))
+    expect(action?.kind).toBe('keep')
   })
 
   it('a positive advanceThresholdDelta raises the bar for raise', () => {
