@@ -16,6 +16,12 @@
  */
 
 import type { LatencyBucket } from '@/types'
+import {
+  evaluateRate,
+  type ProgressionDecision,
+} from '@/lib/training/progression-kernel'
+
+export type { ProgressionDecision } from '@/lib/training/progression-kernel'
 
 export interface ProgressionMetricRow {
   exercise_id: string
@@ -32,8 +38,6 @@ export interface ProgressionSessionRow {
   date: string
 }
 
-export type ProgressionDecision = 'advance' | 'hold' | 'regress'
-
 export interface ExerciseProgressionDecision {
   exercise_id: string
   criteria_level_id: string | null
@@ -41,18 +45,6 @@ export interface ExerciseProgressionDecision {
   attempts: number
   success_rate: number
   reason: string
-}
-
-const MIN_ATTEMPTS = 10
-const MIN_SESSIONS = 2
-const ADVANCE_THRESHOLD = 0.80
-const MAX_ADVANCE_THRESHOLD = 0.90
-const REGRESS_THRESHOLD = 0.60
-
-function latencyWeight(bucket: LatencyBucket | null): number {
-  if (bucket === 'lt1s') return 0.05
-  if (bucket === 'gt3s') return -0.05
-  return 0
 }
 
 /**
@@ -101,7 +93,8 @@ export function computeProgressionDecisions(
     acc.success += row.success_count
     acc.fail += row.fail_count
     if (row.latency_bucket) {
-      acc.latencyScore += latencyWeight(row.latency_bucket)
+      if (row.latency_bucket === 'lt1s') acc.latencyScore += 0.05
+      else if (row.latency_bucket === 'gt3s') acc.latencyScore -= 0.05
       acc.latencyCount += 1
     }
   }
@@ -127,47 +120,41 @@ export function computeProgressionDecisions(
     if (attempts === 0) continue
     const sessionCount = acc.sessionDays.size
 
-    const rawRate = acc.success / attempts
-    const latencyAdjust = acc.latencyCount > 0 ? acc.latencyScore / acc.latencyCount : 0
-    const adjustedRate = rawRate + latencyAdjust
+    const latencyBucket: LatencyBucket | null =
+      acc.latencyCount > 0
+        ? acc.latencyScore / acc.latencyCount > 0
+          ? 'lt1s'
+          : acc.latencyScore / acc.latencyCount < 0
+            ? 'gt3s'
+            : '1to3s'
+        : null
 
-    const advanceThreshold = Math.min(
-      ADVANCE_THRESHOLD + (thresholdOverrides[exerciseId] ?? 0),
-      MAX_ADVANCE_THRESHOLD,
-    )
-
-    let decision: ProgressionDecision
-    let reason: string
-    if (sessionCount < MIN_SESSIONS) {
-      decision = 'hold'
-      reason = `${sessionCount} pass på nivån — kör minst ${MIN_SESSIONS} pass innan nivåbeslut`
-    } else if (attempts < MIN_ATTEMPTS) {
-      decision = 'hold'
-      reason = `${attempts} reps på fönstret — för få datapunkter, håll nuvarande nivå`
-    } else if (adjustedRate >= advanceThreshold) {
-      decision = 'advance'
-      reason = `${Math.round(rawRate * 100)}% lyckade över ${attempts} reps — höj kriteriet ett steg`
-    } else if (adjustedRate <= REGRESS_THRESHOLD) {
-      decision = 'regress'
-      reason = `${Math.round(rawRate * 100)}% lyckade över ${attempts} reps — sänk kriteriet ett steg`
-    } else {
-      decision = 'hold'
-      reason = `${Math.round(rawRate * 100)}% lyckade över ${attempts} reps — fortsätt på nuvarande nivå`
-    }
+    const evaluated = evaluateRate({
+      success: acc.success,
+      fail: acc.fail,
+      latencyBucket,
+      horizon: 'week',
+      sessionCount,
+      advanceThresholdDelta: thresholdOverrides[exerciseId] ?? 0,
+    })
 
     decisions.push({
       exercise_id: exerciseId,
       criteria_level_id: criteriaLevelId,
-      decision,
-      attempts,
-      success_rate: rawRate,
-      reason,
+      decision: evaluated.decision,
+      attempts: evaluated.attempts,
+      success_rate: evaluated.rate,
+      reason: evaluated.reason,
     })
   }
 
   // Sort: regressions first (most urgent), then advances, then holds.
   // Within each group, more attempts ranked higher.
-  const order: Record<ProgressionDecision, number> = { regress: 0, advance: 1, hold: 2 }
+  const order: Record<ProgressionDecision, number> = {
+    regress: 0,
+    advance: 1,
+    hold: 2,
+  }
   decisions.sort((a, b) => {
     if (order[a.decision] !== order[b.decision]) return order[a.decision] - order[b.decision]
     return b.attempts - a.attempts
