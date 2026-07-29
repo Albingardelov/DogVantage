@@ -2,6 +2,11 @@ import type { SessionLog } from '@/types'
 import type { PuppyZone } from '@/lib/training/puppy-zone'
 import { inferEnvironment, type SkillEnvironment } from '@/lib/training/skill-progress'
 import { statsFor } from '@/lib/training/handler-feedback'
+import {
+  ADVANCE_THRESHOLD,
+  REGRESS_THRESHOLD,
+  horizonMinAttempts,
+} from '@/lib/training/progression-kernel'
 
 export interface DogStateMetricRow {
   exercise_id: string
@@ -49,9 +54,9 @@ export interface DogStateInputs {
   checkIns: Record<string, PuppyZone>
 }
 
-const MIN_ATTEMPTS = 10
-const WEAK_THRESHOLD = 0.6
-const STRONG_THRESHOLD = 0.8
+const MIN_ATTEMPTS = horizonMinAttempts('week')
+const WEAK_THRESHOLD = REGRESS_THRESHOLD
+const STRONG_THRESHOLD = ADVANCE_THRESHOLD
 const MAX_LISTED = 3
 const MIN_ENV_ATTEMPTS = 8
 
