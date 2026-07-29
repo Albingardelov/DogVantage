@@ -11,6 +11,7 @@
  * viktas upp.
  */
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
+import { evaluateRate } from '@/lib/training/progression-kernel'
 
 export interface ProtocolPhase {
   id: string
@@ -138,9 +139,6 @@ export interface ProjectProgress {
   nextStep: string | null
 }
 
-const MIN_ATTEMPTS_PER_RUNG = 6
-const MIN_SUCCESS_RATE = 0.8
-
 /**
  * Beräknar var i protokollet hunden befinner sig utifrån loggade metrics för
  * primärövningen. En pinne räknas som uppnådd när hunden har ≥80 % lyckade
@@ -167,7 +165,12 @@ export function computeProjectProgress(
 
   let highestAchievedIdx = -1
   for (const [idx, bucket] of byRung) {
-    if (bucket.attempts >= MIN_ATTEMPTS_PER_RUNG && bucket.success / bucket.attempts >= MIN_SUCCESS_RATE) {
+    const evaluated = evaluateRate({
+      success: bucket.success,
+      fail: bucket.attempts - bucket.success,
+      horizon: 'project',
+    })
+    if (evaluated.decision === 'advance') {
       highestAchievedIdx = Math.max(highestAchievedIdx, idx)
     }
   }
