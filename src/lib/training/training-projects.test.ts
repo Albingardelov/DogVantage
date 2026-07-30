@@ -55,21 +55,27 @@ describe('computeProjectProgress', () => {
     expect(progress.currentPhase).toBe(1)
     expect(progress.completed).toBe(false)
     expect(progress.achievedRungLabel).toBeNull()
-    expect(progress.nextStep).toContain('Inne · 2 m')
+    expect(progress.nextStep).toContain('Inne · 5 m')
   })
 
   it('advances to the next phase when the target rung is achieved', () => {
-    // home_2m (fas 1-mål) uppnådd: 8/9 lyckade.
-    const progress = computeProjectProgress(recall, rows([['home_2m', 8, 1]]))
+    // home_5m (fas 1-mål) uppnådd: 8/9 lyckade.
+    const progress = computeProjectProgress(recall, rows([['home_5m', 8, 1]]))
     expect(progress.currentPhase).toBe(2)
     expect(progress.phaseLabel).toBe('Ute i trädgården')
-    expect(progress.achievedRungLabel).toContain('Inne · 2 m')
+    expect(progress.achievedRungLabel).toContain('Inne · 5 m')
   })
 
   it('requires enough attempts before counting a rung as achieved', () => {
     // 100 % men bara 3 försök — otillräckligt underlag.
-    const progress = computeProjectProgress(recall, rows([['home_2m', 3, 0]]))
+    const progress = computeProjectProgress(recall, rows([['home_5m', 3, 0]]))
     expect(progress.currentPhase).toBe(1)
+  })
+
+  it('home_2m alone does not complete the indoor foundation phase', () => {
+    const progress = computeProjectProgress(recall, rows([['home_2m', 8, 1]]))
+    expect(progress.currentPhase).toBe(1)
+    expect(progress.achievedRungLabel).toContain('Inne · 2 m')
   })
 
   it('counts a later rung as covering earlier phases', () => {
