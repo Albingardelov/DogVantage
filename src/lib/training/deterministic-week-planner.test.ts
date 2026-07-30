@@ -91,7 +91,7 @@ describe('buildDeterministicWeekPlan', () => {
       .find((exercise) => exercise.id === 'inkallning')
 
     expect(inkallning?.desc).toMatch(/Lättare idag/i)
-    expect(inkallning?.desc).toContain('tom gård')
+    expect(inkallning?.desc).toMatch(/5–10 m|tom gård/i)
   })
 
   it('validator flags a bad plan', () => {

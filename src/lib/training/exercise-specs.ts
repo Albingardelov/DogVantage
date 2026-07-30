@@ -491,24 +491,50 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
         ],
       },
       {
-        id: 'garden_low',
-        label: 'Ute · låg störning',
-        criteria: 'Enkelt ute (tom gård). Kort avstånd. Belöna snabbt och generöst.',
+        id: 'home_5m',
+        label: 'Inne · 5 m',
+        criteria: 'Hunden kommer ca 5 m inne på första signalen. Belöna vid vändning + vid dig.',
         tips: [
-          'Tom gård, kort avstånd. Samma signal som inne.',
+          'Öka till ~5 m inne (hall/rum). En signal, backa när den kommer.',
+          'Dubbelbelöna: vändning och ankomst — jackpot när den når dig.',
+        ],
+        failTips: [
+          'Gå tillbaka till 2 m tills tre lyckade i rad.',
+          'Korta passet: tre lyckade på 5 m och avsluta.',
+        ],
+      },
+      {
+        id: 'garden_low',
+        label: 'Ute · 2–5 m · låg störning',
+        criteria: 'Tom gård/inhägnat. 2–5 m. Belöna snabbt och generöst.',
+        tips: [
+          'Tom gård, börja på 2–3 m och bygg mot 5 m. Samma signal som inne.',
           'Belöna generöst ute — miljön konkurrerar.',
         ],
         failTips: [
-          'Gå närmare eller tillbaka inne en stund.',
+          'Gå närmare eller tillbaka inne till 5 m en stund.',
           'Använd långlina om frihet vinner.',
         ],
       },
       {
-        id: 'park_low',
-        label: 'Ute · låg störning (park)',
-        criteria: 'Korta avstånd, långlina vid behov. Belöna med hög värde-belöning.',
+        id: 'garden_10m',
+        label: 'Ute · 5–10 m · låg störning',
+        criteria: 'Tom gård/inhägnat. 5–10 m, långlina vid behov. En signal.',
         tips: [
-          'Korta avstånd, långlina på. En signal.',
+          'Bygg från 5 m mot 10 m. Långlina på om du är osäker.',
+          'Belöna vid dig, ge fri, låt hunden gå ut på linan igen.',
+        ],
+        failTips: [
+          'Korta till 3–5 m tills tre lyckade i rad.',
+          'Höj belöningsvärdet (lek) och avsluta efter en lyckad.',
+        ],
+      },
+      {
+        id: 'park_low',
+        label: 'Ute · park · kort avstånd',
+        criteria: 'Korta avstånd i park, långlina vid behov. Belöna med hög värde-belöning.',
+        tips: [
+          'Korta avstånd (börja 2–5 m), långlina på. En signal.',
           'Högvärdesbelöning (lek/mat) vid dig, sedan fri ut på linan igen.',
         ],
         failTips: [
@@ -567,7 +593,7 @@ export const EXERCISE_SPECS: Record<string, ExerciseSpec> = {
       ],
       successLooksLike: 'Hunden vänder direkt och kommer hela vägen in på första signalen, utan att du upprepar dig.',
       whenItFails: [
-        'Gå närmare innan du ropar — börja på 1 meter om 3 meter är för svårt.',
+        'Gå närmare innan du ropar — backa ett avståndssteg (t.ex. 5 m → 2 m).',
         'Byt till godare belöning eller leksak, och belöna snabbare vid vändningen.',
         'Gör tre supersmidiga reps inne innan ni går ut igen.',
       ],

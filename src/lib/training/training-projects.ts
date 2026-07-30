@@ -38,8 +38,8 @@ export const TRAINING_PROTOCOLS: Record<string, TrainingProtocol> = {
     primaryExerciseId: 'inkallning',
     supportExerciseIds: ['namn', 'stoppsignal'],
     phases: [
-      { id: 'foundation', label: 'Grunden inne', targetRungId: 'home_2m' },
-      { id: 'garden', label: 'Ute i trädgården', targetRungId: 'garden_low' },
+      { id: 'foundation', label: 'Grunden inne', targetRungId: 'home_5m' },
+      { id: 'garden', label: 'Ute i trädgården', targetRungId: 'garden_10m' },
       { id: 'park', label: 'Parken, låg störning', targetRungId: 'park_low' },
       { id: 'distractions', label: 'Mitt bland störningar', targetRungId: 'park_medium' },
     ],
