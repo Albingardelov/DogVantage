@@ -11,7 +11,7 @@ export function getStripe(): Stripe {
   if (stripeClient) return stripeClient
   const key = requireEnv('STRIPE_SECRET_KEY', process.env.STRIPE_SECRET_KEY)
   stripeClient = new Stripe(key, {
-    apiVersion: '2026-04-22.dahlia',
+    apiVersion: '2026-07-29.dahlia',
   })
   return stripeClient
 }

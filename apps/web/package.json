@@ -1,0 +1,48 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest",
+    "ingest:behavior": "npx tsx scripts/ingest-behavior-welfare-docs.ts",
+    "ingest:skk": "npx tsx scripts/ingest-skk-rasstandarder.ts",
+    "ingest:skk:cleanup": "npx tsx scripts/cleanup-skk-ingest.ts",
+    "ingest:skk:remap": "npx tsx scripts/remap-skk-fci-breeds.ts",
+    "ingest:skk:generate-breeds": "npx tsx scripts/generate-skk-supplemental-breeds.ts"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@phosphor-icons/react": "^2.1.10",
+    "@serwist/next": "^9.5.7",
+    "@supabase/ssr": "^0.10.2",
+    "@supabase/supabase-js": "^2.105.1",
+    "groq-sdk": "^1.1.2",
+    "i18next": "^26.3.1",
+    "next": "16.2.4",
+    "pdf-parse": "^2.4.5",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-i18next": "^17.0.8",
+    "serwist": "^9.5.7",
+    "stripe": "^22.1.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^20",
+    "@types/pdf-parse": "^1.1.5",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/coverage-v8": "^4.1.5",
+    "dotenv": "^17.4.1",
+    "jsdom": "^29.1.0",
+    "typescript": "^5",
+    "vitest": "^4.1.5"
+  }
+}
