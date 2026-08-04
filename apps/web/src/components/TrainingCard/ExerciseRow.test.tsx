@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import ExerciseRow from './ExerciseRow'
-import { EMPTY_GUARD } from '@/lib/training/session-coach'
-import type { ExerciseSpec } from '@/lib/training/exercise-specs'
+import { EMPTY_GUARD } from '@dogvantage/core'
+import type { ExerciseSpec } from '@dogvantage/core'
 
 const spec: ExerciseSpec = {
   exerciseId: 'sitt',

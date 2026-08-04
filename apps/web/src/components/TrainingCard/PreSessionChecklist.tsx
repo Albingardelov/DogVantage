@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import styles from './PreSessionChecklist.module.css'
-import { getLifeStage, isPuppy } from '@/lib/dog/age'
+import { getLifeStage, isPuppy } from '@dogvantage/core'
 
 function storageKey(dogId: string, dateKey: string): string {
   return `dv_pre_ready_${dogId}_${dateKey}`

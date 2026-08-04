@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { formatDogStateForPrompt } from './dog-state-context'
-import type { DogStatePayload } from '@/lib/training/dog-state'
+import type { DogStatePayload } from '@dogvantage/core'
 
 function emptyPayload(): DogStatePayload {
   return {

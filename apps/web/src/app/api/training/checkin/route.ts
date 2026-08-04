@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAuthAndDog } from '@/lib/api/with-auth'
 import { getCheckIn, getCheckIns, saveCheckIn } from '@/lib/supabase/daily-check-ins'
-import type { PuppyZone } from '@/lib/training/puppy-zone'
-import type { HandlerEnergy } from '@/lib/training/day-scaler'
+import type { PuppyZone } from '@dogvantage/core'
+import type { HandlerEnergy } from '@dogvantage/core'
 
 const VALID_ZONES: PuppyZone[] = ['green', 'yellow', 'red']
 const VALID_ENERGY: HandlerEnergy[] = ['low', 'ok', 'high']

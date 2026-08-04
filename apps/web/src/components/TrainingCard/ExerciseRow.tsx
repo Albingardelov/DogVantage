@@ -16,13 +16,13 @@ import {
 } from '@/components/icons'
 import styles from './ExerciseRow.module.css'
 import type { DailyExerciseMetrics, Exercise, LatencyBucket, TrainingSourceRef } from '@dogvantage/core'
-import type { ExerciseSpec } from '@/lib/training/exercise-specs'
-import { isPuppy as isPuppyAge, getLifeStage } from '@/lib/dog/age'
-import { buildCoachAction, latencyMeaning, type SessionGuard } from '@/lib/training/session-coach'
+import type { ExerciseSpec } from '@dogvantage/core'
+import { isPuppy as isPuppyAge, getLifeStage } from '@dogvantage/core'
+import { buildCoachAction, latencyMeaning, type SessionGuard } from '@dogvantage/core'
 import { resolveLiveCoach } from '@/lib/training/live-coach'
 import type { ExerciseMaturity } from './maturity'
 import { topBadge } from './badges'
-import { normalizeHandlerGuide } from '@/lib/training/normalize-handler-guide'
+import { normalizeHandlerGuide } from '@dogvantage/core'
 
 interface Props {
   exercise: Exercise

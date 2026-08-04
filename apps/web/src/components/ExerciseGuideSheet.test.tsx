@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import ExerciseGuideSheet from './ExerciseGuideSheet'
-import type { ExerciseSpec } from '@/lib/training/exercise-specs'
+import type { ExerciseSpec } from '@dogvantage/core'
 
 const push = vi.fn()
 

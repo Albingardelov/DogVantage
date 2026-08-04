@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAuthAndDog } from '@/lib/api/with-auth'
-import { getAgeInWeeks, type LifeStage } from '@/lib/dog/age'
+import { getAgeInWeeks, type LifeStage } from '@dogvantage/core'
 import { getCurriculumOverview } from '@/lib/learning/curriculum'
 import { lifeStageFromAgeWeeks } from '@/lib/learning/curriculum-def'
 import { listCompletedModules, listFailedQuizModuleIds } from '@/lib/supabase/learning-progress'
 import { getDogState } from '@/lib/supabase/dog-state'
-import { computeHandlerStruggle } from '@/lib/training/handler-state'
+import { computeHandlerStruggle } from '@dogvantage/core'
 import type { Breed } from '@dogvantage/core'
 
 export async function GET(req: NextRequest) {

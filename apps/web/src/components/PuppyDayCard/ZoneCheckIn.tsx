@@ -6,7 +6,7 @@
 
 import { Smiley, SmileyMeh, SmileySad } from '@phosphor-icons/react'
 import { DvIcon } from '@/components/icons'
-import type { PuppyZone } from '@/lib/training/puppy-zone'
+import type { PuppyZone } from '@dogvantage/core'
 import styles from './PuppyDayCard.module.css'
 
 interface Props {

@@ -8,17 +8,17 @@ import ExerciseGuideSheet from '@/components/ExerciseGuideSheet'
 import { IconCaretRight, SelectionCheck } from '@/components/icons'
 import { updateDogProfile } from '@/lib/dog/profile'
 import { useActiveDog } from '@/lib/dog/active-dog-context'
-import { getAgeInWeeks } from '@/lib/dog/age'
-import { getExerciseSpec } from '@/lib/training/exercise-specs'
-import { computeStartingWeek } from '@/lib/training/assessment-week'
-import { GOAL_EXERCISE_IDS } from '@/lib/training/goal-exercises'
+import { getAgeInWeeks } from '@dogvantage/core'
+import { getExerciseSpec } from '@dogvantage/core'
+import { computeStartingWeek } from '@dogvantage/core'
+import { GOAL_EXERCISE_IDS } from '@dogvantage/core'
 import {
   TRIGGER_LABELS,
   LEASH_LABELS,
   ENV_REACTION_LABELS,
   BACKGROUND_LABELS,
   HOUSEHOLD_PET_LABELS,
-} from '@/lib/dog/behavior'
+} from '@dogvantage/core'
 import type {
   DailyExerciseMetrics,
   LatencyBucket,

@@ -9,7 +9,7 @@ import {
   buildYellowExercise,
   selectYellowExercise,
   type PuppyZone,
-} from '@/lib/training/puppy-zone'
+} from '@dogvantage/core'
 
 const SWEDISH_DAYS = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag']
 

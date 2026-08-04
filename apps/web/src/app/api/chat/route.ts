@@ -10,13 +10,13 @@ import { getCachedChat, setCachedChat, touchCacheEntry } from '@/lib/supabase/tr
 import { incrementChatCount, DAILY_CHAT_LIMIT } from '@/lib/supabase/chat-usage'
 import { detectSecretExposure } from '@/lib/ai/safety-guards'
 import { isSupportedLocale, DEFAULT_LOCALE } from '@/i18n/config'
-import { getAgeInWeeks } from '@/lib/dog/age'
-import { getBehaviorContextPayloadFromDb } from '@/lib/dog/build-behavior-context'
-import { extractChatTopic } from '@/lib/dog/chat-topics'
-import { summarizeDogTimeline } from '@/lib/dog/timeline'
+import { getAgeInWeeks } from '@dogvantage/core'
+import { getBehaviorContextPayloadFromDb } from '@dogvantage/core'
+import { extractChatTopic } from '@dogvantage/core'
+import { summarizeDogTimeline } from '@dogvantage/core'
 import { logChatTopic, getRecentChatTopics } from '@/lib/supabase/chat-topics'
 import { getActiveProject } from '@/lib/supabase/training-projects'
-import { PROTOCOL_BY_CHAT_TOPIC, TRAINING_PROTOCOLS } from '@/lib/training/training-projects'
+import { PROTOCOL_BY_CHAT_TOPIC, TRAINING_PROTOCOLS } from '@dogvantage/core'
 import { getCheckIns } from '@/lib/supabase/daily-check-ins'
 import { getChatMessages, appendChatExchange } from '@/lib/supabase/chat-messages'
 import { getDogState } from '@/lib/supabase/dog-state'
@@ -42,7 +42,7 @@ function todayDateString(): string {
   return new Date().toISOString().split('T')[0]
 }
 
-function formatMetricsForPrompt(metrics: Record<string, import('@/types').DailyExerciseMetrics>): string[] {
+function formatMetricsForPrompt(metrics: Record<string, import('@dogvantage/core').DailyExerciseMetrics>): string[] {
   return Object.entries(metrics)
     .map(([exerciseId, m]) => {
       const attempts = (m.success_count ?? 0) + (m.fail_count ?? 0)

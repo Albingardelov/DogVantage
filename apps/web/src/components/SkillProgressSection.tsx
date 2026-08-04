@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import type { SkillEnvironment, SkillProgress } from '@/lib/training/skill-progress'
-import { MAX_WEEKLY_PRIORITY_EXERCISES } from '@/lib/training/weekly-focus'
+import type { SkillEnvironment, SkillProgress } from '@dogvantage/core'
+import { MAX_WEEKLY_PRIORITY_EXERCISES } from '@dogvantage/core'
 import styles from './SkillProgressSection.module.css'
 
 interface Props {

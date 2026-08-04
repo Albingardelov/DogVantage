@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getExerciseSpec } from './exercise-specs'
+import { getExerciseSpec } from '@dogvantage/core'
 import { resolveLiveCoach } from './live-coach'
 
 const ink = () => getExerciseSpec('inkallning')!

@@ -4,7 +4,7 @@ import {
   sanitizePriorityExerciseIds,
   type WeeklyFocusArea,
   type WeeklyPlanningPreferences,
-} from '@/lib/training/weekly-focus'
+} from '@dogvantage/core'
 
 export async function getWeeklyFocusPreferences(
   dogId: string,

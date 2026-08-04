@@ -1,12 +1,12 @@
 import { AI_TIMEOUTS, getGroqClient, GROQ_MODEL } from './client'
 import type { TrainingSourceRef, WeekPlan } from '@dogvantage/core'
 import { buildWeekPromptParts } from './week-plan-prompt'
-import type { WeekPlanInput } from '@/lib/training/week-context'
-import { buildDeterministicWeekPlan } from '@/lib/training/deterministic-week-planner'
-import { validateWeekPlan } from '@/lib/training/week-plan-validator'
+import type { WeekPlanInput } from '@dogvantage/core'
+import { buildDeterministicWeekPlan } from '@dogvantage/core'
+import { validateWeekPlan } from '@dogvantage/core'
 import { getExerciseDocContext } from './doc-learning'
-import { exerciseLabel } from '@/lib/training/exercise-label'
-import { getLifeStage } from '@/lib/dog/age'
+import { exerciseLabel } from '@dogvantage/core'
+import { getLifeStage } from '@dogvantage/core'
 import { trackTelemetry } from '@/lib/telemetry'
 
 // Bump this when plan generation logic changes significantly — forces cache invalidation

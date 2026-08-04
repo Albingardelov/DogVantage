@@ -7,7 +7,7 @@ import Avatar from '@/components/Avatar'
 import BottomNav from '@/components/BottomNav'
 import SkillProgressSection from '@/components/SkillProgressSection'
 import { useActiveDog } from '@/lib/dog/active-dog-context'
-import { MAX_WEEKLY_PRIORITY_EXERCISES } from '@/lib/training/weekly-focus'
+import { MAX_WEEKLY_PRIORITY_EXERCISES } from '@dogvantage/core'
 import styles from './page.module.css'
 
 export default function SkillsPage() {

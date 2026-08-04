@@ -1,5 +1,5 @@
 import { BREED_REGISTRY } from '../src/lib/breeds/registry'
-import type { Breed } from '../src/types'
+import type { Breed } from '@dogvantage/core'
 
 const DUPLICATE_FCI_CANONICAL: Record<number, Breed> = {
   15: 'belgian_malinois',

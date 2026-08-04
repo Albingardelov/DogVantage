@@ -57,4 +57,3 @@ export interface WeekPlan {
   days: DayPlan[]
 }
 
-export type WeeklyFocusArea = 'engagement' | 'calm' | 'impulse_control' | 'confidence' | 'cooperation'

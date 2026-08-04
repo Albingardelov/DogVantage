@@ -1,4 +1,4 @@
-import { getLifeStage, type LifeStage } from '@/lib/dog/age'
+import { getLifeStage, type LifeStage } from '@dogvantage/core'
 import type { ChunkTopic } from '@/lib/learning/chunk-metadata'
 
 export interface CurriculumModuleDef {

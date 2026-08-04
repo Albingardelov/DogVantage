@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { TRAINING_PROTOCOLS } from '@/lib/training/training-projects'
+import { TRAINING_PROTOCOLS } from '@dogvantage/core'
 import { IconTarget, IconCaretRight } from '@/components/icons'
 import styles from './TrainingProjectCard.module.css'
 

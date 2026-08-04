@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAuthAndDog } from '@/lib/api/with-auth'
-import { getAgeInWeeks, type LifeStage } from '@/lib/dog/age'
+import { getAgeInWeeks, type LifeStage } from '@dogvantage/core'
 import { getModuleById, moduleListForStage } from '@/lib/learning/curriculum'
 import { lifeStageFromAgeWeeks } from '@/lib/learning/curriculum-def'
 import { listCompletedAmong, markModuleComplete } from '@/lib/supabase/learning-progress'

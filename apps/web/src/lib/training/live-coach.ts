@@ -1,8 +1,8 @@
 import type { TrainingSourceRef } from '@dogvantage/core'
-import type { LifeStage } from '@/lib/dog/age'
+import type { LifeStage } from '@dogvantage/core'
 import { topicForExerciseId } from '@/lib/learning/chunk-metadata'
-import type { CoachAction } from '@/lib/training/session-coach'
-import type { ExerciseSpec } from '@/lib/training/exercise-specs'
+import type { CoachAction } from '@dogvantage/core'
+import type { ExerciseSpec } from '@dogvantage/core'
 
 export type CoachKind = CoachAction['kind'] | null
 

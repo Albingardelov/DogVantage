@@ -6,7 +6,7 @@ import {
   computeProgressionDecisions,
   type ProgressionMetricRow,
   type ProgressionSessionRow,
-} from '@/lib/training/progression-rules'
+} from '@dogvantage/core'
 import type { ExerciseSummary, LatencyBucket } from '@dogvantage/core'
 
 function daysAgo(days: number): string {

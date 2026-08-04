@@ -2,8 +2,8 @@ import { getSupabaseAdmin } from './client'
 import {
   computeDogState,
   type DogStatePayload,
-} from '@/lib/training/dog-state'
-import type { PuppyZone } from '@/lib/training/puppy-zone'
+} from '@dogvantage/core'
+import type { PuppyZone } from '@dogvantage/core'
 import type { SessionLog } from '@dogvantage/core'
 import { trackTelemetry } from '@/lib/telemetry'
 import type { Json } from '@dogvantage/core'

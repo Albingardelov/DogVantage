@@ -10,9 +10,9 @@ import BottomNav from '@/components/BottomNav'
 import { updateDogProfile } from '@/lib/dog/profile'
 import { saveDogPhoto } from '@/lib/dog/photo'
 import { useActiveDog } from '@/lib/dog/active-dog-context'
-import { getAgeInWeeks, daysUntilHomecoming } from '@/lib/dog/age'
+import { getAgeInWeeks, daysUntilHomecoming } from '@dogvantage/core'
 import { GOALS, getGoalsForBreed, ENVIRONMENTS, REWARDS } from '@/components/DogProfileForm'
-import { HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'
+import { HOUSEHOLD_PET_LABELS } from '@dogvantage/core'
 import { ALL_BREED_OPTIONS } from '@/lib/breeds/registry'
 import {
   IconCaretLeft,

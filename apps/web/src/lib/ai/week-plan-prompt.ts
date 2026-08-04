@@ -1,10 +1,10 @@
 import { formatCurrentPhase, formatBreedProfileShort } from './breed-profiles'
-import { GOAL_EXERCISE_IDS, GOAL_LABELS } from '@/lib/training/goal-exercises'
-import { focusExerciseIds } from '@/lib/training/weekly-focus'
-import { isPuppy as isPuppyAge } from '@/lib/dog/age'
-import { allowedExerciseIdsForBreed } from '@/lib/training/allowed-exercises'
-import { composeRules, ALL_RULES } from '@/lib/training/rules'
-import { buildWeekContext, type WeekPlanInput } from '@/lib/training/week-context'
+import { GOAL_EXERCISE_IDS, GOAL_LABELS } from '@dogvantage/core'
+import { focusExerciseIds } from '@dogvantage/core'
+import { isPuppy as isPuppyAge } from '@dogvantage/core'
+import { allowedExerciseIdsForBreed } from '@dogvantage/core'
+import { composeRules, ALL_RULES } from '@dogvantage/core'
+import { buildWeekContext, type WeekPlanInput } from '@dogvantage/core'
 const REACTIVE_EXERCISES = ['lat']
 
 export function buildWeekPromptParts(input: WeekPlanInput & { documentContext?: string }) {

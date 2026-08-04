@@ -1,7 +1,7 @@
 import { getSupabaseAdmin } from './client'
 import type { TrainingResult, Breed, WeekPlan } from '@dogvantage/core'
 import { type Locale } from '@/i18n/config'
-import { getLifeStage } from '@/lib/dog/age'
+import { getLifeStage } from '@dogvantage/core'
 import { TrainingResultSchema, WeekPlanSchema } from '@dogvantage/core'
 
 export async function getCachedTraining(

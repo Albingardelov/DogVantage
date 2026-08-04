@@ -1,6 +1,6 @@
-import type { DogStatePayload } from '@/lib/training/dog-state'
-import type { SkillEnvironment } from '@/lib/training/skill-progress'
-import { exerciseLabel } from '@/lib/training/exercise-label'
+import type { DogStatePayload } from '@dogvantage/core'
+import type { SkillEnvironment } from '@dogvantage/core'
+import { exerciseLabel } from '@dogvantage/core'
 
 const ENV_LABELS: Record<SkillEnvironment, string> = {
   home: 'hemma',

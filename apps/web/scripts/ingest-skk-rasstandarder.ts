@@ -6,7 +6,7 @@ import { tmpdir } from 'os'
 import { basename, extname, join } from 'path'
 import { spawnSync } from 'child_process'
 import { ingestPDF } from '../src/lib/ai/ingest'
-import type { Breed } from '../src/types'
+import type { Breed } from '@dogvantage/core'
 import { canonicalBreedFromFci } from './skk-canonical-map'
 
 const SKK_ZIP_URLS: string[] = [

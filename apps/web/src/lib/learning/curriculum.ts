@@ -9,7 +9,7 @@ import {
   type CurriculumModuleDef,
 } from '@/lib/learning/curriculum-def'
 import type { Breed, TrainingSourceRef } from '@dogvantage/core'
-import type { LifeStage } from '@/lib/dog/age'
+import type { LifeStage } from '@dogvantage/core'
 
 export interface CurriculumModuleContent {
   id: string

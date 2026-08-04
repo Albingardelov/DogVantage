@@ -10,7 +10,7 @@ import {
   projectExerciseIds,
   type ProjectMetricRow,
   type TrainingProtocol,
-} from '@/lib/training/training-projects'
+} from '@dogvantage/core'
 
 const METRICS_WINDOW_DAYS = 42
 

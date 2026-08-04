@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { ExerciseSpec } from '@/lib/training/exercise-specs'
+import type { ExerciseSpec } from '@dogvantage/core'
 
 /**
  * Loads the user's custom exercise specs once per dog and exposes a

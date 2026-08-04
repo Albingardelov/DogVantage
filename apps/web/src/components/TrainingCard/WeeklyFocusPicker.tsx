@@ -6,7 +6,7 @@ import {
   WEEKLY_FOCUS_LABELS,
   MAX_WEEKLY_FOCUS,
   type WeeklyFocusArea,
-} from '@/lib/training/weekly-focus'
+} from '@dogvantage/core'
 import { IconCaretRight, IconTarget } from '@/components/icons'
 import styles from './WeeklyFocusPicker.module.css'
 

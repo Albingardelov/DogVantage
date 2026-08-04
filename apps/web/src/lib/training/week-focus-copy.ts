@@ -1,6 +1,6 @@
 import { resolveBreedProfile } from '@/lib/ai/breed-profiles'
-import { GOAL_LABELS, GOAL_RULES } from '@/lib/training/goal-exercises'
-import { getLifeStage, isPuppy } from '@/lib/dog/age'
+import { GOAL_LABELS, GOAL_RULES } from '@dogvantage/core'
+import { getLifeStage, isPuppy } from '@dogvantage/core'
 import type { Breed, TrainingGoal } from '@dogvantage/core'
 
 export interface WeekFocusCopy {

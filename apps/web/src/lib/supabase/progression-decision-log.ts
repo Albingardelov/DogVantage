@@ -1,11 +1,11 @@
 import { getSupabaseAdmin } from './client'
-import type { ExerciseProgressionDecision } from '@/lib/training/progression-rules'
+import type { ExerciseProgressionDecision } from '@dogvantage/core'
 import type {
   DecisionEvaluation,
   PendingDecisionRow,
   AdvanceOutcomeRow,
   DecisionOutcome,
-} from '@/lib/training/decision-calibration'
+} from '@dogvantage/core'
 
 // Must cover HISTORY_WINDOW (10, decision-calibration.ts) rows per actively
 // trained exercise — a smaller global limit silently drops the exercises with

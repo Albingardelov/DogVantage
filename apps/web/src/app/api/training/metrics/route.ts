@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getMetrics, getTrainingDays, upsertMetrics } from '@/lib/supabase/daily-exercise-metrics'
-import { getExerciseSpec, isValidCriteriaLevel } from '@/lib/training/exercise-specs'
+import { getExerciseSpec, isValidCriteriaLevel } from '@dogvantage/core'
 import { withAuthAndDog } from '@/lib/api/with-auth'
 import type { DailyExerciseMetrics, LatencyBucket } from '@dogvantage/core'
 

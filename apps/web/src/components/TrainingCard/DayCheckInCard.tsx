@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import styles from './DayCheckInCard.module.css'
-import type { DayCheckInState, HandlerEnergy } from '@/lib/training/day-scaler'
-import type { PuppyZone } from '@/lib/training/puppy-zone'
+import type { DayCheckInState, HandlerEnergy } from '@dogvantage/core'
+import type { PuppyZone } from '@dogvantage/core'
 
 interface Props {
   dogName: string

@@ -9,7 +9,7 @@ import { ingestPDF } from '../src/lib/ai/ingest'
 
 const FILES: Array<{
   path: string
-  breed: import('../src/types').Breed
+  breed: import('@dogvantage/core').Breed
   sourceUrl: string
   docVersion: string
 }> = [

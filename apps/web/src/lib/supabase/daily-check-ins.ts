@@ -1,5 +1,5 @@
 import { getSupabaseAdmin } from './client'
-import type { PuppyZone } from '@/lib/training/puppy-zone'
+import type { PuppyZone } from '@dogvantage/core'
 
 export interface DayCheckInRow {
   zone: PuppyZone

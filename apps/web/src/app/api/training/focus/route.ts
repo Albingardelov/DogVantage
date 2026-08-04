@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAuthAndDog } from '@/lib/api/with-auth'
 import { getWeeklyFocusPreferences, setWeeklyFocusPreferences } from '@/lib/supabase/weekly-focus'
-import { currentIsoWeek, sanitizeFocusAreas, sanitizePriorityExerciseIds } from '@/lib/training/weekly-focus'
+import { currentIsoWeek, sanitizeFocusAreas, sanitizePriorityExerciseIds } from '@dogvantage/core'
 
 function resolveIsoWeek(value: string | null): string {
   if (value && /^\d{4}-W\d{2}$/.test(value)) return value

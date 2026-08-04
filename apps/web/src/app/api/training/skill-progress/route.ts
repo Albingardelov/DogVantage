@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { withAuthAndDog } from '@/lib/api/with-auth'
 import { apiError } from '@/lib/api/errors'
 import { getSupabaseAdmin } from '@/lib/supabase/client'
-import { aggregateSkillProgress, type MetricRow } from '@/lib/training/skill-progress'
-import { getExerciseSpec } from '@/lib/training/exercise-specs'
+import { aggregateSkillProgress, type MetricRow } from '@dogvantage/core'
+import { getExerciseSpec } from '@dogvantage/core'
 import type { ExerciseSummary } from '@dogvantage/core'
 
 function daysAgo(days: number): string {

@@ -21,7 +21,7 @@ import * as path from 'path'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { createClient } from '@supabase/supabase-js'
 import { PDFParse } from 'pdf-parse'
-import type { BreedOrGeneral } from '../src/types'
+import type { BreedOrGeneral } from '@dogvantage/core'
 
 const CHUNK_SIZE = 2000
 const CHUNK_OVERLAP = 200

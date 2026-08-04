@@ -7,7 +7,7 @@ import {
   findEnvironmentGapInsight,
   formatInsightCopy,
   type EnvironmentGapInsight,
-} from '@/lib/training/insights'
+} from '@dogvantage/core'
 import { IconTarget, IconClose, IconCheck } from '@/components/icons'
 import styles from './InsightCard.module.css'
 

@@ -3,7 +3,7 @@
 
 import { SmileySad } from '@phosphor-icons/react'
 import { DvIcon, IconPaw } from '@/components/icons'
-import { getRecoveryTips } from '@/lib/training/puppy-zone'
+import { getRecoveryTips } from '@dogvantage/core'
 import styles from './PuppyDayCard.module.css'
 
 export default function RecoveryCard() {
