@@ -10,7 +10,7 @@ import {
 } from '@/lib/supabase/custom-exercises'
 import { getGeminiTextModel, jsonGenConfig } from '@/lib/ai/client'
 import { aiErrorResponse } from '@/lib/ai/errors'
-import { slugify, randomSuffix } from '@/lib/utils/slugify'
+import { slugify, randomSuffix } from '@dogvantage/core'
 import type {
   ExerciseSpec,
   GuideStep,
