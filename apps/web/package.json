@@ -15,6 +15,7 @@
     "ingest:skk:generate-breeds": "npx tsx scripts/generate-skk-supplemental-breeds.ts"
   },
   "dependencies": {
+    "@dogvantage/core": "workspace:*",
     "@google/generative-ai": "^0.24.1",
     "@phosphor-icons/react": "^2.1.10",
     "@serwist/next": "^9.5.7",

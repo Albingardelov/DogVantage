@@ -1,0 +1,20 @@
+{
+  "name": "@dogvantage/core",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "react-native": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run --passWithNoTests",
+    "lint": "depcruise src --config .dependency-cruiser.cjs"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "vitest": "^4.1.5",
+    "dependency-cruiser": "^16.0.0"
+  }
+}
