@@ -4,9 +4,9 @@ import {
   type DogStatePayload,
 } from '@/lib/training/dog-state'
 import type { PuppyZone } from '@/lib/training/puppy-zone'
-import type { SessionLog } from '@/types'
+import type { SessionLog } from '@dogvantage/core'
 import { trackTelemetry } from '@/lib/telemetry'
-import type { Json } from '@/types/database'
+import type { Json } from '@dogvantage/core'
 
 const STALE_MS = 6 * 60 * 60 * 1000
 const METRICS_WINDOW_DAYS = 28

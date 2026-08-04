@@ -3,8 +3,8 @@ import { withAuthAndDog } from '@/lib/api/with-auth'
 import { apiError } from '@/lib/api/errors'
 import { getStruggleAdvice, type CoachTip } from '@/lib/ai/doc-learning'
 import { isSupportedLocale, DEFAULT_LOCALE } from '@/i18n/config'
-import type { Json } from '@/types/database'
-import type { Breed, QuickRating, ExerciseSummary } from '@/types'
+import type { Json } from '@dogvantage/core'
+import type { Breed, QuickRating, ExerciseSummary } from '@dogvantage/core'
 
 const STRUGGLE_MIN_ATTEMPTS = 4
 const STRUGGLE_MAX_RATE = 0.5

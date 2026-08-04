@@ -2,10 +2,10 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { ChatMessage, TrainingSourceRef } from '@/types'
+import type { ChatMessage, TrainingSourceRef } from '@dogvantage/core'
 import { IconPaw, IconSend } from '@/components/icons'
 import { apiFetch, ApiError } from '@/lib/api/fetch'
-import { TrainingResultSchema, ChatHistoryResponseSchema } from '@/types/api/schemas'
+import { TrainingResultSchema, ChatHistoryResponseSchema } from '@dogvantage/core'
 import styles from './ChatInterface.module.css'
 
 interface Props {

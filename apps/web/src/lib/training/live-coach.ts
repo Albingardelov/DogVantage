@@ -1,4 +1,4 @@
-import type { TrainingSourceRef } from '@/types'
+import type { TrainingSourceRef } from '@dogvantage/core'
 import type { LifeStage } from '@/lib/dog/age'
 import { topicForExerciseId } from '@/lib/learning/chunk-metadata'
 import type { CoachAction } from '@/lib/training/session-coach'

@@ -1,4 +1,4 @@
-import type { SessionLog } from '@/types'
+import type { SessionLog } from '@dogvantage/core'
 import type { PuppyZone } from '@/lib/training/puppy-zone'
 import { inferEnvironment, type SkillEnvironment } from '@/lib/training/skill-progress'
 import { statsFor } from '@/lib/training/handler-feedback'

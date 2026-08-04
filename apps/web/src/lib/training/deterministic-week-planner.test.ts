@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { buildDeterministicWeekPlan } from './deterministic-week-planner'
 import { validateWeekPlan } from './week-plan-validator'
 import type { WeekPlanInput } from './week-context'
-import type { WeekPlan } from '@/types'
+import type { WeekPlan } from '@dogvantage/core'
 
 function makeInput(overrides: Partial<WeekPlanInput> = {}): WeekPlanInput {
   return {

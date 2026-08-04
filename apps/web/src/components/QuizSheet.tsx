@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { apiFetch } from '@/lib/api/fetch'
-import { QuizGradeResponseSchema, QuizSessionResponseSchema } from '@/types/api/schemas'
+import { QuizGradeResponseSchema, QuizSessionResponseSchema } from '@dogvantage/core'
 import type { z } from 'zod'
-import type { QuizQuestionSchema } from '@/types/api/schemas'
+import type { QuizQuestionSchema } from '@dogvantage/core'
 import { IconCheck, IconX } from '@/components/icons'
 import styles from './QuizSheet.module.css'
 

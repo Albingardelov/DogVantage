@@ -2,7 +2,7 @@
 
 import { IconCaretLeft, IconRestDay } from '@/components/icons'
 import styles from './WeekView.module.css'
-import type { WeekPlan } from '@/types'
+import type { WeekPlan } from '@dogvantage/core'
 
 const SWEDISH_DAYS = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag']
 

@@ -1,4 +1,4 @@
-import type { TrainingResult } from '@/types'
+import type { TrainingResult } from '@dogvantage/core'
 import { FALLBACK_LOCALE, type Locale } from '@/i18n/config'
 
 /**

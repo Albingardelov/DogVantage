@@ -4,7 +4,7 @@ import { apiError } from '@/lib/api/errors'
 import { getSupabaseAdmin } from '@/lib/supabase/client'
 import { aggregateSkillProgress, type MetricRow } from '@/lib/training/skill-progress'
 import { getExerciseSpec } from '@/lib/training/exercise-specs'
-import type { ExerciseSummary } from '@/types'
+import type { ExerciseSummary } from '@dogvantage/core'
 
 function daysAgo(days: number): string {
   const d = new Date()

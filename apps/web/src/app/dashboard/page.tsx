@@ -25,7 +25,7 @@ import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import { getHandlerFeedbackTip, type HandlerFeedbackTip } from '@/lib/training/handler-feedback'
 import { computeStreak } from '@/lib/training/streak'
 import { apiFetch } from '@/lib/api/fetch'
-import { SessionLogArraySchema, TrainingDaysResponseSchema } from '@/types/api/schemas'
+import { SessionLogArraySchema, TrainingDaysResponseSchema } from '@dogvantage/core'
 import {
   IconCalendar,
   IconCaretRight,
@@ -35,7 +35,7 @@ import {
   IconPencil,
   IconSignOut,
 } from '@/components/icons'
-import type { DogProfile, BehaviorProfile, SessionLog } from '@/types'
+import type { DogProfile, BehaviorProfile, SessionLog } from '@dogvantage/core'
 import styles from './page.module.css'
 
 export default function DashboardPage() {

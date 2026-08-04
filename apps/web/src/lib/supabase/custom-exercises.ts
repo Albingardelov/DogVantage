@@ -1,5 +1,5 @@
 import { createSupabaseServer } from './server'
-import type { Json } from '@/types/database'
+import type { Json } from '@dogvantage/core'
 import type { ExerciseSpec } from '@/lib/training/exercise-specs'
 
 export interface CustomExercise {

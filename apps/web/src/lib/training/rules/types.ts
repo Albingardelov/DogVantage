@@ -4,7 +4,7 @@ import type {
   DogSex,
   CastrationStatus,
   HouseholdPet,
-} from '@/types/dog'
+} from '@dogvantage/core'
 import type { WeeklyFocusArea } from '@/lib/training/weekly-focus'
 import type { ActiveProjectInput } from '@/lib/training/training-projects'
 import type { LifeStage } from '@/lib/dog/age'

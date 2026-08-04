@@ -1,4 +1,4 @@
-import type { Breed, HouseholdPet, RewardPreference, TrainingEnvironment, TrainingGoal } from '@/types'
+import type { Breed, HouseholdPet, RewardPreference, TrainingEnvironment, TrainingGoal } from '@dogvantage/core'
 
 export interface WeekPlanUrlParams {
   /**

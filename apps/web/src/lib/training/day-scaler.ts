@@ -1,4 +1,4 @@
-import type { Exercise } from '@/types'
+import type { Exercise } from '@dogvantage/core'
 import {
   buildYellowExercise,
   selectYellowExercise,

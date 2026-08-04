@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { SupabaseClient, User } from '@supabase/supabase-js'
 import { createSupabaseServer } from '@/lib/supabase/server'
-import type { Database } from '@/types/database'
+import type { Database } from '@dogvantage/core'
 import { enforceApiRateLimit } from './rate-limit'
 
 type DogRow = { id: string; breed: string; user_id: string }

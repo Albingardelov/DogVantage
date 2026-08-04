@@ -15,7 +15,7 @@ import {
   IconX,
 } from '@/components/icons'
 import styles from './ExerciseRow.module.css'
-import type { DailyExerciseMetrics, Exercise, LatencyBucket, TrainingSourceRef } from '@/types'
+import type { DailyExerciseMetrics, Exercise, LatencyBucket, TrainingSourceRef } from '@dogvantage/core'
 import type { ExerciseSpec } from '@/lib/training/exercise-specs'
 import { isPuppy as isPuppyAge, getLifeStage } from '@/lib/dog/age'
 import { buildCoachAction, latencyMeaning, type SessionGuard } from '@/lib/training/session-coach'

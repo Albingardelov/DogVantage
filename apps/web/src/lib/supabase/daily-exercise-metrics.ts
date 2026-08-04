@@ -1,6 +1,6 @@
 import { getSupabaseAdmin } from './client'
-import type { Breed } from '@/types'
-import type { DailyExerciseMetrics, LatencyBucket } from '@/types'
+import type { Breed } from '@dogvantage/core'
+import type { DailyExerciseMetrics, LatencyBucket } from '@dogvantage/core'
 
 type Row = {
   exercise_id: string

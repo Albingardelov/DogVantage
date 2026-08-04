@@ -3,9 +3,9 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { IconCheckCircle, IconConfetti, IconMedal, RatingIcon } from '@/components/icons'
-import { CoachTipSchema } from '@/types/api/schemas'
+import { CoachTipSchema } from '@dogvantage/core'
 import type { z } from 'zod'
-import type { ExerciseSummary, QuickRating } from '@/types'
+import type { ExerciseSummary, QuickRating } from '@dogvantage/core'
 import styles from './SessionLogForm.module.css'
 
 type CoachTip = z.infer<typeof CoachTipSchema>

@@ -9,7 +9,7 @@ import ExerciseGuideSheet from '@/components/ExerciseGuideSheet'
 import { useActiveDog } from '@/lib/dog/active-dog-context'
 import { getAgeInWeeks, isPuppyMode } from '@/lib/dog/age'
 import type { PuppyZone } from '@/lib/training/puppy-zone'
-import type { DayPlan, Exercise, QuickRating, SessionLog, WeekPlan } from '@/types'
+import type { DayPlan, Exercise, QuickRating, SessionLog, WeekPlan } from '@dogvantage/core'
 import { IconCaretLeft, IconClose } from '@/components/icons'
 import styles from './page.module.css'
 

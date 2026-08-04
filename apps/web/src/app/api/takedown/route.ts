@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase/client'
-import type { Breed } from '@/types'
+import type { Breed } from '@dogvantage/core'
 import { enforceApiRateLimit } from '@/lib/api/rate-limit'
 
 export async function POST(req: NextRequest) {

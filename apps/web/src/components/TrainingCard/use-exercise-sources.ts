@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { apiFetch } from '@/lib/api/fetch'
-import { ExerciseSourcesResponseSchema } from '@/types/api/schemas'
-import type { TrainingSourceRef } from '@/types'
+import { ExerciseSourcesResponseSchema } from '@dogvantage/core'
+import type { TrainingSourceRef } from '@dogvantage/core'
 
 /**
  * Fetches cached "läs mer" document sources for today's exercises.

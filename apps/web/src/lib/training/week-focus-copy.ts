@@ -1,7 +1,7 @@
 import { resolveBreedProfile } from '@/lib/ai/breed-profiles'
 import { GOAL_LABELS, GOAL_RULES } from '@/lib/training/goal-exercises'
 import { getLifeStage, isPuppy } from '@/lib/dog/age'
-import type { Breed, TrainingGoal } from '@/types'
+import type { Breed, TrainingGoal } from '@dogvantage/core'
 
 export interface WeekFocusCopy {
   /** Varför veckan ser ut som den gör */

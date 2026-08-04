@@ -7,9 +7,9 @@ import BottomNav from '@/components/BottomNav'
 import { useActiveDog } from '@/lib/dog/active-dog-context'
 import { IconCaretRight, RatingIcon } from '@/components/icons'
 import SkillProgressSection from '@/components/SkillProgressSection'
-import type { QuickRating, SessionLog } from '@/types'
+import type { QuickRating, SessionLog } from '@dogvantage/core'
 import { apiFetch } from '@/lib/api/fetch'
-import { SessionLogArraySchema } from '@/types/api/schemas'
+import { SessionLogArraySchema } from '@dogvantage/core'
 import styles from './page.module.css'
 
 export default function LogPage() {

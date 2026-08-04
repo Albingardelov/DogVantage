@@ -3,9 +3,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { apiFetch } from '@/lib/api/fetch'
-import { CurriculumOverviewSchema } from '@/types/api/schemas'
+import { CurriculumOverviewSchema } from '@dogvantage/core'
 import type { z } from 'zod'
-import type { CurriculumModuleSchema } from '@/types/api/schemas'
+import type { CurriculumModuleSchema } from '@dogvantage/core'
 import { IconCaretRight, IconCheck } from '@/components/icons'
 import styles from './CurriculumView.module.css'
 

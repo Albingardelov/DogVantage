@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { getHandlerFeedbackTip } from './handler-feedback'
-import type { SessionLog } from '@/types'
+import type { SessionLog } from '@dogvantage/core'
 
 function log(overrides: Partial<SessionLog>): SessionLog {
   return {

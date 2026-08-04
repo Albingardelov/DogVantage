@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { apiFetch } from '@/lib/api/fetch'
-import { DayCheckInResponseSchema } from '@/types/api/schemas'
+import { DayCheckInResponseSchema } from '@dogvantage/core'
 import type { DayCheckInState } from '@/lib/training/day-scaler'
 
 interface UseDayCheckInResult {

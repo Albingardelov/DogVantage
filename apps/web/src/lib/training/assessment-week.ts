@@ -1,5 +1,5 @@
 import { getExerciseSpec } from './exercise-specs'
-import type { DailyExerciseMetrics } from '@/types'
+import type { DailyExerciseMetrics } from '@dogvantage/core'
 
 /**
  * Computes an appropriate starting program week from biological age

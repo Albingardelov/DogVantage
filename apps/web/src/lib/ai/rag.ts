@@ -11,7 +11,7 @@ import {
 import { languageDirective } from '@/i18n/language-directive'
 import { DEFAULT_LOCALE, type Locale } from '@/i18n/config'
 import type { ChunkTopic, LifeStageFilter } from '@/lib/learning/chunk-metadata'
-import type { Breed, ChunkMatch, TrainingResult, TrainingSourceRef } from '@/types'
+import type { Breed, ChunkMatch, TrainingResult, TrainingSourceRef } from '@dogvantage/core'
 
 const MIN_DOCUMENT_SIMILARITY = 0.72
 

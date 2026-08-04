@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { apiFetch } from '@/lib/api/fetch'
-import { DogStatePayloadSchema } from '@/types/api/schemas'
+import { DogStatePayloadSchema } from '@dogvantage/core'
 import type { z } from 'zod'
 
 export type DogStatePayload = z.infer<typeof DogStatePayloadSchema>

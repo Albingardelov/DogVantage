@@ -6,7 +6,7 @@ import { lifeStageFromAgeWeeks } from '@/lib/learning/curriculum-def'
 import { listCompletedModules, listFailedQuizModuleIds } from '@/lib/supabase/learning-progress'
 import { getDogState } from '@/lib/supabase/dog-state'
 import { computeHandlerStruggle } from '@/lib/training/handler-state'
-import type { Breed } from '@/types'
+import type { Breed } from '@dogvantage/core'
 
 export async function GET(req: NextRequest) {
   return withAuthAndDog(req, async ({ user, dog, supabase }) => {

@@ -1,10 +1,10 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import type { Breed, DailyExerciseMetrics, Exercise, HouseholdPet, RewardPreference, TrainingEnvironment, TrainingGoal } from '@/types'
+import type { Breed, DailyExerciseMetrics, Exercise, HouseholdPet, RewardPreference, TrainingEnvironment, TrainingGoal } from '@dogvantage/core'
 import { buildWeekPlanUrl } from '../TrainingCard/url-builder'
 import { apiFetch } from '@/lib/api/fetch'
-import { MetricsMapSchema, ProgressMapSchema, WeekPlanSchema } from '@/types/api/schemas'
+import { MetricsMapSchema, ProgressMapSchema, WeekPlanSchema } from '@dogvantage/core'
 import {
   buildYellowExercise,
   selectYellowExercise,

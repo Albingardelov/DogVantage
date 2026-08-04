@@ -1,6 +1,6 @@
 import { getSupabaseBrowser } from './browser'
-import type { Json } from '@/types/database'
-import type { DogProfile, DogSex, CastrationStatus } from '@/types'
+import type { Json } from '@dogvantage/core'
+import type { DogProfile, DogSex, CastrationStatus } from '@dogvantage/core'
 
 interface DbProfile {
   id: string

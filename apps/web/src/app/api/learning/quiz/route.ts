@@ -7,7 +7,7 @@ import {
   type QuizGradeInput,
 } from '@/lib/learning/quiz'
 import { topicForExerciseId } from '@/lib/learning/chunk-metadata'
-import type { Breed } from '@/types'
+import type { Breed } from '@dogvantage/core'
 
 export async function GET(req: NextRequest) {
   return withAuthAndDog(req, async ({ user, dog }) => {

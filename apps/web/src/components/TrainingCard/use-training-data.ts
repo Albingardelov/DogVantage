@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { DailyExerciseMetrics, WeekPlan } from '@/types'
+import type { DailyExerciseMetrics, WeekPlan } from '@dogvantage/core'
 import { buildWeekPlanUrl, type WeekPlanUrlParams } from './url-builder'
 import { apiFetch } from '@/lib/api/fetch'
 import {
   MetricsMapSchema,
   ProgressMapSchema,
   WeekPlanSchema,
-} from '@/types/api/schemas'
+} from '@dogvantage/core'
 
 interface TrainingDataState {
   weekPlan: WeekPlan | null

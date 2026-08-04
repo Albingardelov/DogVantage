@@ -11,7 +11,7 @@ import { HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import { IconCamera, SelectionCheck } from '@/components/icons'
 import BreedPicker from '@/components/BreedPicker'
-import type { Breed, DogProfile, DogSex, CastrationStatus, HouseholdPet, OnboardingPrefs, RewardPreference, TrainingBackground, TrainingEnvironment, TrainingGoal } from '@/types'
+import type { Breed, DogProfile, DogSex, CastrationStatus, HouseholdPet, OnboardingPrefs, RewardPreference, TrainingBackground, TrainingEnvironment, TrainingGoal } from '@dogvantage/core'
 import styles from './DogProfileForm.module.css'
 
 

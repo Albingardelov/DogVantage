@@ -7,7 +7,7 @@ import {
   type ProgressionMetricRow,
   type ProgressionSessionRow,
 } from '@/lib/training/progression-rules'
-import type { ExerciseSummary, LatencyBucket } from '@/types'
+import type { ExerciseSummary, LatencyBucket } from '@dogvantage/core'
 
 function daysAgo(days: number): string {
   const d = new Date()

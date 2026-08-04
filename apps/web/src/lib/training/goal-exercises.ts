@@ -4,7 +4,7 @@
  * Single source of truth used by both the week planner and the assessment
  * screening so the two flows are always in sync.
  */
-import type { TrainingGoal } from '@/types'
+import type { TrainingGoal } from '@dogvantage/core'
 
 export const GOAL_EXERCISE_IDS: Record<TrainingGoal, string[]> = {
   everyday_obedience: ['namn', 'inkallning', 'koppel', 'stanna', 'hantering', 'socialisering', 'fot', 'plats'],

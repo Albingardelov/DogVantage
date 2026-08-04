@@ -1,4 +1,4 @@
-import type { LatencyBucket } from '@/types'
+import type { LatencyBucket } from '@dogvantage/core'
 
 export type ProgressionDecision = 'advance' | 'hold' | 'regress'
 export type ProgressionHorizon = 'session' | 'week' | 'project'

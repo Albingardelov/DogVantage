@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import type { Breed } from '@/types'
+import type { Breed } from '@dogvantage/core'
 import { ALL_BREED_OPTIONS } from '@/lib/breeds/registry'
 import styles from './page.module.css'
 

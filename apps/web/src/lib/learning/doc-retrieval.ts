@@ -1,6 +1,6 @@
 import { embedText } from '@/lib/ai/embed'
 import { searchBreedChunks } from '@/lib/supabase/breed-chunks'
-import type { Breed, ChunkMatch } from '@/types'
+import type { Breed, ChunkMatch } from '@dogvantage/core'
 import type { ChunkTopic, LifeStageFilter } from '@/lib/learning/chunk-metadata'
 
 const MIN_SIMILARITY = 0.66

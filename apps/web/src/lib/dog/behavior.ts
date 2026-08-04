@@ -5,7 +5,7 @@ import type {
   NewEnvironmentReaction,
   TrainingBackground,
   HouseholdPet,
-} from '@/types'
+} from '@dogvantage/core'
 
 export const TRIGGER_LABELS: Record<TriggerType, string> = {
   cars:         'Bilar / fordon',

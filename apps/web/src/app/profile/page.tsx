@@ -22,7 +22,7 @@ import {
   IconWarningCircle,
   SelectionCheck,
 } from '@/components/icons'
-import type { DogProfile, DogSex, CastrationStatus, TrainingGoal, TrainingEnvironment, RewardPreference, HouseholdPet } from '@/types'
+import type { DogProfile, DogSex, CastrationStatus, TrainingGoal, TrainingEnvironment, RewardPreference, HouseholdPet } from '@dogvantage/core'
 
 const ALL_HOUSEHOLD_PETS = Object.keys(HOUSEHOLD_PET_LABELS) as HouseholdPet[]
 import styles from './page.module.css'

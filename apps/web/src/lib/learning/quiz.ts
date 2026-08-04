@@ -9,7 +9,7 @@ import {
 } from '@/lib/supabase/learning-progress'
 import { formatChunksForPrompt, retrieveDocumentChunks } from '@/lib/learning/doc-retrieval'
 import type { ChunkTopic } from '@/lib/learning/chunk-metadata'
-import type { Breed } from '@/types'
+import type { Breed } from '@dogvantage/core'
 
 export interface QuizQuestion {
   cardKey: string

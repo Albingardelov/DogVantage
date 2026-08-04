@@ -5,7 +5,7 @@ import type {
   DogSex,
   HouseholdPet,
   TrainingGoal,
-} from '@/types/dog'
+} from '@dogvantage/core'
 import type { WeeklyFocusArea } from '@/lib/training/weekly-focus'
 import type { ActiveProjectInput } from '@/lib/training/training-projects'
 import type { WeekPlanContext } from './rules'

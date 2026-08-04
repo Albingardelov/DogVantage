@@ -1,5 +1,5 @@
 import { getSupabaseAdmin } from './client'
-import type { ChunkMatch, Breed } from '@/types'
+import type { ChunkMatch, Breed } from '@dogvantage/core'
 import type { ChunkTopic, LifeStageFilter } from '@/lib/learning/chunk-metadata'
 
 export interface ChunkSearchFilters {

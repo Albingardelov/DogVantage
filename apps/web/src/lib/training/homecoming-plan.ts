@@ -1,4 +1,4 @@
-import type { WeekPlan } from '@/types'
+import type { WeekPlan } from '@dogvantage/core'
 
 /**
  * Week 1 homecoming plan for new puppies (< 14 weeks).

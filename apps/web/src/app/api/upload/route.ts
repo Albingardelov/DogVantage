@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAuth } from '@/lib/api/with-auth'
 import { getSupabaseAdmin } from '@/lib/supabase/client'
-import type { Breed } from '@/types'
+import type { Breed } from '@dogvantage/core'
 
 // Community submission endpoint — stores file metadata for admin review.
 // Does NOT ingest directly; admin uses /admin/ingest after vetting.

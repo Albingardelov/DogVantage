@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { scaleDayPlan, type DayCheckInState } from './day-scaler'
-import type { Exercise } from '@/types'
+import type { Exercise } from '@dogvantage/core'
 
 const EXERCISES: Exercise[] = [
   { id: 'inkallning', label: 'Inkallning', desc: '5 reps', reps: 5 },

@@ -7,7 +7,7 @@ import { retrieveDocumentChunks, formatChunksForPrompt } from '@/lib/learning/do
 import { topicForExerciseId, type LifeStageFilter, type ChunkTopic } from '@/lib/learning/chunk-metadata'
 import { languageDirective } from '@/i18n/language-directive'
 import type { Locale } from '@/i18n/config'
-import type { Breed, TrainingSourceRef } from '@/types'
+import type { Breed, TrainingSourceRef } from '@dogvantage/core'
 
 // Behaviour-emergency / clinical welfare topics must never ground a daily
 // training schedule — they describe problems that need professional help, not

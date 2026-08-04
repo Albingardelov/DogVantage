@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAuthAndDog } from '@/lib/api/with-auth'
 import { getExerciseSources } from '@/lib/ai/doc-learning'
-import type { Breed, TrainingSourceRef } from '@/types'
+import type { Breed, TrainingSourceRef } from '@dogvantage/core'
 
 const MAX_IDS = 8
 

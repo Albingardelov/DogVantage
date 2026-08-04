@@ -1,5 +1,5 @@
 import { AI_TIMEOUTS, getGroqClient, GROQ_MODEL } from './client'
-import type { TrainingSourceRef, WeekPlan } from '@/types'
+import type { TrainingSourceRef, WeekPlan } from '@dogvantage/core'
 import { buildWeekPromptParts } from './week-plan-prompt'
 import type { WeekPlanInput } from '@/lib/training/week-context'
 import { buildDeterministicWeekPlan } from '@/lib/training/deterministic-week-planner'

@@ -1,4 +1,4 @@
-import type { Exercise, WeekPlan } from '@/types'
+import type { Exercise, WeekPlan } from '@dogvantage/core'
 
 function syncRepsFromDesc(exercise: Exercise): Exercise {
   const match = exercise.desc?.match(/^(\d+)\s*[×x]/i)

@@ -2,7 +2,7 @@ import { PDFParse } from 'pdf-parse'
 import { embedText } from './embed'
 import { getSupabaseAdmin } from '@/lib/supabase/client'
 import { classifyChunkContent } from '@/lib/learning/chunk-metadata'
-import type { Breed } from '@/types'
+import type { Breed } from '@dogvantage/core'
 
 const CHUNK_SIZE = 2000    // chars ≈ 500 tokens
 const CHUNK_OVERLAP = 200  // chars ≈ 50 tokens overlap

@@ -11,7 +11,7 @@
  * to produce breed-appropriate, week-specific recommendations.
  */
 
-import type { Breed, TrainingGoal } from '@/types'
+import type { Breed, TrainingGoal } from '@dogvantage/core'
 import { getBreedEntry } from '@/lib/breeds/registry'
 import { getFciGroupProfile } from '@/lib/breeds/fci-groups'
 

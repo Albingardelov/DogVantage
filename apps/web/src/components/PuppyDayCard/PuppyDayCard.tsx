@@ -17,7 +17,7 @@ import { advanceGuard, EMPTY_GUARD, type SessionGuard } from '@/lib/training/ses
 import { buildExerciseSummaries, emptyMetrics } from '../TrainingCard/exercise-helpers'
 import { usePuppyDay } from './use-puppy-day'
 import SessionLogForm from '@/components/SessionLogForm'
-import type { Breed, DailyExerciseMetrics, HouseholdPet, RewardPreference, TrainingEnvironment, TrainingGoal } from '@/types'
+import type { Breed, DailyExerciseMetrics, HouseholdPet, RewardPreference, TrainingEnvironment, TrainingGoal } from '@dogvantage/core'
 import { DvIcon, IconChevronRight } from '@/components/icons'
 import { SmileyMeh } from '@phosphor-icons/react'
 

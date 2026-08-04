@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { apiFetch } from '@/lib/api/fetch'
-import { DogStatePayloadSchema, WeeklyFocusResponseSchema } from '@/types/api/schemas'
+import { DogStatePayloadSchema, WeeklyFocusResponseSchema } from '@dogvantage/core'
 import {
   findEnvironmentGapInsight,
   formatInsightCopy,

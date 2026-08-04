@@ -5,7 +5,7 @@ import { saveDogProfile } from '@/lib/dog/profile'
 import { saveDogPhoto } from '@/lib/dog/photo'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
 import DogProfileForm from '@/components/DogProfileForm'
-import type { DogProfile } from '@/types'
+import type { DogProfile } from '@dogvantage/core'
 import { IconClose } from '@/components/icons'
 import styles from './AddDogModal.module.css'
 

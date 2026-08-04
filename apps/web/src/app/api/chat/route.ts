@@ -24,7 +24,7 @@ import { formatDogStateForPrompt } from '@/lib/ai/dog-state-context'
 import { CHUNK_TOPICS, type ChunkTopic, type LifeStageFilter } from '@/lib/learning/chunk-metadata'
 import type { ChatHistoryEntry } from '@/lib/ai/rag'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database } from '@/types/database'
+import type { Database } from '@dogvantage/core'
 
 const LIFE_STAGE_FILTERS = ['puppy', 'junior', 'adolescent', 'adult', 'all'] as const satisfies readonly LifeStageFilter[]
 

@@ -4,7 +4,7 @@ import { getAgeInWeeks, type LifeStage } from '@/lib/dog/age'
 import { getModuleById, moduleListForStage } from '@/lib/learning/curriculum'
 import { lifeStageFromAgeWeeks } from '@/lib/learning/curriculum-def'
 import { listCompletedAmong, markModuleComplete } from '@/lib/supabase/learning-progress'
-import type { Breed } from '@/types'
+import type { Breed } from '@dogvantage/core'
 
 type RouteParams = { params: Promise<{ moduleId: string }> }
 

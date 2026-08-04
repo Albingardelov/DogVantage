@@ -6,7 +6,7 @@ import { isSupportedLocale, DEFAULT_LOCALE } from '@/i18n/config'
 import { getAgeInWeeks, getLifeStage } from '@/lib/dog/age'
 import { rankWeakestExercises, pickMicroLessonExercise, type ExerciseMetricRow } from '@/lib/learning/micro-lesson'
 import { listRecentMicroQuizExercises } from '@/lib/supabase/learning-progress'
-import type { Breed } from '@/types'
+import type { Breed } from '@dogvantage/core'
 
 // A completed lesson stays gone this long before its topic can come back.
 const COMPLETED_WINDOW_DAYS = 7

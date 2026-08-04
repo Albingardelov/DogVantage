@@ -1,4 +1,4 @@
-import type { WeekPlan } from '@/types'
+import type { WeekPlan } from '@dogvantage/core'
 import type { ExerciseProgressionDecision } from '@/lib/training/progression-rules'
 import { allowedExerciseIdsForBreed } from '@/lib/training/allowed-exercises'
 import { GOAL_EXERCISE_IDS } from '@/lib/training/goal-exercises'

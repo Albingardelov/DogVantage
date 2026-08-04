@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState, useCallback } from 'rea
 import { getAllDogProfiles } from './profile'
 import { getActiveDogId, setActiveDogId } from '@/lib/supabase/user-settings'
 import { getSupabaseBrowser } from '@/lib/supabase/browser'
-import type { DogProfile } from '@/types'
+import type { DogProfile } from '@dogvantage/core'
 
 interface ActiveDogContextValue {
   activeDog: DogProfile | null

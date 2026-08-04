@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { DogProfile } from '@/types'
+import type { DogProfile } from '@dogvantage/core'
 
 const mockUseSearchParams = vi.fn()
 const mockUseActiveDog = vi.fn()

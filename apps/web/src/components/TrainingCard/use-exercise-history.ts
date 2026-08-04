@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { apiFetch } from '@/lib/api/fetch'
-import { ExerciseHistoryPayloadSchema } from '@/types/api/schemas'
+import { ExerciseHistoryPayloadSchema } from '@dogvantage/core'
 
 /**
  * Set of exercise ids the dog has trained before today. Supplementary —

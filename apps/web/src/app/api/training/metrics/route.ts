@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getMetrics, getTrainingDays, upsertMetrics } from '@/lib/supabase/daily-exercise-metrics'
 import { getExerciseSpec, isValidCriteriaLevel } from '@/lib/training/exercise-specs'
 import { withAuthAndDog } from '@/lib/api/with-auth'
-import type { DailyExerciseMetrics, LatencyBucket } from '@/types'
+import type { DailyExerciseMetrics, LatencyBucket } from '@dogvantage/core'
 
 const VALID_LATENCY: LatencyBucket[] = ['lt1s', '1to3s', 'gt3s']
 

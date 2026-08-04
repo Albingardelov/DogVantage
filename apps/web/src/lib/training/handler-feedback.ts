@@ -1,4 +1,4 @@
-import type { SessionLog } from '@/types'
+import type { SessionLog } from '@dogvantage/core'
 
 export type HandlerDimension = 'timing' | 'consistency' | 'reading'
 

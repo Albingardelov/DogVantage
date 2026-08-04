@@ -1,4 +1,4 @@
-import type { Exercise } from '@/types'
+import type { Exercise } from '@dogvantage/core'
 
 export type LatencyBucket = 'lt1s' | '1to3s' | 'gt3s'
 

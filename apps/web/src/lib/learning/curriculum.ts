@@ -8,7 +8,7 @@ import {
   modulesForLifeStage,
   type CurriculumModuleDef,
 } from '@/lib/learning/curriculum-def'
-import type { Breed, TrainingSourceRef } from '@/types'
+import type { Breed, TrainingSourceRef } from '@dogvantage/core'
 import type { LifeStage } from '@/lib/dog/age'
 
 export interface CurriculumModuleContent {

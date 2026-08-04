@@ -28,7 +28,7 @@ import type {
   NewEnvironmentReaction,
   TrainingBackground,
   HouseholdPet,
-} from '@/types'
+} from '@dogvantage/core'
 import styles from './page.module.css'
 
 type ExerciseId = string

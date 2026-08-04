@@ -13,7 +13,7 @@ vi.mock('@/lib/supabase/dog-profiles', () => ({
 }))
 
 import { getDogProfile, saveDogProfile, updateDogProfile } from './profile'
-import type { DogProfile } from '@/types'
+import type { DogProfile } from '@dogvantage/core'
 
 const mockProfile: DogProfile = {
   name: 'Rex',

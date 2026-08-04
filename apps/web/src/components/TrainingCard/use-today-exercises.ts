@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { DayPlan, DailyExerciseMetrics, Exercise, WeekPlan } from '@/types'
+import type { DayPlan, DailyExerciseMetrics, Exercise, WeekPlan } from '@dogvantage/core'
 import { focusExerciseIds, type WeeklyFocusArea } from '@/lib/training/weekly-focus'
 import { scaleDayPlan, type DayCheckInState, type DayScaleMode } from '@/lib/training/day-scaler'
 import { CALM_EXERCISE_IDS } from '@/lib/training/puppy-zone'

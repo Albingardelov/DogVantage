@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database } from '@/types/database'
+import type { Database } from '@dogvantage/core'
 import {
   type Breed,
   type CastrationStatus,
@@ -11,8 +11,8 @@ import {
   type TrainingGoal,
   type WeekPlan,
   type ExerciseSummary,
-} from '@/types'
-import { isGoal } from '@/types/dog'
+} from '@dogvantage/core'
+import { isGoal } from '@dogvantage/core'
 import { isValidBreed } from '@/lib/breeds/registry'
 import { getBehaviorContextPayloadFromDb } from '@/lib/dog/build-behavior-context'
 import { householdPetNotes, HOUSEHOLD_PET_LABELS } from '@/lib/dog/behavior'

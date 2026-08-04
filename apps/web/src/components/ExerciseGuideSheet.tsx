@@ -7,7 +7,7 @@ import type { ExerciseSpec } from '@/lib/training/exercise-specs'
 import { normalizeHandlerGuide } from '@/lib/training/normalize-handler-guide'
 import { resolveLiveCoach } from '@/lib/training/live-coach'
 import { getLifeStage } from '@/lib/dog/age'
-import type { DailyExerciseMetrics } from '@/types'
+import type { DailyExerciseMetrics } from '@dogvantage/core'
 import { IconClose } from '@/components/icons'
 import styles from './ExerciseGuideSheet.module.css'
 

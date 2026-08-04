@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import type { Breed } from '@/types'
+import type { Breed } from '@dogvantage/core'
 import { ALL_BREED_OPTIONS } from '@/lib/breeds/registry'
 import { IconCaretLeft } from '@/components/icons'
 import styles from './page.module.css'

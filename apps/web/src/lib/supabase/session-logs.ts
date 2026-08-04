@@ -1,5 +1,5 @@
 import { createSupabaseServer } from '@/lib/supabase/server'
-import type { SessionLog, QuickRating } from '@/types'
+import type { SessionLog, QuickRating } from '@dogvantage/core'
 
 export async function getRecentLogs(
   dogId: string,

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { computeDogState, type DogStateInputs } from './dog-state'
-import type { SessionLog } from '@/types'
+import type { SessionLog } from '@dogvantage/core'
 
 function makeLog(overrides: Partial<SessionLog> = {}): SessionLog {
   return {

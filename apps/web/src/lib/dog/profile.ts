@@ -1,6 +1,6 @@
 import { getProfile, saveProfile, updateProfile, getAllProfiles } from '@/lib/supabase/dog-profiles'
 import { autoAdvancedTrainingWeek } from './age'
-import type { DogProfile } from '@/types'
+import type { DogProfile } from '@dogvantage/core'
 
 export async function getDogProfile(): Promise<DogProfile | null> {
   return getProfile()

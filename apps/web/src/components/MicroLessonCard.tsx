@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { apiFetch } from '@/lib/api/fetch'
-import { MicroLessonResponseSchema } from '@/types/api/schemas'
+import { MicroLessonResponseSchema } from '@dogvantage/core'
 import type { z } from 'zod'
-import type { MicroLessonSchema } from '@/types/api/schemas'
+import type { MicroLessonSchema } from '@dogvantage/core'
 import Link from 'next/link'
 import styles from './MicroLessonCard.module.css'
 

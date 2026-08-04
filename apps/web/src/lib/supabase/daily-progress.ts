@@ -1,5 +1,5 @@
 import { getSupabaseAdmin } from './client'
-import type { Breed } from '@/types'
+import type { Breed } from '@dogvantage/core'
 
 export async function getProgress(
   breed: Breed,

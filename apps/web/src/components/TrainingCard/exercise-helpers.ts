@@ -1,4 +1,4 @@
-import type { DailyExerciseMetrics, Exercise, ExerciseSummary } from '@/types'
+import type { DailyExerciseMetrics, Exercise, ExerciseSummary } from '@dogvantage/core'
 
 export function emptyMetrics(): DailyExerciseMetrics {
   return {

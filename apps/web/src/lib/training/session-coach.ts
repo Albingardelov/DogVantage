@@ -1,4 +1,4 @@
-import type { DailyExerciseMetrics, LatencyBucket } from '@/types'
+import type { DailyExerciseMetrics, LatencyBucket } from '@dogvantage/core'
 import { isPuppy as isPuppyAge } from '@/lib/dog/age'
 import type { CriteriaLevel } from '@/lib/training/exercise-specs'
 import { evaluateRate, horizonMinAttempts } from '@/lib/training/progression-kernel'

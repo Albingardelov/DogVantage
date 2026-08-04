@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { ChunkMatch, TrainingResult } from '@/types'
+import type { ChunkMatch, TrainingResult } from '@dogvantage/core'
 
 vi.mock('@/lib/ai/embed', () => ({
   embedText: vi.fn().mockResolvedValue(new Array(1536).fill(0.1)),

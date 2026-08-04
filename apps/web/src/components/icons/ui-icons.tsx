@@ -37,7 +37,7 @@ import {
   X,
 } from '@phosphor-icons/react'
 import { DvIcon, type IconSize } from './DvIcon'
-import type { QuickRating } from '@/types'
+import type { QuickRating } from '@dogvantage/core'
 
 export function IconCheck({ size = 'sm', className }: { size?: IconSize; className?: string }) {
   return <DvIcon icon={Check} size={size} weight="bold" className={className} />

@@ -15,7 +15,7 @@
  * pushes toward advance, slow latency pushes toward regress.
  */
 
-import type { LatencyBucket } from '@/types'
+import type { LatencyBucket } from '@dogvantage/core'
 import {
   evaluateRate,
   type ProgressionDecision,
