@@ -8,6 +8,7 @@ export const colors = {
   text: '#1c1917',
   textMuted: '#5c5752',
   border: '#e7e0d8',
+  accent: '#f4a261',
   error: '#d62828',
 } as const
 

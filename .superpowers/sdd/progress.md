@@ -2,14 +2,12 @@
 
 ## Done
 - [x] RN-0 monorepo
-- [x] RN-8 slim BottomNav
+- [x] RN-8 BottomNav
 - [x] RN-1 Auth
 - [x] RN-2 Onboarding
-- [x] RN-3 Dashboard MVP (week plan + guide modal)
+- [x] RN-3 Dashboard week plan
+- [x] RN-4 Logging (Lyckad/Miss + session log modal)
 
 ## Next
-- [ ] RN-4 Loggning (reps/metrics)
-- then RN-6 chat, RN-5 calendar, RN-7 profile, RN-PAY-1
-
-## Notes
-- Dashboard needs running web API at EXPO_PUBLIC_WEB_URL (Bearer)
+- [ ] RN-6 Chat (or RN-5 calendar / RN-7 profile)
+- [ ] RN-PAY-1 before store

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   ActivityIndicator,
   Pressable,
@@ -11,14 +11,33 @@ import {
 import { Link as RouterLink } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { ExerciseGuideModal } from '@/components/training/ExerciseGuideModal'
-import { useWeekPlan } from '@/hooks/use-week-plan'
+import { ExerciseRow } from '@/components/training/ExerciseRow'
+import { useTrainingSession } from '@/hooks/use-training-session'
 import { colors, fontSize, space } from '@/theme/tokens'
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets()
-  const { dog, today, loading, error, referral, reload } = useWeekPlan()
+  const {
+    dog,
+    today,
+    progress,
+    metrics,
+    loading,
+    error,
+    referral,
+    reload,
+    logSuccess,
+    logFail,
+  } = useTrainingSession()
   const [guideId, setGuideId] = useState<string | null>(null)
   const [guideLabel, setGuideLabel] = useState<string | null>(null)
+
+  const exercises = today?.exercises ?? []
+  const completedCount = useMemo(
+    () => exercises.filter((ex) => (progress[ex.id] ?? 0) >= ex.reps).length,
+    [exercises, progress],
+  )
+  const allDone = exercises.length > 0 && completedCount === exercises.length
 
   return (
     <View style={[styles.root, { paddingTop: insets.top + space.lg }]}>
@@ -31,6 +50,9 @@ export default function DashboardScreen() {
         {dog ? (
           <Text style={styles.meta}>
             Vecka {dog.trainingWeek ?? 1} · {dog.ageWeeks} veckor
+            {!today?.rest && exercises.length > 0
+              ? ` · ${completedCount}/${exercises.length} klara`
+              : ''}
           </Text>
         ) : null}
 
@@ -57,22 +79,24 @@ export default function DashboardScreen() {
         {!loading && !error && !referral && today && !today.rest ? (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Idag · {today.day}</Text>
-            {(today.exercises ?? []).map((ex) => (
-              <Pressable
+            {allDone ? (
+              <Text style={styles.doneBanner}>Klart för idag — bra jobbat!</Text>
+            ) : null}
+            {exercises.map((ex) => (
+              <ExerciseRow
                 key={ex.id}
-                style={styles.exercise}
-                onPress={() => {
+                exercise={ex}
+                done={progress[ex.id] ?? 0}
+                metrics={metrics[ex.id]}
+                onSuccess={() => void logSuccess(ex)}
+                onFail={() => void logFail(ex)}
+                onOpenGuide={() => {
                   setGuideId(ex.id)
                   setGuideLabel(ex.label)
                 }}
-                accessibilityRole="button"
-              >
-                <Text style={styles.exLabel}>{ex.label}</Text>
-                <Text style={styles.desc}>{ex.desc}</Text>
-                <Text style={styles.reps}>{ex.reps} reps · tryck för guide</Text>
-              </Pressable>
+              />
             ))}
-            {(today.exercises ?? []).length === 0 ? (
+            {exercises.length === 0 ? (
               <Text style={styles.desc}>Inga övningar planerade idag.</Text>
             ) : null}
           </View>
@@ -80,7 +104,7 @@ export default function DashboardScreen() {
 
         <RouterLink href="/log" asChild>
           <Pressable style={styles.secondaryBtn}>
-            <Text style={styles.secondaryLabel}>Öppna logg (modal)</Text>
+            <Text style={styles.secondaryLabel}>Logga pass</Text>
           </Pressable>
         </RouterLink>
         <RouterLink href="/profile" asChild>
@@ -108,7 +132,12 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: space.xl, paddingBottom: space.xxl },
   eyebrow: { fontSize: fontSize.sm, color: colors.textMuted, marginBottom: space.xs },
   title: { fontSize: fontSize.xl, fontWeight: '600', color: colors.text },
-  meta: { fontSize: fontSize.sm, color: colors.textMuted, marginTop: space.xs, marginBottom: space.lg },
+  meta: {
+    fontSize: fontSize.sm,
+    color: colors.textMuted,
+    marginTop: space.xs,
+    marginBottom: space.lg,
+  },
   card: {
     backgroundColor: colors.surface,
     borderRadius: 16,
@@ -117,15 +146,18 @@ const styles = StyleSheet.create({
     padding: space.lg,
     marginBottom: space.lg,
   },
-  cardTitle: { fontSize: fontSize.lg, fontWeight: '600', color: colors.text, marginBottom: space.md },
-  exercise: {
-    paddingVertical: space.md,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
+  cardTitle: {
+    fontSize: fontSize.lg,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: space.md,
   },
-  exLabel: { fontSize: fontSize.base, fontWeight: '600', color: colors.text },
+  doneBanner: {
+    color: colors.primary,
+    fontWeight: '600',
+    marginBottom: space.md,
+  },
   desc: { fontSize: fontSize.sm, color: colors.textMuted, marginTop: space.xs },
-  reps: { fontSize: fontSize.xs, color: colors.primary, marginTop: space.sm, fontWeight: '600' },
   error: { color: colors.error, marginBottom: space.lg },
   secondaryBtn: {
     minHeight: 44,
