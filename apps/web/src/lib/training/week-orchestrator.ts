@@ -14,7 +14,7 @@ import {
 } from '@dogvantage/core'
 import { isGoal } from '@dogvantage/core'
 import { isValidBreed } from '@/lib/breeds/registry'
-import { getBehaviorContextPayloadFromDb } from '@dogvantage/core'
+import { getBehaviorContextPayloadFromDb } from '@/lib/dog/build-behavior-context'
 import { householdPetNotes, HOUSEHOLD_PET_LABELS } from '@dogvantage/core'
 import { detectBehaviorEmergency, behaviorResponse } from '@/lib/ai/safety-guards'
 import { DEFAULT_LOCALE } from '@/i18n/config'

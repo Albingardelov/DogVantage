@@ -1,7 +1,15 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "types": ["vitest/globals"]
+    "baseUrl": ".",
+    "types": ["vitest/globals"],
+    "paths": {
+      "react": ["./forbidden/react"],
+      "react-dom": ["./forbidden/react-dom"],
+      "next": ["./forbidden/next"],
+      "next/*": ["./forbidden/next/*"],
+      "@supabase/*": ["./forbidden/@supabase/*"]
+    }
   },
   "include": ["src/**/*.ts"]
 }

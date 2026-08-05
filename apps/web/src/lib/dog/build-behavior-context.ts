@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database } from '../..'
-import type { OnboardingPrefs, AssessmentState, BehaviorProfile } from '../..'
-import { buildBehaviorContext } from './behavior'
+import type { Database } from '@dogvantage/core'
+import type { OnboardingPrefs, AssessmentState, BehaviorProfile } from '@dogvantage/core'
+import { buildBehaviorContext } from '@dogvantage/core'
 
 type DogProfileBehaviorRow = {
   onboarding: OnboardingPrefs | null
