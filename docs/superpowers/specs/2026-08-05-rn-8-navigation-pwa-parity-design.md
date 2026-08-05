@@ -1,7 +1,7 @@
 # RN-8 slim: Navigation & BottomNav (PWA parity) — design
 
 **Datum:** 2026-08-05  
-**Status:** pending user review  
+**Status:** approved — implemented on rn-0  
 **Branch:** `rn-0` (local only — never merge RN UI into `main` until explicitly decided)  
 **Issues:** #39 (RN-8), enables #32 (RN-1)  
 **Depends on:** #31 RN-0 (done locally)

@@ -1,9 +1,10 @@
 {
   "expo": {
-    "name": "mobile",
+    "name": "DogVantage",
     "slug": "mobile",
     "version": "1.0.0",
     "orientation": "portrait",
+    "scheme": "dogvantage",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
