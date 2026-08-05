@@ -1,14 +1,15 @@
-# RN progress (local branch `rn-0` only — do not push to main)
+# RN progress (local `rn-0` — do not push to main)
 
 ## Done
 - [x] RN-0 monorepo
-- [x] RN-8 slim BottomNav (PWA tabs)
-- [x] RN-1 Auth (SecureStore)
-- [x] RN-2 Onboarding (7-step dog profile + dog gate)
+- [x] RN-8 slim BottomNav
+- [x] RN-1 Auth
+- [x] RN-2 Onboarding
+- [x] RN-3 Dashboard MVP (week plan + guide modal)
 
 ## Next
-- [ ] RN-3 Dashboard — veckans träningsplan
+- [ ] RN-4 Loggning (reps/metrics)
+- then RN-6 chat, RN-5 calendar, RN-7 profile, RN-PAY-1
 
 ## Notes
-- Never merge RN into `main` without explicit ask
-- `withAuth` accepts Bearer for mobile → ensure-trial
+- Dashboard needs running web API at EXPO_PUBLIC_WEB_URL (Bearer)
