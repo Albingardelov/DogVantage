@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import type { SupabaseClient, User } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js'
 import { createSupabaseServer } from '@/lib/supabase/server'
 import type { Database } from '@dogvantage/core'
 import { enforceApiRateLimit } from './rate-limit'
@@ -12,13 +12,39 @@ export interface DogContext {
   supabase: SupabaseClient<Database>
 }
 
+async function resolveAuthedClient(req: NextRequest): Promise<{
+  user: User
+  supabase: SupabaseClient<Database>
+} | null> {
+  const authHeader = req.headers.get('authorization')
+  if (authHeader?.startsWith('Bearer ')) {
+    const token = authHeader.slice('Bearer '.length).trim()
+    if (!token) return null
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    if (!url || !anon) return null
+    const supabase = createClient<Database>(url, anon, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
+    const { data: { user }, error } = await supabase.auth.getUser(token)
+    if (error || !user) return null
+    return { user, supabase }
+  }
+
+  const supabase = await createSupabaseServer()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+  return { user, supabase }
+}
+
 export async function withAuthAndDog(
   req: NextRequest,
   handler: (ctx: DogContext) => Promise<NextResponse>,
 ): Promise<NextResponse> {
-  const supabase = await createSupabaseServer()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  const authed = await resolveAuthedClient(req)
+  if (!authed) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  const { user, supabase } = authed
   const limited = await enforceApiRateLimit(req, { userId: user.id })
   if (limited) return limited
 
@@ -53,10 +79,9 @@ export async function withAuth(
   req: NextRequest,
   handler: (ctx: { user: User; supabase: SupabaseClient<Database> }) => Promise<NextResponse>,
 ): Promise<NextResponse> {
-  const supabase = await createSupabaseServer()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
-  const limited = await enforceApiRateLimit(req, { userId: user.id })
+  const authed = await resolveAuthedClient(req)
+  if (!authed) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  const limited = await enforceApiRateLimit(req, { userId: authed.user.id })
   if (limited) return limited
-  return handler({ user, supabase })
+  return handler(authed)
 }

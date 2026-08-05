@@ -1,18 +1,20 @@
 import { Redirect, useSegments } from 'expo-router'
 import { ActivityIndicator, StyleSheet, View } from 'react-native'
 import { useAuth } from '@/lib/auth/AuthContext'
+import { useDogGate } from '@/lib/dog/DogGateContext'
 import { colors } from '@/theme/tokens'
 
 /**
- * Gates protected areas. Auth routes stay reachable when logged out.
- * Dog/onboarding/billing gates are later tickets (ProfileGuard parity).
+ * Session + dog gates (ProfileGuard parity without billing yet).
  */
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth()
+  const { dogCount, dogsLoading } = useDogGate()
   const segments = useSegments()
   const inAuthGroup = segments[0] === '(auth)'
+  const inOnboarding = segments[0] === 'onboarding'
 
-  if (loading) {
+  if (loading || (session && dogsLoading)) {
     return (
       <View style={styles.loading}>
         <ActivityIndicator color={colors.primary} />
@@ -25,6 +27,15 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   }
 
   if (session && inAuthGroup) {
+    if ((dogCount ?? 0) === 0) return <Redirect href="/onboarding" />
+    return <Redirect href="/(tabs)/dashboard" />
+  }
+
+  if (session && !inOnboarding && (dogCount ?? 0) === 0) {
+    return <Redirect href="/onboarding" />
+  }
+
+  if (session && inOnboarding && (dogCount ?? 0) > 0) {
     return <Redirect href="/(tabs)/dashboard" />
   }
 
