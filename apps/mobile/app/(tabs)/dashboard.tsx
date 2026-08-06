@@ -48,12 +48,17 @@ export default function DashboardScreen() {
         <Text style={styles.eyebrow}>Hem</Text>
         <Text style={styles.title}>{dog ? `${dog.name}s träning` : 'Din träning'}</Text>
         {dog ? (
-          <Text style={styles.meta}>
-            Vecka {dog.trainingWeek ?? 1} · {dog.ageWeeks} veckor
-            {!today?.rest && exercises.length > 0
-              ? ` · ${completedCount}/${exercises.length} klara`
-              : ''}
-          </Text>
+          <RouterLink href="/calendar" asChild>
+            <Pressable style={styles.weekLink} accessibilityRole="link">
+              <Text style={styles.meta}>
+                Programvecka {dog.trainingWeek ?? 1} · {dog.ageWeeks} v
+                {!today?.rest && exercises.length > 0
+                  ? ` · ${completedCount}/${exercises.length} klara`
+                  : ''}
+              </Text>
+              <Text style={styles.weekChevron}>Kalender →</Text>
+            </Pressable>
+          </RouterLink>
         ) : null}
 
         {loading && !today ? (
@@ -132,11 +137,23 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: space.xl, paddingBottom: space.xxl },
   eyebrow: { fontSize: fontSize.sm, color: colors.textMuted, marginBottom: space.xs },
   title: { fontSize: fontSize.xl, fontWeight: '600', color: colors.text },
+  weekLink: {
+    marginTop: space.xs,
+    marginBottom: space.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: space.md,
+  },
   meta: {
     fontSize: fontSize.sm,
     color: colors.textMuted,
-    marginTop: space.xs,
-    marginBottom: space.lg,
+    flexShrink: 1,
+  },
+  weekChevron: {
+    fontSize: fontSize.sm,
+    color: colors.primary,
+    fontWeight: '600',
   },
   card: {
     backgroundColor: colors.surface,

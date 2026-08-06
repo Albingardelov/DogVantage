@@ -8,7 +8,8 @@
 - [x] RN-3 Dashboard
 - [x] RN-4 Logging
 - [x] RN-6 Chat (history + send + markdown + quick prompts)
+- [x] RN-5 Calendar (monthly dots + day sheet + delete via RLS)
 
 ## Next
-- [ ] RN-5 Calendar / RN-7 Profile
+- [ ] RN-7 Profile
 - [ ] RN-PAY-1 before store
