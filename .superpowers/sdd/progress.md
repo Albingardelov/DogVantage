@@ -10,6 +10,7 @@
 - [x] RN-6 Chat (history + send + markdown + quick prompts)
 - [x] RN-5 Calendar (monthly dots + day sheet + delete via RLS)
 - [x] RN-7 Profile (settings, Pro-gated custom exercises / multi-dog, delete account)
+- [x] RN-PAY-1 Netflix billing gate (read-only `/api/billing/me`, no IAP)
 
 ## Next
-- [ ] RN-PAY-1 before store
+- [ ] STORE-1 / store submit when ready

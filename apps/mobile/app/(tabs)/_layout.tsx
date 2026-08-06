@@ -1,5 +1,6 @@
 import { Tabs } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { SubscriptionGate } from '@/components/billing/SubscriptionGate'
 import { NavIcon, type BottomNavTab } from '@/components/NavIcon'
 import { colors, fontSize, space } from '@/theme/tokens'
 
@@ -15,37 +16,39 @@ export default function TabsLayout() {
   const bottomPad = Math.max(space.xl, insets.bottom)
 
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textMuted,
-        tabBarLabelStyle: {
-          fontSize: fontSize.xs,
-          fontWeight: '400',
-        },
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopColor: colors.border,
-          borderTopWidth: 1,
-          paddingTop: space.sm,
-          paddingBottom: bottomPad,
-          height: 56 + bottomPad,
-        },
-      }}
-    >
-      {TABS.map(({ name, title }) => (
-        <Tabs.Screen
-          key={name}
-          name={name}
-          options={{
-            title,
-            tabBarIcon: ({ color, focused }) => (
-              <NavIcon tab={name} focused={focused} color={String(color)} />
-            ),
-          }}
-        />
-      ))}
-    </Tabs>
+    <SubscriptionGate requireTier="basic">
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarActiveTintColor: colors.primary,
+          tabBarInactiveTintColor: colors.textMuted,
+          tabBarLabelStyle: {
+            fontSize: fontSize.xs,
+            fontWeight: '400',
+          },
+          tabBarStyle: {
+            backgroundColor: colors.surface,
+            borderTopColor: colors.border,
+            borderTopWidth: 1,
+            paddingTop: space.sm,
+            paddingBottom: bottomPad,
+            height: 56 + bottomPad,
+          },
+        }}
+      >
+        {TABS.map(({ name, title }) => (
+          <Tabs.Screen
+            key={name}
+            name={name}
+            options={{
+              title,
+              tabBarIcon: ({ color, focused }) => (
+                <NavIcon tab={name} focused={focused} color={String(color)} />
+              ),
+            }}
+          />
+        ))}
+      </Tabs>
+    </SubscriptionGate>
   )
 }

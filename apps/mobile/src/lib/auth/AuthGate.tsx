@@ -5,7 +5,7 @@ import { useDogGate } from '@/lib/dog/DogGateContext'
 import { colors } from '@/theme/tokens'
 
 /**
- * Session + dog gates (ProfileGuard parity without billing yet).
+ * Session + dog gates. Billing/subscription gating lives in SubscriptionGate (tabs).
  */
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth()

@@ -14,6 +14,7 @@ import {
 } from 'react-native'
 import Markdown from 'react-native-markdown-display'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { SubscriptionGate } from '@/components/billing/SubscriptionGate'
 import { useChat, type UiChatMessage } from '@/hooks/use-chat'
 import { colors, fontSize, space } from '@/theme/tokens'
 
@@ -99,6 +100,7 @@ export default function ChatScreen() {
   }
 
   return (
+    <SubscriptionGate requireTier="pro">
     <KeyboardAvoidingView
       style={[styles.root, { paddingTop: insets.top + space.sm }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -159,6 +161,7 @@ export default function ChatScreen() {
         </Pressable>
       </View>
     </KeyboardAvoidingView>
+    </SubscriptionGate>
   )
 }
 

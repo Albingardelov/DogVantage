@@ -17,14 +17,16 @@ import { DogInfoSection } from '@/components/profile/DogInfoSection'
 import { DogSwitcher } from '@/components/profile/DogSwitcher'
 import { SettingsSection } from '@/components/profile/SettingsSection'
 import { useProfile } from '@/hooks/use-profile'
-import { useSubscription } from '@/hooks/use-subscription'
+import { hasFeature, useSubscription } from '@/lib/billing/use-subscription'
 import { useAuth } from '@/lib/auth/AuthContext'
 import { colors, fontSize, space } from '@/theme/tokens'
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets()
   const { user } = useAuth()
-  const { isPro, reload: reloadSub } = useSubscription()
+  const { state, reload: reloadSub } = useSubscription()
+  const isPro = hasFeature(state, 'custom_exercises')
+  const canMultiDog = hasFeature(state, 'multiple_dogs')
   const {
     dog,
     allDogs,
@@ -109,7 +111,7 @@ export default function ProfileScreen() {
             onAdd={() => setAddExOpen(true)}
           />
 
-          {!isPro ? (
+          {!canMultiDog ? (
             <Text style={styles.proHint}>Flera hundar ingår i Pro. Hantera via webbappen.</Text>
           ) : null}
 
@@ -123,7 +125,7 @@ export default function ProfileScreen() {
         activeId={dog?.id}
         onClose={() => setSwitcherOpen(false)}
         onSelect={(id) => void switchDog(id)}
-        canAdd={isPro}
+        canAdd={canMultiDog}
         onAdd={() => {
           setSwitcherOpen(false)
           setAddDogOpen(true)
