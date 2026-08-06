@@ -9,7 +9,7 @@
 - [x] RN-4 Logging
 - [x] RN-6 Chat (history + send + markdown + quick prompts)
 - [x] RN-5 Calendar (monthly dots + day sheet + delete via RLS)
+- [x] RN-7 Profile (settings, Pro-gated custom exercises / multi-dog, delete account)
 
 ## Next
-- [ ] RN-7 Profile
 - [ ] RN-PAY-1 before store

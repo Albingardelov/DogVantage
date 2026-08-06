@@ -101,6 +101,41 @@ export async function saveNewDogProfile(input: {
   }
 }
 
+export async function updateDogProfile(fields: {
+  id: string
+  name?: string
+  birthdate?: string
+  trainingWeek?: number
+  sex?: DogProfile['sex']
+  castrationStatus?: DogProfile['castrationStatus']
+  onboarding?: OnboardingPrefs
+}): Promise<void> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new Error('Inte inloggad')
+
+  const updates: Record<string, unknown> = {}
+  if (fields.name !== undefined) updates.name = fields.name
+  if (fields.birthdate !== undefined) updates.birthdate = fields.birthdate
+  if (fields.trainingWeek !== undefined) updates.training_week = fields.trainingWeek
+  if (fields.sex !== undefined) updates.sex = fields.sex ?? null
+  if (fields.castrationStatus !== undefined) {
+    updates.castration_status = fields.castrationStatus ?? null
+  }
+  if (fields.onboarding !== undefined) updates.onboarding = fields.onboarding
+
+  if (Object.keys(updates).length === 0) return
+
+  const { error } = await supabase
+    .from('dog_profiles')
+    .update(updates)
+    .eq('id', fields.id)
+    .eq('user_id', user.id)
+
+  if (error) throw new Error(error.message || 'Kunde inte spara profilen')
+}
+
 export async function ensureTrialForSession(accessToken: string): Promise<void> {
   const base =
     process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '') ||

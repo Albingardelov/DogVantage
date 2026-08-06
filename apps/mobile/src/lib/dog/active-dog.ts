@@ -28,6 +28,9 @@ function dbToProfile(row: {
   }
 }
 
+const DOG_SELECT =
+  'id, name, breed, birthdate, training_week, sex, castration_status, onboarding' as const
+
 export async function fetchActiveDog(): Promise<ActiveDog | null> {
   const { data: settings } = await supabase
     .from('user_settings')
@@ -50,7 +53,7 @@ export async function fetchActiveDog(): Promise<ActiveDog | null> {
 
   const { data, error } = await supabase
     .from('dog_profiles')
-    .select('id, name, breed, birthdate, training_week, sex, castration_status, onboarding')
+    .select(DOG_SELECT)
     .eq('id', dogId)
     .single()
 
@@ -60,4 +63,25 @@ export async function fetchActiveDog(): Promise<ActiveDog | null> {
     ...profile,
     ageWeeks: getAgeInWeeks(profile.birthdate),
   }
+}
+
+export async function fetchAllDogs(): Promise<ActiveDog[]> {
+  const { data, error } = await supabase
+    .from('dog_profiles')
+    .select(DOG_SELECT)
+    .order('created_at', { ascending: true })
+
+  if (error || !data) return []
+  return data.map((row) => {
+    const profile = dbToProfile(row)
+    return { ...profile, ageWeeks: getAgeInWeeks(profile.birthdate) }
+  })
+}
+
+export async function switchActiveDog(userId: string, dogId: string): Promise<void> {
+  const { error } = await supabase.from('user_settings').upsert({
+    user_id: userId,
+    active_dog_id: dogId,
+  })
+  if (error) throw new Error(error.message)
 }
