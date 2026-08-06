@@ -11,6 +11,8 @@
 - [x] RN-5 Calendar (monthly dots + day sheet + delete via RLS)
 - [x] RN-7 Profile (settings, Pro-gated custom exercises / multi-dog, delete account)
 - [x] RN-PAY-1 Netflix billing gate (read-only `/api/billing/me`, no IAP)
+- [x] STORE-1 compliance pack (privacy, store docs, targetSdk 35, auth legal links)
 
 ## Next
-- [ ] STORE-1 / store submit when ready
+- [ ] EAS project id + screenshots + TestFlight / Play internal
+- [ ] Create App Review demo account before submit

@@ -16,6 +16,7 @@
     "@react-native-community/datetimepicker": "^9.1.0",
     "@supabase/supabase-js": "^2.105.1",
     "expo": "~57.0.10",
+    "expo-build-properties": "^57.0.9",
     "expo-constants": "~57.0.9",
     "expo-linking": "~57.0.5",
     "expo-router": "~57.0.10",

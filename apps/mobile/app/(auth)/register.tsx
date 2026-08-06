@@ -12,6 +12,7 @@ import {
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuth } from '@/lib/auth/AuthContext'
+import { AuthLegalLinks } from '@/components/auth/AuthLegalLinks'
 import { colors, fontSize, space } from '@/theme/tokens'
 
 export default function RegisterScreen() {
@@ -53,7 +54,7 @@ export default function RegisterScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <Text style={styles.title}>Skapa konto</Text>
-      <Text style={styles.hint}>Hundprofil och onboarding kommer i RN-2.</Text>
+      <Text style={styles.hint}>Efter registrering skapar du hundprofil i onboarding.</Text>
       <View style={styles.field}>
         <Text style={styles.label}>E-post</Text>
         <TextInput
@@ -110,6 +111,7 @@ export default function RegisterScreen() {
           Logga in
         </Link>
       </Text>
+      <AuthLegalLinks />
     </KeyboardAvoidingView>
   )
 }

@@ -12,6 +12,7 @@ import {
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuth } from '@/lib/auth/AuthContext'
+import { AuthLegalLinks } from '@/components/auth/AuthLegalLinks'
 import { colors, fontSize, space } from '@/theme/tokens'
 
 export default function LoginScreen() {
@@ -95,6 +96,7 @@ export default function LoginScreen() {
           Skapa konto
         </Link>
       </Text>
+      <AuthLegalLinks />
     </KeyboardAvoidingView>
   )
 }
