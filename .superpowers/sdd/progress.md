@@ -5,9 +5,10 @@
 - [x] RN-8 BottomNav
 - [x] RN-1 Auth
 - [x] RN-2 Onboarding
-- [x] RN-3 Dashboard week plan
-- [x] RN-4 Logging (Lyckad/Miss + session log modal)
+- [x] RN-3 Dashboard
+- [x] RN-4 Logging
+- [x] RN-6 Chat (history + send + markdown + quick prompts)
 
 ## Next
-- [ ] RN-6 Chat (or RN-5 calendar / RN-7 profile)
+- [ ] RN-5 Calendar / RN-7 Profile
 - [ ] RN-PAY-1 before store
