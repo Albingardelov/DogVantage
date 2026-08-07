@@ -15,9 +15,9 @@
 - [x] RN-CHECKIN thin parity (day check-in, scaleDayPlan, heat, dog-state summary)
 - [x] RN-ASSESS nivåtest (behavior + exercise baseline → trainingWeek)
 - [x] RN-SKILLS färdighetsöversikt + veckoprioriteringar
+- [x] RN-LEARN kurs + artiklar + quiz
 
 ## Next (PWA clone)
-- [ ] RN-LEARN
 - [ ] RN-MICRO
 - [ ] RN-i18n
 - [ ] EAS project id + screenshots + TestFlight / Play internal
