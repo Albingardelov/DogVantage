@@ -16,8 +16,8 @@
 - [x] RN-ASSESS nivåtest (behavior + exercise baseline → trainingWeek)
 - [x] RN-SKILLS färdighetsöversikt + veckoprioriteringar
 - [x] RN-LEARN kurs + artiklar + quiz
+- [x] RN-MICRO (checklist, mikrolektion, insight; chat history redan i RN-6)
 
 ## Next (PWA clone)
-- [ ] RN-MICRO
 - [ ] RN-i18n
 - [ ] EAS project id + screenshots + TestFlight / Play internal

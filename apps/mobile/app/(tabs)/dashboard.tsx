@@ -10,10 +10,16 @@ import {
 } from 'react-native'
 import { Link as RouterLink, router, useFocusEffect } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { daysUntilHomecoming } from '@dogvantage/core'
+import { InsightCard } from '@/components/dashboard/InsightCard'
+import { LearningChecklistCard } from '@/components/dashboard/LearningChecklistCard'
+import { MicroLessonCard } from '@/components/dashboard/MicroLessonCard'
 import { DayCheckInCard } from '@/components/training/DayCheckInCard'
 import { ExerciseGuideModal } from '@/components/training/ExerciseGuideModal'
 import { ExerciseRow } from '@/components/training/ExerciseRow'
 import { HeatBanner } from '@/components/training/HeatBanner'
+import { useInsight } from '@/hooks/use-insight'
+import { useMicroLesson } from '@/hooks/use-micro-lesson'
 import { useTrainingSession } from '@/hooks/use-training-session'
 import { needsAssessment } from '@/lib/dog/active-dog'
 import { colors, fontSize, space } from '@/theme/tokens'
@@ -44,10 +50,20 @@ export default function DashboardScreen() {
   const [guideId, setGuideId] = useState<string | null>(null)
   const [guideLabel, setGuideLabel] = useState<string | null>(null)
 
+  const homecomeDate = dog?.onboarding?.homecomeDate
+  const daysUntilHome = homecomeDate ? daysUntilHomecoming(homecomeDate) : null
+  const beforeHomecoming = daysUntilHome !== null && daysUntilHome > 0
+  const showHomeCards = Boolean(dog?.id) && !beforeHomecoming
+
+  const micro = useMicroLesson(dog?.id, showHomeCards)
+  const insight = useInsight(dog?.id, showHomeCards)
+
   useFocusEffect(
     useCallback(() => {
       void reload()
-    }, [reload]),
+      void micro.reload()
+      void insight.reload()
+    }, [reload, micro.reload, insight.reload]),
   )
 
   const exercises = today?.exercises ?? []
@@ -121,6 +137,16 @@ export default function DashboardScreen() {
 
         {scaleNote ? <Text style={styles.scaleNote}>{scaleNote}</Text> : null}
 
+        {dog && (dog.trainingWeek ?? 1) <= 3 ? <LearningChecklistCard /> : null}
+
+        {showHomeCards && micro.lesson && dog?.id ? (
+          <MicroLessonCard
+            lesson={micro.lesson}
+            dogId={dog.id}
+            onDismiss={() => void micro.dismiss()}
+          />
+        ) : null}
+
         {loading && !today ? (
           <ActivityIndicator color={colors.primary} style={{ marginTop: space.xxl }} />
         ) : null}
@@ -167,6 +193,15 @@ export default function DashboardScreen() {
               <Text style={styles.desc}>Inga övningar planerade idag.</Text>
             ) : null}
           </View>
+        ) : null}
+
+        {showHomeCards && insight.copy ? (
+          <InsightCard
+            copy={insight.copy}
+            busy={insight.busy}
+            onPriority={() => void insight.makePriority()}
+            onDismiss={() => void insight.dismiss()}
+          />
         ) : null}
 
         <RouterLink href="/log" asChild>
