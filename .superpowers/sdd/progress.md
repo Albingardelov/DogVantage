@@ -12,7 +12,12 @@
 - [x] RN-7 Profile (settings, Pro-gated custom exercises / multi-dog, delete account)
 - [x] RN-PAY-1 Netflix billing gate (read-only `/api/billing/me`, no IAP)
 - [x] STORE-1 compliance pack (privacy, store docs, targetSdk 35, auth legal links)
+- [x] RN-CHECKIN thin parity (day check-in, scaleDayPlan, heat, dog-state summary)
 
-## Next
+## Next (PWA clone)
+- [ ] RN-ASSESS
+- [ ] RN-SKILLS
+- [ ] RN-LEARN
+- [ ] RN-MICRO
+- [ ] RN-i18n
 - [ ] EAS project id + screenshots + TestFlight / Play internal
-- [ ] Create App Review demo account before submit

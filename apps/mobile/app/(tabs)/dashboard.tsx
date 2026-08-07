@@ -10,10 +10,14 @@ import {
 } from 'react-native'
 import { Link as RouterLink } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { DayCheckInCard } from '@/components/training/DayCheckInCard'
 import { ExerciseGuideModal } from '@/components/training/ExerciseGuideModal'
 import { ExerciseRow } from '@/components/training/ExerciseRow'
+import { HeatBanner } from '@/components/training/HeatBanner'
 import { useTrainingSession } from '@/hooks/use-training-session'
 import { colors, fontSize, space } from '@/theme/tokens'
+
+const ZONE_LABEL = { green: 'Grön', yellow: 'Gul', red: 'Röd' } as const
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets()
@@ -28,6 +32,13 @@ export default function DashboardScreen() {
     reload,
     logSuccess,
     logFail,
+    checkIn,
+    showCheckInCard,
+    saveCheckIn,
+    dismissCheckIn,
+    scaleNote,
+    heat,
+    dogStateSummary,
   } = useTrainingSession()
   const [guideId, setGuideId] = useState<string | null>(null)
   const [guideLabel, setGuideLabel] = useState<string | null>(null)
@@ -61,6 +72,35 @@ export default function DashboardScreen() {
           </RouterLink>
         ) : null}
 
+        {dogStateSummary ? <Text style={styles.stateLine}>{dogStateSummary}</Text> : null}
+
+        {heat.eligible ? (
+          <HeatBanner
+            heat={heat.heat ?? { isInHeat: false, skenfasActive: false }}
+            busy={heat.busy}
+            onStart={() => void heat.start()}
+            onEnd={() => void heat.end()}
+          />
+        ) : null}
+
+        {dog && showCheckInCard ? (
+          <DayCheckInCard
+            dogName={dog.name}
+            onSave={(v) => void saveCheckIn(v)}
+            onDismiss={dismissCheckIn}
+          />
+        ) : null}
+
+        {checkIn?.zone && !showCheckInCard ? (
+          <Text style={styles.checkSummary}>
+            Dagens form: {ZONE_LABEL[checkIn.zone]}
+            {checkIn.handlerEnergy ? ` · energi ${checkIn.handlerEnergy}` : ''}
+            {checkIn.minutesAvailable != null ? ` · ${checkIn.minutesAvailable} min` : ''}
+          </Text>
+        ) : null}
+
+        {scaleNote ? <Text style={styles.scaleNote}>{scaleNote}</Text> : null}
+
         {loading && !today ? (
           <ActivityIndicator color={colors.primary} style={{ marginTop: space.xxl }} />
         ) : null}
@@ -77,7 +117,9 @@ export default function DashboardScreen() {
         {!loading && !error && !referral && today?.rest ? (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Vilodag</Text>
-            <Text style={styles.desc}>Idag är det återhämtning — ingen strukturerad träning.</Text>
+            <Text style={styles.desc}>
+              {scaleNote ?? 'Idag är det återhämtning — ingen strukturerad träning.'}
+            </Text>
           </View>
         ) : null}
 
@@ -139,7 +181,7 @@ const styles = StyleSheet.create({
   title: { fontSize: fontSize.xl, fontWeight: '600', color: colors.text },
   weekLink: {
     marginTop: space.xs,
-    marginBottom: space.lg,
+    marginBottom: space.md,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -154,6 +196,23 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
     color: colors.primary,
     fontWeight: '600',
+  },
+  stateLine: {
+    fontSize: fontSize.xs,
+    color: colors.textMuted,
+    marginBottom: space.md,
+  },
+  checkSummary: {
+    fontSize: fontSize.sm,
+    color: colors.primary,
+    fontWeight: '600',
+    marginBottom: space.md,
+  },
+  scaleNote: {
+    fontSize: fontSize.sm,
+    color: colors.textMuted,
+    marginBottom: space.md,
+    fontStyle: 'italic',
   },
   card: {
     backgroundColor: colors.surface,
