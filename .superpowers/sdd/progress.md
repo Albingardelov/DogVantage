@@ -14,9 +14,9 @@
 - [x] STORE-1 compliance pack (privacy, store docs, targetSdk 35, auth legal links)
 - [x] RN-CHECKIN thin parity (day check-in, scaleDayPlan, heat, dog-state summary)
 - [x] RN-ASSESS nivåtest (behavior + exercise baseline → trainingWeek)
+- [x] RN-SKILLS färdighetsöversikt + veckoprioriteringar
 
 ## Next (PWA clone)
-- [ ] RN-SKILLS
 - [ ] RN-LEARN
 - [ ] RN-MICRO
 - [ ] RN-i18n
