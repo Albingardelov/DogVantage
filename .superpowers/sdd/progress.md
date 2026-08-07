@@ -13,9 +13,9 @@
 - [x] RN-PAY-1 Netflix billing gate (read-only `/api/billing/me`, no IAP)
 - [x] STORE-1 compliance pack (privacy, store docs, targetSdk 35, auth legal links)
 - [x] RN-CHECKIN thin parity (day check-in, scaleDayPlan, heat, dog-state summary)
+- [x] RN-ASSESS nivåtest (behavior + exercise baseline → trainingWeek)
 
 ## Next (PWA clone)
-- [ ] RN-ASSESS
 - [ ] RN-SKILLS
 - [ ] RN-LEARN
 - [ ] RN-MICRO

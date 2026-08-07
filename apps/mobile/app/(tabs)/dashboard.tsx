@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import {
   ActivityIndicator,
   Pressable,
@@ -8,13 +8,14 @@ import {
   Text,
   View,
 } from 'react-native'
-import { Link as RouterLink } from 'expo-router'
+import { Link as RouterLink, router, useFocusEffect } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { DayCheckInCard } from '@/components/training/DayCheckInCard'
 import { ExerciseGuideModal } from '@/components/training/ExerciseGuideModal'
 import { ExerciseRow } from '@/components/training/ExerciseRow'
 import { HeatBanner } from '@/components/training/HeatBanner'
 import { useTrainingSession } from '@/hooks/use-training-session'
+import { needsAssessment } from '@/lib/dog/active-dog'
 import { colors, fontSize, space } from '@/theme/tokens'
 
 const ZONE_LABEL = { green: 'Grön', yellow: 'Gul', red: 'Röd' } as const
@@ -42,6 +43,12 @@ export default function DashboardScreen() {
   } = useTrainingSession()
   const [guideId, setGuideId] = useState<string | null>(null)
   const [guideLabel, setGuideLabel] = useState<string | null>(null)
+
+  useFocusEffect(
+    useCallback(() => {
+      void reload()
+    }, [reload]),
+  )
 
   const exercises = today?.exercises ?? []
   const completedCount = useMemo(
@@ -73,6 +80,19 @@ export default function DashboardScreen() {
         ) : null}
 
         {dogStateSummary ? <Text style={styles.stateLine}>{dogStateSummary}</Text> : null}
+
+        {needsAssessment(dog) ? (
+          <Pressable
+            style={styles.assessBanner}
+            onPress={() => router.push('/assessment')}
+            accessibilityRole="button"
+          >
+            <Text style={styles.assessTitle}>Starta nivåtest (10–12 min)</Text>
+            <Text style={styles.assessBody}>
+              Anpassa startvecka och rekommendationer efter hundens nivå.
+            </Text>
+          </Pressable>
+        ) : null}
 
         {heat.eligible ? (
           <HeatBanner
@@ -202,6 +222,16 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     marginBottom: space.md,
   },
+  assessBanner: {
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    padding: space.lg,
+    marginBottom: space.lg,
+  },
+  assessTitle: { fontSize: fontSize.base, fontWeight: '600', color: colors.primary },
+  assessBody: { fontSize: fontSize.sm, color: colors.textMuted, marginTop: space.xs },
   checkSummary: {
     fontSize: fontSize.sm,
     color: colors.primary,

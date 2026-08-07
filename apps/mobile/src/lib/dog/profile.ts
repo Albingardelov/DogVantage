@@ -1,4 +1,5 @@
 import type {
+  AssessmentState,
   DogProfile,
   HouseholdPet,
   OnboardingPrefs,
@@ -109,6 +110,7 @@ export async function updateDogProfile(fields: {
   sex?: DogProfile['sex']
   castrationStatus?: DogProfile['castrationStatus']
   onboarding?: OnboardingPrefs
+  assessment?: AssessmentState
 }): Promise<void> {
   const {
     data: { user },
@@ -124,6 +126,7 @@ export async function updateDogProfile(fields: {
     updates.castration_status = fields.castrationStatus ?? null
   }
   if (fields.onboarding !== undefined) updates.onboarding = fields.onboarding
+  if (fields.assessment !== undefined) updates.assessment = fields.assessment
 
   if (Object.keys(updates).length === 0) return
 

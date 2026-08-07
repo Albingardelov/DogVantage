@@ -25,6 +25,7 @@ export default function RootLayout() {
               <Stack.Screen name="onboarding/index" />
               <Stack.Screen name="profile" />
               <Stack.Screen name="calendar" />
+              <Stack.Screen name="assessment" />
               <Stack.Screen name="log" options={{ presentation: 'modal' }} />
               <Stack.Screen name="+not-found" />
             </Stack>

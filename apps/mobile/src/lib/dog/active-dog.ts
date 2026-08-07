@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase'
-import type { DogProfile, OnboardingPrefs } from '@dogvantage/core'
+import type { AssessmentState, DogProfile, OnboardingPrefs } from '@dogvantage/core'
 import { getAgeInWeeks } from '@dogvantage/core'
 
 export type ActiveDog = DogProfile & {
@@ -15,6 +15,7 @@ function dbToProfile(row: {
   sex: string | null
   castration_status: string | null
   onboarding: OnboardingPrefs | null
+  assessment: AssessmentState | null
 }): DogProfile {
   return {
     id: row.id,
@@ -25,11 +26,12 @@ function dbToProfile(row: {
     sex: (row.sex as DogProfile['sex']) ?? undefined,
     castrationStatus: (row.castration_status as DogProfile['castrationStatus']) ?? undefined,
     onboarding: row.onboarding ?? undefined,
+    assessment: row.assessment ?? undefined,
   }
 }
 
 const DOG_SELECT =
-  'id, name, breed, birthdate, training_week, sex, castration_status, onboarding' as const
+  'id, name, breed, birthdate, training_week, sex, castration_status, onboarding, assessment' as const
 
 export async function fetchActiveDog(): Promise<ActiveDog | null> {
   const { data: settings } = await supabase
@@ -84,4 +86,10 @@ export async function switchActiveDog(userId: string, dogId: string): Promise<vo
     active_dog_id: dogId,
   })
   if (error) throw new Error(error.message)
+}
+
+export function needsAssessment(dog: ActiveDog | null): boolean {
+  if (!dog) return false
+  const ageWeeks = Math.max(1, dog.ageWeeks)
+  return (dog.assessment?.status ?? 'not_started') !== 'completed' && ageWeeks >= 26
 }
