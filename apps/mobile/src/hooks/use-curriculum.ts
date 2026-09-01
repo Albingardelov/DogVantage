@@ -15,7 +15,7 @@ export function useCurriculum(dogId: string | undefined) {
   const [completingId, setCompletingId] = useState<string | null>(null)
 
   const reload = useCallback(async () => {
-    if (!session?.access_token || !dogId) {
+    if (!session?.user?.id || !dogId) {
       setOverview(null)
       setLoading(false)
       return
@@ -25,7 +25,6 @@ export function useCurriculum(dogId: string | undefined) {
     try {
       const res = await apiFetch(
         `/api/learning/curriculum?dogId=${encodeURIComponent(dogId)}`,
-        session.access_token,
       )
       if (!res.ok) throw new Error('Kunde inte hämta kursen')
       setOverview(CurriculumOverviewSchema.parse(await res.json()))
@@ -35,7 +34,7 @@ export function useCurriculum(dogId: string | undefined) {
     } finally {
       setLoading(false)
     }
-  }, [session?.access_token, dogId])
+  }, [session?.user?.id, dogId])
 
   useEffect(() => {
     void reload()
@@ -43,13 +42,12 @@ export function useCurriculum(dogId: string | undefined) {
 
   const completeModule = useCallback(
     async (moduleId: string) => {
-      if (!session?.access_token || !dogId) return
+      if (!session?.user?.id || !dogId) return
       setCompletingId(moduleId)
       setError(null)
       try {
         const res = await apiFetch(
           `/api/learning/curriculum/${encodeURIComponent(moduleId)}?dogId=${encodeURIComponent(dogId)}`,
-          session.access_token,
           { method: 'POST' },
         )
         if (!res.ok) {
@@ -67,7 +65,7 @@ export function useCurriculum(dogId: string | undefined) {
         setCompletingId(null)
       }
     },
-    [session?.access_token, dogId, reload],
+    [session?.user?.id, dogId, reload],
   )
 
   return { overview, loading, error, reload, completeModule, completingId }

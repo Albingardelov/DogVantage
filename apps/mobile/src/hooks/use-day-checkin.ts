@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { Alert } from 'react-native'
 import type { DayCheckInState } from '@dogvantage/core'
 import { DayCheckInResponseSchema } from '@dogvantage/core'
 import { useAuth } from '@/lib/auth/AuthContext'
@@ -13,7 +14,7 @@ export function useDayCheckIn(dogId: string | undefined) {
   const date = todayDateKey()
 
   const reload = useCallback(async () => {
-    if (!session?.access_token || !dogId) {
+    if (!session?.user?.id || !dogId) {
       setCheckIn(null)
       setLoaded(true)
       return
@@ -21,7 +22,6 @@ export function useDayCheckIn(dogId: string | undefined) {
     try {
       const res = await apiFetch(
         `/api/training/checkin?dogId=${encodeURIComponent(dogId)}&date=${date}`,
-        session.access_token,
       )
       if (!res.ok) {
         setCheckIn(null)
@@ -34,7 +34,7 @@ export function useDayCheckIn(dogId: string | undefined) {
     } finally {
       setLoaded(true)
     }
-  }, [session?.access_token, dogId, date])
+  }, [session?.user?.id, dogId, date])
 
   useEffect(() => {
     setLoaded(false)
@@ -44,21 +44,29 @@ export function useDayCheckIn(dogId: string | undefined) {
 
   const save = useCallback(
     async (value: DayCheckInState) => {
-      if (!session?.access_token || !dogId || !value.zone) return
+      if (!session?.user?.id || !dogId || !value.zone) return
+      const previous = checkIn
       setCheckIn(value)
       setDismissed(false)
-      await apiFetch(`/api/training/checkin?dogId=${encodeURIComponent(dogId)}`, session.access_token, {
-        method: 'POST',
-        body: JSON.stringify({
-          dogId,
-          date,
-          zone: value.zone,
-          handlerEnergy: value.handlerEnergy ?? undefined,
-          minutesAvailable: value.minutesAvailable ?? undefined,
-        }),
-      }).catch((e) => console.warn('[useDayCheckIn] save', e))
+      try {
+        const res = await apiFetch(`/api/training/checkin?dogId=${encodeURIComponent(dogId)}`, {
+          method: 'POST',
+          body: JSON.stringify({
+            dogId,
+            date,
+            zone: value.zone,
+            handlerEnergy: value.handlerEnergy ?? undefined,
+            minutesAvailable: value.minutesAvailable ?? undefined,
+          }),
+        })
+        if (!res.ok) throw new Error('save_failed')
+      } catch (e) {
+        console.warn('[useDayCheckIn] save', e)
+        setCheckIn(previous)
+        Alert.alert('Kunde inte spara', 'Din check-in sparades inte. Kontrollera anslutningen och försök igen.')
+      }
     },
-    [session?.access_token, dogId, date],
+    [session?.user?.id, dogId, date, checkIn],
   )
 
   const dismiss = useCallback(() => setDismissed(true), [])

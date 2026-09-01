@@ -17,7 +17,7 @@ export function useInsight(dogId: string | undefined, enabled: boolean) {
   const [busy, setBusy] = useState(false)
 
   const reload = useCallback(async () => {
-    if (!session?.access_token || !dogId || !enabled) {
+    if (!session?.user?.id || !dogId || !enabled) {
       setInsight(null)
       setCopy(null)
       return
@@ -25,7 +25,6 @@ export function useInsight(dogId: string | undefined, enabled: boolean) {
     try {
       const res = await apiFetch(
         `/api/training/dog-state?dogId=${encodeURIComponent(dogId)}`,
-        session.access_token,
       )
       if (!res.ok) return
       const payload = (await res.json()) as DogStatePayload
@@ -47,7 +46,7 @@ export function useInsight(dogId: string | undefined, enabled: boolean) {
       setInsight(null)
       setCopy(null)
     }
-  }, [session?.access_token, dogId, enabled])
+  }, [session?.user?.id, dogId, enabled])
 
   useEffect(() => {
     void reload()
@@ -62,19 +61,18 @@ export function useInsight(dogId: string | undefined, enabled: boolean) {
   }, [dogId, insight])
 
   const makePriority = useCallback(async () => {
-    if (!session?.access_token || !dogId || !insight) return
+    if (!session?.user?.id || !dogId || !insight) return
     setBusy(true)
     try {
       const focusRes = await apiFetch(
         `/api/training/focus?dogId=${encodeURIComponent(dogId)}`,
-        session.access_token,
       )
       const focus = focusRes.ok
         ? ((await focusRes.json()) as { exerciseIds?: string[] })
         : { exerciseIds: [] }
       const existing = focus.exerciseIds ?? []
       if (!existing.includes(insight.exerciseId)) {
-        await apiFetch('/api/training/focus', session.access_token, {
+        await apiFetch('/api/training/focus', {
           method: 'PUT',
           body: JSON.stringify({
             dogId,
@@ -86,7 +84,7 @@ export function useInsight(dogId: string | undefined, enabled: boolean) {
     } finally {
       setBusy(false)
     }
-  }, [session?.access_token, dogId, insight, dismiss])
+  }, [session?.user?.id, dogId, insight, dismiss])
 
   return { insight, copy, busy, dismiss, makePriority, reload }
 }

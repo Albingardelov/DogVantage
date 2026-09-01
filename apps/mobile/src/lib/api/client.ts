@@ -1,29 +1,44 @@
+import { supabase } from '@/lib/supabase'
 import type { ActiveDog } from '@/lib/dog/active-dog'
+
+const PROD_WEB_URL = 'https://dog-vantage.vercel.app'
 
 export function webBaseUrl(): string {
   return (
     process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '') ||
     process.env.EXPO_PUBLIC_APP_URL?.replace(/\/$/, '') ||
-    ''
+    PROD_WEB_URL
   )
 }
 
-export async function apiFetch(
-  path: string,
-  accessToken: string,
-  init: RequestInit = {},
-): Promise<Response> {
-  const base = webBaseUrl()
-  if (!base) throw new Error('EXPO_PUBLIC_WEB_URL saknas')
-  const headers = new Headers(init.headers)
-  headers.set('Authorization', `Bearer ${accessToken}`)
-  if (!headers.has('Content-Type') && init.body) {
-    headers.set('Content-Type', 'application/json')
+/**
+ * Hämtar aktuell access-token själv (getSession auto-refreshar utgången token)
+ * och gör en refresh + retry vid 401, så anropare aldrig skickar stale tokens.
+ */
+export async function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
+  const { data } = await supabase.auth.getSession()
+  const token = data.session?.access_token
+  if (!token) throw new Error('Ingen aktiv session')
+
+  const url = `${webBaseUrl()}${path.startsWith('/') ? path : `/${path}`}`
+  const doFetch = (accessToken: string) => {
+    const headers = new Headers(init.headers)
+    headers.set('Authorization', `Bearer ${accessToken}`)
+    if (!headers.has('Content-Type') && init.body) {
+      headers.set('Content-Type', 'application/json')
+    }
+    return fetch(url, { ...init, headers })
   }
-  return fetch(`${base}${path.startsWith('/') ? path : `/${path}`}`, {
-    ...init,
-    headers,
-  })
+
+  let res = await doFetch(token)
+  if (res.status === 401) {
+    const { data: refreshed } = await supabase.auth.refreshSession()
+    const newToken = refreshed.session?.access_token
+    if (newToken && newToken !== token) {
+      res = await doFetch(newToken)
+    }
+  }
+  return res
 }
 
 export function buildWeekPlanPath(dog: ActiveDog): string {

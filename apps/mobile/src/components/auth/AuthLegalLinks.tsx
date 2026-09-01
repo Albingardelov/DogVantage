@@ -4,8 +4,7 @@ import { colors, fontSize, space } from '@/theme/tokens'
 
 export function AuthLegalLinks() {
   function openPrivacy() {
-    const base = webBaseUrl()
-    void Linking.openURL(base ? `${base}/privacy` : 'https://dogvantage.se/privacy')
+    void Linking.openURL(`${webBaseUrl()}/privacy`)
   }
 
   return (

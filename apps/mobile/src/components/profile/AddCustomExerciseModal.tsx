@@ -28,13 +28,12 @@ export function AddCustomExerciseModal({ visible, dogId, onClose, onCreated }: P
   const [error, setError] = useState<string | null>(null)
 
   async function submit() {
-    if (!session?.access_token || !prompt.trim()) return
+    if (!session?.user?.id || !prompt.trim()) return
     setSaving(true)
     setError(null)
     try {
       const res = await apiFetch(
         `/api/training/custom?dogId=${encodeURIComponent(dogId)}`,
-        session.access_token,
         {
           method: 'POST',
           body: JSON.stringify({ prompt: prompt.trim(), dogId }),

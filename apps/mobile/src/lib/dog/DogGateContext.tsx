@@ -13,6 +13,7 @@ import { useAuth } from '@/lib/auth/AuthContext'
 type DogGateValue = {
   dogCount: number | null
   dogsLoading: boolean
+  dogsError: boolean
   refreshDogs: () => Promise<void>
 }
 
@@ -20,12 +21,15 @@ const DogGateContext = createContext<DogGateValue | null>(null)
 
 export function DogGateProvider({ children }: { children: ReactNode }) {
   const { session, loading: authLoading } = useAuth()
+  const userId = session?.user?.id ?? null
   const [dogCount, setDogCount] = useState<number | null>(null)
   const [dogsLoading, setDogsLoading] = useState(true)
+  const [dogsError, setDogsError] = useState(false)
 
   const refreshDogs = useCallback(async () => {
-    if (!session) {
+    if (!userId) {
       setDogCount(null)
+      setDogsError(false)
       setDogsLoading(false)
       return
     }
@@ -33,13 +37,14 @@ export function DogGateProvider({ children }: { children: ReactNode }) {
     try {
       const n = await countUserDogs()
       setDogCount(n)
+      setDogsError(false)
     } catch (e) {
       console.warn('[DogGate]', e)
-      setDogCount(0)
+      setDogsError(true)
     } finally {
       setDogsLoading(false)
     }
-  }, [session])
+  }, [userId])
 
   useEffect(() => {
     if (authLoading) return
@@ -47,8 +52,8 @@ export function DogGateProvider({ children }: { children: ReactNode }) {
   }, [authLoading, refreshDogs])
 
   const value = useMemo(
-    () => ({ dogCount, dogsLoading, refreshDogs }),
-    [dogCount, dogsLoading, refreshDogs],
+    () => ({ dogCount, dogsLoading, dogsError, refreshDogs }),
+    [dogCount, dogsLoading, dogsError, refreshDogs],
   )
 
   return <DogGateContext.Provider value={value}>{children}</DogGateContext.Provider>

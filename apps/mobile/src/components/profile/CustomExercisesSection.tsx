@@ -32,7 +32,7 @@ export function CustomExercisesSection({ dogId, isPro, onAdd }: Props) {
   const [error, setError] = useState<string | null>(null)
 
   const reload = useCallback(async () => {
-    if (!isPro || !dogId || !session?.access_token) {
+    if (!isPro || !dogId || !session?.user?.id) {
       setItems([])
       return
     }
@@ -41,7 +41,6 @@ export function CustomExercisesSection({ dogId, isPro, onAdd }: Props) {
     try {
       const res = await apiFetch(
         `/api/training/custom?dogId=${encodeURIComponent(dogId)}`,
-        session.access_token,
       )
       if (res.status === 402) {
         setItems([])
@@ -55,16 +54,16 @@ export function CustomExercisesSection({ dogId, isPro, onAdd }: Props) {
     } finally {
       setLoading(false)
     }
-  }, [isPro, dogId, session?.access_token])
+  }, [isPro, dogId, session?.user?.id])
 
   useEffect(() => {
     void reload()
   }, [reload])
 
   async function toggle(id: string, active: boolean) {
-    if (!session?.access_token) return
+    if (!session?.user?.id) return
     setItems((prev) => prev.map((x) => (x.id === id ? { ...x, active } : x)))
-    const res = await apiFetch('/api/training/custom', session.access_token, {
+    const res = await apiFetch('/api/training/custom', {
       method: 'PATCH',
       body: JSON.stringify({ id, active }),
     })

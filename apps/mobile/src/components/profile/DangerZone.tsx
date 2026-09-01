@@ -18,14 +18,13 @@ export function DangerZone({ email }: Props) {
   }
 
   function onPrivacy() {
-    const base = webBaseUrl()
-    void Linking.openURL(base ? `${base}/privacy` : 'https://dogvantage.se/privacy')
+    void Linking.openURL(`${webBaseUrl()}/privacy`)
   }
 
   async function deleteAccount() {
-    if (!session?.access_token) return
+    if (!session?.user?.id) return
     try {
-      const res = await apiFetch('/api/account', session.access_token, { method: 'DELETE' })
+      const res = await apiFetch('/api/account', { method: 'DELETE' })
       if (!res.ok) {
         const body = (await res.json().catch(() => null)) as { error?: string } | null
         throw new Error(body?.error ?? `Radering misslyckades (${res.status})`)

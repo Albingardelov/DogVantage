@@ -87,7 +87,7 @@ export default function LogModal() {
 
   const canSubmit =
     !!dog?.id &&
-    !!session?.access_token &&
+    !!session?.user?.id &&
     selectedExercises.length >= 1 &&
     focus >= 1 &&
     obedience >= 1 &&
@@ -95,7 +95,7 @@ export default function LogModal() {
     !saving
 
   async function onSubmit() {
-    if (!canSubmit || !dog?.id || !session?.access_token || !quick) return
+    if (!canSubmit || !dog?.id || !session?.user?.id || !quick) return
     setSaving(true)
     setError(null)
     try {
@@ -111,7 +111,7 @@ export default function LogModal() {
         }
       })
 
-      const res = await apiFetch('/api/logs', session.access_token, {
+      const res = await apiFetch('/api/logs', {
         method: 'POST',
         body: JSON.stringify({
           dogId: dog.id,

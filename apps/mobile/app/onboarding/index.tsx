@@ -114,7 +114,7 @@ export default function OnboardingScreen() {
           trainingBackground: background,
         },
       })
-      await ensureTrialForSession(session.access_token)
+      await ensureTrialForSession()
       await refreshDogs()
       router.replace('/(tabs)/dashboard')
     } catch (e) {

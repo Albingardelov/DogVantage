@@ -9,6 +9,7 @@ import type {
   TrainingGoal,
 } from '@dogvantage/core'
 import { supabase } from '@/lib/supabase'
+import { apiFetch } from '@/lib/api/client'
 
 export const GOAL_OPTIONS: { value: TrainingGoal; label: string }[] = [
   { value: 'everyday_obedience', label: 'Vardagslydnad' },
@@ -139,21 +140,12 @@ export async function updateDogProfile(fields: {
   if (error) throw new Error(error.message || 'Kunde inte spara profilen')
 }
 
-export async function ensureTrialForSession(accessToken: string): Promise<void> {
-  const base =
-    process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '') ||
-    process.env.EXPO_PUBLIC_APP_URL?.replace(/\/$/, '') ||
-    ''
-  if (!base) return
+export async function ensureTrialForSession(): Promise<boolean> {
   try {
-    await fetch(`${base}/api/billing/ensure-trial`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-    })
+    const res = await apiFetch('/api/billing/ensure-trial', { method: 'POST' })
+    return res.ok
   } catch (e) {
     console.warn('[ensureTrialForSession]', e)
+    return false
   }
 }

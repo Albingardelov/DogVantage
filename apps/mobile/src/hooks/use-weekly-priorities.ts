@@ -10,7 +10,7 @@ export function useWeeklyPriorities(dogId: string | undefined) {
   const [loading, setLoading] = useState(true)
 
   const reload = useCallback(async () => {
-    if (!session?.access_token || !dogId) {
+    if (!session?.user?.id || !dogId) {
       setPriorityIds([])
       setIsoWeek(null)
       setLoading(false)
@@ -20,7 +20,6 @@ export function useWeeklyPriorities(dogId: string | undefined) {
     try {
       const res = await apiFetch(
         `/api/training/focus?dogId=${encodeURIComponent(dogId)}`,
-        session.access_token,
       )
       if (!res.ok) return
       const data = (await res.json()) as { exerciseIds?: string[]; isoWeek?: string }
@@ -29,7 +28,7 @@ export function useWeeklyPriorities(dogId: string | undefined) {
     } finally {
       setLoading(false)
     }
-  }, [session?.access_token, dogId])
+  }, [session?.user?.id, dogId])
 
   useEffect(() => {
     void reload()
@@ -37,10 +36,10 @@ export function useWeeklyPriorities(dogId: string | undefined) {
 
   const persist = useCallback(
     async (next: string[]) => {
-      if (!session?.access_token || !dogId) return
+      if (!session?.user?.id || !dogId) return
       const capped = next.slice(0, MAX_WEEKLY_PRIORITY_EXERCISES)
       setPriorityIds(capped)
-      const res = await apiFetch('/api/training/focus', session.access_token, {
+      const res = await apiFetch('/api/training/focus', {
         method: 'PUT',
         body: JSON.stringify({ dogId, exerciseIds: capped }),
       })
@@ -52,7 +51,7 @@ export function useWeeklyPriorities(dogId: string | undefined) {
         await reload()
       }
     },
-    [session?.access_token, dogId, reload],
+    [session?.user?.id, dogId, reload],
   )
 
   const togglePriority = useCallback(

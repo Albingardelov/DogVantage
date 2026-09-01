@@ -18,7 +18,7 @@ export function useMicroLesson(dogId: string | undefined, enabled: boolean) {
   const [loading, setLoading] = useState(false)
 
   const reload = useCallback(async () => {
-    if (!session?.access_token || !dogId || !enabled) {
+    if (!session?.user?.id || !dogId || !enabled) {
       setLesson(null)
       return
     }
@@ -31,7 +31,6 @@ export function useMicroLesson(dogId: string | undefined, enabled: boolean) {
     try {
       const res = await apiFetch(
         `/api/training/micro-lesson?dogId=${encodeURIComponent(dogId)}&locale=sv`,
-        session.access_token,
       )
       if (!res.ok) {
         setLesson(null)
@@ -44,7 +43,7 @@ export function useMicroLesson(dogId: string | undefined, enabled: boolean) {
     } finally {
       setLoading(false)
     }
-  }, [session?.access_token, dogId, enabled])
+  }, [session?.user?.id, dogId, enabled])
 
   useEffect(() => {
     void reload()

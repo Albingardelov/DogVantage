@@ -29,7 +29,7 @@ export function useChat() {
   const [errorBanner, setErrorBanner] = useState<string | null>(null)
 
   const load = useCallback(async () => {
-    if (!session?.access_token) return
+    if (!session?.user?.id) return
     setBooting(true)
     setErrorBanner(null)
     try {
@@ -41,7 +41,6 @@ export function useChat() {
       }
       const res = await apiFetch(
         `/api/chat/history?dogId=${encodeURIComponent(active.id)}`,
-        session.access_token,
       )
       if (res.status === 401) {
         setErrorBanner('Sessionen har gått ut — logga in igen.')
@@ -67,7 +66,7 @@ export function useChat() {
     } finally {
       setBooting(false)
     }
-  }, [session?.access_token])
+  }, [session?.user?.id])
 
   useEffect(() => {
     void load()
@@ -76,14 +75,14 @@ export function useChat() {
   const send = useCallback(
     async (raw: string) => {
       const query = raw.trim()
-      if (!query || !session?.access_token || !dog?.id || loading) return
+      if (!query || !session?.user?.id || !dog?.id || loading) return
 
       setLoading(true)
       setErrorBanner(null)
       setMessages((prev) => [...prev, { role: 'user', content: query }])
 
       try {
-        const res = await apiFetch('/api/chat', session.access_token, {
+        const res = await apiFetch('/api/chat', {
           method: 'POST',
           body: JSON.stringify({
             query,
@@ -154,7 +153,7 @@ export function useChat() {
         setLoading(false)
       }
     },
-    [session?.access_token, dog?.id, loading],
+    [session?.user?.id, dog?.id, loading],
   )
 
   const retry = useCallback(

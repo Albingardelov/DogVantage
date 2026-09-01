@@ -86,22 +86,38 @@ export function useAssessment() {
 
   const patchMetrics = useCallback(
     async (exerciseId: string, patch: Partial<DailyExerciseMetrics>) => {
-      if (!session?.access_token || !dog?.id) return
-      setMetrics((prev) => ({
-        ...prev,
-        [exerciseId]: { ...(prev[exerciseId] ?? emptyMetrics()), ...patch },
-      }))
-      await apiFetch('/api/training/metrics', session.access_token, {
-        method: 'PATCH',
-        body: JSON.stringify({
-          date: todayDateKey(),
-          dogId: dog.id,
-          exerciseId,
-          patch,
-        }),
-      }).catch((e) => console.warn('[assessment patchMetrics]', e))
+      if (!session?.user?.id || !dog?.id) return
+      let previous: DailyExerciseMetrics | undefined
+      setMetrics((prev) => {
+        previous = prev[exerciseId]
+        return {
+          ...prev,
+          [exerciseId]: { ...(prev[exerciseId] ?? emptyMetrics()), ...patch },
+        }
+      })
+      try {
+        const res = await apiFetch('/api/training/metrics', {
+          method: 'PATCH',
+          body: JSON.stringify({
+            date: todayDateKey(),
+            dogId: dog.id,
+            exerciseId,
+            patch,
+          }),
+        })
+        if (!res.ok) throw new Error('save_failed')
+      } catch (e) {
+        console.warn('[assessment patchMetrics]', e)
+        setMetrics((prev) => {
+          const next = { ...prev }
+          if (previous) next[exerciseId] = previous
+          else delete next[exerciseId]
+          return next
+        })
+        setError('Kunde inte spara svaret. Kontrollera anslutningen och försök igen.')
+      }
     },
-    [session?.access_token, dog?.id],
+    [session?.user?.id, dog?.id],
   )
 
   const logOutcome = useCallback(

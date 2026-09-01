@@ -10,7 +10,7 @@ export function useSkillProgress(dogId: string | undefined, weeks = 8) {
   const [error, setError] = useState<string | null>(null)
 
   const reload = useCallback(async () => {
-    if (!session?.access_token || !dogId) {
+    if (!session?.user?.id || !dogId) {
       setExercises([])
       setLoading(false)
       return
@@ -20,7 +20,6 @@ export function useSkillProgress(dogId: string | undefined, weeks = 8) {
     try {
       const res = await apiFetch(
         `/api/training/skill-progress?dogId=${encodeURIComponent(dogId)}&weeks=${weeks}`,
-        session.access_token,
       )
       if (!res.ok) throw new Error('Kunde inte hämta färdigheter')
       const data = (await res.json()) as { exercises?: SkillProgress[] }
@@ -31,7 +30,7 @@ export function useSkillProgress(dogId: string | undefined, weeks = 8) {
     } finally {
       setLoading(false)
     }
-  }, [session?.access_token, dogId, weeks])
+  }, [session?.user?.id, dogId, weeks])
 
   useEffect(() => {
     void reload()

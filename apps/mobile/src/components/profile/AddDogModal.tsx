@@ -66,7 +66,7 @@ export function AddDogModal({ visible, onClose, onCreated }: Props) {
           trainingBackground: 'some_training',
         },
       })
-      await ensureTrialForSession(session.access_token)
+      await ensureTrialForSession()
       await refreshDogs()
       setName('')
       setBreed('')

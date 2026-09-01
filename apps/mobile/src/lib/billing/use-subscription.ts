@@ -61,13 +61,13 @@ export function useSubscription() {
   const [loading, setLoading] = useState(true)
 
   const refresh = useCallback(async () => {
-    if (!session?.access_token || !user?.id) {
+    if (!session?.user?.id || !user?.id) {
       setState(null)
       setLoading(false)
       return
     }
     try {
-      const res = await apiFetch('/api/billing/me', session.access_token)
+      const res = await apiFetch('/api/billing/me')
       if (!res.ok) {
         setState(null)
         return
@@ -81,7 +81,7 @@ export function useSubscription() {
     } finally {
       setLoading(false)
     }
-  }, [session?.access_token, user?.id])
+  }, [session?.user?.id, user?.id])
 
   useEffect(() => {
     let cancelled = false

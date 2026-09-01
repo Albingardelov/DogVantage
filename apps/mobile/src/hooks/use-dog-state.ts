@@ -9,7 +9,7 @@ export function useDogState(dogId: string | undefined) {
   const [summary, setSummary] = useState<string | null>(null)
 
   const reload = useCallback(async () => {
-    if (!session?.access_token || !dogId) {
+    if (!session?.user?.id || !dogId) {
       setState(null)
       setSummary(null)
       return
@@ -17,7 +17,6 @@ export function useDogState(dogId: string | undefined) {
     try {
       const res = await apiFetch(
         `/api/training/dog-state?dogId=${encodeURIComponent(dogId)}`,
-        session.access_token,
       )
       if (!res.ok) {
         setState(null)
@@ -38,7 +37,7 @@ export function useDogState(dogId: string | undefined) {
       setState(null)
       setSummary(null)
     }
-  }, [session?.access_token, dogId])
+  }, [session?.user?.id, dogId])
 
   useEffect(() => {
     void reload()

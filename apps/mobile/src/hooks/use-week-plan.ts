@@ -25,7 +25,7 @@ export function useWeekPlan() {
   const [referral, setReferral] = useState<string | null>(null)
 
   const reload = useCallback(async () => {
-    if (!session?.access_token) return
+    if (!session?.user?.id) return
     setLoading(true)
     setError(null)
     setReferral(null)
@@ -38,7 +38,7 @@ export function useWeekPlan() {
         setError('Ingen hundprofil hittades.')
         return
       }
-      const res = await apiFetch(buildWeekPlanPath(active), session.access_token)
+      const res = await apiFetch(buildWeekPlanPath(active))
       if (res.status === 422) {
         const body = (await res.json()) as { error?: string; referral?: string }
         setReferral(body.referral ?? body.error ?? 'behavior_referral')
@@ -60,7 +60,7 @@ export function useWeekPlan() {
     } finally {
       setLoading(false)
     }
-  }, [session?.access_token])
+  }, [session?.user?.id])
 
   useEffect(() => {
     void reload()

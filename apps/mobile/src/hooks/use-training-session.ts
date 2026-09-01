@@ -26,7 +26,7 @@ export function useTrainingSession() {
   const dogStateApi = useDogState(dog?.id)
 
   const reload = useCallback(async () => {
-    if (!session?.access_token) return
+    if (!session?.user?.id) return
     setLoading(true)
     setError(null)
     setReferral(null)
@@ -45,9 +45,9 @@ export function useTrainingSession() {
       const date = todayDateKey()
       const dogId = encodeURIComponent(active.id)
       const [weekRes, progressRes, metricsRes] = await Promise.all([
-        apiFetch(buildWeekPlanPath(active), session.access_token),
-        apiFetch(`/api/training/progress?date=${date}&dogId=${dogId}`, session.access_token),
-        apiFetch(`/api/training/metrics?date=${date}&dogId=${dogId}`, session.access_token),
+        apiFetch(buildWeekPlanPath(active)),
+        apiFetch(`/api/training/progress?date=${date}&dogId=${dogId}`),
+        apiFetch(`/api/training/metrics?date=${date}&dogId=${dogId}`),
       ])
 
       if (weekRes.status === 422) {
@@ -79,7 +79,7 @@ export function useTrainingSession() {
     } finally {
       setLoading(false)
     }
-  }, [session?.access_token])
+  }, [session?.user?.id])
 
   useEffect(() => {
     void reload()
@@ -109,7 +109,7 @@ export function useTrainingSession() {
 
   const patchRep = useCallback(
     async (exercise: Exercise, kind: 'success' | 'fail') => {
-      if (!session?.access_token || !dog?.id) return
+      if (!session || !dog?.id) return
       const done = progress[exercise.id] ?? 0
       if (done >= exercise.reps) return
 
@@ -125,21 +125,28 @@ export function useTrainingSession() {
       setMetrics((m) => ({ ...m, [exercise.id]: nextMetrics }))
 
       const date = todayDateKey()
-      const token = session.access_token
       const dogId = dog.id
 
-      await Promise.all([
-        apiFetch('/api/training/metrics', token, {
-          method: 'PATCH',
-          body: JSON.stringify({ date, dogId, exerciseId: exercise.id, patch }),
-        }),
-        apiFetch('/api/training/progress', token, {
-          method: 'PATCH',
-          body: JSON.stringify({ date, dogId, exerciseId: exercise.id, count: newDone }),
-        }),
-      ]).catch((e) => console.warn('[patchRep]', e))
+      try {
+        const [metricsRes, progressRes] = await Promise.all([
+          apiFetch('/api/training/metrics', {
+            method: 'PATCH',
+            body: JSON.stringify({ date, dogId, exerciseId: exercise.id, patch }),
+          }),
+          apiFetch('/api/training/progress', {
+            method: 'PATCH',
+            body: JSON.stringify({ date, dogId, exerciseId: exercise.id, count: newDone }),
+          }),
+        ])
+        if (!metricsRes.ok || !progressRes.ok) throw new Error('save_failed')
+      } catch (e) {
+        console.warn('[patchRep]', e)
+        setProgress((p) => ({ ...p, [exercise.id]: done }))
+        setMetrics((m) => ({ ...m, [exercise.id]: current }))
+        setError('Kunde inte spara passet. Kontrollera anslutningen och försök igen.')
+      }
     },
-    [session?.access_token, dog?.id, progress, metrics],
+    [session, dog?.id, progress, metrics],
   )
 
   const logSuccess = useCallback((ex: Exercise) => patchRep(ex, 'success'), [patchRep])

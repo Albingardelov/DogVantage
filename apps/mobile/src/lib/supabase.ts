@@ -2,7 +2,7 @@ import 'react-native-url-polyfill/auto'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createClient } from '@supabase/supabase-js'
 import * as SecureStore from 'expo-secure-store'
-import { Platform } from 'react-native'
+import { AppState, Platform } from 'react-native'
 
 /**
  * SecureStore has a ~2048 byte value limit on some platforms.
@@ -41,3 +41,15 @@ export const supabase = createClient(url ?? '', anonKey ?? '', {
     detectSessionInUrl: false,
   },
 })
+
+// Supabase-timern för token-refresh måste kopplas till app-livscykeln i RN,
+// annars sover den i bakgrunden och access-token hinner gå ut.
+if (Platform.OS !== 'web') {
+  AppState.addEventListener('change', (state) => {
+    if (state === 'active') {
+      void supabase.auth.startAutoRefresh()
+    } else {
+      void supabase.auth.stopAutoRefresh()
+    }
+  })
+}

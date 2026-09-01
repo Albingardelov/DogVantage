@@ -19,14 +19,13 @@ export function useHeat(dog: ActiveDog | null) {
   const eligible = heatEligible(dog)
 
   const reload = useCallback(async () => {
-    if (!session?.access_token || !dog?.id || !eligible) {
+    if (!session?.user?.id || !dog?.id || !eligible) {
       setHeat(null)
       return
     }
     try {
       const res = await apiFetch(
         `/api/training/heat?dogId=${encodeURIComponent(dog.id)}`,
-        session.access_token,
       )
       if (!res.ok) {
         setHeat(null)
@@ -40,34 +39,32 @@ export function useHeat(dog: ActiveDog | null) {
     } catch {
       setHeat(null)
     }
-  }, [session?.access_token, dog?.id, eligible])
+  }, [session?.user?.id, dog?.id, eligible])
 
   useEffect(() => {
     void reload()
   }, [reload])
 
   const start = useCallback(async () => {
-    if (!session?.access_token || !dog?.id || !eligible) return
+    if (!session?.user?.id || !dog?.id || !eligible) return
     setBusy(true)
     try {
       const res = await apiFetch(
         `/api/training/heat?dogId=${encodeURIComponent(dog.id)}`,
-        session.access_token,
         { method: 'POST', body: JSON.stringify({ dogId: dog.id }) },
       )
       if (res.ok) setHeat({ isInHeat: true, skenfasActive: false })
     } finally {
       setBusy(false)
     }
-  }, [session?.access_token, dog?.id, eligible])
+  }, [session?.user?.id, dog?.id, eligible])
 
   const end = useCallback(async () => {
-    if (!session?.access_token || !dog?.id || !eligible) return
+    if (!session?.user?.id || !dog?.id || !eligible) return
     setBusy(true)
     try {
       const res = await apiFetch(
         `/api/training/heat?dogId=${encodeURIComponent(dog.id)}`,
-        session.access_token,
         { method: 'DELETE', body: JSON.stringify({ dogId: dog.id }) },
       )
       if (res.ok) {
@@ -77,7 +74,7 @@ export function useHeat(dog: ActiveDog | null) {
     } finally {
       setBusy(false)
     }
-  }, [session?.access_token, dog?.id, eligible])
+  }, [session?.user?.id, dog?.id, eligible])
 
   return { eligible, heat, busy, reload, start, end }
 }
