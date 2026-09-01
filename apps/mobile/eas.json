@@ -4,17 +4,27 @@
     "appVersionSource": "remote"
   },
   "build": {
+    "base": {
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://ovsstecpricoqptsfupg.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92c3N0ZWNwcmljb3FwdHNmdXBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0NDU3ODksImV4cCI6MjA5MzAyMTc4OX0.svVxg2tEqzxnyDll6ypj4sADNA82rlEm_1toWaeIv70",
+        "EXPO_PUBLIC_WEB_URL": "https://dog-vantage.vercel.app"
+      }
+    },
     "development": {
+      "extends": "base",
       "developmentClient": true,
       "distribution": "internal"
     },
     "preview": {
+      "extends": "base",
       "distribution": "internal",
       "android": {
         "buildType": "apk"
       }
     },
     "production": {
+      "extends": "base",
       "autoIncrement": true
     }
   },

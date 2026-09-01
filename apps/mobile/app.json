@@ -41,16 +41,18 @@
             "buildToolsVersion": "35.0.0"
           },
           "ios": {
-            "deploymentTarget": "15.1"
+            "deploymentTarget": "16.4"
           }
         }
       ]
     ],
     "extra": {
-      "privacyPolicyUrl": "https://dogvantage.se/privacy",
+      "privacyPolicyUrl": "https://dog-vantage.vercel.app/privacy",
+      "router": {},
       "eas": {
-        "projectId": "REPLACE_WITH_EAS_PROJECT_ID"
+        "projectId": "f00d81af-8f0d-47f1-8d9b-3e2ec5934ae0"
       }
-    }
+    },
+    "owner": "albingardelov"
   }
 }
