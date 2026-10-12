@@ -27,7 +27,7 @@ import { useExerciseHistory } from './use-exercise-history'
 import { exerciseMaturity } from './maturity'
 import { useDayCheckIn } from './use-day-checkin'
 import DayCheckInCard from './DayCheckInCard'
-import { buildExerciseSummaries, emptyMetrics } from './exercise-helpers'
+import { buildExerciseSummaries, emptyMetrics, successRatePercent } from './exercise-helpers'
 import { NextBanner, LoadingIndicator, ReferralCard, RestDay, ChevronRight, DayComplete } from './parts'
 import DayProgressBar from './DayProgressBar'
 import TrainingOnboarding from './TrainingOnboarding'
@@ -115,7 +115,9 @@ export default function TrainingCard(props: Props) {
 
   const allComplete = !loading && todayExercises.length > 0 &&
     todayExercises.every((e) => (progress[e.id] ?? 0) >= e.reps)
-  const dayRate = repsDone > 0 && repsPlanned > 0 ? Math.round((repsDone / repsPlanned) * 100) : null
+  const daySuccesses = todayExercises.reduce((sum, e) => sum + (metrics[e.id]?.success_count ?? 0), 0)
+  const dayFails = todayExercises.reduce((sum, e) => sum + (metrics[e.id]?.fail_count ?? 0), 0)
+  const dayRate = successRatePercent(daySuccesses, dayFails)
 
   const checklistItems = useMemo(() => {
     if (todayExercises.length === 0) return undefined

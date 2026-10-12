@@ -6,6 +6,7 @@ import { IconCheckCircle, IconConfetti, IconMedal, RatingIcon } from '@/componen
 import { CoachTipSchema } from '@/types/api/schemas'
 import type { z } from 'zod'
 import type { ExerciseSummary, QuickRating } from '@/types'
+import { successRatePercent } from './TrainingCard/exercise-helpers'
 import styles from './SessionLogForm.module.css'
 
 type CoachTip = z.infer<typeof CoachTipSchema>
@@ -100,9 +101,12 @@ function Stepper({
 function computeHeroStats(exercises?: ExerciseSummary[]) {
   if (!exercises || exercises.length === 0) return { rate: null, count: 0, reps: 0 }
   const totalSuccess = exercises.reduce((s, e) => s + e.success_count, 0)
-  const totalAttempts = exercises.reduce((s, e) => s + e.success_count + e.fail_count, 0)
-  const rate = totalAttempts > 0 ? Math.round((totalSuccess / totalAttempts) * 100) : null
-  return { rate, count: exercises.length, reps: totalAttempts }
+  const totalFail = exercises.reduce((s, e) => s + e.fail_count, 0)
+  return {
+    rate: successRatePercent(totalSuccess, totalFail),
+    count: exercises.length,
+    reps: totalSuccess + totalFail,
+  }
 }
 
 export default function SessionLogForm({ dogId, weekNumber, exercises, onSaved, onCancel }: Props) {

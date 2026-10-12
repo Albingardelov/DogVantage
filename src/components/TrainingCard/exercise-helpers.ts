@@ -9,6 +9,12 @@ export function emptyMetrics(): DailyExerciseMetrics {
   }
 }
 
+/** Share of logged attempts that succeeded, or null when nothing has been attempted. */
+export function successRatePercent(successes: number, fails: number): number | null {
+  const attempts = successes + fails
+  return attempts > 0 ? Math.round((successes / attempts) * 100) : null
+}
+
 export function buildExerciseSummaries(
   exercises: Exercise[],
   metrics: Record<string, DailyExerciseMetrics>,
