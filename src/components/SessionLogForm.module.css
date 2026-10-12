@@ -207,6 +207,12 @@
 }
 
 .submitBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.saveError {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-error);
+}
 .submitBtn:active:not(:disabled) { transform: scale(0.98); }
 
 /* ── Cancel button ────────────────────────────────────────── */

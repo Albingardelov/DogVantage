@@ -118,6 +118,7 @@ export default function SessionLogForm({ dogId, weekNumber, exercises, onSaved, 
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [coachTip, setCoachTip] = useState<CoachTip | null>(null)
+  const [saveFailed, setSaveFailed] = useState(false)
 
   const { rate, count, reps } = computeHeroStats(exercises)
 
@@ -125,6 +126,7 @@ export default function SessionLogForm({ dogId, weekNumber, exercises, onSaved, 
     e.preventDefault()
     if (!rating) return
     setSaving(true)
+    setSaveFailed(false)
     try {
       let combinedNotes = notes.trim()
       if (nextSession) {
@@ -154,6 +156,11 @@ export default function SessionLogForm({ dogId, weekNumber, exercises, onSaved, 
         }),
       })
 
+      if (!res.ok) {
+        setSaveFailed(true)
+        return
+      }
+
       let tip: CoachTip | null = null
       try {
         const body = await res.json()
@@ -165,6 +172,8 @@ export default function SessionLogForm({ dogId, weekNumber, exercises, onSaved, 
       setSaved(true)
       // With a coach tip the user closes manually; otherwise auto-close.
       if (!tip) setTimeout(() => onSaved(), 1200)
+    } catch {
+      setSaveFailed(true)
     } finally {
       setSaving(false)
     }
@@ -303,6 +312,11 @@ export default function SessionLogForm({ dogId, weekNumber, exercises, onSaved, 
         <button type="button" onClick={onCancel} className={styles.cancelBtn} disabled={saving}>
           Avbryt
         </button>
+      )}
+      {saveFailed && (
+        <p role="alert" className={styles.saveError}>
+          Passet kunde inte sparas. Dina uppgifter finns kvar, försök igen.
+        </p>
       )}
       <button type="submit" className={styles.submitBtn} disabled={saving || !rating}>
         <IconCheckCircle size="md" /> Spara pass

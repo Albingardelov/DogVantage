@@ -2,6 +2,18 @@ import { getSupabaseAdmin } from './client'
 import type { Breed } from '@/types'
 import type { DailyExerciseMetrics, LatencyBucket } from '@/types'
 
+type MetricsUpsertRow = {
+  dog_id: string
+  breed: Breed
+  date: string
+  exercise_id: string
+  success_count?: number
+  fail_count?: number
+  latency_bucket?: LatencyBucket | null
+  criteria_level_id?: string | null
+  notes?: string | null
+}
+
 type Row = {
   exercise_id: string
   success_count: number
@@ -64,22 +76,21 @@ export async function upsertMetrics(
   exerciseId: string,
   patch: Partial<DailyExerciseMetrics>
 ): Promise<void> {
+  const row: MetricsUpsertRow = {
+    dog_id: dogId,
+    breed,
+    date,
+    exercise_id: exerciseId,
+  }
+  if ('success_count' in patch) row.success_count = patch.success_count
+  if ('fail_count' in patch) row.fail_count = patch.fail_count
+  if ('latency_bucket' in patch) row.latency_bucket = patch.latency_bucket ?? null
+  if ('criteria_level_id' in patch) row.criteria_level_id = patch.criteria_level_id ?? null
+  if ('notes' in patch) row.notes = patch.notes ?? null
+
   const { error } = await getSupabaseAdmin()
     .from('daily_exercise_metrics')
-    .upsert(
-      {
-        dog_id: dogId,
-        breed,
-        date,
-        exercise_id: exerciseId,
-        success_count: patch.success_count,
-        fail_count: patch.fail_count,
-        latency_bucket: patch.latency_bucket ?? null,
-        criteria_level_id: patch.criteria_level_id ?? null,
-        notes: patch.notes ?? null,
-      },
-      { onConflict: 'dog_id,breed,date,exercise_id' }
-    )
+    .upsert(row, { onConflict: 'dog_id,breed,date,exercise_id' })
 
   if (error) throw new Error(`Metrics upsert failed: ${error.message}`)
 }
