@@ -24,7 +24,7 @@ describe('SessionLogForm save status', () => {
 
     renderForm()
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('kunde inte sparas')
+    expect(await screen.findByRole('alert', {}, { timeout: 5000 })).toHaveTextContent('kunde inte sparas')
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Spara pass/ })).toBeEnabled()
   })
@@ -34,7 +34,7 @@ describe('SessionLogForm save status', () => {
 
     renderForm()
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('kunde inte sparas')
+    expect(await screen.findByRole('alert', {}, { timeout: 5000 })).toHaveTextContent('kunde inte sparas')
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
 

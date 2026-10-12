@@ -28,6 +28,7 @@ import { exerciseMaturity } from './maturity'
 import { useDayCheckIn } from './use-day-checkin'
 import DayCheckInCard from './DayCheckInCard'
 import { buildExerciseSummaries, emptyMetrics, successRatePercent } from './exercise-helpers'
+import { useTrainingWrite } from './use-training-write'
 import { NextBanner, LoadingIndicator, ReferralCard, RestDay, ChevronRight, DayComplete } from './parts'
 import DayProgressBar from './DayProgressBar'
 import TrainingOnboarding from './TrainingOnboarding'
@@ -62,6 +63,7 @@ export default function TrainingCard(props: Props) {
   const practicedExercises = useExerciseHistory(dogId)
   const { checkIn, loaded: checkInLoaded, save: saveDayCheckIn } = useDayCheckIn(dogId, todayDate)
   const [checkInDismissed, setCheckInDismissed] = useState(false)
+  const { writeFailed, saveTrainingWrite } = useTrainingWrite()
 
   const [sessionGuard, setSessionGuard] = useState<Record<string, SessionGuard>>({})
   const [showWeekView, setShowWeekView] = useState(false)
@@ -230,11 +232,7 @@ export default function TrainingCard(props: Props) {
       todayExercises.every((e) => (newProgress[e.id] ?? 0) >= e.reps)
     if (allDone) setShowLogForm(true)
 
-    fetch('/api/training/progress', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date: todayDate, dogId, exerciseId, count }),
-    }).catch(console.error)
+    saveTrainingWrite('/api/training/progress', { date: todayDate, dogId, exerciseId, count })
   }
 
   function handleRepClick(exerciseId: string, currentDone: number, maxReps: number) {
@@ -253,11 +251,7 @@ export default function TrainingCard(props: Props) {
       [exerciseId]: { ...(prev[exerciseId] ?? emptyMetrics()), ...patch },
     }))
 
-    fetch('/api/training/metrics', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date: todayDate, dogId, exerciseId, patch }),
-    }).catch(console.error)
+    saveTrainingWrite('/api/training/metrics', { date: todayDate, dogId, exerciseId, patch })
   }
 
   function handleSwap(originalIdx: number) {
@@ -357,6 +351,9 @@ export default function TrainingCard(props: Props) {
 
         {loading && <LoadingIndicator />}
         {!loading && error && <p className={styles.errorMsg}>Kunde inte hämta träningsplan. Försök igen.</p>}
+        {writeFailed && (
+          <p role="alert" className={styles.errorMsg}>Kunde inte spara ändringen. Kontrollera anslutningen och försök igen.</p>
+        )}
         {!loading && referral && <ReferralCard text={referral} />}
         {!loading && todayPlan?.rest && <RestDay />}
 
