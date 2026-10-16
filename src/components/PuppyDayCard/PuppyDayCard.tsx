@@ -15,6 +15,7 @@ import { getLifeStage } from '@/lib/dog/age'
 import { useExerciseSources } from '../TrainingCard/use-exercise-sources'
 import { advanceGuard, EMPTY_GUARD, type SessionGuard } from '@/lib/training/session-coach'
 import { buildExerciseSummaries, emptyMetrics, incrementedCountPatch } from '../TrainingCard/exercise-helpers'
+import { useTrainingWrite } from '../TrainingCard/use-training-write'
 import { usePuppyDay } from './use-puppy-day'
 import SessionLogForm from '@/components/SessionLogForm'
 import type { Breed, DailyExerciseMetrics, HouseholdPet, RewardPreference, TrainingEnvironment, TrainingGoal } from '@/types'
@@ -51,6 +52,7 @@ export default function PuppyDayCard(props: Props) {
 
   const { zone, exercises, progress, metrics, loading, error, saveZone, setProgress, setMetrics } =
     usePuppyDay({ ...props, todayDate })
+  const { writeFailed, saveTrainingWrite } = useTrainingWrite()
 
   const exerciseIds = useMemo(() => exercises.map((e) => e.id), [exercises])
   const exerciseSources = useExerciseSources(dogId, exerciseIds)
@@ -85,11 +87,7 @@ export default function PuppyDayCard(props: Props) {
     const newProgress = { ...progress, [exerciseId]: count }
     setProgress(newProgress)
     if (exercises.every((e) => (newProgress[e.id] ?? 0) >= e.reps)) setShowLogForm(true)
-    fetch('/api/training/progress', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date: todayDate, dogId, exerciseId, count }),
-    }).catch(console.error)
+    saveTrainingWrite('/api/training/progress', { date: todayDate, dogId, exerciseId, count })
   }
 
   function handleRepClick(exerciseId: string, currentDone: number, maxReps: number) {
@@ -106,11 +104,7 @@ export default function PuppyDayCard(props: Props) {
       ...prev,
       [exerciseId]: { ...(prev[exerciseId] ?? emptyMetrics()), ...patch },
     }))
-    fetch('/api/training/metrics', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date: todayDate, dogId, exerciseId, patch }),
-    }).catch(console.error)
+    saveTrainingWrite('/api/training/metrics', { date: todayDate, dogId, exerciseId, patch })
   }
 
   if (loading) {
@@ -172,6 +166,9 @@ export default function PuppyDayCard(props: Props) {
         <DayProgressBar repsDone={repsDone} repsPlanned={repsPlanned} isRestDay={false} />
 
         {error && <p className={styles.errorMsg}>Kunde inte hämta träningsplan. Försök igen.</p>}
+        {writeFailed && (
+          <p role="alert" className={styles.errorMsg}>Kunde inte spara ändringen. Kontrollera anslutningen och försök igen.</p>
+        )}
 
         {exercises.length > 0 && (
           <div className={styles.exercises}>

@@ -35,6 +35,26 @@ describe('useTrainingWrite', () => {
     await waitFor(() => expect(result.current.writeFailed).toBe(true))
   })
 
+  it('sends a later write only after the earlier one has completed', async () => {
+    let finishFirst: (value: { ok: boolean }) => void = () => {}
+    const fetchMock = vi
+      .fn()
+      .mockImplementationOnce(() => new Promise((resolve) => { finishFirst = resolve }))
+      .mockResolvedValueOnce({ ok: true })
+    vi.stubGlobal('fetch', fetchMock)
+    const { result } = renderHook(() => useTrainingWrite())
+
+    act(() => {
+      result.current.saveTrainingWrite('/api/training/metrics', { patch: { success_count: 1 } })
+      result.current.saveTrainingWrite('/api/training/metrics', { patch: { success_count: 2 } })
+    })
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1))
+    await act(async () => finishFirst({ ok: true }))
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2))
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({ patch: { success_count: 2 } })
+  })
+
   it('clears the flag when a later write succeeds', async () => {
     const fetchMock = vi
       .fn()
