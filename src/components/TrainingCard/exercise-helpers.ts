@@ -9,6 +9,16 @@ export function emptyMetrics(): DailyExerciseMetrics {
   }
 }
 
+/** Patch that adds one to a count, based on the latest known metrics for the exercise. */
+export function incrementedCountPatch(
+  current: DailyExerciseMetrics | null,
+  field: 'success_count' | 'fail_count',
+): Partial<DailyExerciseMetrics> {
+  return field === 'success_count'
+    ? { success_count: (current?.success_count ?? 0) + 1 }
+    : { fail_count: (current?.fail_count ?? 0) + 1 }
+}
+
 /** Share of logged attempts that succeeded, or null when nothing has been attempted. */
 export function successRatePercent(successes: number, fails: number): number | null {
   const attempts = successes + fails

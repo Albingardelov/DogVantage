@@ -35,6 +35,7 @@ interface Props {
   advanceThresholdDelta?: number
   onEndExercise?: () => void
   onMetricsPatch: (patch: Partial<DailyExerciseMetrics>) => void
+  onIncrement: (field: 'success_count' | 'fail_count') => void
   ageWeeks?: number
   /** Primär "nästa övning" i dagens pass (visuell ram, ej samma som rep-prickarnas nästa) */
   sessionNext?: boolean
@@ -144,6 +145,7 @@ export default function ExerciseRow({
   advanceThresholdDelta,
   onEndExercise,
   onMetricsPatch,
+  onIncrement,
   ageWeeks,
   sessionNext: _sessionNext,
   rootId,
@@ -227,7 +229,7 @@ export default function ExerciseRow({
     if (isComplete) return
     setCombo((c) => c + 1)
     spawnFloat('success')
-    onMetricsPatch({ success_count: successCount + 1 })
+    onIncrement('success_count')
     onRepClick()
   }
 
@@ -235,7 +237,7 @@ export default function ExerciseRow({
     if (isComplete) return
     setCombo(0)
     spawnFloat('miss')
-    onMetricsPatch({ fail_count: failCount + 1 })
+    onIncrement('fail_count')
     onRepClick()
   }
 

@@ -1,5 +1,18 @@
 import { describe, it, expect } from 'vitest'
-import { successRatePercent } from './exercise-helpers'
+import { emptyMetrics, incrementedCountPatch, successRatePercent } from './exercise-helpers'
+
+describe('incrementedCountPatch', () => {
+  it('starts from zero when no metrics exist yet', () => {
+    expect(incrementedCountPatch(null, 'success_count')).toEqual({ success_count: 1 })
+    expect(incrementedCountPatch(null, 'fail_count')).toEqual({ fail_count: 1 })
+  })
+
+  it('adds one to the latest known count of the given field only', () => {
+    const current = { ...emptyMetrics(), success_count: 3, fail_count: 7 }
+    expect(incrementedCountPatch(current, 'success_count')).toEqual({ success_count: 4 })
+    expect(incrementedCountPatch(current, 'fail_count')).toEqual({ fail_count: 8 })
+  })
+})
 
 describe('successRatePercent', () => {
   it('is null when nothing has been attempted', () => {

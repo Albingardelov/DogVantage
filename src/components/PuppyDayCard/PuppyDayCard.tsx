@@ -14,7 +14,7 @@ import { resolveLiveCoach } from '@/lib/training/live-coach'
 import { getLifeStage } from '@/lib/dog/age'
 import { useExerciseSources } from '../TrainingCard/use-exercise-sources'
 import { advanceGuard, EMPTY_GUARD, type SessionGuard } from '@/lib/training/session-coach'
-import { buildExerciseSummaries, emptyMetrics } from '../TrainingCard/exercise-helpers'
+import { buildExerciseSummaries, emptyMetrics, incrementedCountPatch } from '../TrainingCard/exercise-helpers'
 import { usePuppyDay } from './use-puppy-day'
 import SessionLogForm from '@/components/SessionLogForm'
 import type { Breed, DailyExerciseMetrics, HouseholdPet, RewardPreference, TrainingEnvironment, TrainingGoal } from '@/types'
@@ -190,6 +190,7 @@ export default function PuppyDayCard(props: Props) {
                   guard={sessionGuard[ex.id] ?? EMPTY_GUARD}
                   onEndExercise={() => commitProgress(ex.id, ex.reps)}
                   onMetricsPatch={(patch) => patchMetrics(ex.id, patch)}
+                  onIncrement={(field) => patchMetrics(ex.id, incrementedCountPatch(m, field))}
                   ageWeeks={ageWeeks}
                   sessionNext={nextExerciseId === ex.id}
                   rootId={nextExerciseId === ex.id ? 'training-session-next' : undefined}

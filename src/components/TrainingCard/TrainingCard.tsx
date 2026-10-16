@@ -27,7 +27,7 @@ import { useExerciseHistory } from './use-exercise-history'
 import { exerciseMaturity } from './maturity'
 import { useDayCheckIn } from './use-day-checkin'
 import DayCheckInCard from './DayCheckInCard'
-import { buildExerciseSummaries, emptyMetrics, successRatePercent } from './exercise-helpers'
+import { buildExerciseSummaries, emptyMetrics, incrementedCountPatch, successRatePercent } from './exercise-helpers'
 import { useTrainingWrite } from './use-training-write'
 import { NextBanner, LoadingIndicator, ReferralCard, RestDay, ChevronRight, DayComplete } from './parts'
 import DayProgressBar from './DayProgressBar'
@@ -385,6 +385,7 @@ export default function TrainingCard(props: Props) {
                   advanceThresholdDelta={dogState?.thresholdAdjustments[ex.id] ?? 0}
                   onEndExercise={() => commitProgress(ex.id, ex.reps)}
                   onMetricsPatch={(patch) => patchMetrics(ex.id, patch)}
+                  onIncrement={(field) => patchMetrics(ex.id, incrementedCountPatch(m, field))}
                   ageWeeks={ageWeeks}
                   sessionNext={nextExerciseId === ex.id}
                   rootId={nextExerciseId === ex.id ? 'training-session-next' : undefined}

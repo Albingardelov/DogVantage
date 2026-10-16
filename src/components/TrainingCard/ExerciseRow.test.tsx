@@ -38,6 +38,7 @@ const base = {
   metrics: null,
   guard: EMPTY_GUARD,
   onMetricsPatch: vi.fn(),
+  onIncrement: vi.fn(),
   ageWeeks: 52,
 }
 
