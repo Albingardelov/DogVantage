@@ -46,3 +46,6 @@ next-env.d.ts
 node_modules
 
 .worktrees/
+
+# third-party source PDFs live in Supabase Storage, see docs/SOURCE-DOCUMENTS.md
+docs/**/*.pdf

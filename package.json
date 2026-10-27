@@ -9,6 +9,8 @@
     "lint": "eslint .",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
+    "docs:pull": "npx tsx scripts/source-docs.ts pull",
+    "docs:push": "npx tsx scripts/source-docs.ts push",
     "ingest:behavior": "npx tsx scripts/ingest-behavior-welfare-docs.ts",
     "ingest:skk": "npx tsx scripts/ingest-skk-rasstandarder.ts",
     "ingest:skk:cleanup": "npx tsx scripts/cleanup-skk-ingest.ts",
