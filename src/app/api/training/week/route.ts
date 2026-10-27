@@ -7,6 +7,8 @@ import {
   getOrGenerateWeekPlan,
 } from '@/lib/training/week-orchestrator'
 
+export const maxDuration = 60
+
 export async function GET(req: NextRequest) {
   return withAuthAndDog(req, async ({ dog, supabase }) => {
     try {

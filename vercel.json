@@ -1,7 +1,0 @@
-{
-  "functions": {
-    "src/app/api/training/route.ts": { "maxDuration": 60 },
-    "src/app/api/chat/route.ts": { "maxDuration": 60 },
-    "src/app/api/ingest/route.ts": { "maxDuration": 120 }
-  }
-}

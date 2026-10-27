@@ -33,6 +33,24 @@ describe('detectHealthIssue', () => {
     expect(detectHealthIssue('Bästa belöningen utomhus?')).toBe(false)
   })
 
+  it('flags English health text', () => {
+    expect(detectHealthIssue('My dog is limping since yesterday')).toBe(true)
+    expect(detectHealthIssue('She has been vomiting all night')).toBe(true)
+    expect(detectHealthIssue('Should I see a vet?')).toBe(true)
+  })
+
+  it('does not fire on keywords inside unrelated words', () => {
+    expect(detectHealthIssue('Hur tränar jag ögonkontakt?')).toBe(false)
+    expect(detectHealthIssue('Vi jobbar med kontakt och kontroll')).toBe(false)
+    expect(detectHealthIssue('Han är sårbar i nya miljöer')).toBe(false)
+    expect(detectHealthIssue('Can we work on loose-leash walking?')).toBe(false)
+  })
+
+  it('matches inflections of stem keywords', () => {
+    expect(detectHealthIssue('Hon kräktes i bilen')).toBe(true)
+    expect(detectHealthIssue('Tassen är svullnad')).toBe(true)
+  })
+
   it('is case-insensitive', () => {
     expect(detectHealthIssue('Hunden HALTAR plötsligt')).toBe(true)
   })
@@ -67,6 +85,12 @@ describe('detectBehaviorEmergency', () => {
     expect(detectBehaviorEmergency('Hur tränar jag sitt?')).toBe(false)
     expect(detectBehaviorEmergency('Hunden är lite skygg mot främlingar')).toBe(false)
     expect(detectBehaviorEmergency('Vill lära henne apportera')).toBe(false)
+  })
+
+  it('flags English behaviour emergencies', () => {
+    expect(detectBehaviorEmergency('He bit my daughter yesterday')).toBe(true)
+    expect(detectBehaviorEmergency('She growls when I touch her bowl')).toBe(true)
+    expect(detectBehaviorEmergency('Severe separation anxiety')).toBe(true)
   })
 
   it('handles null/undefined safely', () => {

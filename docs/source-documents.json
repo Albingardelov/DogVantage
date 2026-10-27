@@ -1,0 +1,368 @@
+[
+  {
+    "path": "docs/134g07-PRE-en.pdf",
+    "bytes": 15183119,
+    "sha256": "ad649584ebd5f00571649269572edb68add7168e5de9dd23f6e82a22ab7c2928",
+    "sourceUrl": "https://www.fci.be/Nomenclature/Education/134g07-PRE-en.pdf"
+  },
+  {
+    "path": "docs/134g07-fr.pdf",
+    "bytes": 278886,
+    "sha256": "9727d19d8df891b41a898099cb3375f2b045837050268e8e4eb0f4abf085dcaa",
+    "sourceUrl": "https://www.fci.be"
+  },
+  {
+    "path": "docs/akc-cgc-10-essential-skills.pdf",
+    "bytes": 923940,
+    "sha256": "42214cf4b4ff4cdde27a0e7cf65c3e93416604442343b6d72c1e3a09332e9cf4",
+    "sourceUrl": "http://images.akc.org/pdf/ebook/CGC2.pdf"
+  },
+  {
+    "path": "docs/akc-cgc-participants-handbook.pdf",
+    "bytes": 2772747,
+    "sha256": "7d29d2ff8ba078c6f6b77ce7e2db5b19e86d400566860e3bdaf213da91fb5df4",
+    "sourceUrl": "https://images.akc.org/pdf/cgc/GK9GC2.pdf"
+  },
+  {
+    "path": "docs/akc-urban-cgc-brochure.pdf",
+    "bytes": 2617163,
+    "sha256": "26fe12f810e8223ec82198cdc633d42e022ad5220ec4c276c3f51be21fc7b8e3",
+    "sourceUrl": "https://images.akc.org/pdf/cgc/urban_cgc_brochure.pdf"
+  },
+  {
+    "path": "docs/anvisningar-working-test-retriever-2024.pdf",
+    "bytes": 404708,
+    "sha256": "7ee0f069c8931475d56c6e88ae100ec76fcd02ed03583cf6da88ee4d987dba00",
+    "sourceUrl": "https://ssrk.se/wp-content/uploads/2023/03/anvisningar-working-test-retriever-2024.pdf"
+  },
+  {
+    "path": "docs/aspca-preventing-separation-anxiety.pdf",
+    "bytes": 106579,
+    "sha256": "17b5d207a89a267a6fb108b8d369941a72d6093ff50417650ab9ffda6e732930",
+    "sourceUrl": "https://aspcapro.org/sites/default/files/behavior-2020-preventing-anxiety.pdf"
+  },
+  {
+    "path": "docs/aspca-treating-separation-anxiety.pdf",
+    "bytes": 144102,
+    "sha256": "3f1e59f9d236aa019547c60ccea3b99a24ff356aa9c596465cc4a8c72ed9efc9",
+    "sourceUrl": "https://aspcapro.org/sites/default/files/behavior-2020-treating-anxiety.pdf"
+  },
+  {
+    "path": "docs/berkeleyhumane-scentwork-intro.pdf",
+    "bytes": 284284,
+    "sha256": "adad84947e4f71b10ccfbb88b46460a97ba4be045f8fa52cbce7bea659846efb",
+    "sourceUrl": "https://berkeleyhumane.org/wp-content/uploads/2021/05/Scentwork-1-E-Book-Combo-1.pdf"
+  },
+  {
+    "path": "docs/bph_informationsbroschyr_a36-komprimerad.pdf",
+    "bytes": 543595,
+    "sha256": "f2d03960154996e38010330e289b14e58ccb5f7f6a9404bef03d4739755b4b7f",
+    "sourceUrl": "https://www.skk.se"
+  },
+  {
+    "path": "docs/braque-francais-de-petite-taille.pdf",
+    "bytes": 337894,
+    "sha256": "bec71ed1a3336c1752ed6e443060873bf3a3db2464605699e4a106a1d8c5c653",
+    "sourceUrl": "https://www.ukcdogs.com"
+  },
+  {
+    "path": "docs/ddfl-fearful-dog.pdf",
+    "bytes": 208362,
+    "sha256": "1cd3dc56384775de7c9465cdc635b72f88efdf466bf9bafb1b499e3cb49728d1",
+    "sourceUrl": "https://upaws.org/wp-content/uploads/2014/12/fearful-dog_0.pdf"
+  },
+  {
+    "path": "docs/dogstrust-teenage-trouble-adolescent.pdf",
+    "bytes": 202335,
+    "sha256": "b2aca9abde1557206309a97fc40866e8829aa1f3310044001519519a5f9f32d9",
+    "sourceUrl": "https://assets.ctfassets.net/2t8dhn7s97w9/39h5qX6CVhhevVfprxThAh/f5f6fde8b98af4a9a70ce3c09f1db4e4/Teenage_Trouble-_Bonding_with_Your_Adolescent_Dog.pdf"
+  },
+  {
+    "path": "docs/domarkompendium-labrador-retriever-skk.pdf",
+    "bytes": 2356155,
+    "sha256": "dd93aec59ad5691cf6b50b68b4e95528d9b41e440d8587a068486238a4ac759b",
+    "sourceUrl": "https://www.skk.se/contentassets/215ded01c7884b748cc03a4065deaa3c/domarkompendium-labrador-retriever.pdf"
+  },
+  {
+    "path": "docs/eastbayspca-canine-enrichment.pdf",
+    "bytes": 2792991,
+    "sha256": "10e1e548879a091e66fed2aa64be098d76606cab758882180a33bf40370af420",
+    "sourceUrl": "https://eastbayspca.org/wp-content/uploads/2024/05/Canine-Enrichment-Handout.pdf"
+  },
+  {
+    "path": "docs/edmonton-humane-muzzle-cooperative-care.pdf",
+    "bytes": 322231,
+    "sha256": "d782227697a54801914b7ee0abf414307f4a673f4442f6450f5d5cb9e2dbe0ce",
+    "sourceUrl": "https://www.edmontonhumanesociety.com/wp-content/uploads/2024/05/2023-Muzzle-Use-Training-EHS-Resources.pdf"
+  },
+  {
+    "path": "docs/fa-jaktprovsregler-2017.pdf",
+    "bytes": 370954,
+    "sha256": "5ee9df652e63f859feec4a66ee02c4d06c910b4a6d6eb1835eb9df1c8e46a92e",
+    "sourceUrl": "https://fa-avance.se/wp-content/uploads/2020/12/jaktprovsregler_2017_A4.pdf"
+  },
+  {
+    "path": "docs/homologation titre travail_0.pdf",
+    "bytes": 139282,
+    "sha256": "c669ba2f9bb44c1ede8722c4e8088bdc5bdc77fcea6333f6db8c7694e5f9d952",
+    "sourceUrl": null
+  },
+  {
+    "path": "docs/louisianaspca-loose-leash-walking.pdf",
+    "bytes": 285062,
+    "sha256": "183a1c304900d2b2301760fb73a08d23a5850f5bf3d813491d46aa2283da5393",
+    "sourceUrl": "https://www.louisianaspca.org/wp-content/uploads/2020/09/Loose-Leash-Walking.pdf"
+  },
+  {
+    "path": "docs/mas-akc-breed-standard.pdf",
+    "bytes": 232802,
+    "sha256": "b741a8ceffef748ca550ad460019edfbcd19c212584d438b13dcb8b8f7bb5f77",
+    "sourceUrl": "https://images.akc.org/pdf/breeds/standards/MiniatureAmericanShepherd.pdf"
+  },
+  {
+    "path": "docs/mas-fci-367-en.pdf",
+    "bytes": 315187,
+    "sha256": "a11c0f5bc9fe5e126f0e3e283b0116890aa4b6c26c23849f07e7ea0597ab13f6",
+    "sourceUrl": "https://www.fci.be/Nomenclature/Standards/367g01-en.pdf"
+  },
+  {
+    "path": "docs/mas-mascusa-breed-standard-seminar.pdf",
+    "bytes": 7783374,
+    "sha256": "cc8de6b57dd112b5e8a69d9895e8efb2ac19d0cd573f3dd192222e4fbdb74e6a",
+    "sourceUrl": "https://mascusa.org/wp-content/uploads/docs/bsee/breed-standard-seminar.pdf"
+  },
+  {
+    "path": "docs/mas-ukc-breed-standard.pdf",
+    "bytes": 310871,
+    "sha256": "f513eccab5ce256031b4d11dc57876641ac4094d761bc9600d8d19567112c413",
+    "sourceUrl": "https://www.ukcdogs.com/docs/breeds/miniature-american-shepherd.pdf"
+  },
+  {
+    "path": "docs/navhda-gun-dog-test-aims-rules.pdf",
+    "bytes": 313902,
+    "sha256": "2583b94eabfe32f49ce3845a07318191bc3d2861c9f67c2bbf3c721cb524820f",
+    "sourceUrl": "https://www.navhda.org/wp-content/uploads/2025/02/Gun-Dog-Test-Aims-Rules.pdf"
+  },
+  {
+    "path": "docs/navhda-rules-book-2024.pdf",
+    "bytes": 2609570,
+    "sha256": "f179d33c1d6410fcb9b8ac19a80cf24eb2f7f48487d0541fd2c27f6f51b77bb7",
+    "sourceUrl": "https://www.navhda.org/wp-content/uploads/2018/11/RulesBook_rev_2024_0313.pdf"
+  },
+  {
+    "path": "docs/navhda-utility-training-intro-whalen.pdf",
+    "bytes": 751435,
+    "sha256": "9d403f9a77dc31bfc4ad7a4294796a6d03bb38b5359864f20e11b4f9209bea52",
+    "sourceUrl": "https://mnnavhda.org/wp-content/uploads/2019/10/Utility-Training-Intro-by-Mark-Whalen.pdf"
+  },
+  {
+    "path": "docs/navhda-vhd-training-issue-2022.pdf",
+    "bytes": 4568799,
+    "sha256": "259f03a589c110f8df7ce2f53df905473698804443d1734b3a58accdd65186b5",
+    "sourceUrl": "https://www.navhda.org/wp-content/uploads/2022/05/VHDTrainingIssue22WEB.pdf"
+  },
+  {
+    "path": "docs/ras-labrador-retriever-skk.pdf",
+    "bytes": 6782820,
+    "sha256": "fc650d334d278f365045e9570f1512111a8b1d46a5a815ca9a72cf9b2b242393",
+    "sourceUrl": "https://www.skk.se/contentassets/215ded01c7884b748cc03a4065deaa3c/ras-labrador-retriever.pdf"
+  },
+  {
+    "path": "docs/rasstandard-braque-francais-type-pyrenees-fci-134.pdf",
+    "bytes": 287855,
+    "sha256": "58b73128b9ccca0edfa741b9df63e2b4cd31b364307ade37e748cbf899597056",
+    "sourceUrl": "https://www.skk.se"
+  },
+  {
+    "path": "docs/rasstandard-labrador-retriever-fci-122.pdf",
+    "bytes": 231246,
+    "sha256": "07886809ee3cd6d993af6c2d19c697a659cc3fa240c7cdb870dbe63f1a6d82f7",
+    "sourceUrl": "https://www.skk.se/contentassets/215ded01c7884b748cc03a4065deaa3c/rasstandard-labrador-retriever-fci-122.pdf"
+  },
+  {
+    "path": "docs/reading-body-language-in-pets.pdf",
+    "bytes": 3643475,
+    "sha256": "b9d55208a51bf9a011dc6d01cbfa1f16c459fa99a68b683eaeb5b90c8d016d9c",
+    "sourceUrl": "https://creeksidepetvet.com/wp-content/uploads/2022/04/Reading-Body-Language-in-Pets.pdf"
+  },
+  {
+    "path": "docs/rspca-sa-noise-storm-phobia.pdf",
+    "bytes": 295886,
+    "sha256": "39e2b3d472b0d7a6dc35a8384c2411e057714bb9eb3167269dc6ad51d4748c97",
+    "sourceUrl": "https://www.rspcasa.org.au/wp-content/uploads/2020/11/RSPCA-SA-Customer-Advice-Noise-and-Storm-Phobia.pdf"
+  },
+  {
+    "path": "docs/sfspca-food-resource-guarding.pdf",
+    "bytes": 41395,
+    "sha256": "9a11341d90c2d59b3b4b089255a91fcbbd1c0fbf1c8910a571cc8e836c610a9f",
+    "sourceUrl": "https://www.sfspca.org/wp-content/uploads/2023/02/dog_behavior_food-and-resource-guarding.pdf"
+  },
+  {
+    "path": "docs/skk-regler-viltsparprov-t36.pdf",
+    "bytes": 889390,
+    "sha256": "67132fbf157efb2105b22c98bcea360db14897a3b58ff804f94aee3c1ac07ad7",
+    "sourceUrl": "https://www.skk.se/globalassets/globala-filer/regler/regler-for-viltsparprov-t36.pdf"
+  },
+  {
+    "path": "docs/snwk-regelverk-nosework-2022.pdf",
+    "bytes": 1839551,
+    "sha256": "edbf8fd540413af074eb4e840fac308b158f173ebb6ccf601138f4aa5974d243",
+    "sourceUrl": "https://brukshundklubben.se/media/tcjh5y1t/snwk-slutligt-regelverk-nosework-2022_rev2-docx.pdf"
+  },
+  {
+    "path": "docs/southfields-canine-cognitive-dysfunction.pdf",
+    "bytes": 88965,
+    "sha256": "e159e3b693dac94f15b04bc0239f88b512c0502d13f07f92a733a4cc1765f275",
+    "sourceUrl": "https://southfields.co.uk/wp-content/uploads/2024/05/S-017-Canine_cognitive_dysfunction_fact_sheet.pdf"
+  },
+  {
+    "path": "docs/spca-teaching-dog-wear-muzzle.pdf",
+    "bytes": 202008,
+    "sha256": "28fac08b42555ab8e994a57d0977dc91767d91f3aeccc3ceca56db725ce7bb1b",
+    "sourceUrl": "https://spca.org/wp-content/uploads/2023/12/Teaching-a-dog-to-wear-a-muzzle.pdf"
+  },
+  {
+    "path": "docs/ssrk-fbr-anvisningar-2023.pdf",
+    "bytes": 327715,
+    "sha256": "775b7d35738c1267fcc2a5b80bb88de8a6ec896e801473fd57ffee8d0dcdfe92",
+    "sourceUrl": "https://ssrk.se/wp-content/uploads/2019/11/fb-r-anvisningar-2023.pdf"
+  },
+  {
+    "path": "docs/ssrk-vad-ar-fbr.pdf",
+    "bytes": 958769,
+    "sha256": "42f052f584da8df1401eca8942ada0d64de33148bb519119a189a254d86efb72",
+    "sourceUrl": "https://ssrk.se/wp-content/uploads/2020/01/vad_ar_fb-r.pdf"
+  },
+  {
+    "path": "docs/svak-regelbok-vallhundsprov.pdf",
+    "bytes": 2088406,
+    "sha256": "03ab3515d43b58550a7db798fc4f836cf541f3e684f562c2f715ed45ee25faa2",
+    "sourceUrl": "https://www.vallhundsringen.se/ws/media-library/3b40e32999214b8bbc7f7808a240531a/svak-regelbok2017-2021.pdf"
+  },
+  {
+    "path": "docs/svak-tavlingsanvisningar-2024-2025.pdf",
+    "bytes": 278950,
+    "sha256": "4588d38e00ef519d39473d423f7d75eb3300dbf8daf6e53d99ab3344ff4df5c8",
+    "sourceUrl": "https://www.vallhundsringen.se/ws/media-library/ac39fc30e95a4ef3bab4e699d2011d1e/tavlingsanvisningar-2024-2025.pdf"
+  },
+  {
+    "path": "docs/training-guides/akc-italian-greyhound.pdf",
+    "bytes": 440688,
+    "sha256": "d7b50e8c668aef6e55cc0d0e6c59010369902d984acc20f1cfbc60a656b7f37e",
+    "sourceUrl": "https://www.akc.org"
+  },
+  {
+    "path": "docs/training-guides/akc-star-puppy-6-weeks.pdf",
+    "bytes": 247073,
+    "sha256": "1bc9c9aad017a01b0db31f32cf793a5eed2bdcd217bc7c2d6fe134c4401f6720",
+    "sourceUrl": "https://images.akc.org/pdf/star_puppy/6_Weeks_Class.pdf"
+  },
+  {
+    "path": "docs/training-guides/apdt-dominance-dog-training.pdf",
+    "bytes": 1006916,
+    "sha256": "e0bed2e85f4f67e411f115a83f3d5e3f70a58f68b3927f866116dd3a2beb7a2b",
+    "sourceUrl": "https://apdt.com/wp-content/uploads/2017/01/dominance-and-dog-training.pdf"
+  },
+  {
+    "path": "docs/training-guides/aspca-reactive-dogs-on-leash.pdf",
+    "bytes": 60436,
+    "sha256": "ce1a1139eb8a0596a7dea4d91bc995d1a08793c30bfe3ee5b0c22713b5ba7088",
+    "sourceUrl": "https://www.aspcapro.org/sites/default/files/aspca-reactive-dogs-on-leash.pdf"
+  },
+  {
+    "path": "docs/training-guides/aspca-separation-anxiety.pdf",
+    "bytes": 144102,
+    "sha256": "3f1e59f9d236aa019547c60ccea3b99a24ff356aa9c596465cc4a8c72ed9efc9",
+    "sourceUrl": "https://www.aspcapro.org/sites/default/files/behavior-2020-treating-anxiety.pdf"
+  },
+  {
+    "path": "docs/training-guides/avsab-dominance-2009.pdf",
+    "bytes": 1386638,
+    "sha256": "cc28366115b040a4974963b36d640588f3994842fae87e027caa3eddc6008221",
+    "sourceUrl": "https://avsab.org/resources/position-statements/"
+  },
+  {
+    "path": "docs/training-guides/avsab-humane-dog-training-2021.pdf",
+    "bytes": 2184503,
+    "sha256": "87d9eb82f86a41de1ca3963d7b649a527a50adcea8e0529be4c2d715f3871eda",
+    "sourceUrl": "https://avsab.org/wp-content/uploads/2021/08/AVSAB-Humane-Dog-Training-Position-Statement-2021.pdf"
+  },
+  {
+    "path": "docs/training-guides/avsab-punishment-2021.pdf",
+    "bytes": 1258875,
+    "sha256": "05620b23b078d6c5335a50dc3043eb451f67c086b0d3d4fe05f9153c6b02fce7",
+    "sourceUrl": "https://avsab.org/resources/position-statements/"
+  },
+  {
+    "path": "docs/training-guides/avsab-puppy-socialization-2024.pdf",
+    "bytes": 3569858,
+    "sha256": "f17b4a4d7708e2776ea5947a82e2e7ddc154f50a3f690e66eb6a7d5692f34834",
+    "sourceUrl": "https://avsab.org/wp-content/uploads/2024/12/Puppy-Socialization-Position-Statement-FINAL.pdf"
+  },
+  {
+    "path": "docs/training-guides/dog-training-101.pdf",
+    "bytes": 18148143,
+    "sha256": "9b3f71c80cbd66211c0d3b3f5a7d81b38b63d234e3ba60fae440a0c511c904ff",
+    "sourceUrl": null
+  },
+  {
+    "path": "docs/training-guides/dunbar-after-puppy.pdf",
+    "bytes": 4712697,
+    "sha256": "9787e532acdfda389f415aa7ca8ba9d1703c419b82bb952b85ef681d2131214d",
+    "sourceUrl": "https://dunbaracademy.com"
+  },
+  {
+    "path": "docs/training-guides/dunbar-before-puppy.pdf",
+    "bytes": 3207296,
+    "sha256": "2aa77d22bb8a87dc26aac1545ad0dd9d0bc35e9f40e276d98b2cfd53e3f94502",
+    "sourceUrl": "https://dunbaracademy.com"
+  },
+  {
+    "path": "docs/training-guides/mcgill-positive-reinforcement-sop.pdf",
+    "bytes": 100893,
+    "sha256": "6f7441f34c78fe63b3d4b91c3f2c7b71d261a8a71c1ac0a35ab7f21ab37fc71c",
+    "sourceUrl": "https://www.mcgill.ca/research/files/research/638_-_positive_reinforcement_training_-_mcgill.pdf"
+  },
+  {
+    "path": "docs/training-guides/navhda-versatile-hunting-dog.pdf",
+    "bytes": 4568799,
+    "sha256": "259f03a589c110f8df7ce2f53df905473698804443d1734b3a58accdd65186b5",
+    "sourceUrl": "https://www.navhda.org"
+  },
+  {
+    "path": "docs/training-guides/oregonhumane-positive-reinforcement.pdf",
+    "bytes": 385277,
+    "sha256": "c4d5f4079d3a5a617bf7244d426e14d5e2cb1744b1b5ff1da6000f929847b970",
+    "sourceUrl": "https://www.oregonhumane.org/wp-content/uploads/Positive-Reinforcement-Training_6.13.19.pdf"
+  },
+  {
+    "path": "docs/training-guides/rspca-basic-commands.pdf",
+    "bytes": 274413,
+    "sha256": "9a7d4b0fa8140cd9494be1802988c08c152e2bae0b351bdbbcb67eb53fa1dc75",
+    "sourceUrl": "https://www.rspca.org.uk/documents/1494939/7712578/How%20to%20teach%20your%20dog%20basic%20commands%20(268%20KB)/17ed86f5-dc2b-b943-b3a6-923e23998a6b?version=2.0"
+  },
+  {
+    "path": "docs/training-guides/rspca-recall.pdf",
+    "bytes": 168081,
+    "sha256": "6b438286dcb38b58b217ee5fb1c73721cd5f6e434857d09e8bdf956576937c70",
+    "sourceUrl": "https://www.rspca.org.uk/documents/1494939/7712578/How%20to%20teach%20your%20dog%20recall%20(165%20KB)/23409bf2-4273-1434-72c5-de4f97c2d21c?download=true&version=2.0"
+  },
+  {
+    "path": "docs/training-guides/spca-crate-training.pdf",
+    "bytes": 138968,
+    "sha256": "7fb34e628c4b23c3ff4c302319773c9c3dda98371f2e1b02eb3d4cd340486448",
+    "sourceUrl": "https://spca.org/wp-content/uploads/2023/07/Crate-Training-Your-Dog.pdf"
+  },
+  {
+    "path": "docs/training-guides/toronto-puppy-training-manual.pdf",
+    "bytes": 690544,
+    "sha256": "5973a194e7ceed1f237e172beab34e31657c80a0c9492f4a7b1930722afb5c32",
+    "sourceUrl": "https://www.torontohumanesociety.com"
+  },
+  {
+    "path": "docs/valkommen-valp-m54.pdf",
+    "bytes": 1196557,
+    "sha256": "9b904bfa4c5994a71002d22ac58775b2f1c5acb3f0501599a6830e2fa1675f9f",
+    "sourceUrl": "https://www.skk.se"
+  }
+]

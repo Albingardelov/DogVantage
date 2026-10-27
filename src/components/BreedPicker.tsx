@@ -69,6 +69,7 @@ export default function BreedPicker({ value, onChange, placeholder = 'Sök ras�
         onFocus={() => setOpen(true)}
         placeholder={placeholder}
         autoComplete="off"
+        role="combobox"
         aria-label="Sök ras"
         aria-expanded={open}
         aria-autocomplete="list"

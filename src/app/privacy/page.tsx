@@ -60,7 +60,7 @@ export default function PrivacyPage() {
           <ul>
             <li><strong>Få tillgång</strong> till dina personuppgifter — kontakta oss</li>
             <li><strong>Rätta</strong> felaktiga uppgifter — gör det direkt i appen</li>
-            <li><strong>Radera</strong> alla dina uppgifter — använd "Radera mitt konto" i profilinställningarna</li>
+            <li><strong>Radera</strong> alla dina uppgifter — använd &quot;Radera mitt konto&quot; i profilinställningarna</li>
             <li><strong>Invända</strong> mot behandling — kontakta oss</li>
           </ul>
         </Section>

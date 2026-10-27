@@ -26,6 +26,8 @@ import type { ChatHistoryEntry } from '@/lib/ai/rag'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/database'
 
+export const maxDuration = 60
+
 const LIFE_STAGE_FILTERS = ['puppy', 'junior', 'adolescent', 'adult', 'all'] as const satisfies readonly LifeStageFilter[]
 
 function parseChunkTopic(value: string | undefined): ChunkTopic | undefined {
