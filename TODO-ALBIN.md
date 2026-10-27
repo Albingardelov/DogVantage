@@ -19,12 +19,12 @@ Ta bort filen när listan är avbockad.
 
 ## Måste göras innan/när branchen mergas
 
-- [ ] **Kör migration 030** mot Supabase. Kontrollera efteråt:
+- [x] **Kör migration 030** mot Supabase (körd via SQL-editorn 2026-10-27, ej registrerad i migrationshistoriken). Kontrollera efteråt:
       `select relname, relrowsecurity from pg_class where relnamespace = 'public'::regnamespace order by 1;`
       – alla tabeller ska ha `relrowsecurity = true`.
-- [ ] **Ladda upp PDF:erna** en gång (du har dem lokalt eller i historiken t.o.m. `7b01a25`):
+- [x] **Ladda upp PDF:erna** en gång (du har dem lokalt eller i historiken t.o.m. `7b01a25`):
       `npm run docs:push` med `SUPABASE_SERVICE_ROLE_KEY` i `.env.local`.
-      Testa sedan `npm run docs:pull` i en ren klon.
+      Testa sedan `npm run docs:pull` i en ren klon. (Uppladdat 2026-10-27: 59 nya, 2 fanns redan. `docs:pull` i ren klon: 61 filer, checksummor OK.)
 - [ ] **Stripe-webhooken** – lägg till dessa events på endpointen i Stripe-dashboarden:
       `invoice.paid`, `customer.subscription.paused`, `customer.subscription.resumed`
       (utöver de som redan finns). Testa i test mode med `stripe trigger` eller
