@@ -49,7 +49,9 @@ export async function POST(req: NextRequest) {
         from: (table: string) => {
           select: (columns: string) => {
             eq: (column: string, value: string) => {
-              maybeSingle: () => Promise<{ data: { stripe_customer_id: string | null } | null }>
+              maybeSingle: () => Promise<{
+                data: { stripe_customer_id: string | null; stripe_subscription_id: string | null; status: string } | null
+              }>
             }
           }
           upsert: (
@@ -61,9 +63,13 @@ export async function POST(req: NextRequest) {
 
       const { data: sub } = await admin
         .from('subscriptions')
-        .select('stripe_customer_id')
+        .select('stripe_customer_id, stripe_subscription_id, status')
         .eq('user_id', user.id)
         .maybeSingle()
+
+      if (sub?.stripe_subscription_id && ['active', 'trialing', 'past_due'].includes(sub.status)) {
+        return NextResponse.json({ error: 'already_subscribed', retryable: false }, { status: 409 })
+      }
 
       let customerId = sub?.stripe_customer_id ?? null
       if (!customerId) {

@@ -84,6 +84,29 @@ export async function getSubscriptionState(userId: string): Promise<Subscription
   return mapState(data)
 }
 
+export async function getStripeCustomerId(userId: string): Promise<string | null> {
+  const admin = getSupabaseAdmin() as unknown as {
+    from: (table: string) => {
+      select: (query: string) => {
+        eq: (column: string, value: string) => {
+          maybeSingle: () => Promise<{
+            data: { stripe_customer_id: string | null } | null
+            error: { message: string } | null
+          }>
+        }
+      }
+    }
+  }
+
+  const { data, error } = await admin
+    .from('subscriptions')
+    .select('stripe_customer_id')
+    .eq('user_id', userId)
+    .maybeSingle()
+  if (error) throw new Error(`Failed to load stripe customer: ${error.message}`)
+  return data?.stripe_customer_id ?? null
+}
+
 export function hasFeature(state: SubscriptionState, feature: FeatureKey): boolean {
   if (!state.isActive) return false
   return TIER_FEATURES[state.tier].has(feature)
