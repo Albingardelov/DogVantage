@@ -3,6 +3,8 @@ import { ingestPDF } from '@/lib/ai/ingest'
 import type { Breed } from '@/types'
 import { enforceApiRateLimit } from '@/lib/api/rate-limit'
 
+export const maxDuration = 120
+
 export async function POST(req: NextRequest) {
   const limited = await enforceApiRateLimit(req, {
     scope: 'admin',

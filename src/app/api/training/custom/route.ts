@@ -18,6 +18,8 @@ import type {
   HandlerGuide,
 } from '@/lib/training/exercise-specs'
 
+export const maxDuration = 60
+
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0
 }
