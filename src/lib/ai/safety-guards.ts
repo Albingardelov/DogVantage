@@ -11,12 +11,33 @@ import { FALLBACK_LOCALE, type Locale } from '@/i18n/config'
  *     resource guarding) → certified behaviour consultant (SBBK / IAABC)
  */
 
+// ─── Keyword matching ────────────────────────────────────────────────────────
+//
+// Keywords match whole words, so 'ont' does not fire on "ögonkontakt" and 'sår'
+// not on "sårbar". A trailing '*' also matches inflections ('kräk*' → kräks,
+// kräkningar). Both languages are always checked: users write in either one
+// regardless of the UI locale. `\b` is ASCII-only, hence the explicit
+// Unicode letter/number lookarounds.
+function compileKeywords(keywords: readonly string[]): RegExp {
+  const alternatives = keywords.map((kw) => {
+    const prefix = kw.endsWith('*')
+    const body = (prefix ? kw.slice(0, -1) : kw).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    return prefix ? `${body}[\\p{L}\\p{N}]*` : body
+  })
+  return new RegExp(`(?<![\\p{L}\\p{N}])(?:${alternatives.join('|')})(?![\\p{L}\\p{N}])`, 'iu')
+}
+
 // ─── Health / vet guard ──────────────────────────────────────────────────────
-const VET_KEYWORDS = [
-  'haltar', 'kräks', 'äter inte', 'blöder', 'veterinär',
-  'sjuk', 'ont', 'skada', 'hälta', 'kräkningar', 'diarré',
-  'feber', 'sår', 'svullen',
-]
+const VET_KEYWORDS = compileKeywords([
+  // sv
+  'halta*', 'hälta', 'kräk*', 'äter inte', 'blöd*', 'veterinär*',
+  'sjuk', 'sjukdom*', 'ont', 'skada*', 'diarré*', 'feber', 'febrig',
+  'sår', 'såret', 'såren', 'sårig', 'svull*',
+  // en
+  'limp*', 'vomit*', 'throwing up', 'not eating', "won't eat", 'bleed*',
+  'diarrh*', 'fever*', 'injur*', 'wound*', 'swollen', 'swelling', 'sick',
+  'in pain', 'vet', 'vets', 'veterinar*',
+])
 
 const VET_RESPONSES: Partial<Record<Locale, TrainingResult>> = {
   sv: {
@@ -40,8 +61,7 @@ export function vetResponse(locale: Locale): TrainingResult {
 }
 
 export function detectHealthIssue(text: string): boolean {
-  const lower = text.toLowerCase()
-  return VET_KEYWORDS.some((kw) => lower.includes(kw))
+  return VET_KEYWORDS.test(text)
 }
 
 // ─── Behaviour-emergency guard ───────────────────────────────────────────────
@@ -50,7 +70,8 @@ export function detectHealthIssue(text: string): boolean {
 // and could cause real harm if followed without a professional assessment:
 // bite history, severe aggression, panic/separation distress, resource guarding,
 // and hormonal aggression windows.
-const BEHAVIOR_REFERRAL_KEYWORDS = [
+const BEHAVIOR_REFERRAL_KEYWORDS = compileKeywords([
+  // ── sv ──
   // Bite / aggression
   'biter', 'bitit', 'bett mig', 'bett barn', 'bett någon',
   'morrar', 'morrade', 'morrar mot barn', 'morrar mot folk',
@@ -67,7 +88,16 @@ const BEHAVIOR_REFERRAL_KEYWORDS = [
   'skenfas-aggression', 'aggressiv under löp', 'aggressiv i skenfas',
   // Fear-aggression
   'fruktan-aggression', 'rädsla för folk',
-]
+  // ── en ──
+  'bites', 'bitten', 'bit me', 'bit my*', 'bit a child', 'bit someone',
+  'growls', 'growled', 'growling at',
+  'snaps', 'snapped', 'snapping at',
+  'attacks', 'attacked',
+  'resource guarding', 'guards food', 'guards his food', 'guards her food', 'guards toys',
+  'guards the bed',
+  'separation anxiety', 'panics when alone', 'panics when i leave', 'destroys when i leave',
+  'fear aggression', 'aggressive in heat', 'aggressive during heat',
+])
 
 const BEHAVIOR_RESPONSES: Partial<Record<Locale, TrainingResult>> = {
   sv: {
@@ -103,8 +133,7 @@ export function behaviorResponse(locale: Locale): TrainingResult {
 
 export function detectBehaviorEmergency(text: string | null | undefined): boolean {
   if (!text) return false
-  const lower = text.toLowerCase()
-  return BEHAVIOR_REFERRAL_KEYWORDS.some((kw) => lower.includes(kw))
+  return BEHAVIOR_REFERRAL_KEYWORDS.test(text)
 }
 
 // ─── Secret exposure guard ───────────────────────────────────────────────────
