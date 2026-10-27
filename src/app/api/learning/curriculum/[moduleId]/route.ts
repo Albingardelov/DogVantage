@@ -21,12 +21,12 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     const ageWeeks = profile?.birthdate ? getAgeInWeeks(profile.birthdate) : undefined
     const lifeStage: LifeStage = lifeStageFromAgeWeeks(ageWeeks)
 
-    const module = await getModuleById(breed, lifeStage, moduleId)
-    if (!module) {
+    const curriculumModule = await getModuleById(breed, lifeStage, moduleId)
+    if (!curriculumModule) {
       return NextResponse.json({ error: 'module_not_found' }, { status: 404 })
     }
 
-    return NextResponse.json({ module })
+    return NextResponse.json({ module: curriculumModule })
   })
 }
 
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
     await markModuleComplete(user.id, dog.id, moduleId)
 
-    const module = await getModuleById(breed, lifeStage, moduleId)
-    return NextResponse.json({ ok: true, module })
+    const curriculumModule = await getModuleById(breed, lifeStage, moduleId)
+    return NextResponse.json({ ok: true, module: curriculumModule })
   })
 }

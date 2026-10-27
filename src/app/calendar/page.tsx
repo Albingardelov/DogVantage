@@ -190,7 +190,7 @@ function AgendaDay({
               })}
             </ul>
           )}
-          {log.notes && <p className={styles.logNotes}>"{log.notes}"</p>}
+          {log.notes && <p className={styles.logNotes}>&quot;{log.notes}&quot;</p>}
         </div>
       ) : isFuture && dayPlan.exercises && dayPlan.exercises.length > 0 ? (
         <ul className={styles.exerciseList}>

@@ -6,7 +6,7 @@ import BreedPicker from './BreedPicker'
 describe('BreedPicker', () => {
   it('shows input when no value selected', () => {
     render(<BreedPicker value="" onChange={() => {}} />)
-    expect(screen.getByRole('textbox')).toBeDefined()
+    expect(screen.getByRole('combobox')).toBeDefined()
   })
 
   it('shows selected breed name and clear button when value is set', () => {
@@ -18,7 +18,7 @@ describe('BreedPicker', () => {
   it('calls onChange with slug when a result is clicked', () => {
     const onChange = vi.fn()
     render(<BreedPicker value="" onChange={onChange} />)
-    const input = screen.getByRole('textbox')
+    const input = screen.getByRole('combobox')
     fireEvent.change(input, { target: { value: 'golden' } })
     const option = screen.getByText('Golden Retriever')
     fireEvent.mouseDown(option)
@@ -27,7 +27,7 @@ describe('BreedPicker', () => {
 
   it('shows empty message when search has no results', () => {
     render(<BreedPicker value="" onChange={() => {}} />)
-    const input = screen.getByRole('textbox')
+    const input = screen.getByRole('combobox')
     fireEvent.change(input, { target: { value: 'zzzzznotabreed' } })
     expect(screen.getByText(/Hittade ingen ras/)).toBeDefined()
   })
